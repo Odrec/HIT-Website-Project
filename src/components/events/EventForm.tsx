@@ -60,12 +60,12 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
   const [infoMarkets, setInfoMarkets] = useState<InfoMarket[]>([])
   const [loading, setLoading] = useState(true)
 
-  const form = useForm<EventFormValues>({
+  const form = useForm({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       ...defaultEventValues,
       ...initialData,
-    },
+    } as EventFormValues,
   })
 
   const {
@@ -136,9 +136,11 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     label: `${im.name} (${im.location})`,
   }))
 
-  const handleFormSubmit = handleSubmit(async (data) => {
-    await onSubmit(data as EventFormValues)
-  })
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const formData = form.getValues()
+    await onSubmit(formData as EventFormValues)
+  }
 
   if (loading) {
     return (
