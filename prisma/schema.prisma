@@ -41,4 +41,60 @@ enum UserRole {
   PUBLIC
 }
 
-// Models will be added in subsequent commits
+// =============================================================================
+// Core Tables
+// =============================================================================
+
+/// Study program cluster for grouping related programs
+model StudyProgramCluster {
+  id          String         @id @default(cuid())
+  name        String         @db.VarChar(200)
+  description String?        @db.Text
+  programs    StudyProgram[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("study_program_clusters")
+}
+
+/// Study program offered by Uni or Hochschule
+model StudyProgram {
+  id          String                @id @default(cuid())
+  name        String                @db.VarChar(200)
+  institution Institution
+  clusterId   String?
+  cluster     StudyProgramCluster?  @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  events      EventStudyProgram[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([institution])
+  @@index([clusterId])
+  @@map("study_programs")
+}
+
+/// Physical location (building/room) for events
+model Location {
+  id           String   @id @default(cuid())
+  buildingName String   @db.VarChar(200)
+  roomNumber   String?  @db.VarChar(50)
+  address      String?  @db.Text
+  latitude     Float?
+  longitude    Float?
+  events       Event[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([buildingName])
+  @@map("locations")
+}
+
+/// Information market (Infomarkt) locations
+model InformationMarket {
+  id       String                    @id @default(cuid())
+  name     String                    @db.VarChar(200)
+  location String                    @db.VarChar(200)
+  events   EventInformationMarket[]
+
+  @@map("information_markets")
+}
