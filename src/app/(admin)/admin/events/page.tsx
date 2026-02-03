@@ -224,12 +224,12 @@ export default function EventsListPage() {
                   />
                 </div>
               </div>
-              <Select value={eventType} onValueChange={setEventType}>
+              <Select value={eventType || 'all'} onValueChange={(v) => setEventType(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Veranstaltungstyp" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Typen</SelectItem>
+                  <SelectItem value="all">Alle Typen</SelectItem>
                   {Object.entries(eventTypeLabels).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
@@ -237,12 +237,12 @@ export default function EventsListPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={institution} onValueChange={setInstitution}>
+              <Select value={institution || 'all'} onValueChange={(v) => setInstitution(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Institution" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
                   {Object.entries(institutionLabels).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
