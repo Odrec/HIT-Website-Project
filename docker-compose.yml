@@ -1,0 +1,65 @@
+version: '3.8'
+
+# Development Docker Compose configuration
+# Provides PostgreSQL and Redis for local development
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: hit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hit_user
+      POSTGRES_PASSWORD: hit_password
+      POSTGRES_DB: hit_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hit_user -d hit_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: hit-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Commander (Optional - Redis GUI for development)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: hit-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    name: hit-postgres-data
+  redis_data:
+    name: hit-redis-data
+
+networks:
+  default:
+    name: hit-network
