@@ -1,0 +1,2 @@
+# Authentication utilities directory
+# Contains: auth-options.ts, session.ts, rbac.ts

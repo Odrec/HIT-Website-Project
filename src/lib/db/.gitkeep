@@ -1,0 +1,2 @@
+# Database utilities directory
+# Contains: prisma.ts (Prisma client singleton), queries

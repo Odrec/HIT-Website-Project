@@ -1,0 +1,2 @@
+# Cache utilities directory
+# Contains: redis.ts, cache-keys.ts, cache-utils.ts
