@@ -114,7 +114,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/navigator">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white/10">
                   <Compass className="mr-2 h-5 w-5" />
                   Studiennavigator
                 </Button>
