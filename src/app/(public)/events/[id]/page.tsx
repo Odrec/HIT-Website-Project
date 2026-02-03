@@ -3,18 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  User, 
-  GraduationCap, 
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  GraduationCap,
   Building2,
   Mail,
   Phone,
   Share2,
   ArrowLeft,
-  Plus,
   Check,
   Copy,
   ExternalLink,
@@ -37,6 +36,8 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { EventCard } from '@/components/events/EventCard'
+import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
+import type { Event as ScheduleEvent } from '@/types/events'
 
 interface Event {
   id: string
@@ -124,7 +125,6 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null)
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [addedToSchedule, setAddedToSchedule] = useState(false)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -154,11 +154,43 @@ export default function EventDetailPage() {
     }
   }, [eventId])
 
-  const handleAddToSchedule = () => {
-    // TODO: Implement actual schedule functionality in Phase 4
-    setAddedToSchedule(true)
-    setTimeout(() => setAddedToSchedule(false), 2000)
-  }
+  // Convert API event to schedule-compatible event type
+  const convertToScheduleEvent = (e: Event): ScheduleEvent => ({
+    id: e.id,
+    title: e.title,
+    description: e.description ?? undefined,
+    eventType: e.eventType as ScheduleEvent['eventType'],
+    timeStart: e.timeStart ? new Date(e.timeStart) : undefined,
+    timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
+    locationType: e.locationType as ScheduleEvent['locationType'],
+    institution: e.institution as ScheduleEvent['institution'],
+    location: e.location ? {
+      id: e.location.id,
+      buildingName: e.location.buildingName,
+      roomNumber: e.location.roomNumber ?? undefined,
+      address: e.location.address ?? undefined,
+    } : undefined,
+    lecturers: e.lecturers.map((l) => ({
+      id: l.id,
+      eventId: e.id,
+      firstName: l.firstName,
+      lastName: l.lastName,
+      title: l.title ?? undefined,
+      email: l.email ?? undefined,
+      building: l.building ?? undefined,
+      roomNumber: l.roomNumber ?? undefined,
+    })),
+    studyPrograms: e.studyPrograms.map((sp) => ({
+      id: sp.id,
+      name: sp.name,
+      institution: sp.institution as ScheduleEvent['institution'],
+    })),
+    meetingPoint: e.meetingPoint ?? undefined,
+    photoUrl: e.photoUrl ?? undefined,
+    additionalInfo: e.additionalInfo ?? undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })
 
   const handleCopyLink = async () => {
     try {
@@ -382,23 +414,10 @@ export default function EventDetailPage() {
           {/* Actions */}
           <Card>
             <CardContent className="pt-6 space-y-3">
-              <Button
+              <AddToScheduleButton
+                event={convertToScheduleEvent(event)}
                 className="w-full"
-                variant={addedToSchedule ? 'outline' : 'uni'}
-                onClick={handleAddToSchedule}
-              >
-                {addedToSchedule ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Hinzugefügt!
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Zum Stundenplan hinzufügen
-                  </>
-                )}
-              </Button>
+              />
 
               <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
                 <DialogTrigger asChild>
