@@ -114,8 +114,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse dates if provided
+    // Convert 'none' locationId to null (placeholder value from form)
+    const locationId = body.locationId === 'none' || body.locationId === '' ? null : body.locationId
+    
     const eventData = {
       ...body,
+      locationId,
       timeStart: body.timeStart ? new Date(body.timeStart) : undefined,
       timeEnd: body.timeEnd ? new Date(body.timeEnd) : undefined,
     }
