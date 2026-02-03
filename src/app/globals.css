@@ -79,3 +79,67 @@
     @apply focus:outline-none focus:ring-2 focus:ring-hit-uni-500 focus:ring-offset-2;
   }
 }
+
+/* Print styles */
+@media print {
+  /* Hide non-essential elements when printing */
+  header,
+  footer,
+  .print\\:hidden,
+  nav,
+  button:not(.print-visible),
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Reset background colors for printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Ensure cards have visible borders when printed */
+  .card,
+  [class*="Card"] {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Make badges visible in print */
+  .badge,
+  [class*="Badge"] {
+    border: 1px solid #999 !important;
+    background: #f5f5f5 !important;
+    color: black !important;
+  }
+
+  /* Ensure schedule timeline prints well */
+  .schedule-timeline {
+    width: 100% !important;
+  }
+
+  /* Page settings */
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  /* Print only section */
+  .print\\:block {
+    display: block !important;
+  }
+
+  /* Ensure good text contrast */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  /* Remove hover effects */
+  *:hover {
+    background: inherit !important;
+    color: inherit !important;
+  }
+}

@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Calendar, User, LogOut, Settings } from 'lucide-react'
+import { Menu, X, Calendar, User, LogOut, Settings, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useSchedule } from '@/contexts/schedule-context'
 
 /**
  * Main header component with navigation and user menu
@@ -13,8 +15,11 @@ import { cn } from '@/lib/utils'
 export function Header() {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { state, getConflicts } = useSchedule()
 
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'ORGANIZER'
+  const scheduleCount = state.items.length
+  const hasConflicts = getConflicts().length > 0
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -42,9 +47,21 @@ export function Header() {
           </Link>
           <Link
             href="/schedule"
-            className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
+            className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500 flex items-center gap-1"
           >
             Mein Stundenplan
+            {scheduleCount > 0 && (
+              <Badge
+                variant={hasConflicts ? 'destructive' : 'default'}
+                className={cn(
+                  'ml-1 text-xs h-5 min-w-5 flex items-center justify-center',
+                  !hasConflicts && 'bg-hit-uni-500'
+                )}
+              >
+                {scheduleCount}
+                {hasConflicts && <AlertTriangle className="h-3 w-3 ml-0.5" />}
+              </Badge>
+            )}
           </Link>
           <Link
             href="/programs"
@@ -126,10 +143,22 @@ export function Header() {
           </Link>
           <Link
             href="/schedule"
-            className="py-2 text-sm font-medium text-hit-gray-600"
+            className="py-2 text-sm font-medium text-hit-gray-600 flex items-center gap-2"
             onClick={() => setMobileMenuOpen(false)}
           >
             Mein Stundenplan
+            {scheduleCount > 0 && (
+              <Badge
+                variant={hasConflicts ? 'destructive' : 'default'}
+                className={cn(
+                  'text-xs h-5 min-w-5 flex items-center justify-center',
+                  !hasConflicts && 'bg-hit-uni-500'
+                )}
+              >
+                {scheduleCount}
+                {hasConflicts && <AlertTriangle className="h-3 w-3 ml-0.5" />}
+              </Badge>
+            )}
           </Link>
           <Link
             href="/programs"

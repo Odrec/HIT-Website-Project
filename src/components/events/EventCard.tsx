@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Clock, MapPin, User, GraduationCap, Calendar as CalendarIcon, Plus } from 'lucide-react'
+import { Clock, MapPin, User, GraduationCap, Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
+import type { Event } from '@/types/events'
 
 interface EventCardProps {
   event: {
@@ -70,6 +71,42 @@ const institutionColors: Record<string, string> = {
   UNI: 'bg-hit-uni-100 text-hit-uni-700',
   HS: 'bg-hit-hs-100 text-hit-hs-700',
   BOTH: 'bg-gradient-to-r from-hit-uni-100 to-hit-hs-100 text-hit-gray-700',
+}
+
+// Helper to convert EventCard event to Event type for schedule
+function convertToEvent(event: EventCardProps['event']): Event {
+  return {
+    id: event.id,
+    title: event.title,
+    description: event.description ?? undefined,
+    eventType: event.eventType as Event['eventType'],
+    timeStart: event.timeStart ? new Date(event.timeStart) : undefined,
+    timeEnd: event.timeEnd ? new Date(event.timeEnd) : undefined,
+    locationType: event.locationType as Event['locationType'],
+    institution: event.institution as Event['institution'],
+    location: event.location ? {
+      id: event.location.id,
+      buildingName: event.location.buildingName,
+      roomNumber: event.location.roomNumber ?? undefined,
+      address: event.location.address ?? undefined,
+    } : undefined,
+    lecturers: event.lecturers.map((l) => ({
+      id: l.id,
+      eventId: event.id,
+      firstName: l.firstName,
+      lastName: l.lastName,
+      title: l.title ?? undefined,
+    })),
+    studyPrograms: event.studyPrograms.map((sp) => ({
+      id: sp.id,
+      name: sp.name,
+      institution: sp.institution as Event['institution'],
+    })),
+    meetingPoint: event.meetingPoint ?? undefined,
+    photoUrl: event.photoUrl ?? undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
 }
 
 /**
@@ -266,11 +303,16 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           </div>
 
           {/* Action Column */}
-          <div className="flex items-center justify-end border-t p-4 sm:w-40 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:border-l sm:border-t-0">
-            <Button variant="outline" size="sm" className="w-full sm:mb-2">
-              <Plus className="mr-2 h-4 w-4" />
-              Zum Stundenplan
-            </Button>
+          <div
+            className="flex items-center justify-end border-t p-4 sm:w-40 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:border-l sm:border-t-0"
+            onClick={(e) => e.preventDefault()}
+          >
+            <AddToScheduleButton
+              event={convertToEvent(event)}
+              variant="outline"
+              size="sm"
+              className="w-full sm:mb-2"
+            />
             <span className="hidden text-xs text-hit-gray-500 sm:block">
               Details ansehen →
             </span>
