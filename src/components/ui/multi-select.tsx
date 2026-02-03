@@ -88,18 +88,28 @@ export function MultiSelect({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <div
           role="combobox"
           aria-expanded={isOpen}
-          disabled={disabled}
+          aria-disabled={disabled}
+          tabIndex={disabled ? -1 : 0}
           className={cn(
-            'w-full justify-between min-h-10 h-auto',
+            'flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer',
+            'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+            'hover:bg-accent hover:text-accent-foreground',
+            'min-h-10 h-auto',
+            disabled && 'cursor-not-allowed opacity-50',
             !value.length && 'text-muted-foreground',
             className
           )}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              if (!disabled) setIsOpen(true)
+            }
+          }}
         >
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 flex-1">
             {selectedOptions.length === 0 ? (
               <span>{placeholder}</span>
             ) : selectedOptions.length <= maxDisplay ? (
@@ -110,16 +120,25 @@ export function MultiSelect({
                   className="mr-1"
                 >
                   {option.label}
-                  <button
-                    className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                     onMouseDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                     }}
                     onClick={(e) => removeOption(option.value, e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onChange(value.filter((v) => v !== option.value))
+                      }
+                    }}
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </span>
                 </Badge>
               ))
             ) : (
@@ -128,22 +147,31 @@ export function MultiSelect({
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 ml-2">
             {value.length > 0 && (
-              <button
-                className="ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              <span
+                role="button"
+                tabIndex={0}
+                className="ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                 onMouseDown={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
                 }}
                 onClick={clearAll}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onChange([])
+                  }
+                }}
               >
                 <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
+              </span>
             )}
             <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
           </div>
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <div className="p-2 border-b">
