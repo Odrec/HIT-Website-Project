@@ -98,3 +98,92 @@ model InformationMarket {
 
   @@map("information_markets")
 }
+
+// =============================================================================
+// Event Tables
+// =============================================================================
+
+/// Main event entity - lectures, workshops, tours, info stands, etc.
+model Event {
+  id              String                    @id @default(cuid())
+  title           String                    @db.VarChar(200)
+  description     String?                   @db.Text
+  eventType       EventType
+  timeStart       DateTime?
+  timeEnd         DateTime?
+  locationType    LocationType
+  locationDetails Json?                     @db.JsonB
+  roomRequest     String?                   @db.Text
+  meetingPoint    String?                   @db.VarChar(500)
+  additionalInfo  String?                   @db.Text
+  photoUrl        String?                   @db.VarChar(500)
+  institution     Institution
+  locationId      String?
+  location        Location?                 @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  lecturers       Lecturer[]
+  organizers      EventOrganizer[]
+  studyPrograms   EventStudyProgram[]
+  infoMarkets     EventInformationMarket[]
+  scheduleItems   ScheduleItem[]
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@index([eventType])
+  @@index([institution])
+  @@index([timeStart])
+  @@index([locationId])
+  @@map("events")
+}
+
+/// Lecturer/speaker for an event
+model Lecturer {
+  id         String  @id @default(cuid())
+  eventId    String
+  event      Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  firstName  String  @db.VarChar(100)
+  lastName   String  @db.VarChar(100)
+  title      String? @db.VarChar(50)
+  email      String? @db.VarChar(200)
+  building   String? @db.VarChar(100)
+  roomNumber String? @db.VarChar(50)
+
+  @@index([eventId])
+  @@map("lecturers")
+}
+
+/// Event organizer contact information (internal use)
+model EventOrganizer {
+  id           String  @id @default(cuid())
+  eventId      String
+  event        Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  email        String  @db.VarChar(200)
+  phone        String? @db.VarChar(50)
+  internalOnly Boolean @default(true)
+
+  @@index([eventId])
+  @@map("event_organizers")
+}
+
+/// Junction table: Event to StudyProgram (many-to-many)
+model EventStudyProgram {
+  eventId        String
+  studyProgramId String
+  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  studyProgram   StudyProgram @relation(fields: [studyProgramId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, studyProgramId])
+  @@index([studyProgramId])
+  @@map("event_study_programs")
+}
+
+/// Junction table: Event to InformationMarket (many-to-many)
+model EventInformationMarket {
+  eventId  String
+  marketId String
+  event    Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  market   InformationMarket @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, marketId])
+  @@index([marketId])
+  @@map("event_information_markets")
+}
