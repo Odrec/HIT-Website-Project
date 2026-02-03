@@ -1,16 +1,12 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
-
-interface PageProps {
-  params: Promise<{ id: string }>
-}
 
 interface EventData {
   id: string
@@ -44,8 +40,9 @@ interface EventData {
   infoMarkets: { marketId: string }[]
 }
 
-export default function EditEventPage({ params }: PageProps) {
-  const { id } = use(params)
+export default function EditEventPage() {
+  const params = useParams()
+  const id = params.id as string
   const router = useRouter()
   const [event, setEvent] = useState<EventData | null>(null)
   const [loading, setLoading] = useState(true)
