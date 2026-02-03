@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '.prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 /**
  * Prisma Client singleton for database access
@@ -11,11 +13,25 @@ import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  pool: Pool | undefined
 }
+
+// Create pg pool if not already created
+const pool =
+  globalForPrisma.pool ??
+  new Pool({
+    connectionString:
+      process.env.DATABASE_URL ||
+      'postgresql://hit_user:hit_password@localhost:5432/hit_db',
+  })
+
+// Create adapter
+const adapter = new PrismaPg(pool)
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter,
     log:
       process.env.NODE_ENV === 'development'
         ? ['query', 'error', 'warn']
@@ -24,6 +40,7 @@ export const prisma =
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
+  globalForPrisma.pool = pool
 }
 
 /**
@@ -32,6 +49,7 @@ if (process.env.NODE_ENV !== 'production') {
  */
 export async function disconnect() {
   await prisma.$disconnect()
+  await pool.end()
 }
 
 /**

@@ -1,7 +1,17 @@
-import { PrismaClient, Institution, EventType, LocationType, UserRole } from '@prisma/client'
+import { PrismaClient, $Enums } from '.prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import * as bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient()
+const { Institution, EventType, LocationType, UserRole } = $Enums
+
+// Create pg connection pool
+const connectionString = process.env.DATABASE_URL || 'postgresql://hit_user:hit_password@localhost:5432/hit_db'
+const pool = new pg.Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+
+// PrismaClient with pg adapter for Prisma 7
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('🌱 Starting database seeding...')
