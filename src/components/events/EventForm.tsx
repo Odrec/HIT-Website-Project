@@ -136,9 +136,22 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     label: `${im.name} (${im.location})`,
   }))
 
+  const [dateError, setDateError] = useState<string | null>(null)
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setDateError(null)
+    
     const formData = form.getValues()
+    
+    // Validate that end date is after start date
+    if (formData.timeStart && formData.timeEnd) {
+      if (formData.timeEnd <= formData.timeStart) {
+        setDateError('Das Enddatum muss nach dem Startdatum liegen.')
+        return
+      }
+    }
+    
     await onSubmit(formData as EventFormValues)
   }
 
@@ -307,6 +320,12 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 )}
               </div>
             </div>
+            
+            {dateError && (
+              <div className="rounded-lg bg-red-50 p-3 text-red-700">
+                <p className="text-sm font-medium">{dateError}</p>
+              </div>
+            )}
 
             {watchLocationType === 'OTHER' && (
               <div className="space-y-2">
