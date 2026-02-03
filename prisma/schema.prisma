@@ -187,3 +187,56 @@ model EventInformationMarket {
   @@index([marketId])
   @@map("event_information_markets")
 }
+
+// =============================================================================
+// User & Schedule Tables
+// =============================================================================
+
+/// User account for authentication and authorization
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique @db.VarChar(200)
+  passwordHash  String?        @db.VarChar(255)
+  name          String?        @db.VarChar(200)
+  role          UserRole       @default(PUBLIC)
+  schedules     UserSchedule[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+/// User's personal schedule/cart of events
+model UserSchedule {
+  id        String         @id @default(cuid())
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?        @db.VarChar(100) // For anonymous users
+  name      String         @default("My Schedule") @db.VarChar(100)
+  items     ScheduleItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([sessionId])
+  @@index([userId])
+  @@map("user_schedules")
+}
+
+/// Individual item in a user's schedule
+model ScheduleItem {
+  id         String       @id @default(cuid())
+  scheduleId String
+  schedule   UserSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  eventId    String
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  priority   Int          @default(1)
+  notes      String?      @db.Text
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@unique([scheduleId, eventId])
+  @@index([eventId])
+  @@map("schedule_items")
+}
