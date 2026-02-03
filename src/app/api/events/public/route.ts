@@ -29,6 +29,14 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {}
 
+    // Map institution from frontend value to Prisma enum value
+    // Frontend uses: UNI, HS, BOTH
+    // Prisma enum uses: UNI, HOCHSCHULE, BOTH
+    const mapInstitution = (inst: string): string => {
+      if (inst === 'HS') return 'HOCHSCHULE'
+      return inst
+    }
+
     // Institution filter
     if (institution) {
       if (institution === 'BOTH') {
@@ -36,8 +44,9 @@ export async function GET(request: NextRequest) {
         where.institution = 'BOTH'
       } else {
         // Show events for the specific institution OR both
+        const mappedInstitution = mapInstitution(institution)
         where.OR = [
-          { institution: institution as 'UNI' | 'HS' },
+          { institution: mappedInstitution },
           { institution: 'BOTH' }
         ]
       }
@@ -147,6 +156,14 @@ export async function GET(request: NextRequest) {
       prisma.event.count({ where })
     ])
 
+    // Map institution from Prisma enum back to frontend value
+    // Prisma enum uses: UNI, HOCHSCHULE, BOTH
+    // Frontend uses: UNI, HS, BOTH
+    const mapInstitutionToFrontend = (inst: string): string => {
+      if (inst === 'HOCHSCHULE') return 'HS'
+      return inst
+    }
+
     // Transform the response to flatten nested structures
     const transformedEvents = events.map((event) => ({
       id: event.id,
@@ -160,7 +177,7 @@ export async function GET(request: NextRequest) {
       meetingPoint: event.meetingPoint,
       additionalInfo: event.additionalInfo,
       photoUrl: event.photoUrl,
-      institution: event.institution,
+      institution: mapInstitutionToFrontend(event.institution),
       location: event.location ? {
         id: event.location.id,
         buildingName: event.location.buildingName,

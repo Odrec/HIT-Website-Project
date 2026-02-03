@@ -166,6 +166,14 @@ export async function GET(
       relatedEvents = [...relatedEvents, ...additionalEvents]
     }
 
+    // Map institution from Prisma enum back to frontend value
+    // Prisma enum uses: UNI, HOCHSCHULE, BOTH
+    // Frontend uses: UNI, HS, BOTH
+    const mapInstitutionToFrontend = (inst: string): string => {
+      if (inst === 'HOCHSCHULE') return 'HS'
+      return inst
+    }
+
     // Transform the event response
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformEvent = (e: any) => ({
@@ -180,7 +188,7 @@ export async function GET(
       meetingPoint: e.meetingPoint,
       additionalInfo: e.additionalInfo,
       photoUrl: e.photoUrl,
-      institution: e.institution,
+      institution: mapInstitutionToFrontend(e.institution),
       location: e.location ? {
         id: e.location.id,
         buildingName: e.location.buildingName,
