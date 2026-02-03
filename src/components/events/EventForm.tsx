@@ -312,14 +312,14 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               <div className="space-y-2">
                 <Label htmlFor="locationId">Gebäude/Raum</Label>
                 <Select
-                  value={watch('locationId') || ''}
-                  onValueChange={(value) => setValue('locationId', value || undefined)}
+                  value={watch('locationId') || 'none'}
+                  onValueChange={(value) => setValue('locationId', value === 'none' ? undefined : value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Standort auswählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Kein Standort</SelectItem>
+                    <SelectItem value="none">Kein Standort</SelectItem>
                     {locations.map((loc) => (
                       <SelectItem key={loc.id} value={loc.id}>
                         {loc.buildingName}
