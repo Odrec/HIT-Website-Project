@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum Institution {
+  UNI
+  HOCHSCHULE
+  BOTH
+}
+
+enum EventType {
+  VORTRAG
+  LABORFUEHRUNG
+  RUNDGANG
+  WORKSHOP
+  LINK
+  INFOSTAND
+}
+
+enum LocationType {
+  INFOMARKT_SCHLOSS
+  INFOMARKT_CN
+  OTHER
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  PUBLIC
+}
+
+// Models will be added in subsequent commits
