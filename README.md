@@ -39,6 +39,7 @@ npm install
 
 ### 2. Start Local Services
 
+**Option A: Using Docker (recommended)**
 ```bash
 # Start PostgreSQL and Redis
 docker-compose up -d
@@ -46,6 +47,18 @@ docker-compose up -d
 # Wait for services to be ready
 docker-compose ps
 ```
+
+**Option B: Without Docker**
+
+If you don't have Docker installed, you can:
+1. Use cloud services like [Neon](https://neon.tech) (free PostgreSQL) and [Upstash](https://upstash.com) (free Redis)
+2. Install PostgreSQL and Redis locally via Homebrew:
+   ```bash
+   brew install postgresql@16 redis
+   brew services start postgresql@16
+   brew services start redis
+   createdb hit_db
+   ```
 
 ### 3. Configure Environment
 
