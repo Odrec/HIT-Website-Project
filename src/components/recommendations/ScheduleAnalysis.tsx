@@ -262,7 +262,11 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
               {analysis.gaps.map((gap, idx) => (
                 <li key={idx} className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">
-                    {new Date(gap.start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} - 
+                    <span className="font-medium">
+                      {new Date(gap.start).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </span>
+                    {': '}
+                    {new Date(gap.start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} -
                     {new Date(gap.end).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   <Badge variant="secondary">{gap.durationMinutes} Min.</Badge>

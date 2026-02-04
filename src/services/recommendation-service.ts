@@ -589,27 +589,57 @@ export const recommendationService = {
       }
     }
 
-    // Find gaps between events (only same-day gaps)
+    // Find gaps between events - properly merge overlapping periods first
     const gaps: TimeSlot[] = []
-    const sortedEvents = events
+    const eventsWithTime = events
       .filter(e => e.timeStart && e.timeEnd)
-      .sort((a, b) => new Date(a.timeStart!).getTime() - new Date(b.timeStart!).getTime())
+      .map(e => ({
+        start: new Date(e.timeStart!).getTime(),
+        end: new Date(e.timeEnd!).getTime(),
+        date: new Date(e.timeStart!).toDateString()
+      }))
+      .sort((a, b) => a.start - b.start)
 
-    for (let i = 0; i < sortedEvents.length - 1; i++) {
-      const current = sortedEvents[i]
-      const next = sortedEvents[i + 1]
+    // Group events by day
+    const eventsByDay: Record<string, { start: number; end: number }[]> = {}
+    for (const e of eventsWithTime) {
+      if (!eventsByDay[e.date]) {
+        eventsByDay[e.date] = []
+      }
+      eventsByDay[e.date].push({ start: e.start, end: e.end })
+    }
+
+    // For each day, merge overlapping periods and find gaps
+    for (const [day, dayEvents] of Object.entries(eventsByDay)) {
+      if (dayEvents.length < 2) continue // Need at least 2 events to have a gap
       
-      if (current.timeEnd && next.timeStart) {
-        const gapStart = new Date(current.timeEnd)
-        const gapEnd = new Date(next.timeStart)
-        
-        // Only count gaps on the same day
-        const sameDay = gapStart.toDateString() === gapEnd.toDateString()
-        if (!sameDay) continue
-        
+      // Sort by start time
+      dayEvents.sort((a, b) => a.start - b.start)
+      
+      // Merge overlapping periods
+      const mergedPeriods: { start: number; end: number }[] = []
+      let currentPeriod = { ...dayEvents[0] }
+      
+      for (let i = 1; i < dayEvents.length; i++) {
+        const nextEvent = dayEvents[i]
+        if (nextEvent.start <= currentPeriod.end) {
+          // Overlapping or adjacent - extend current period
+          currentPeriod.end = Math.max(currentPeriod.end, nextEvent.end)
+        } else {
+          // Gap found - save current and start new
+          mergedPeriods.push(currentPeriod)
+          currentPeriod = { ...nextEvent }
+        }
+      }
+      mergedPeriods.push(currentPeriod)
+      
+      // Now find gaps between merged periods
+      for (let i = 0; i < mergedPeriods.length - 1; i++) {
+        const gapStart = new Date(mergedPeriods[i].end)
+        const gapEnd = new Date(mergedPeriods[i + 1].start)
         const gapMinutes = (gapEnd.getTime() - gapStart.getTime()) / (1000 * 60)
         
-        // Only count gaps of 30+ minutes but less than 8 hours (reasonable daily gaps)
+        // Only count gaps of 30+ minutes but less than 8 hours
         if (gapMinutes >= 30 && gapMinutes <= 480) {
           gaps.push({
             start: gapStart,
