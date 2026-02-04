@@ -37,6 +37,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const initializingRef = useRef(false)
   const { toast } = useToast()
 
   // Scroll to bottom when messages change
@@ -44,8 +45,11 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Initialize session
+  // Initialize session (with ref guard to prevent duplicate calls in StrictMode)
   const initializeSession = useCallback(async () => {
+    if (initializingRef.current || sessionId) return
+    initializingRef.current = true
+    
     setIsLoading(true)
     try {
       const response = await fetch('/api/navigator')
@@ -74,7 +78,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     } finally {
       setIsLoading(false)
     }
-  }, [toast])
+  }, [sessionId, toast])
 
   // Initialize on mount
   useEffect(() => {
