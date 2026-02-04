@@ -646,9 +646,10 @@ export async function getRecommendations(
     } as ProgramRecommendation
   })
   
-  // Sort by score and limit
+  // Sort by score and limit - only include programs with 60%+ relevance
   scoredPrograms.sort((a, b) => b.relevanceScore - a.relevanceScore)
-  const topPrograms = scoredPrograms.slice(0, limit)
+  const qualifiedPrograms = scoredPrograms.filter(p => p.relevanceScore >= 60)
+  const topPrograms = qualifiedPrograms.slice(0, limit)
   
   // Group by cluster
   const clusterMap: Record<string, ProgramRecommendation[]> = {}
