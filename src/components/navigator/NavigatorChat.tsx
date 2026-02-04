@@ -147,20 +147,33 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
 
   // Load recommendations
   const loadRecommendations = async () => {
-    if (!sessionId) return
-
     try {
-      const response = await fetch(
-        `/api/navigator/recommendations?sessionId=${sessionId}&limit=10`
-      )
-      if (!response.ok) throw new Error('Failed to load recommendations')
+      const url = sessionId
+        ? `/api/navigator/recommendations?sessionId=${sessionId}&limit=10`
+        : `/api/navigator/recommendations?limit=10`
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        console.error('Recommendations response not ok:', response.status)
+        // Still show the panel even if there's an error
+        setShowRecommendations(true)
+        return
+      }
 
       const data = await response.json()
       setRecommendations(data.programs || [])
       setEndResources(data.endResources || [])
       setShowRecommendations(true)
+      
+      // Update session ID if a new one was created
+      if (data.newSessionId && data.newSessionId !== sessionId) {
+        setSessionId(data.newSessionId)
+      }
     } catch (error) {
       console.error('Failed to load recommendations:', error)
+      // Show panel anyway so user can see something
+      setShowRecommendations(true)
     }
   }
 
