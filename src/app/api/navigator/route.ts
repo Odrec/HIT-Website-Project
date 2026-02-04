@@ -3,6 +3,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { navigatorService } from '@/services/navigator-service'
 
 /**
+ * Get the AI model name for display
+ */
+function getModelDisplayName(): string {
+  const model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
+  // Format for display: "gemini-1.5-flash" -> "Gemini 1.5 Flash"
+  return model
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+/**
  * POST /api/navigator
  * Send a message to the navigator and get a response
  */
@@ -36,6 +47,7 @@ export async function POST(request: NextRequest) {
         completed: result.session.completed,
       },
       crisis: result.crisis,
+      model: getModelDisplayName(),
     })
   } catch (error) {
     console.error('Navigator error:', error)
@@ -76,6 +88,7 @@ export async function GET() {
           ],
         },
       },
+      model: getModelDisplayName(),
     })
   } catch (error) {
     console.error('Navigator init error:', error)

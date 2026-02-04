@@ -34,6 +34,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState<CrisisDetection | null>(null)
   const [isComplete, setIsComplete] = useState(false)
+  const [modelName, setModelName] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -57,6 +58,11 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
       
       const data = await response.json()
       setSessionId(data.sessionId)
+      
+      // Set the model name if provided
+      if (data.model) {
+        setModelName(data.model)
+      }
       
       const initialMessage: NavigatorMessageType = {
         id: data.message.id,
@@ -228,10 +234,17 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         <Card className="flex-1 flex flex-col">
           <CardHeader className="pb-3 border-b">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Compass className="w-5 h-5 text-primary" />
-                Studiennavigator
-              </CardTitle>
+              <div className="flex flex-col gap-1">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Compass className="w-5 h-5 text-primary" />
+                  Studiennavigator
+                </CardTitle>
+                {modelName && (
+                  <span className="text-xs text-muted-foreground">
+                    Powered by {modelName}
+                  </span>
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
