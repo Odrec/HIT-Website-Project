@@ -567,7 +567,7 @@ export const recommendationService = {
     })
 
     // Detect conflicts
-    const conflicts: { event1Id: string; event2Id: string; overlapMinutes: number }[] = []
+    const conflicts: { event1Id: string; event1Title: string; event2Id: string; event2Title: string; overlapMinutes: number }[] = []
     
     for (let i = 0; i < events.length; i++) {
       for (let j = i + 1; j < events.length; j++) {
@@ -579,7 +579,9 @@ export const recommendationService = {
           if (overlap > 0) {
             conflicts.push({
               event1Id: e1.id,
+              event1Title: e1.title,
               event2Id: e2.id,
+              event2Title: e2.title,
               overlapMinutes: overlap,
             })
           }
@@ -587,7 +589,7 @@ export const recommendationService = {
       }
     }
 
-    // Find gaps between events
+    // Find gaps between events (only same-day gaps)
     const gaps: TimeSlot[] = []
     const sortedEvents = events
       .filter(e => e.timeStart && e.timeEnd)
@@ -600,13 +602,19 @@ export const recommendationService = {
       if (current.timeEnd && next.timeStart) {
         const gapStart = new Date(current.timeEnd)
         const gapEnd = new Date(next.timeStart)
+        
+        // Only count gaps on the same day
+        const sameDay = gapStart.toDateString() === gapEnd.toDateString()
+        if (!sameDay) continue
+        
         const gapMinutes = (gapEnd.getTime() - gapStart.getTime()) / (1000 * 60)
         
-        if (gapMinutes >= 30) { // Only count gaps of 30+ minutes
+        // Only count gaps of 30+ minutes but less than 8 hours (reasonable daily gaps)
+        if (gapMinutes >= 30 && gapMinutes <= 480) {
           gaps.push({
             start: gapStart,
             end: gapEnd,
-            durationMinutes: gapMinutes,
+            durationMinutes: Math.round(gapMinutes),
           })
         }
       }
@@ -637,15 +645,15 @@ export const recommendationService = {
     // Generate optimization suggestions
     const optimizations: ScheduleOptimization[] = []
 
-    // Suggest conflict resolution
+    // Suggest conflict resolution (one per conflict, not duplicates)
     for (const conflict of conflicts) {
       optimizations.push({
         type: 'resolve_conflict',
-        description: `Zeitüberschneidung von ${conflict.overlapMinutes} Minuten gefunden`,
+        description: `„${conflict.event1Title}" und „${conflict.event2Title}" überschneiden sich um ${conflict.overlapMinutes} Min.`,
         suggestedAction: {
           action: 'remove',
           eventIds: [conflict.event1Id, conflict.event2Id],
-          reason: 'Eine der überlappenden Veranstaltungen entfernen',
+          reason: `Entferne „${conflict.event1Title}" oder „${conflict.event2Title}" um den Konflikt zu lösen`,
         },
         benefitScore: 30,
       })

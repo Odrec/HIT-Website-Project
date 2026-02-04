@@ -1,65 +1,99 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
   Lightbulb,
   BarChart3,
-  RefreshCw
+  RefreshCw,
+  Trash2,
+  X
 } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
-import type { ScheduleOptimizationResult } from '@/types/recommendations'
+import type { ScheduleOptimization, ScheduleOptimizationResult } from '@/types/recommendations'
 
 interface ScheduleAnalysisProps {
   onOptimizationSelect?: (optimization: ScheduleOptimizationResult['optimizations'][0]) => void
 }
 
 export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps) {
-  const { state } = useSchedule()
+  const { state, removeEvent } = useSchedule()
   const [analysis, setAnalysis] = useState<ScheduleOptimizationResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [selectedOptimization, setSelectedOptimization] = useState<ScheduleOptimization | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  const scheduledEventIds = state.items.map(item => item.eventId)
+  // Stabilize scheduledEventIds with useMemo and create a stable key
+  const scheduledEventIds = useMemo(
+    () => state.items.map(item => item.eventId),
+    [state.items]
+  )
+  const scheduledEventIdsKey = scheduledEventIds.join(',')
 
-  const analyzeSchedule = useCallback(async () => {
+  useEffect(() => {
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+
     if (scheduledEventIds.length === 0) {
       setAnalysis(null)
+      setLoading(false)
       return
     }
 
-    setLoading(true)
-    setError(null)
+    const analyzeSchedule = async () => {
+      setLoading(true)
+      setError(null)
 
-    try {
-      const response = await fetch('/api/recommendations/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scheduledEventIds }),
-      })
+      try {
+        const response = await fetch('/api/recommendations/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scheduledEventIds }),
+          signal: abortControllerRef.current?.signal,
+        })
 
-      if (!response.ok) {
-        throw new Error('Failed to analyze schedule')
+        if (!response.ok) {
+          throw new Error('Failed to analyze schedule')
+        }
+
+        const data: ScheduleOptimizationResult = await response.json()
+        setAnalysis(data)
+      } catch (err) {
+        // Ignore abort errors
+        if (err instanceof Error && err.name === 'AbortError') {
+          return
+        }
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
       }
-
-      const data: ScheduleOptimizationResult = await response.json()
-      setAnalysis(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
     }
-  }, [scheduledEventIds])
 
-  useEffect(() => {
     analyzeSchedule()
-  }, [analyzeSchedule])
+
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [scheduledEventIdsKey, refreshTrigger]) // Use stable key instead of array
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600'
@@ -73,6 +107,38 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
     if (score >= 60) return 'bg-blue-500'
     if (score >= 40) return 'bg-yellow-500'
     return 'bg-red-500'
+  }
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleOptimizationClick = (opt: ScheduleOptimization) => {
+    setSelectedOptimization(opt)
+    setDialogOpen(true)
+    // Also call external handler if provided
+    onOptimizationSelect?.(opt)
+  }
+
+  const handleRemoveEvent = (eventId: string) => {
+    // Find the event title from state.items
+    const item = state.items.find(i => i.eventId === eventId)
+    if (item) {
+      removeEvent(item.eventId)
+    }
+    setDialogOpen(false)
+    setSelectedOptimization(null)
+  }
+
+  // Get event titles for the selected optimization
+  const getEventTitlesForOptimization = (opt: ScheduleOptimization) => {
+    return opt.suggestedAction.eventIds.map(eventId => {
+      const item = state.items.find(i => i.eventId === eventId)
+      return {
+        eventId,
+        title: item?.event.title || 'Unbekannte Veranstaltung'
+      }
+    })
   }
 
   if (scheduledEventIds.length === 0) {
@@ -102,7 +168,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
       <Card className="bg-red-50 border-red-200">
         <CardContent className="pt-6">
           <p className="text-red-600">Fehler bei der Analyse: {error}</p>
-          <Button onClick={analyzeSchedule} variant="outline" className="mt-4">
+          <Button onClick={handleRefresh} variant="outline" className="mt-4">
             <RefreshCw className="h-4 w-4 mr-2" />
             Erneut versuchen
           </Button>
@@ -154,11 +220,17 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {analysis.conflicts.map((conflict, idx) => (
-                <li key={idx} className="flex items-center text-sm text-yellow-800">
-                  <Clock className="h-4 w-4 mr-2" />
-                  {conflict.overlapMinutes} Min. Überschneidung
+                <li key={idx} className="text-sm text-yellow-800 p-2 bg-yellow-100 rounded">
+                  <div className="flex items-center gap-2 mb-1">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                    <span className="font-medium">{conflict.overlapMinutes} Min. Überschneidung</span>
+                  </div>
+                  <div className="ml-6 text-yellow-700">
+                    <p className="truncate">„{conflict.event1Title}"</p>
+                    <p className="truncate">„{conflict.event2Title}"</p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -247,10 +319,10 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
           <CardContent>
             <ul className="space-y-3">
               {analysis.optimizations.map((opt, idx) => (
-                <li 
-                  key={idx} 
+                <li
+                  key={idx}
                   className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
-                  onClick={() => onOptimizationSelect?.(opt)}
+                  onClick={() => handleOptimizationClick(opt)}
                 >
                   <div className="flex-1">
                     <p className="font-medium">{opt.description}</p>
@@ -263,6 +335,65 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
           </CardContent>
         </Card>
       )}
+
+      {/* Optimization Action Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-yellow-500" />
+              Optimierungsvorschlag
+            </DialogTitle>
+            <DialogDescription>
+              {selectedOptimization?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOptimization && selectedOptimization.suggestedAction.action === 'remove' && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Welche Veranstaltung möchtest du entfernen, um den Konflikt zu lösen?
+              </p>
+              <div className="space-y-2">
+                {getEventTitlesForOptimization(selectedOptimization).map(({ eventId, title }) => (
+                  <Button
+                    key={eventId}
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-left"
+                    onClick={() => handleRemoveEvent(eventId)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <span className="truncate">„{title}" entfernen</span>
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => setDialogOpen(false)}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Abbrechen
+              </Button>
+            </div>
+          )}
+
+          {selectedOptimization && selectedOptimization.suggestedAction.action !== 'remove' && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                {selectedOptimization.suggestedAction.reason}
+              </p>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => setDialogOpen(false)}
+              >
+                Schließen
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

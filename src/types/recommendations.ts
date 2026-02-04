@@ -155,7 +155,9 @@ export interface ScheduleOptimizationResult {
   gaps: TimeSlot[] // unscheduled time periods
   conflicts: {
     event1Id: string
+    event1Title: string
     event2Id: string
+    event2Title: string
     overlapMinutes: number
   }[]
   diversity: {

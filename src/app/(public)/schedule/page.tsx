@@ -280,33 +280,6 @@ function SchedulePageContent() {
         )}
       </div>
 
-      {/* Conflict warning */}
-      {conflicts.length > 0 && (
-        <Card className="mb-6 border-yellow-500 bg-yellow-50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-yellow-800">
-                  {conflicts.length} Zeitkonflikt{conflicts.length > 1 ? 'e' : ''} erkannt
-                </h3>
-                <ul className="mt-2 space-y-1 text-sm text-yellow-700">
-                  {conflicts.map((conflict, idx) => (
-                    <li key={idx}>
-                      <span className="font-medium">{conflict.event1.event.title}</span>
-                      {' und '}
-                      <span className="font-medium">{conflict.event2.event.title}</span>
-                      {' überschneiden sich um '}
-                      {conflict.overlapMinutes} Minuten
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Empty state */}
       {state.items.length === 0 && !isLoadingShared && (
         <Card className="text-center py-16">
