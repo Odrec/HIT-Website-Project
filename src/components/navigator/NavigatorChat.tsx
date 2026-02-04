@@ -333,7 +333,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
             onViewEvents={handleViewEvents}
           />
 
-          {isComplete && endResources.length > 0 && (
+          {endResources.length > 0 && (
             <EndSessionResources resources={endResources} />
           )}
         </div>
