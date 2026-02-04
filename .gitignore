@@ -47,4 +47,6 @@ prisma/*.db
 prisma/*.db-journal
 
 /src/generated/prisma
-screenshots/
+# Ignore screenshots in root, but allow docs/screenshots
+/screenshots/
+!docs/screenshots/

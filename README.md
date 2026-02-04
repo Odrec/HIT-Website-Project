@@ -12,13 +12,15 @@
 
 ## 📸 Screenshots
 
-<!-- Add screenshots of the application here -->
 <p align="center">
   <img src="docs/screenshots/homepage.png" alt="Homepage" width="400" />
-  <img src="docs/screenshots/schedule-builder.png" alt="Schedule Builder" width="400" />
+  <img src="docs/screenshots/events.png" alt="Events Listing" width="400" />
 </p>
 
-> 📝 **Note:** Screenshots will be added once the UI is finalized.
+<p align="center">
+  <img src="docs/screenshots/navigator.png" alt="Study Navigator" width="400" />
+  <img src="docs/screenshots/route-planner.png" alt="Route Planner with Campus Map" width="400" />
+</p>
 
 ---
 
