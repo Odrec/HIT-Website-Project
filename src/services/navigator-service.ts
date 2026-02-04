@@ -506,8 +506,29 @@ export async function getRecommendations(
     const programName = program.name.toLowerCase()
     const clusterName = program.cluster?.name?.toLowerCase() || ''
     
+    // DIRECT PROGRAM NAME MATCH - highest priority!
+    // Extract core program name (without degree suffix like B.Eng., M.Sc., etc.)
+    const coreNameMatch = programName.match(/^([^(]+)/)
+    const coreName = coreNameMatch ? coreNameMatch[1].trim() : programName
+    
+    // Check if user explicitly mentioned this program name
+    if (conversationText.includes(coreName)) {
+      score += 40 // Very high boost for explicit mention
+      reasons.push('Direkt von dir erwähnt')
+    } else {
+      // Check for partial matches of significant words in program name
+      const programWords = coreName.split(/\s+/).filter(w => w.length > 4)
+      for (const word of programWords) {
+        if (conversationText.includes(word)) {
+          score += 35 // High boost for mentioning key program words
+          reasons.push('Passt zu deiner Anfrage')
+          break
+        }
+      }
+    }
+    
     // Interest matching
-    if (conversationText.includes('technik') && (programName.includes('technik') || programName.includes('ingenieur'))) {
+    if (conversationText.includes('technik') && (programName.includes('technik') || programName.includes('ingenieur') || programName.includes('maschinenbau'))) {
       score += 20
       reasons.push('Passt zu deinem Interesse an Technik')
     }
