@@ -338,12 +338,12 @@ export default function StudyProgramsPage() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+                <Select value={institutionFilter || "__all__"} onValueChange={(v) => setInstitutionFilter(v === "__all__" ? "" : v)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Alle Institutionen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Alle Institutionen</SelectItem>
+                    <SelectItem value="__all__">Alle Institutionen</SelectItem>
                     <SelectItem value="UNI">Universität</SelectItem>
                     <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
                     <SelectItem value="BOTH">Beide</SelectItem>
@@ -595,16 +595,16 @@ export default function StudyProgramsPage() {
             <div className="space-y-2">
               <Label htmlFor="cluster">Cluster</Label>
               <Select
-                value={programFormData.clusterId}
+                value={programFormData.clusterId || "__none__"}
                 onValueChange={(value) =>
-                  setProgramFormData({ ...programFormData, clusterId: value })
+                  setProgramFormData({ ...programFormData, clusterId: value === "__none__" ? "" : value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Kein Cluster" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Kein Cluster</SelectItem>
+                  <SelectItem value="__none__">Kein Cluster</SelectItem>
                   {clusters.map((cluster) => (
                     <SelectItem key={cluster.id} value={cluster.id}>
                       <div className="flex items-center gap-2">

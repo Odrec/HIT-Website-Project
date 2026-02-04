@@ -256,12 +256,12 @@ export default function UsersPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <Select value={roleFilter || "__all__"} onValueChange={(v) => setRoleFilter(v === "__all__" ? "" : v)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Alle Rollen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Rollen</SelectItem>
+                <SelectItem value="__all__">Alle Rollen</SelectItem>
                 <SelectItem value="ADMIN">Administrator</SelectItem>
                 <SelectItem value="ORGANIZER">Organisator</SelectItem>
                 <SelectItem value="PUBLIC">Öffentlich</SelectItem>
