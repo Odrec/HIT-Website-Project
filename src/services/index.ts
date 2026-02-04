@@ -5,6 +5,7 @@ export { studyProgramService } from './study-program-service'
 export { locationService } from './location-service'
 export { navigatorService } from './navigator-service'
 export { recommendationService } from './recommendation-service'
+export * as routeService from './route-service'
 
 // Additional services will be added as they are created:
 // export { scheduleService } from './schedule-service'
