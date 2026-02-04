@@ -6,9 +6,24 @@ import { prisma } from '@/lib/db/prisma'
 import { Institution } from '@/types/events'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-options'
+import { cacheGet, cacheSet, invalidateProgramCaches } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
+
+/**
+ * Generate a cache key for study programs
+ */
+function generateCacheKey(institution?: string, grouped?: boolean): string {
+  const base = CacheKeys.studyPrograms.all()
+  const parts = [base]
+  if (institution) parts.push(`inst:${institution}`)
+  if (grouped) parts.push('grouped')
+  return parts.join(':')
+}
 
 /**
  * GET /api/study-programs - List all study programs
+ * Results are cached in Redis for performance
  */
 export async function GET(request: NextRequest) {
   try {
@@ -16,16 +31,43 @@ export async function GET(request: NextRequest) {
     const institution = searchParams.get('institution') as Institution | undefined
     const grouped = searchParams.get('grouped') === 'true'
 
-    if (grouped) {
-      const result = await studyProgramService.getGroupedByCluster(institution)
-      return NextResponse.json(result)
+    // Check cache first (if Redis is available)
+    const cacheKey = generateCacheKey(institution || undefined, grouped)
+    const redisConnected = await isRedisConnected()
+    
+    if (redisConnected) {
+      const cached = await cacheGet<unknown>(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'X-Cache-Key': cacheKey,
+          }
+        })
+      }
     }
 
-    const programs = await studyProgramService.list(
-      institution ? { institution } : undefined
-    )
+    let result: unknown
 
-    return NextResponse.json(programs)
+    if (grouped) {
+      result = await studyProgramService.getGroupedByCluster(institution)
+    } else {
+      result = await studyProgramService.list(
+        institution ? { institution } : undefined
+      )
+    }
+
+    // Cache the result
+    if (redisConnected) {
+      await cacheSet(cacheKey, result, CacheTTL.PROGRAMS)
+    }
+
+    return NextResponse.json(result, {
+      headers: {
+        'X-Cache': 'MISS',
+        'X-Cache-Key': cacheKey,
+      }
+    })
   } catch (error) {
     console.error('Error fetching study programs:', error)
     return NextResponse.json(
@@ -76,6 +118,9 @@ export async function POST(request: NextRequest) {
         cluster: true,
       },
     })
+
+    // Invalidate study program caches
+    await invalidateProgramCaches()
 
     return NextResponse.json(program, { status: 201 })
   } catch (error) {

@@ -4,14 +4,45 @@ import { NextRequest, NextResponse } from 'next/server'
 import { locationService } from '@/services'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-options'
+import { cacheGet, cacheSet, invalidateLocationCaches } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
 
 /**
  * GET /api/locations - List all locations
+ * Results are cached in Redis for performance (locations rarely change)
  */
 export async function GET() {
   try {
+    const cacheKey = CacheKeys.locations.all()
+    const redisConnected = await isRedisConnected()
+    
+    // Check cache first
+    if (redisConnected) {
+      const cached = await cacheGet<unknown[]>(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'X-Cache-Key': cacheKey,
+          }
+        })
+      }
+    }
+
     const locations = await locationService.list()
-    return NextResponse.json(locations)
+    
+    // Cache the result (longer TTL since locations rarely change)
+    if (redisConnected) {
+      await cacheSet(cacheKey, locations, CacheTTL.LOCATIONS)
+    }
+
+    return NextResponse.json(locations, {
+      headers: {
+        'X-Cache': 'MISS',
+        'X-Cache-Key': cacheKey,
+      }
+    })
   } catch (error) {
     console.error('Error fetching locations:', error)
     return NextResponse.json(
@@ -52,6 +83,9 @@ export async function POST(request: NextRequest) {
       latitude: body.latitude ? parseFloat(body.latitude) : undefined,
       longitude: body.longitude ? parseFloat(body.longitude) : undefined,
     })
+
+    // Invalidate location caches
+    await invalidateLocationCaches()
 
     return NextResponse.json(location, { status: 201 })
   } catch (error) {
