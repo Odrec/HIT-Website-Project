@@ -128,10 +128,18 @@ model Event {
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
 
+  // Single-column indexes
   @@index([eventType])
   @@index([institution])
   @@index([timeStart])
   @@index([locationId])
+  @@index([createdAt])
+  
+  // Compound indexes for common query patterns
+  @@index([institution, eventType])      // Filtering by institution and type
+  @@index([timeStart, timeEnd])          // Time range queries
+  @@index([institution, timeStart])      // Events by institution sorted by time
+  
   @@map("events")
 }
 
