@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -40,46 +40,78 @@ export function RecommendationList({
   const [excludeConflicts, setExcludeConflicts] = useState(false)
   const [onlyHighDemand, setOnlyHighDemand] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const hasFetched = useRef(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  const scheduledEventIds = state.items.map(item => item.eventId)
-
-  const fetchRecommendations = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/recommendations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scheduledEventIds,
-          studyProgramIds,
-          institution,
-          preferredEventTypes,
-          dismissedEventIds: dismissedIds,
-          excludeConflicts,
-          onlyHighDemand,
-          limit,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch recommendations')
-      }
-
-      const data: RecommendationResult = await response.json()
-      setRecommendations(data.recommendations)
-      setGroups(data.groups)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }, [scheduledEventIds, studyProgramIds, institution, preferredEventTypes, dismissedIds, excludeConflicts, onlyHighDemand, limit])
-
+  // Fetch recommendations on mount and when filters change
   useEffect(() => {
+    // Skip if we've already fetched and filters haven't changed
+    if (hasFetched.current && refreshTrigger === 0) {
+      return
+    }
+    hasFetched.current = true
+
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+
+    const fetchRecommendations = async () => {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const scheduledEventIds = state.items.map(item => item.eventId)
+        
+        const response = await fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            scheduledEventIds,
+            studyProgramIds,
+            institution,
+            preferredEventTypes,
+            dismissedEventIds: dismissedIds,
+            excludeConflicts,
+            onlyHighDemand,
+            limit,
+          }),
+          signal: abortControllerRef.current?.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch recommendations')
+        }
+
+        const data: RecommendationResult = await response.json()
+        setRecommendations(data.recommendations)
+        setGroups(data.groups)
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return // Ignore abort errors
+        }
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchRecommendations()
-  }, [fetchRecommendations])
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  // Only re-fetch when filters or refreshTrigger changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [excludeConflicts, onlyHighDemand, refreshTrigger])
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
 
   const handleViewDetails = (eventId: string) => {
     if (onEventSelect) {
@@ -112,14 +144,12 @@ export function RecommendationList({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-2/3" />
+              <div className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-3" />
+                <Skeleton className="h-4 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-2/3 mb-3" />
                 <Skeleton className="h-8 w-full" />
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
@@ -132,7 +162,7 @@ export function RecommendationList({
       <Card className="bg-red-50 border-red-200">
         <CardContent className="pt-6">
           <p className="text-red-600">Fehler beim Laden der Empfehlungen: {error}</p>
-          <Button onClick={fetchRecommendations} variant="outline" className="mt-4">
+          <Button onClick={handleRefresh} variant="outline" className="mt-4">
             <RefreshCw className="h-4 w-4 mr-2" />
             Erneut versuchen
           </Button>
@@ -150,7 +180,7 @@ export function RecommendationList({
           <h2 className="text-xl font-semibold">Empfohlene Veranstaltungen</h2>
           <Badge variant="secondary">{recommendations.length} Empfehlungen</Badge>
         </div>
-        <Button onClick={fetchRecommendations} variant="outline" size="sm">
+        <Button onClick={handleRefresh} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
           Aktualisieren
         </Button>
@@ -179,7 +209,10 @@ export function RecommendationList({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setDismissedIds([])}
+              onClick={() => {
+                setDismissedIds([])
+                handleRefresh()
+              }}
             >
               {dismissedIds.length} ausgeblendet zurücksetzen
             </Button>
@@ -228,7 +261,10 @@ export function RecommendationList({
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => setDismissedIds([])}
+                  onClick={() => {
+                    setDismissedIds([])
+                    handleRefresh()
+                  }}
                   className="ml-1"
                 >
                   Zurücksetzen
