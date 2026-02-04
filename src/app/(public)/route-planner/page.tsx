@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSchedule } from '@/contexts/schedule-context'
@@ -58,6 +59,7 @@ const CAMPUS_AREAS: { id: string; name: string }[] = [
 ]
 
 export default function RoutePlannerPage() {
+  const router = useRouter()
   const { state } = useSchedule()
   
   const [view, setView] = useState<'map' | 'list'>('map')
@@ -349,7 +351,7 @@ export default function RoutePlannerPage() {
             <TravelWarnings
               analyses={travelAnalyses}
               onEventClick={(eventId: string) => {
-                console.log('Navigate to event:', eventId)
+                router.push(`/events/${eventId}`)
               }}
             />
           )}

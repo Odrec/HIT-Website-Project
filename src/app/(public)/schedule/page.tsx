@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react'
 import { format, addDays, startOfDay, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useSchedule } from '@/contexts/schedule-context'
@@ -53,6 +53,7 @@ const HIT_DATE = new Date('2026-11-14')
 
 function SchedulePageContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { state, clearSchedule, getConflicts, getScheduleUrl, addEvent } = useSchedule()
   const { toast } = useToast()
   
@@ -612,8 +613,7 @@ function SchedulePageContent() {
                       <TravelWarnings
                         analyses={travelAnalyses}
                         onEventClick={(eventId: string) => {
-                          // Could scroll to event or open detail
-                          console.log('Clicked event:', eventId)
+                          router.push(`/events/${eventId}`)
                         }}
                       />
                     </div>
