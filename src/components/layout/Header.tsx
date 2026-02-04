@@ -64,10 +64,10 @@ export function Header() {
             )}
           </Link>
           <Link
-            href="/programs"
+            href="/route-planner"
             className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
           >
-            Studiengänge
+            Routenplanung
           </Link>
           <Link
             href="/navigator"
