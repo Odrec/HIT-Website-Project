@@ -8,7 +8,7 @@ export default function NavigatorPage() {
 
   const handleProgramSelect = (programId: string) => {
     // Navigate to events filtered by this program
-    router.push(`/events?studyProgram=${programId}`)
+    router.push(`/events?studyProgramId=${programId}`)
   }
 
   return (
