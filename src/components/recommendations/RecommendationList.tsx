@@ -41,16 +41,10 @@ export function RecommendationList({
   const [onlyHighDemand, setOnlyHighDemand] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const hasFetched = useRef(false)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   // Fetch recommendations on mount and when filters change
   useEffect(() => {
-    // Skip if we've already fetched and filters haven't changed
-    if (hasFetched.current && refreshTrigger === 0) {
-      return
-    }
-    hasFetched.current = true
 
     // Cancel any pending request
     if (abortControllerRef.current) {
