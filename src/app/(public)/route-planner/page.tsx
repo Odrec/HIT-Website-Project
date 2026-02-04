@@ -373,7 +373,7 @@ export default function RoutePlannerPage() {
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Campus auswählen" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[1000]">
                       {CAMPUS_AREAS.map((area) => (
                         <SelectItem key={area.id} value={area.id}>
                           {area.name}
