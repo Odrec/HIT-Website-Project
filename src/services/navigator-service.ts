@@ -21,25 +21,30 @@ const sessions = new Map<string, NavigatorSession>()
 /**
  * System prompt for the study program navigator
  */
-const SYSTEM_PROMPT = `Du bist ein freundlicher und hilfreicher Studienberater für die Universität und Hochschule Osnabrück. 
+const SYSTEM_PROMPT = `Du bist ein freundlicher und hilfreicher Studienberater für die Universität und Hochschule Osnabrück.
 Deine Aufgabe ist es, Studieninteressierten bei der Wahl des passenden Studiengangs zu helfen.
 
-Wichtige Regeln:
+WICHTIGE REGELN:
 1. Stelle pro Nachricht maximal 1-2 Fragen
-2. Wiederhole keine bereits gestellten Fragen
+2. Wiederhole NIEMALS bereits gestellte Fragen - beziehe dich auf vorherige Antworten
 3. Sei empathisch und ermutigend
 4. Erkläre den Unterschied zwischen Universität und Hochschule wenn relevant
 5. Bei Lehramt-Interesse: Erkläre das 2-Fächer-Bachelor-System
-6. Gib nach 3-5 Fragen erste Empfehlungen
-7. Beende das Gespräch nach 8-10 Fragen mit finalen Empfehlungen
+6. WICHTIG: Nach dem 4. Austausch fasse zusammen was du über den User gelernt hast
+7. Nach dem 5. Austausch beende das Gespräch mit einer Zusammenfassung und sage dass du jetzt Empfehlungen zeigst
 
-Antworte immer auf Deutsch. Formatiere deine Antwort als JSON mit folgender Struktur:
+KONVERSATIONSGEDÄCHTNIS:
+- Erinnere dich an ALLE vorherigen Antworten des Users
+- Beziehe dich explizit auf frühere Aussagen ("Du hast erwähnt dass...")
+- Baue auf dem Gesagten auf
+
+Antworte IMMER auf Deutsch und NUR im folgenden JSON-Format (kein anderer Text!):
 {
   "message": "Deine Antwort an den Benutzer",
   "suggestedResponses": ["Vorschlag 1", "Vorschlag 2", "Vorschlag 3"],
   "questionType": "interests|skills|career|institution|study_format|subjects|lehramt|clarification|confirmation",
-  "recommendedProgramIds": ["program-id-1", "program-id-2"],
-  "shouldEndSession": false
+  "shouldEndSession": true/false,
+  "summary": "Zusammenfassung der Interessen falls shouldEndSession=true"
 }`
 
 /**
@@ -283,7 +288,7 @@ async function callGemini(
 /**
  * Parse AI response and extract structured data
  */
-function parseAIResponse(content: string): LLMCompletionResponse {
+function parseAIResponse(content: string): LLMCompletionResponse & { shouldEndSession?: boolean; summary?: string } {
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
@@ -294,6 +299,8 @@ function parseAIResponse(content: string): LLMCompletionResponse {
         detectedIntents: parsed.questionType ? [parsed.questionType] : undefined,
         recommendedPrograms: parsed.recommendedProgramIds,
         crisisKeywords: undefined,
+        shouldEndSession: parsed.shouldEndSession,
+        summary: parsed.summary,
       }
     }
   } catch {
@@ -401,9 +408,23 @@ Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber d
     return { session, response: supportMessage, crisis }
   }
   
-  // Build conversation history for LLM
+  // Count exchanges (user messages)
+  const userMessageCount = session.messages.filter(m => m.role === 'user').length
+  
+  // Build conversation history for LLM with context
+  const contextInfo = `
+
+AKTUELLER STATUS:
+- Anzahl bisheriger Austausche: ${userMessageCount}
+- ${userMessageCount >= 4 ? 'WICHTIG: Du hast genug Informationen! Fasse zusammen und beende bald das Gespräch.' : 'Stelle noch Fragen um mehr zu erfahren.'}
+- ${userMessageCount >= 5 ? 'JETZT das Gespräch beenden mit shouldEndSession: true!' : ''}
+
+Bisherige Antworten des Users:
+${session.messages.filter(m => m.role === 'user').map((m, i) => `${i + 1}. "${m.content}"`).join('\n')}
+`
+  
   const llmMessages = [
-    { role: 'system' as const, content: SYSTEM_PROMPT },
+    { role: 'system' as const, content: SYSTEM_PROMPT + contextInfo },
     ...session.messages.map(m => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
@@ -436,8 +457,9 @@ Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber d
     session.askedQuestions.push(llmResponse.detectedIntents[0])
   }
   
-  // Check if session should end
-  if (session.messages.length >= 20) {
+  // Check if session should end - either from LLM or after 5+ user messages
+  const extendedResponse = llmResponse as LLMCompletionResponse & { shouldEndSession?: boolean }
+  if (extendedResponse.shouldEndSession || userMessageCount >= 5 || session.messages.length >= 12) {
     session.completed = true
   }
   
