@@ -172,19 +172,81 @@ export function detectCrisis(message: string): CrisisDetection {
 }
 
 /**
- * Call the LLM API (Google Generative AI / Gemini)
+ * Call the LLM API - supports Google Gemini and OpenAI
+ * Priority: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
  */
 async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResponse> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY
+  const openaiApiKey = process.env.OPENAI_API_KEY
+  const googleApiKey = process.env.GOOGLE_AI_API_KEY
+  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini'
   
-  if (!apiKey) {
-    console.warn('GOOGLE_AI_API_KEY not configured, using fallback responses')
+  // Try OpenAI first if available
+  if (openaiApiKey) {
+    return callOpenAI(request, openaiApiKey, openaiModel)
+  }
+  
+  // Fall back to Google Gemini
+  if (googleApiKey) {
+    return callGemini(request, googleApiKey)
+  }
+  
+  console.warn('No AI API key configured (OPENAI_API_KEY or GOOGLE_AI_API_KEY), using fallback responses')
+  return getFallbackResponse(request)
+}
+
+/**
+ * Call OpenAI API
+ */
+async function callOpenAI(
+  request: LLMCompletionRequest,
+  apiKey: string,
+  model: string
+): Promise<LLMCompletionResponse> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: request.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+        temperature: request.temperature ?? 0.7,
+        max_tokens: request.maxTokens ?? 1024,
+      }),
+    })
+
+    if (!response.ok) {
+      console.error('OpenAI API error:', await response.text())
+      return getFallbackResponse(request)
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || ''
+
+    return parseAIResponse(content)
+  } catch (error) {
+    console.error('OpenAI API call failed:', error)
     return getFallbackResponse(request)
   }
+}
+
+/**
+ * Call Google Gemini API
+ */
+async function callGemini(
+  request: LLMCompletionRequest,
+  apiKey: string
+): Promise<LLMCompletionResponse> {
+  const model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
   
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -202,37 +264,43 @@ async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResp
         }),
       }
     )
-    
+
     if (!response.ok) {
-      console.error('LLM API error:', await response.text())
+      console.error('Gemini API error:', await response.text())
       return getFallbackResponse(request)
     }
-    
+
     const data = await response.json()
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-    
-    // Try to parse JSON response
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        return {
-          content: parsed.message || content,
-          suggestedResponses: parsed.suggestedResponses,
-          detectedIntents: parsed.questionType ? [parsed.questionType] : undefined,
-          recommendedPrograms: parsed.recommendedProgramIds,
-          crisisKeywords: undefined,
-        }
-      }
-    } catch {
-      // If JSON parsing fails, return raw content
-    }
-    
-    return { content }
+
+    return parseAIResponse(content)
   } catch (error) {
-    console.error('LLM API call failed:', error)
+    console.error('Gemini API call failed:', error)
     return getFallbackResponse(request)
   }
+}
+
+/**
+ * Parse AI response and extract structured data
+ */
+function parseAIResponse(content: string): LLMCompletionResponse {
+  try {
+    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0])
+      return {
+        content: parsed.message || content,
+        suggestedResponses: parsed.suggestedResponses,
+        detectedIntents: parsed.questionType ? [parsed.questionType] : undefined,
+        recommendedPrograms: parsed.recommendedProgramIds,
+        crisisKeywords: undefined,
+      }
+    }
+  } catch {
+    // If JSON parsing fails, return raw content
+  }
+
+  return { content }
 }
 
 /**
