@@ -13,8 +13,11 @@ import {
   ChevronUp,
   ExternalLink,
   Star,
+  Plus,
 } from 'lucide-react'
+import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
 import type { ProgramRecommendation, ClusterRecommendation } from '@/types/navigator'
+import type { Event } from '@/types/events'
 
 interface NavigatorRecommendationsProps {
   programs: ProgramRecommendation[]
@@ -142,24 +145,29 @@ export function NavigatorRecommendations({
                     </h4>
                     <div className="space-y-2">
                       {rec.relatedEvents!.slice(0, 3).map((event) => (
-                        <Link
+                        <div
                           key={event.id}
-                          href={`/events/${event.id}`}
-                          className="block p-2 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                          className="flex items-center gap-2 p-2 bg-muted rounded-md"
                         >
-                          <div className="font-medium text-sm">{event.title}</div>
-                          {event.timeStart && (
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(event.timeStart).toLocaleDateString('de-DE', {
-                                weekday: 'short',
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </div>
-                          )}
-                        </Link>
+                          <Link
+                            href={`/events/${event.id}`}
+                            className="flex-1 hover:underline"
+                          >
+                            <div className="font-medium text-sm">{event.title}</div>
+                            {event.timeStart && (
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(event.timeStart).toLocaleDateString('de-DE', {
+                                  weekday: 'short',
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                            )}
+                          </Link>
+                          <AddToScheduleButton event={event as Event} size="sm" variant="ghost" />
+                        </div>
                       ))}
                       
                       {rec.relatedEvents!.length > 3 && (
