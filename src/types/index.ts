@@ -2,3 +2,4 @@
 export * from './events'
 export * from './auth'
 export * from './schedule'
+export * from './navigator'
