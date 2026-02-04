@@ -2,14 +2,54 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
+import { cacheGet, cacheSet } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
+
+/**
+ * Generate a cache key from query parameters
+ */
+function generateCacheKey(searchParams: URLSearchParams): string {
+  // Sort params for consistent keys
+  const params = Array.from(searchParams.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&')
+  return `${CacheKeys.events.all()}:query:${params || 'default'}`
+}
 
 /**
  * GET /api/events/public - List events for public browsing
  * Supports filtering, sorting, pagination, and full-text search
+ * Results are cached in Redis for performance
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    
+    // Check cache first (if Redis is available)
+    const cacheKey = generateCacheKey(searchParams)
+    const redisConnected = await isRedisConnected()
+    
+    if (redisConnected) {
+      const cached = await cacheGet<{
+        events: unknown[]
+        total: number
+        page: number
+        pageSize: number
+        totalPages: number
+      }>(cacheKey)
+      
+      if (cached) {
+        // Return cached result with cache header
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'X-Cache-Key': cacheKey,
+          }
+        })
+      }
+    }
 
     // Parse query parameters
     const page = parseInt(searchParams.get('page') || '1', 10)
@@ -189,12 +229,27 @@ export async function GET(request: NextRequest) {
       organizers: event.organizers,
     }))
 
-    return NextResponse.json({
+    // Prepare response data
+    const responseData = {
       events: transformedEvents,
       total,
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize),
+    }
+
+    // Cache the result for future requests (if Redis is available)
+    if (redisConnected) {
+      // Use shorter TTL for search queries, longer for standard queries
+      const ttl = search ? CacheTTL.SHORT : CacheTTL.EVENTS
+      await cacheSet(cacheKey, responseData, ttl)
+    }
+
+    return NextResponse.json(responseData, {
+      headers: {
+        'X-Cache': 'MISS',
+        'X-Cache-Key': cacheKey,
+      }
     })
   } catch (error) {
     console.error('Error fetching public events:', error)
