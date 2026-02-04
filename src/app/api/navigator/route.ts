@@ -4,13 +4,31 @@ import { navigatorService } from '@/services/navigator-service'
 
 /**
  * Get the AI model name for display
+ * Priority matches navigator-service.ts: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
  */
 function getModelDisplayName(): string {
-  const model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
-  // Format for display: "gemini-1.5-flash" -> "Gemini 1.5 Flash"
-  return model
+  const openaiApiKey = process.env.OPENAI_API_KEY
+  const googleApiKey = process.env.GOOGLE_AI_API_KEY
+  
+  let model: string
+  let provider: string
+  
+  if (openaiApiKey) {
+    model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+    provider = 'OpenAI'
+  } else if (googleApiKey) {
+    model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
+    provider = 'Google'
+  } else {
+    return 'Fallback Mode (No AI configured)'
+  }
+  
+  // Format model name for display: "gpt-4o-mini" -> "GPT 4o Mini"
+  const formattedModel = model
     .replace(/-/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase())
+  
+  return `${provider} ${formattedModel}`
 }
 
 /**
