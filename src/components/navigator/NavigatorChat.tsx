@@ -128,8 +128,8 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         await loadRecommendations()
       }
 
-      // Auto-load recommendations after a few messages
-      if (data.session?.messageCount >= 6 && !showRecommendations) {
+      // Auto-load OR refresh recommendations after enough messages
+      if (data.session?.messageCount >= 4 || showRecommendations) {
         await loadRecommendations()
       }
     } catch (error) {
