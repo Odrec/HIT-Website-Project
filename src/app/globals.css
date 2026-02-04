@@ -80,6 +80,35 @@
   }
 }
 
+/* Leaflet map z-index fix - ensure header stays above map */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 40 !important;
+}
+
+.leaflet-control {
+  z-index: 30 !important;
+}
+
 /* Print styles */
 @media print {
   /* Hide non-essential elements when printing */
