@@ -7,6 +7,7 @@ import type {
   Route,
   Coordinates,
   RouteWaypoint,
+  TravelTimeAnalysis,
 } from '@/types/routes'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -35,6 +36,7 @@ const Polyline = dynamic(
 interface CampusMapProps {
   buildings?: BuildingInfo[]
   route?: Route
+  travelAnalyses?: TravelTimeAnalysis[]
   selectedBuilding?: string
   currentLocation?: Coordinates
   onBuildingClick?: (building: BuildingInfo) => void
@@ -51,6 +53,7 @@ const DEFAULT_ZOOM = 14
 export default function CampusMap({
   buildings = [],
   route,
+  travelAnalyses = [],
   selectedBuilding,
   currentLocation,
   onBuildingClick,
@@ -263,17 +266,30 @@ export default function CampusMap({
               </Marker>
             ))}
 
-          {/* Route polyline */}
+          {/* Route polylines - colored by travel analysis status */}
           {showRoute && routeCoordinates.length >= 2 && (
-            <Polyline
-              positions={routeCoordinates}
-              pathOptions={{
-                color: '#2563eb',
-                weight: 4,
-                opacity: 0.8,
-                dashArray: '10, 10',
-              }}
-            />
+            <>
+              {routeCoordinates.slice(0, -1).map((coord, index) => {
+                const nextCoord = routeCoordinates[index + 1]
+                // Check if this segment has a warning
+                const analysis = travelAnalyses[index]
+                const hasWarning = analysis && analysis.status !== 'ok'
+                const segmentColor = hasWarning ? '#dc2626' : '#2563eb' // Red for warnings, blue for ok
+                
+                return (
+                  <Polyline
+                    key={`segment-${index}`}
+                    positions={[coord, nextCoord]}
+                    pathOptions={{
+                      color: segmentColor,
+                      weight: hasWarning ? 5 : 4,
+                      opacity: hasWarning ? 1 : 0.8,
+                      dashArray: hasWarning ? undefined : '10, 10',
+                    }}
+                  />
+                )
+              })}
+            </>
           )}
         </MapContainer>
       </div>

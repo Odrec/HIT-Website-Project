@@ -390,6 +390,7 @@ export default function RoutePlannerPage() {
                   <CampusMap
                     buildings={filteredBuildings}
                     route={route || undefined}
+                    travelAnalyses={travelAnalyses}
                     selectedBuilding={selectedBuilding?.id}
                     onBuildingClick={handleBuildingClick}
                     showAllBuildings={true}

@@ -599,6 +599,7 @@ function SchedulePageContent() {
                     <div>
                       <CampusMap
                         route={route || undefined}
+                        travelAnalyses={travelAnalyses}
                         showAllBuildings={false}
                         showRoute={true}
                         height="400px"
