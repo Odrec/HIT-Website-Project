@@ -5,6 +5,7 @@ import { format, addDays, startOfDay, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useSchedule } from '@/contexts/schedule-context'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ScheduleTimeline } from '@/components/schedule/ScheduleTimeline'
 import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
+import { TravelWarnings, RouteInfo } from '@/components/map'
+import type { Route, TravelTimeAnalysis, BuildingInfo } from '@/types/routes'
 import {
   Calendar,
   List,
@@ -34,8 +37,16 @@ import {
   BarChart3,
   ChevronDown,
   ChevronUp,
+  MapPin,
+  Navigation,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+
+// Dynamic import for map component (no SSR)
+const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+})
 
 // HIT Event date (typically November 2026)
 const HIT_DATE = new Date('2026-11-14')
@@ -51,6 +62,10 @@ function SchedulePageContent() {
   const [isLoadingShared, setIsLoadingShared] = useState(false)
   const [showRecommendations, setShowRecommendations] = useState(true)
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [showRouteMap, setShowRouteMap] = useState(false)
+  const [route, setRoute] = useState<Route | null>(null)
+  const [travelAnalyses, setTravelAnalyses] = useState<TravelTimeAnalysis[]>([])
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false)
 
   // Check for shared schedule in URL
   useEffect(() => {
@@ -102,6 +117,63 @@ function SchedulePageContent() {
       setIsLoadingShared(false)
     }
   }
+
+  // Fetch route and travel analysis when schedule changes
+  useEffect(() => {
+    const fetchRouteData = async () => {
+      if (state.items.length < 2) {
+        setRoute(null)
+        setTravelAnalyses([])
+        return
+      }
+
+      setIsLoadingRoute(true)
+      try {
+        const eventIds = state.items
+          .filter((item) => item.event.timeStart)
+          .sort((a, b) =>
+            new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
+          )
+          .map((item) => item.eventId)
+
+        if (eventIds.length < 2) {
+          setRoute(null)
+          setTravelAnalyses([])
+          return
+        }
+
+        // Fetch route
+        const routeResponse = await fetch('/api/routes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scheduledEventIds: eventIds }),
+        })
+        if (routeResponse.ok) {
+          const routeData = await routeResponse.json()
+          setRoute(routeData)
+        }
+
+        // Fetch travel analysis
+        const analysisResponse = await fetch('/api/routes/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scheduledEventIds: eventIds }),
+        })
+        if (analysisResponse.ok) {
+          const analysisData = await analysisResponse.json()
+          setTravelAnalyses(analysisData.analyses || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch route data:', error)
+      } finally {
+        setIsLoadingRoute(false)
+      }
+    }
+
+    if (state.isLoaded) {
+      fetchRouteData()
+    }
+  }, [state.items, state.isLoaded])
 
   // Get unique dates from schedule
   const scheduleDates = useMemo(() => {
@@ -476,7 +548,20 @@ function SchedulePageContent() {
       {/* Recommendations Section */}
       <div className="mt-12 print:hidden">
         {/* Analysis Toggle */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <Button
+            variant={showRouteMap ? 'default' : 'outline'}
+            onClick={() => setShowRouteMap(!showRouteMap)}
+          >
+            <Navigation className="h-4 w-4 mr-2" />
+            Routenplanung
+            {travelAnalyses.filter((a) => a.status !== 'ok').length > 0 && (
+              <Badge variant="destructive" className="ml-2">
+                {travelAnalyses.filter((a) => a.status !== 'ok').length}
+              </Badge>
+            )}
+            {showRouteMap ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+          </Button>
           <Button
             variant={showAnalysis ? 'default' : 'outline'}
             onClick={() => setShowAnalysis(!showAnalysis)}
@@ -494,6 +579,58 @@ function SchedulePageContent() {
             {showRecommendations ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
           </Button>
         </div>
+
+        {/* Route Map and Travel Warnings */}
+        {showRouteMap && state.items.length > 0 && (
+          <div className="mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Navigation className="h-5 w-5 text-primary" />
+                  Route zwischen Veranstaltungen
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingRoute ? (
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                ) : (
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    {/* Map */}
+                    <div>
+                      <CampusMap
+                        route={route || undefined}
+                        showAllBuildings={false}
+                        showRoute={true}
+                        height="400px"
+                        className="rounded-lg overflow-hidden"
+                      />
+                    </div>
+                    {/* Route Info and Warnings */}
+                    <div className="space-y-4">
+                      <RouteInfo route={route} />
+                      <TravelWarnings
+                        analyses={travelAnalyses}
+                        onEventClick={(eventId: string) => {
+                          // Could scroll to event or open detail
+                          console.log('Clicked event:', eventId)
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-4 flex justify-end">
+                  <Button asChild variant="outline">
+                    <Link href="/route-planner">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Detaillierte Routenplanung
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Schedule Analysis */}
         {showAnalysis && state.items.length > 0 && (
