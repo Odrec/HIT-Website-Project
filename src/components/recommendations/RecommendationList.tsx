@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,13 @@ export function RecommendationList({
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  // Fetch recommendations on mount and when filters change
+  // Create a stable key for scheduled event IDs to track schedule changes
+  const scheduledEventIdsKey = useMemo(
+    () => state.items.map(item => item.eventId).join(','),
+    [state.items]
+  )
+
+  // Fetch recommendations on mount and when filters or schedule changes
   useEffect(() => {
 
     // Cancel any pending request
@@ -99,9 +105,8 @@ export function RecommendationList({
         abortControllerRef.current.abort()
       }
     }
-  // Only re-fetch when filters or refreshTrigger changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [excludeConflicts, onlyHighDemand, refreshTrigger])
+  // Re-fetch when filters, refreshTrigger, or schedule changes
+  }, [excludeConflicts, onlyHighDemand, refreshTrigger, scheduledEventIdsKey])
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1)
