@@ -16,7 +16,16 @@ import { Institution, EventType, LocationType } from '@/types/events'
 import type { StudyProgram, Event } from '@/types/events'
 
 // In-memory session store (in production, use Redis)
-const sessions = new Map<string, NavigatorSession>()
+// Use globalThis to persist sessions across Next.js hot-reloads in development
+const globalForSessions = globalThis as unknown as {
+  navigatorSessions: Map<string, NavigatorSession> | undefined
+}
+
+const sessions = globalForSessions.navigatorSessions ?? new Map<string, NavigatorSession>()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForSessions.navigatorSessions = sessions
+}
 
 /**
  * System prompt for the study program navigator
@@ -527,14 +536,28 @@ export async function getRecommendations(
       reasons.push('Lehramtsstudiengang')
     }
     
-    // Institution preference
-    if (conversationText.includes('universität') && program.institution === 'UNI') {
-      score += 10
-      reasons.push('An der Universität')
+    // Institution preference - check for full names and abbreviations
+    const wantsUni = conversationText.includes('universität') ||
+                     /\buni\b/.test(conversationText) ||
+                     conversationText.includes('uos')
+    const wantsHS = conversationText.includes('hochschule') ||
+                    /\bhs\b/.test(conversationText) ||
+                    conversationText.includes('osnabrück hochschule')
+    
+    if (wantsUni && program.institution === 'UNI') {
+      score += 15
+      reasons.push('An der Universität (deine Präferenz)')
     }
-    if (conversationText.includes('hochschule') && program.institution === 'HOCHSCHULE') {
-      score += 10
-      reasons.push('An der Hochschule')
+    if (wantsHS && program.institution === 'HOCHSCHULE') {
+      score += 15
+      reasons.push('An der Hochschule (deine Präferenz)')
+    }
+    // Slight penalty if user expressed a preference for the other institution
+    if (wantsUni && !wantsHS && program.institution === 'HOCHSCHULE') {
+      score -= 5
+    }
+    if (wantsHS && !wantsUni && program.institution === 'UNI') {
+      score -= 5
     }
     
     // Practical vs theoretical preference
