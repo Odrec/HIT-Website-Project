@@ -1,31 +1,65 @@
 # HIT-Website Project
 
-Event management and visitor planning system for the Higher Education Information Day (Hochschulinformationstag) at ZSB Osnabrück.
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)](https://redis.io/)
+[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)](#license)
+
+> Event management and visitor planning system for the Higher Education Information Day (Hochschulinformationstag) at ZSB Osnabrück.
+
+---
+
+## 📸 Screenshots
+
+<!-- Add screenshots of the application here -->
+<p align="center">
+  <img src="docs/screenshots/homepage.png" alt="Homepage" width="400" />
+  <img src="docs/screenshots/schedule-builder.png" alt="Schedule Builder" width="400" />
+</p>
+
+> 📝 **Note:** Screenshots will be added once the UI is finalized.
+
+---
 
 ## 🎯 Overview
 
-The HIT-Website provides:
-- **Event Browsing**: Browse and search all HIT events
-- **Schedule Builder**: Create personalized event schedules
-- **Study Navigator**: AI-powered study program recommendations
-- **Route Planner**: Navigate between event locations
-- **Admin Interface**: Manage events, programs, and users
+The HIT-Website provides a comprehensive platform for organizing and attending university open days:
+
+| Feature | Description |
+|---------|-------------|
+| **Event Browsing** | Browse and search all HIT events with advanced filtering |
+| **Schedule Builder** | Create personalized event schedules with conflict detection |
+| **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini |
+| **Route Planner** | Navigate between campus locations with walking time estimates |
+| **Event Recommendations** | Smart suggestions based on interests and schedule |
+| **Admin Interface** | Manage events, programs, locations, and users |
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Database**: PostgreSQL with Prisma ORM
-- **Cache**: Redis (ioredis)
-- **Auth**: NextAuth.js with credentials provider
-- **Deployment**: Vercel + Docker
+| Category | Technology |
+|----------|------------|
+| **Framework** | Next.js 14 with App Router |
+| **Language** | TypeScript 5.0 |
+| **Styling** | Tailwind CSS + shadcn/ui |
+| **Database** | PostgreSQL 16 with Prisma ORM |
+| **Cache** | Redis 7 (ioredis) |
+| **Auth** | NextAuth.js with credentials provider |
+| **Maps** | Leaflet + React-Leaflet |
+| **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 |
+| **Deployment** | Vercel + Docker |
+
+---
 
 ## 📋 Prerequisites
 
 - Node.js 20+
-- Docker & Docker Compose (for local database)
+- Docker & Docker Compose (for local database) — or external PostgreSQL/Redis
 - Git
+
+---
 
 ## 🚀 Quick Start
 
@@ -50,15 +84,13 @@ docker-compose ps
 
 **Option B: Without Docker**
 
-If you don't have Docker installed, you can:
-1. Use cloud services like [Neon](https://neon.tech) (free PostgreSQL) and [Upstash](https://upstash.com) (free Redis)
-2. Install PostgreSQL and Redis locally via Homebrew:
-   ```bash
-   brew install postgresql@16 redis
-   brew services start postgresql@16
-   brew services start redis
-   createdb hit_db
-   ```
+Use cloud services like [Neon](https://neon.tech) (free PostgreSQL) and [Upstash](https://upstash.com) (free Redis), or install locally:
+```bash
+brew install postgresql@16 redis
+brew services start postgresql@16
+brew services start redis
+createdb hit_db
+```
 
 ### 3. Configure Environment
 
@@ -66,8 +98,7 @@ If you don't have Docker installed, you can:
 # Copy example environment file
 cp .env.example .env.local
 
-# Edit with your values
-# Default values work with docker-compose setup
+# Edit with your values (see Environment Variables section below)
 ```
 
 ### 4. Setup Database
@@ -91,27 +122,70 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000)
 
+---
+
+## 🔧 Environment Variables
+
+Copy `.env.example` to `.env.local` and configure:
+
+### Required Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://hit_user:hit_password@localhost:5432/hit_db` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+| `NEXTAUTH_SECRET` | Secret for NextAuth.js (generate with `openssl rand -base64 32`) | - |
+| `NEXTAUTH_URL` | Base URL of your application | `http://localhost:3000` |
+
+### AI Configuration (Study Navigator)
+
+The AI-powered Study Navigator requires one of these providers:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | OpenAI API key ([get one](https://platform.openai.com/api-keys)) | - |
+| `OPENAI_MODEL` | OpenAI model to use | `gpt-4o-mini` |
+| `GOOGLE_AI_API_KEY` | Google AI API key ([get one](https://makersuite.google.com/app/apikey)) | - |
+| `GOOGLE_AI_MODEL` | Gemini model to use | `gemini-1.5-flash` |
+
+> 💡 If both OpenAI and Google AI keys are set, OpenAI takes priority.
+
+### Optional Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_APP_URL` | Public URL (for client-side) | `http://localhost:3000` |
+| `NODE_ENV` | Environment mode | `development` |
+
+---
+
 ## 📁 Project Structure
 
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── (public)/          # Public routes
+│   ├── (public)/          # Public routes (events, schedule, navigator)
 │   ├── (admin)/           # Admin routes (protected)
 │   └── api/               # API routes
 ├── components/
-│   ├── ui/                # shadcn/ui components
-│   ├── layout/            # Layout components
-│   ├── events/            # Event components
-│   └── schedule/          # Schedule builder components
+│   ├── ui/                # shadcn/ui base components
+│   ├── layout/            # Layout components (Header, Footer, etc.)
+│   ├── events/            # Event-related components
+│   ├── schedule/          # Schedule builder components
+│   ├── navigator/         # AI navigator components
+│   ├── recommendations/   # Recommendation components
+│   └── map/               # Campus map components
 ├── lib/
-│   ├── db/                # Database utilities
+│   ├── db/                # Database utilities (Prisma)
 │   ├── auth/              # Authentication utilities
 │   └── cache/             # Redis cache utilities
+├── services/              # Business logic services
 ├── types/                 # TypeScript type definitions
 ├── hooks/                 # Custom React hooks
-└── services/              # Business logic services
+└── contexts/              # React context providers
 ```
+
+---
 
 ## 🔐 Default Admin Login
 
@@ -119,7 +193,35 @@ After running the seed script:
 - **Email**: admin@zsb-os.de
 - **Password**: admin123
 
-⚠️ Change this password immediately in production!
+⚠️ **Change this password immediately in production!**
+
+---
+
+## 📡 API Endpoints
+
+### Public Endpoints
+
+| Endpoint | Method | Description | Cache |
+|----------|--------|-------------|-------|
+| `/api/events/public` | GET | List all public events (paginated) | 5 min |
+| `/api/events/public/[id]` | GET | Get single event details | 5 min |
+| `/api/study-programs` | GET | List all study programs | 15 min |
+| `/api/locations` | GET | List all locations | 1 hour |
+| `/api/routes` | POST | Calculate route between locations | No |
+| `/api/recommendations` | POST | Get event recommendations | No |
+| `/api/navigator` | POST | AI navigator chat | No |
+
+### Admin Endpoints (Authentication Required)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/events` | GET, POST | List/create events |
+| `/api/events/[id]` | GET, PUT, DELETE | Manage single event |
+| `/api/users` | GET, POST | Manage users |
+| `/api/locations` | POST, PUT, DELETE | Manage locations |
+| `/api/study-programs` | POST, PUT, DELETE | Manage study programs |
+
+---
 
 ## 📦 Available Scripts
 
@@ -132,6 +234,8 @@ After running the seed script:
 | `npm run lint:fix` | Fix ESLint issues |
 | `npm run format` | Format with Prettier |
 | `npm run type-check` | Run TypeScript check |
+
+---
 
 ## 🐳 Docker Commands
 
@@ -152,22 +256,39 @@ docker-compose down -v
 docker-compose --profile tools up -d
 ```
 
+---
+
 ## 🧪 Testing
 
-```bash
-# Run tests (when implemented)
-npm test
+For comprehensive testing instructions, see **[Testing Guide](docs/TESTING-GUIDE.md)**.
 
-# Run tests with coverage
-npm run test:coverage
+### Quick Load Test
+
+```bash
+# Start the app first
+npm run dev
+
+# Run load test (in another terminal)
+npx ts-node scripts/load-test.ts
 ```
+
+### Custom Load Test
+
+```bash
+LOAD_TEST_URL=http://localhost:3000 \
+LOAD_TEST_CONCURRENT=100 \
+LOAD_TEST_DURATION=60 \
+npx ts-node scripts/load-test.ts
+```
+
+---
 
 ## 🚢 Deployment
 
 ### Vercel (Recommended)
 
 1. Push to GitHub
-2. Connect repo in Vercel Dashboard
+2. Connect repo in [Vercel Dashboard](https://vercel.com)
 3. Configure environment variables
 4. Deploy!
 
@@ -185,27 +306,94 @@ docker run -p 3000:3000 \
   hit-website
 ```
 
+---
+
 ## 📊 Performance Targets
 
 Based on November 2025 traffic analysis:
-- **Peak concurrent users**: 5,000
-- **Page load time**: < 2 seconds
-- **API response time**: < 500ms
-- **Uptime during HIT**: 99.9%
+
+| Metric | Target |
+|--------|--------|
+| Peak concurrent users | 5,000 |
+| Page load time | < 2 seconds |
+| API response time | < 500ms |
+| Uptime during HIT | 99.9% |
+
+---
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Database connection fails
+```bash
+# Check if PostgreSQL is running
+docker-compose ps
+
+# Verify connection string format
+# postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+#### Redis connection fails
+```bash
+# Check if Redis is running
+docker-compose logs redis
+
+# Test connection
+redis-cli ping
+```
+
+#### Prisma client not generated
+```bash
+# Regenerate Prisma client
+npx prisma generate
+
+# If schema changed, create migration
+npx prisma migrate dev
+```
+
+#### AI Navigator not responding
+- Verify `OPENAI_API_KEY` or `GOOGLE_AI_API_KEY` is set in `.env.local`
+- Check API key has sufficient credits/quota
+- Try a different model (e.g., `gpt-4o-mini` is faster/cheaper)
+
+#### Slow performance
+- Ensure Redis is running (caching)
+- Check database indexes: `npx prisma migrate deploy`
+- Review [Testing Guide](docs/TESTING-GUIDE.md) for performance optimization
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Testing Guide](docs/TESTING-GUIDE.md) | Load testing, cross-browser testing, performance |
+| [Implementation Plan](docs/implementation-plan.md) | Development roadmap and phases |
+| [Requirements Analysis](docs/requirements-analysis.md) | Detailed requirements specification |
+| [Executive Summary](docs/EXECUTIVE-SUMMARY.md) | Project overview for stakeholders |
+
+---
 
 ## 🤝 Contributing
 
-1. Create a feature branch
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
 2. Make changes
-3. Run lint and type check
-4. Submit PR
+3. Run lint and type check (`npm run lint && npm run type-check`)
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+---
 
 ## 📄 License
 
 All rights reserved. © ZSB Osnabrück
 
+---
+
 ## 📞 Contact
 
-Zentrale Studienberatung Osnabrück
+**Zentrale Studienberatung Osnabrück**
 - Email: zsb@uni-osnabrueck.de
 - Web: https://www.zsb-os.de
