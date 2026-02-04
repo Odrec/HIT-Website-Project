@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScheduleTimeline } from '@/components/schedule/ScheduleTimeline'
 import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
+import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import {
   Calendar,
   List,
@@ -29,6 +30,10 @@ import {
   Check,
   FileText,
   CalendarDays,
+  Sparkles,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -44,6 +49,8 @@ function SchedulePageContent() {
   const [selectedDate, setSelectedDate] = useState<Date>(HIT_DATE)
   const [copied, setCopied] = useState(false)
   const [isLoadingShared, setIsLoadingShared] = useState(false)
+  const [showRecommendations, setShowRecommendations] = useState(true)
+  const [showAnalysis, setShowAnalysis] = useState(false)
 
   // Check for shared schedule in URL
   useEffect(() => {
@@ -492,6 +499,45 @@ function SchedulePageContent() {
           </div>
         </div>
       )}
+
+      {/* Recommendations Section */}
+      <div className="mt-12 print:hidden">
+        {/* Analysis Toggle */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant={showAnalysis ? 'default' : 'outline'}
+            onClick={() => setShowAnalysis(!showAnalysis)}
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Zeitplan-Analyse
+            {showAnalysis ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+          </Button>
+          <Button
+            variant={showRecommendations ? 'default' : 'outline'}
+            onClick={() => setShowRecommendations(!showRecommendations)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Empfehlungen
+            {showRecommendations ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+          </Button>
+        </div>
+
+        {/* Schedule Analysis */}
+        {showAnalysis && state.items.length > 0 && (
+          <div className="mb-8">
+            <ScheduleAnalysis />
+          </div>
+        )}
+
+        {/* Personalized Recommendations */}
+        {showRecommendations && (
+          <RecommendationList
+            showFilters={true}
+            showGroups={true}
+            limit={12}
+          />
+        )}
+      </div>
 
       {/* Print-only full schedule */}
       <div className="hidden print:block mt-8">
