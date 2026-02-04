@@ -4,7 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)](https://redis.io/)
-[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)](#license)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 > Event management and visitor planning system for the Higher Education Information Day (Hochschulinformationstag) at ZSB Osnabrück.
 
@@ -371,9 +371,6 @@ npx prisma migrate dev
 | Document | Description |
 |----------|-------------|
 | [Testing Guide](docs/TESTING-GUIDE.md) | Load testing, cross-browser testing, performance |
-| [Implementation Plan](docs/implementation-plan.md) | Development roadmap and phases |
-| [Requirements Analysis](docs/requirements-analysis.md) | Detailed requirements specification |
-| [Executive Summary](docs/EXECUTIVE-SUMMARY.md) | Project overview for stakeholders |
 
 ---
 
@@ -390,7 +387,7 @@ npx prisma migrate dev
 
 ## 📄 License
 
-All rights reserved. © ZSB Osnabrück
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 

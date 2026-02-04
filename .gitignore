@@ -50,3 +50,8 @@ prisma/*.db-journal
 # Ignore screenshots in root, but allow docs/screenshots
 /screenshots/
 !docs/screenshots/
+
+# Private docs (keep locally, not in repo)
+docs/EXECUTIVE-SUMMARY.md
+docs/implementation-plan.md
+docs/requirements-analysis.md
