@@ -6,11 +6,7 @@ import { Calendar as CalendarIcon, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 
 interface DateTimePickerProps {
@@ -29,9 +25,7 @@ export function DateTimePicker({
   className,
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [time, setTime] = React.useState(
-    value ? format(value, 'HH:mm') : '09:00'
-  )
+  const [time, setTime] = React.useState(value ? format(value, 'HH:mm') : '09:00')
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -72,21 +66,11 @@ export function DateTimePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={handleDateSelect}
-          initialFocus
-        />
+        <Calendar mode="single" selected={value} onSelect={handleDateSelect} initialFocus />
         <div className="border-t p-3">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <Input
-              type="time"
-              value={time}
-              onChange={handleTimeChange}
-              className="w-auto"
-            />
+            <Input type="time" value={time} onChange={handleTimeChange} className="w-auto" />
           </div>
         </div>
       </PopoverContent>

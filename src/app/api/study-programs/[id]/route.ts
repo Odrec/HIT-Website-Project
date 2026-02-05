@@ -28,19 +28,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     })
 
     if (!program) {
-      return NextResponse.json(
-        { error: 'Study program not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Study program not found' }, { status: 404 })
     }
 
     return NextResponse.json(program)
   } catch (error) {
     console.error('Error fetching study program:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch study program' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch study program' }, { status: 500 })
   }
 }
 
@@ -52,10 +46,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -66,25 +57,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Study program not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Study program not found' }, { status: 404 })
     }
 
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Missing required field: name' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
     if (!body.institution || !['UNI', 'HOCHSCHULE', 'BOTH'].includes(body.institution)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing institution' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid or missing institution' }, { status: 400 })
     }
 
     const program = await prisma.studyProgram.update({
@@ -102,10 +84,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(program)
   } catch (error) {
     console.error('Error updating study program:', error)
-    return NextResponse.json(
-      { error: 'Failed to update study program' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update study program' }, { status: 500 })
   }
 }
 
@@ -117,10 +96,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -133,18 +109,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Study program not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Study program not found' }, { status: 404 })
     }
 
     // Check if program is used by events
     if (existing.events && existing.events.length > 0) {
       return NextResponse.json(
-        { 
+        {
           error: 'Cannot delete study program - it is used by events',
-          message: `Dieser Studiengang wird von ${existing.events.length} Veranstaltung(en) verwendet und kann nicht gelöscht werden.`
+          message: `Dieser Studiengang wird von ${existing.events.length} Veranstaltung(en) verwendet und kann nicht gelöscht werden.`,
         },
         { status: 400 }
       )
@@ -157,9 +130,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting study program:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete study program' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete study program' }, { status: 500 })
   }
 }

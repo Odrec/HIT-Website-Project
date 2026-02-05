@@ -16,7 +16,7 @@ export async function GET() {
   try {
     const cacheKey = CacheKeys.locations.all()
     const redisConnected = await isRedisConnected()
-    
+
     // Check cache first
     if (redisConnected) {
       const cached = await cacheGet<unknown[]>(cacheKey)
@@ -25,13 +25,13 @@ export async function GET() {
           headers: {
             'X-Cache': 'HIT',
             'X-Cache-Key': cacheKey,
-          }
+          },
         })
       }
     }
 
     const locations = await locationService.list()
-    
+
     // Cache the result (longer TTL since locations rarely change)
     if (redisConnected) {
       await cacheSet(cacheKey, locations, CacheTTL.LOCATIONS)
@@ -41,14 +41,11 @@ export async function GET() {
       headers: {
         'X-Cache': 'MISS',
         'X-Cache-Key': cacheKey,
-      }
+      },
     })
   } catch (error) {
     console.error('Error fetching locations:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch locations' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 })
   }
 }
 
@@ -60,20 +57,14 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const body = await request.json()
 
     // Validate required fields
     if (!body.buildingName) {
-      return NextResponse.json(
-        { error: 'Missing required field: buildingName' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: buildingName' }, { status: 400 })
     }
 
     const location = await locationService.create({
@@ -90,9 +81,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(location, { status: 201 })
   } catch (error) {
     console.error('Error creating location:', error)
-    return NextResponse.json(
-      { error: 'Failed to create location' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create location' }, { status: 500 })
   }
 }

@@ -3,7 +3,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-options'
-import { flushAllCaches, invalidateEventCaches, invalidateProgramCaches, invalidateLocationCaches } from '@/lib/cache/cache-utils'
+import {
+  flushAllCaches,
+  invalidateEventCaches,
+  invalidateProgramCaches,
+  invalidateLocationCaches,
+} from '@/lib/cache/cache-utils'
 import { isRedisConnected } from '@/lib/cache/redis'
 
 /**
@@ -14,10 +19,7 @@ export async function GET() {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const connected = await isRedisConnected()
@@ -31,10 +33,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error checking cache status:', error)
-    return NextResponse.json(
-      { error: 'Failed to check cache status' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to check cache status' }, { status: 500 })
   }
 }
 
@@ -52,20 +51,20 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     // Check if Redis is connected
     const connected = await isRedisConnected()
     if (!connected) {
-      return NextResponse.json({
-        success: false,
-        message: 'Redis is not connected. Cache operations are disabled.',
-        timestamp: new Date().toISOString(),
-      }, { status: 503 })
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Redis is not connected. Cache operations are disabled.',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 503 }
+      )
     }
 
     // Parse request body for cache type
@@ -106,9 +105,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error clearing cache:', error)
-    return NextResponse.json(
-      { error: 'Failed to clear cache' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to clear cache' }, { status: 500 })
   }
 }

@@ -116,9 +116,7 @@ export default function EditEventPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Veranstaltung nicht gefunden
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">Veranstaltung nicht gefunden</h1>
           </div>
         </div>
         <div className="rounded-lg bg-red-50 p-4 text-red-700">
@@ -171,9 +169,7 @@ export default function EditEventPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Veranstaltung bearbeiten
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Veranstaltung bearbeiten</h1>
           <p className="text-gray-500">{event.title}</p>
         </div>
       </div>
@@ -187,11 +183,7 @@ export default function EditEventPage() {
       )}
 
       {/* Form */}
-      <EventForm
-        initialData={initialData}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
+      <EventForm initialData={initialData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   )
 }

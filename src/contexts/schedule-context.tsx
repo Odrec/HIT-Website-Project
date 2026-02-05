@@ -54,12 +54,7 @@ interface ScheduleContextType {
 const STORAGE_KEY = 'hit-schedule'
 
 // Calculate overlap between two time ranges in minutes
-function calculateOverlap(
-  start1: Date,
-  end1: Date,
-  start2: Date,
-  end2: Date
-): number {
+function calculateOverlap(start1: Date, end1: Date, start2: Date, end2: Date): number {
   const overlapStart = Math.max(start1.getTime(), start2.getTime())
   const overlapEnd = Math.min(end1.getTime(), end2.getTime())
   const overlapMs = Math.max(0, overlapEnd - overlapStart)
@@ -105,10 +100,7 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
   return conflicts
 }
 
-function scheduleReducer(
-  state: ScheduleState,
-  action: ScheduleAction
-): ScheduleState {
+function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
   switch (action.type) {
     case 'LOAD_SCHEDULE': {
       const conflicts = detectConflicts(action.payload)
@@ -129,9 +121,7 @@ function scheduleReducer(
       }
     }
     case 'REMOVE_EVENT': {
-      const newItems = state.items.filter(
-        (item) => item.eventId !== action.payload
-      )
+      const newItems = state.items.filter((item) => item.eventId !== action.payload)
       const conflicts = detectConflicts(newItems)
       return {
         ...state,
@@ -174,9 +164,7 @@ const initialState: ScheduleState = {
   isLoaded: false,
 }
 
-const ScheduleContext = createContext<ScheduleContextType | undefined>(
-  undefined
-)
+const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined)
 
 interface ScheduleProviderProps {
   children: React.ReactNode
@@ -209,12 +197,8 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
             addedAt: new Date(item.addedAt),
             event: {
               ...item.event,
-              timeStart: item.event.timeStart
-                ? new Date(item.event.timeStart)
-                : undefined,
-              timeEnd: item.event.timeEnd
-                ? new Date(item.event.timeEnd)
-                : undefined,
+              timeStart: item.event.timeStart ? new Date(item.event.timeStart) : undefined,
+              timeEnd: item.event.timeEnd ? new Date(item.event.timeEnd) : undefined,
               createdAt: new Date(item.event.createdAt),
               updatedAt: new Date(item.event.updatedAt),
             },
@@ -322,11 +306,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     ]
   )
 
-  return (
-    <ScheduleContext.Provider value={value}>
-      {children}
-    </ScheduleContext.Provider>
-  )
+  return <ScheduleContext.Provider value={value}>{children}</ScheduleContext.Provider>
 }
 
 export function useSchedule() {

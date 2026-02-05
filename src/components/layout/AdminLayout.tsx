@@ -61,9 +61,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   const isAdmin = session?.user?.role === 'ADMIN'
 
-  const filteredItems = sidebarItems.filter(
-    (item) => !item.adminOnly || isAdmin
-  )
+  const filteredItems = sidebarItems.filter((item) => !item.adminOnly || isAdmin)
 
   return (
     <div className="flex min-h-screen bg-hit-gray-50">
@@ -85,8 +83,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-4">
           {filteredItems.map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== '/admin' && pathname?.startsWith(item.href))
+            const isActive =
+              pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
 
             return (
               <Link
@@ -116,9 +114,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <p className="text-sm font-medium text-hit-gray-900 truncate">
                 {session?.user?.name || 'Admin'}
               </p>
-              <p className="text-xs text-hit-gray-500 truncate">
-                {session?.user?.email}
-              </p>
+              <p className="text-xs text-hit-gray-500 truncate">{session?.user?.email}</p>
             </div>
           </div>
           <Button
@@ -209,9 +205,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             Zurück zur Website
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-hit-gray-600">
-              {session?.user?.name}
-            </span>
+            <span className="text-sm text-hit-gray-600">{session?.user?.name}</span>
           </div>
         </header>
 

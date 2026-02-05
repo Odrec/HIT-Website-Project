@@ -14,10 +14,7 @@ export async function GET() {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const users = await prisma.user.findMany({
@@ -29,19 +26,13 @@ export async function GET() {
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: [
-        { role: 'asc' },
-        { email: 'asc' },
-      ],
+      orderBy: [{ role: 'asc' }, { email: 'asc' }],
     })
 
     return NextResponse.json(users)
   } catch (error) {
     console.error('Error fetching users:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
   }
 }
 
@@ -53,41 +44,26 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const body = await request.json()
 
     // Validate required fields
     if (!body.email) {
-      return NextResponse.json(
-        { error: 'Missing required field: email' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: email' }, { status: 400 })
     }
 
     if (!body.password) {
-      return NextResponse.json(
-        { error: 'Missing required field: password' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: password' }, { status: 400 })
     }
 
     if (body.password.length < 8) {
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
     if (!body.role || !['ADMIN', 'ORGANIZER', 'PUBLIC'].includes(body.role)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing role' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid or missing role' }, { status: 400 })
     }
 
     // Check if email is already taken
@@ -124,9 +100,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(user, { status: 201 })
   } catch (error) {
     console.error('Error creating user:', error)
-    return NextResponse.json(
-      { error: 'Failed to create user' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
   }
 }

@@ -102,7 +102,7 @@ export default function PublicEventsPage() {
       const params = new URLSearchParams()
       params.set('page', String(page))
       params.set('pageSize', String(pageSize))
-      
+
       if (debouncedSearch) params.set('search', debouncedSearch)
       if (filters.eventType) params.set('eventType', filters.eventType)
       if (filters.institution) params.set('institution', filters.institution)
@@ -114,7 +114,7 @@ export default function PublicEventsPage() {
 
       const response = await fetch(`/api/events/public?${params.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch events')
-      
+
       const data = await response.json()
       setEvents(data.events)
       setTotalEvents(data.total)
@@ -163,11 +163,11 @@ export default function PublicEventsPage() {
     setPage(1)
   }
 
-  const hasActiveFilters = 
-    filters.eventType || 
-    filters.institution || 
-    filters.studyProgramId || 
-    filters.timeFrom || 
+  const hasActiveFilters =
+    filters.eventType ||
+    filters.institution ||
+    filters.studyProgramId ||
+    filters.timeFrom ||
     filters.timeTo ||
     debouncedSearch
 
@@ -177,9 +177,7 @@ export default function PublicEventsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-hit-gray-900">
-          Veranstaltungen
-        </h1>
+        <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
         <p className="mt-2 text-hit-gray-600">
           Entdecken Sie alle Veranstaltungen des Hochschulinformationstags 2026
         </p>
@@ -223,7 +221,9 @@ export default function PublicEventsPage() {
               onClick={() => setViewMode('list')}
               className={cn(
                 'rounded-md p-2 transition-colors',
-                viewMode === 'list' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700'
+                viewMode === 'list'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
               )}
               aria-label="Listenansicht"
             >
@@ -233,7 +233,9 @@ export default function PublicEventsPage() {
               onClick={() => setViewMode('grid')}
               className={cn(
                 'rounded-md p-2 transition-colors',
-                viewMode === 'grid' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700'
+                viewMode === 'grid'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
               )}
               aria-label="Kachelansicht"
             >
@@ -243,7 +245,9 @@ export default function PublicEventsPage() {
               onClick={() => setViewMode('calendar')}
               className={cn(
                 'rounded-md p-2 transition-colors',
-                viewMode === 'calendar' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700'
+                viewMode === 'calendar'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
               )}
               aria-label="Kalenderansicht"
             >
@@ -275,11 +279,7 @@ export default function PublicEventsPage() {
       {/* Filters Panel */}
       {showFilters && (
         <div className="mb-6">
-          <EventFilters
-            filters={filters}
-            onChange={handleFilterChange}
-            onClear={clearFilters}
-          />
+          <EventFilters filters={filters} onChange={handleFilterChange} onClear={clearFilters} />
         </div>
       )}
 
@@ -332,11 +332,7 @@ export default function PublicEventsPage() {
             )}
           >
             {events.map((event) => (
-              <EventCard 
-                key={event.id} 
-                event={event} 
-                viewMode={viewMode}
-              />
+              <EventCard key={event.id} event={event} viewMode={viewMode} />
             ))}
           </div>
 

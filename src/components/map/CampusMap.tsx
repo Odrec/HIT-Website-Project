@@ -12,26 +12,15 @@ import type {
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamic import for Leaflet (no SSR)
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-)
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-)
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-)
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-)
-const Polyline = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Polyline),
-  { ssr: false }
-)
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
+  ssr: false,
+})
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
+  ssr: false,
+})
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false })
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false })
+const Polyline = dynamic(() => import('react-leaflet').then((mod) => mod.Polyline), { ssr: false })
 
 interface CampusMapProps {
   buildings?: BuildingInfo[]
@@ -73,7 +62,8 @@ export default function CampusMap({
       // Fix for default marker icons
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconRetinaUrl:
+          'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
       })
@@ -92,19 +82,14 @@ export default function CampusMap({
   let center = DEFAULT_CENTER
   if (route && route.waypoints.length > 0) {
     const avgLat =
-      route.waypoints.reduce((sum, wp) => sum + wp.coordinates.latitude, 0) /
-      route.waypoints.length
+      route.waypoints.reduce((sum, wp) => sum + wp.coordinates.latitude, 0) / route.waypoints.length
     const avgLng =
       route.waypoints.reduce((sum, wp) => sum + wp.coordinates.longitude, 0) /
       route.waypoints.length
     center = [avgLat, avgLng]
   } else if (buildings.length > 0) {
-    const avgLat =
-      buildings.reduce((sum, b) => sum + b.coordinates.latitude, 0) /
-      buildings.length
-    const avgLng =
-      buildings.reduce((sum, b) => sum + b.coordinates.longitude, 0) /
-      buildings.length
+    const avgLat = buildings.reduce((sum, b) => sum + b.coordinates.latitude, 0) / buildings.length
+    const avgLng = buildings.reduce((sum, b) => sum + b.coordinates.longitude, 0) / buildings.length
     center = [avgLat, avgLng]
   }
 
@@ -174,10 +159,7 @@ export default function CampusMap({
             buildings.map((building) => (
               <Marker
                 key={building.id}
-                position={[
-                  building.coordinates.latitude,
-                  building.coordinates.longitude,
-                ]}
+                position={[building.coordinates.latitude, building.coordinates.longitude]}
                 icon={buildingIcon}
                 eventHandlers={{
                   click: () => onBuildingClick?.(building),
@@ -196,19 +178,19 @@ export default function CampusMap({
                           building.campus === 'schloss'
                             ? 'bg-purple-100 text-purple-800'
                             : building.campus === 'westerberg'
-                            ? 'bg-blue-100 text-blue-800'
-                            : building.campus === 'caprivi'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-orange-100 text-orange-800'
+                              ? 'bg-blue-100 text-blue-800'
+                              : building.campus === 'caprivi'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-orange-100 text-orange-800'
                         }`}
                       >
                         {building.campus === 'schloss'
                           ? 'Schloss'
                           : building.campus === 'westerberg'
-                          ? 'Westerberg'
-                          : building.campus === 'caprivi'
-                          ? 'Caprivi (HS)'
-                          : 'Haste (HS)'}
+                            ? 'Westerberg'
+                            : building.campus === 'caprivi'
+                              ? 'Caprivi (HS)'
+                              : 'Haste (HS)'}
                       </span>
                       {building.hasAccessibility && (
                         <span className="text-green-600" title="Barrierefrei">
@@ -231,10 +213,7 @@ export default function CampusMap({
             route.waypoints.map((waypoint, index) => (
               <Marker
                 key={`wp-${waypoint.id}-${index}`}
-                position={[
-                  waypoint.coordinates.latitude,
-                  waypoint.coordinates.longitude,
-                ]}
+                position={[waypoint.coordinates.latitude, waypoint.coordinates.longitude]}
                 icon={eventIcon}
               >
                 <Popup>
@@ -275,7 +254,7 @@ export default function CampusMap({
                 const analysis = travelAnalyses[index]
                 const hasWarning = analysis && analysis.status !== 'ok'
                 const segmentColor = hasWarning ? '#dc2626' : '#2563eb' // Red for warnings, blue for ok
-                
+
                 return (
                   <Polyline
                     key={`segment-${index}`}

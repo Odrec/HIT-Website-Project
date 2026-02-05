@@ -93,10 +93,7 @@ export function ScheduleEventCard({
         {/* Header with badges */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex flex-wrap gap-1">
-            <Badge
-              variant="outline"
-              className={cn('text-xs', eventTypeColors[event.eventType])}
-            >
+            <Badge variant="outline" className={cn('text-xs', eventTypeColors[event.eventType])}>
               {eventTypeLabels[event.eventType]}
             </Badge>
             <Badge
@@ -106,7 +103,7 @@ export function ScheduleEventCard({
               {institutionLabels[event.institution]}
             </Badge>
           </div>
-          
+
           {/* Priority indicator */}
           <div className="flex items-center gap-1">
             {hasConflict && (
@@ -114,9 +111,7 @@ export function ScheduleEventCard({
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
               </span>
             )}
-            <span className="text-xs font-medium bg-muted px-1.5 py-0.5 rounded">
-              P{priority}
-            </span>
+            <span className="text-xs font-medium bg-muted px-1.5 py-0.5 rounded">P{priority}</span>
           </div>
         </div>
 
@@ -125,9 +120,7 @@ export function ScheduleEventCard({
           href={`/events/${event.id}`}
           className="group inline-flex items-center gap-1 hover:underline"
         >
-          <h4 className={cn('font-semibold', compact ? 'text-sm' : 'text-base')}>
-            {event.title}
-          </h4>
+          <h4 className={cn('font-semibold', compact ? 'text-sm' : 'text-base')}>{event.title}</h4>
           <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
 
@@ -141,9 +134,7 @@ export function ScheduleEventCard({
                   {format(new Date(event.timeStart), 'EEEE, d. MMMM', { locale: de })}
                   {' • '}
                   {format(new Date(event.timeStart), 'HH:mm')}
-                  {event.timeEnd && (
-                    <> - {format(new Date(event.timeEnd), 'HH:mm')}</>
-                  )}
+                  {event.timeEnd && <> - {format(new Date(event.timeEnd), 'HH:mm')}</>}
                 </span>
               </div>
             )}

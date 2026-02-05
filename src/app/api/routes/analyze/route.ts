@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
     const { scheduledEventIds, settings } = body
 
     if (!scheduledEventIds || !Array.isArray(scheduledEventIds)) {
-      return NextResponse.json(
-        { error: 'scheduledEventIds array is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'scheduledEventIds array is required' }, { status: 400 })
     }
 
     if (scheduledEventIds.length < 2) {
@@ -60,9 +57,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Travel analysis error:', error)
-    return NextResponse.json(
-      { error: 'Failed to analyze travel times' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to analyze travel times' }, { status: 500 })
   }
 }

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     // Check cache first (if Redis is available)
     const cacheKey = generateCacheKey(institution || undefined, grouped)
     const redisConnected = await isRedisConnected()
-    
+
     if (redisConnected) {
       const cached = await cacheGet<unknown>(cacheKey)
       if (cached) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'X-Cache': 'HIT',
             'X-Cache-Key': cacheKey,
-          }
+          },
         })
       }
     }
@@ -52,9 +52,7 @@ export async function GET(request: NextRequest) {
     if (grouped) {
       result = await studyProgramService.getGroupedByCluster(institution)
     } else {
-      result = await studyProgramService.list(
-        institution ? { institution } : undefined
-      )
+      result = await studyProgramService.list(institution ? { institution } : undefined)
     }
 
     // Cache the result
@@ -66,14 +64,11 @@ export async function GET(request: NextRequest) {
       headers: {
         'X-Cache': 'MISS',
         'X-Cache-Key': cacheKey,
-      }
+      },
     })
   } catch (error) {
     console.error('Error fetching study programs:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch study programs' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch study programs' }, { status: 500 })
   }
 }
 
@@ -85,27 +80,18 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const body = await request.json()
 
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Missing required field: name' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
     if (!body.institution || !['UNI', 'HOCHSCHULE', 'BOTH'].includes(body.institution)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing institution' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid or missing institution' }, { status: 400 })
     }
 
     const program = await prisma.studyProgram.create({
@@ -125,9 +111,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(program, { status: 201 })
   } catch (error) {
     console.error('Error creating study program:', error)
-    return NextResponse.json(
-      { error: 'Failed to create study program' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create study program' }, { status: 500 })
   }
 }

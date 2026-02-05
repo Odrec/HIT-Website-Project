@@ -24,12 +24,7 @@ const eventPopularityStore: Map<string, EventPopularity> = new Map()
 /**
  * Calculate time overlap between two events in minutes
  */
-function calculateOverlap(
-  start1: Date,
-  end1: Date,
-  start2: Date,
-  end2: Date
-): number {
+function calculateOverlap(start1: Date, end1: Date, start2: Date, end2: Date): number {
   const overlapStart = Math.max(start1.getTime(), start2.getTime())
   const overlapEnd = Math.min(end1.getTime(), end2.getTime())
   const overlapMs = Math.max(0, overlapEnd - overlapStart)
@@ -41,12 +36,12 @@ function calculateOverlap(
  */
 function eventFitsTimeSlot(event: Event, slot: TimeSlot): boolean {
   if (!event.timeStart || !event.timeEnd) return false
-  
+
   const eventStart = new Date(event.timeStart).getTime()
   const eventEnd = new Date(event.timeEnd).getTime()
   const slotStart = new Date(slot.start).getTime()
   const slotEnd = new Date(slot.end).getTime()
-  
+
   return eventStart >= slotStart && eventEnd <= slotEnd
 }
 
@@ -57,7 +52,7 @@ function eventFitsTimeSlot(event: Event, slot: TimeSlot): boolean {
 function estimateTravelTime(location1?: string, location2?: string): number {
   if (!location1 || !location2) return 0
   if (location1 === location2) return 0
-  
+
   // Simplified: assume 5-15 minutes between different buildings
   // Same building = 2 minutes
   if (location1.split(' ')[0] === location2.split(' ')[0]) {
@@ -86,10 +81,29 @@ function mapPrismaEvent(prismaEvent: {
   locationId: string | null
   createdAt: Date
   updatedAt: Date
-  location?: { id: string; buildingName: string; roomNumber: string | null; address: string | null; latitude: number | null; longitude: number | null } | null
-  lecturers?: Array<{ id: string; firstName: string; lastName: string; title: string | null; eventId: string }>
+  location?: {
+    id: string
+    buildingName: string
+    roomNumber: string | null
+    address: string | null
+    latitude: number | null
+    longitude: number | null
+  } | null
+  lecturers?: Array<{
+    id: string
+    firstName: string
+    lastName: string
+    title: string | null
+    eventId: string
+  }>
   studyPrograms?: Array<{ studyProgram: { id: string; name: string; institution: string } }>
-  organizers?: Array<{ id: string; email: string; phone: string | null; internalOnly: boolean; eventId: string }>
+  organizers?: Array<{
+    id: string
+    email: string
+    phone: string | null
+    internalOnly: boolean
+    eventId: string
+  }>
 }): Event {
   return {
     id: prismaEvent.id,
@@ -106,27 +120,29 @@ function mapPrismaEvent(prismaEvent: {
     photoUrl: prismaEvent.photoUrl ?? undefined,
     institution: Institution[prismaEvent.institution as keyof typeof Institution],
     locationId: prismaEvent.locationId ?? undefined,
-    location: prismaEvent.location ? {
-      id: prismaEvent.location.id,
-      buildingName: prismaEvent.location.buildingName,
-      roomNumber: prismaEvent.location.roomNumber ?? undefined,
-      address: prismaEvent.location.address ?? undefined,
-      latitude: prismaEvent.location.latitude ?? undefined,
-      longitude: prismaEvent.location.longitude ?? undefined,
-    } : undefined,
-    lecturers: prismaEvent.lecturers?.map(l => ({
+    location: prismaEvent.location
+      ? {
+          id: prismaEvent.location.id,
+          buildingName: prismaEvent.location.buildingName,
+          roomNumber: prismaEvent.location.roomNumber ?? undefined,
+          address: prismaEvent.location.address ?? undefined,
+          latitude: prismaEvent.location.latitude ?? undefined,
+          longitude: prismaEvent.location.longitude ?? undefined,
+        }
+      : undefined,
+    lecturers: prismaEvent.lecturers?.map((l) => ({
       id: l.id,
       eventId: l.eventId,
       firstName: l.firstName,
       lastName: l.lastName,
       title: l.title ?? undefined,
     })),
-    studyPrograms: prismaEvent.studyPrograms?.map(sp => ({
+    studyPrograms: prismaEvent.studyPrograms?.map((sp) => ({
       id: sp.studyProgram.id,
       name: sp.studyProgram.name,
       institution: Institution[sp.studyProgram.institution as keyof typeof Institution],
     })),
-    organizers: prismaEvent.organizers?.map(o => ({
+    organizers: prismaEvent.organizers?.map((o) => ({
       id: o.id,
       eventId: o.eventId,
       email: o.email,
@@ -173,34 +189,31 @@ export const recommendationService = {
     // Build query to fetch candidate events
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {}
-    
+
     // Exclude already scheduled events
     if (scheduledEventIds.length > 0) {
       where.id = { notIn: scheduledEventIds }
     }
-    
+
     // Exclude dismissed events
     if (dismissedEventIds.length > 0) {
-      where.id = where.id 
+      where.id = where.id
         ? { ...where.id, notIn: [...(where.id.notIn || []), ...dismissedEventIds] }
         : { notIn: dismissedEventIds }
     }
-    
+
     // Filter by date range
     if (startDate || endDate) {
       where.timeStart = {}
       if (startDate) where.timeStart.gte = startDate
       if (endDate) where.timeStart.lte = endDate
     }
-    
+
     // Filter by institution
     if (institution && institution !== 'BOTH') {
-      where.OR = [
-        { institution: institution },
-        { institution: 'BOTH' },
-      ]
+      where.OR = [{ institution: institution }, { institution: 'BOTH' }]
     }
-    
+
     // Filter by event types
     if (eventTypes && eventTypes.length > 0) {
       where.eventType = { in: eventTypes }
@@ -222,12 +235,13 @@ export const recommendationService = {
     })
 
     // Fetch scheduled events for conflict detection
-    const scheduledEvents = scheduledEventIds.length > 0
-      ? await prisma.event.findMany({
-          where: { id: { in: scheduledEventIds } },
-          include: { location: true },
-        })
-      : []
+    const scheduledEvents =
+      scheduledEventIds.length > 0
+        ? await prisma.event.findMany({
+            where: { id: { in: scheduledEventIds } },
+            include: { location: true },
+          })
+        : []
 
     // Score each event
     const recommendations: EventRecommendation[] = []
@@ -238,9 +252,9 @@ export const recommendationService = {
       let score = 0
 
       // 1. Study program matching (highest weight)
-      const eventProgramIds = prismaEvent.studyPrograms.map(sp => sp.studyProgramId)
-      const matchingPrograms = eventProgramIds.filter(id => studyProgramIds.includes(id))
-      
+      const eventProgramIds = prismaEvent.studyPrograms.map((sp) => sp.studyProgramId)
+      const matchingPrograms = eventProgramIds.filter((id) => studyProgramIds.includes(id))
+
       if (matchingPrograms.length > 0) {
         const programScore = Math.min(40, matchingPrograms.length * 20)
         score += programScore
@@ -263,7 +277,7 @@ export const recommendationService = {
 
       // 3. Time slot fitting
       if (availableTimeSlots.length > 0 && event.timeStart && event.timeEnd) {
-        const fitsSlot = availableTimeSlots.some(slot => eventFitsTimeSlot(event, slot))
+        const fitsSlot = availableTimeSlots.some((slot) => eventFitsTimeSlot(event, slot))
         if (fitsSlot) {
           score += 15
           reasons.push({
@@ -307,7 +321,7 @@ export const recommendationService = {
       // 5. Popularity score
       const popularity = eventPopularityStore.get(event.id)
       const isHighDemand = popularity ? popularity.popularityScore > 70 : false
-      
+
       if (isHighDemand) {
         score += 10
         reasons.push({
@@ -318,7 +332,7 @@ export const recommendationService = {
       }
 
       // 6. Diversity bonus (event types not yet in schedule)
-      const scheduledEventTypes = scheduledEvents.map(e => e.eventType)
+      const scheduledEventTypes = scheduledEvents.map((e) => e.eventType)
       if (!scheduledEventTypes.includes(event.eventType)) {
         score += 5
         reasons.push({
@@ -333,21 +347,19 @@ export const recommendationService = {
       if (scheduledEvents.length > 0 && event.timeStart) {
         const eventStartTime = new Date(event.timeStart).getTime()
         const previousEvent = scheduledEvents
-          .filter(e => e.timeEnd && new Date(e.timeEnd).getTime() < eventStartTime)
-          .sort((a, b) => 
-            new Date(b.timeEnd!).getTime() - new Date(a.timeEnd!).getTime()
-          )[0]
+          .filter((e) => e.timeEnd && new Date(e.timeEnd).getTime() < eventStartTime)
+          .sort((a, b) => new Date(b.timeEnd!).getTime() - new Date(a.timeEnd!).getTime())[0]
 
         if (previousEvent) {
           travelTimeFromPrevious = estimateTravelTime(
             previousEvent.location?.buildingName,
             event.location?.buildingName
           )
-          
+
           const timeBetween = previousEvent.timeEnd
             ? (eventStartTime - new Date(previousEvent.timeEnd).getTime()) / (1000 * 60)
             : 0
-          
+
           if (travelTimeFromPrevious <= timeBetween && travelTimeFromPrevious <= maxTravelTime) {
             score += 5
             reasons.push({
@@ -420,7 +432,7 @@ export const recommendationService = {
         byProgram[program.name].push(rec)
       }
     }
-    
+
     for (const programName of Object.keys(byProgram)) {
       const recs = byProgram[programName]
       if (recs.length >= 2) {
@@ -428,7 +440,8 @@ export const recommendationService = {
           category: programName,
           categoryType: 'study_program',
           recommendations: recs,
-          averageScore: recs.reduce((sum: number, r: EventRecommendation) => sum + r.score, 0) / recs.length,
+          averageScore:
+            recs.reduce((sum: number, r: EventRecommendation) => sum + r.score, 0) / recs.length,
         })
       }
     }
@@ -442,7 +455,7 @@ export const recommendationService = {
       }
       byType[type].push(rec)
     }
-    
+
     const eventTypeLabels: Record<string, string> = {
       VORTRAG: 'Vorträge',
       LABORFUEHRUNG: 'Laborführungen',
@@ -451,7 +464,7 @@ export const recommendationService = {
       LINK: 'Online-Links',
       INFOSTAND: 'Infostände',
     }
-    
+
     for (const type of Object.keys(byType)) {
       const recs = byType[type]
       if (recs.length >= 2) {
@@ -459,7 +472,8 @@ export const recommendationService = {
           category: eventTypeLabels[type] || type,
           categoryType: 'event_type',
           recommendations: recs,
-          averageScore: recs.reduce((sum: number, r: EventRecommendation) => sum + r.score, 0) / recs.length,
+          averageScore:
+            recs.reduce((sum: number, r: EventRecommendation) => sum + r.score, 0) / recs.length,
         })
       }
     }
@@ -484,11 +498,12 @@ export const recommendationService = {
       where: { id: { in: eventIds } },
     })
 
-    const scheduledEvents = scheduledEventIds.length > 0
-      ? await prisma.event.findMany({
-          where: { id: { in: scheduledEventIds } },
-        })
-      : []
+    const scheduledEvents =
+      scheduledEventIds.length > 0
+        ? await prisma.event.findMany({
+            where: { id: { in: scheduledEventIds } },
+          })
+        : []
 
     const addedEventIds: string[] = []
     const skippedEventIds: string[] = []
@@ -497,9 +512,12 @@ export const recommendationService = {
     for (const event of events) {
       // Check for conflicts with existing schedule
       let hasConflict = false
-      
+
       if (event.timeStart && event.timeEnd) {
-        for (const scheduled of [...scheduledEvents, ...events.filter(e => addedEventIds.includes(e.id))]) {
+        for (const scheduled of [
+          ...scheduledEvents,
+          ...events.filter((e) => addedEventIds.includes(e.id)),
+        ]) {
           if (scheduled.id === event.id) continue
           if (scheduled.timeStart && scheduled.timeEnd) {
             const overlap = calculateOverlap(
@@ -567,13 +585,19 @@ export const recommendationService = {
     })
 
     // Detect conflicts
-    const conflicts: { event1Id: string; event1Title: string; event2Id: string; event2Title: string; overlapMinutes: number }[] = []
-    
+    const conflicts: {
+      event1Id: string
+      event1Title: string
+      event2Id: string
+      event2Title: string
+      overlapMinutes: number
+    }[] = []
+
     for (let i = 0; i < events.length; i++) {
       for (let j = i + 1; j < events.length; j++) {
         const e1 = events[i]
         const e2 = events[j]
-        
+
         if (e1.timeStart && e1.timeEnd && e2.timeStart && e2.timeEnd) {
           const overlap = calculateOverlap(e1.timeStart, e1.timeEnd, e2.timeStart, e2.timeEnd)
           if (overlap > 0) {
@@ -592,11 +616,11 @@ export const recommendationService = {
     // Find gaps between events - properly merge overlapping periods first
     const gaps: TimeSlot[] = []
     const eventsWithTime = events
-      .filter(e => e.timeStart && e.timeEnd)
-      .map(e => ({
+      .filter((e) => e.timeStart && e.timeEnd)
+      .map((e) => ({
         start: new Date(e.timeStart!).getTime(),
         end: new Date(e.timeEnd!).getTime(),
-        date: new Date(e.timeStart!).toDateString()
+        date: new Date(e.timeStart!).toDateString(),
       }))
       .sort((a, b) => a.start - b.start)
 
@@ -612,14 +636,14 @@ export const recommendationService = {
     // For each day, merge overlapping periods and find gaps
     for (const [day, dayEvents] of Object.entries(eventsByDay)) {
       if (dayEvents.length < 2) continue // Need at least 2 events to have a gap
-      
+
       // Sort by start time
       dayEvents.sort((a, b) => a.start - b.start)
-      
+
       // Merge overlapping periods
       const mergedPeriods: { start: number; end: number }[] = []
       let currentPeriod = { ...dayEvents[0] }
-      
+
       for (let i = 1; i < dayEvents.length; i++) {
         const nextEvent = dayEvents[i]
         if (nextEvent.start <= currentPeriod.end) {
@@ -632,13 +656,13 @@ export const recommendationService = {
         }
       }
       mergedPeriods.push(currentPeriod)
-      
+
       // Now find gaps between merged periods
       for (let i = 0; i < mergedPeriods.length - 1; i++) {
         const gapStart = new Date(mergedPeriods[i].end)
         const gapEnd = new Date(mergedPeriods[i + 1].start)
         const gapMinutes = (gapEnd.getTime() - gapStart.getTime()) / (1000 * 60)
-        
+
         // Only count gaps of 30+ minutes but less than 8 hours
         if (gapMinutes >= 30 && gapMinutes <= 480) {
           gaps.push({
@@ -658,16 +682,16 @@ export const recommendationService = {
     for (const event of events) {
       // Event types
       eventTypeDistribution[event.eventType] = (eventTypeDistribution[event.eventType] || 0) + 1
-      
+
       // Study programs
       for (const sp of event.studyPrograms) {
-        studyProgramDistribution[sp.studyProgram.name] = 
+        studyProgramDistribution[sp.studyProgram.name] =
           (studyProgramDistribution[sp.studyProgram.name] || 0) + 1
       }
-      
+
       // Locations
       if (event.location) {
-        locationDistribution[event.location.buildingName] = 
+        locationDistribution[event.location.buildingName] =
           (locationDistribution[event.location.buildingName] || 0) + 1
       }
     }
@@ -691,7 +715,8 @@ export const recommendationService = {
 
     // Suggest filling gaps with recommendations
     for (const gap of gaps) {
-      if (gap.durationMinutes >= 45) { // Enough time for another event
+      if (gap.durationMinutes >= 45) {
+        // Enough time for another event
         optimizations.push({
           type: 'fill_gap',
           description: `Lücke von ${gap.durationMinutes} Minuten gefunden`,
@@ -757,7 +782,10 @@ export const recommendationService = {
     const existing = eventPopularityStore.get(eventId)
     if (existing) {
       existing.viewCount += 1
-      existing.popularityScore = this.calculatePopularityScore(existing.viewCount, existing.addToScheduleCount)
+      existing.popularityScore = this.calculatePopularityScore(
+        existing.viewCount,
+        existing.addToScheduleCount
+      )
     } else {
       eventPopularityStore.set(eventId, {
         eventId,
@@ -776,7 +804,10 @@ export const recommendationService = {
     const existing = eventPopularityStore.get(eventId)
     if (existing) {
       existing.addToScheduleCount += 1
-      existing.popularityScore = this.calculatePopularityScore(existing.viewCount, existing.addToScheduleCount)
+      existing.popularityScore = this.calculatePopularityScore(
+        existing.viewCount,
+        existing.addToScheduleCount
+      )
     } else {
       eventPopularityStore.set(eventId, {
         eventId,
@@ -810,7 +841,7 @@ export const recommendationService = {
       return []
     }
 
-    const eventIds = sortedPopularity.map(p => p.eventId)
+    const eventIds = sortedPopularity.map((p) => p.eventId)
     const events = await prisma.event.findMany({
       where: { id: { in: eventIds } },
       include: {
@@ -822,17 +853,19 @@ export const recommendationService = {
       },
     })
 
-    return events.map(prismaEvent => {
+    return events.map((prismaEvent) => {
       const event = mapPrismaEvent(prismaEvent)
       const popularity = eventPopularityStore.get(event.id)
       return {
         event,
         score: popularity?.popularityScore || 50,
-        reasons: [{
-          type: 'popularity' as const,
-          description: `${popularity?.addToScheduleCount || 0} Mal zum Zeitplan hinzugefügt`,
-          weight: 1,
-        }],
+        reasons: [
+          {
+            type: 'popularity' as const,
+            description: `${popularity?.addToScheduleCount || 0} Mal zum Zeitplan hinzugefügt`,
+            weight: 1,
+          },
+        ],
         conflictsWithSchedule: false,
         conflictingEventIds: [],
         isHighDemand: (popularity?.popularityScore || 0) > 70,
@@ -851,8 +884,8 @@ export const recommendationService = {
     if (timeSlots.length === 0) return []
 
     // Find the overall time range
-    const minStart = new Date(Math.min(...timeSlots.map(s => new Date(s.start).getTime())))
-    const maxEnd = new Date(Math.max(...timeSlots.map(s => new Date(s.end).getTime())))
+    const minStart = new Date(Math.min(...timeSlots.map((s) => new Date(s.start).getTime())))
+    const maxEnd = new Date(Math.max(...timeSlots.map((s) => new Date(s.end).getTime())))
 
     const events = await prisma.event.findMany({
       where: {
@@ -873,21 +906,23 @@ export const recommendationService = {
 
     for (const prismaEvent of events) {
       const event = mapPrismaEvent(prismaEvent)
-      
+
       if (!event.timeStart || !event.timeEnd) continue
 
       // Check if event fits any slot
-      const fittingSlot = timeSlots.find(slot => eventFitsTimeSlot(event, slot))
-      
+      const fittingSlot = timeSlots.find((slot) => eventFitsTimeSlot(event, slot))
+
       if (fittingSlot) {
         recommendations.push({
           event,
           score: 75, // High score for time fit
-          reasons: [{
-            type: 'time_fit',
-            description: 'Passt perfekt in deinen verfügbaren Zeitrahmen',
-            weight: 0.75,
-          }],
+          reasons: [
+            {
+              type: 'time_fit',
+              description: 'Passt perfekt in deinen verfügbaren Zeitrahmen',
+              weight: 0.75,
+            },
+          ],
           conflictsWithSchedule: false,
           conflictingEventIds: [],
           isHighDemand: false,

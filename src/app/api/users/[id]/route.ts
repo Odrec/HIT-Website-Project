@@ -18,10 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -38,19 +35,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json(user)
   } catch (error) {
     console.error('Error fetching user:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
   }
 }
 
@@ -62,10 +53,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -76,25 +64,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Validate required fields
     if (!body.email) {
-      return NextResponse.json(
-        { error: 'Missing required field: email' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: email' }, { status: 400 })
     }
 
     if (!body.role || !['ADMIN', 'ORGANIZER', 'PUBLIC'].includes(body.role)) {
-      return NextResponse.json(
-        { error: 'Invalid or missing role' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid or missing role' }, { status: 400 })
     }
 
     // Check if email is already taken by another user
@@ -104,7 +83,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       })
       if (emailTaken) {
         return NextResponse.json(
-          { error: 'Email already in use', message: 'Diese E-Mail-Adresse wird bereits verwendet.' },
+          {
+            error: 'Email already in use',
+            message: 'Diese E-Mail-Adresse wird bereits verwendet.',
+          },
           { status: 400 }
         )
       }
@@ -149,10 +131,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(user)
   } catch (error) {
     console.error('Error updating user:', error)
-    return NextResponse.json(
-      { error: 'Failed to update user' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 })
   }
 }
 
@@ -164,10 +143,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -177,16 +153,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Prevent deleting yourself
     if (session.user.id === id) {
       return NextResponse.json(
-        { error: 'Cannot delete yourself', message: 'Sie können Ihren eigenen Benutzer nicht löschen.' },
+        {
+          error: 'Cannot delete yourself',
+          message: 'Sie können Ihren eigenen Benutzer nicht löschen.',
+        },
         { status: 400 }
       )
     }
@@ -198,9 +174,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting user:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete user' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 })
   }
 }

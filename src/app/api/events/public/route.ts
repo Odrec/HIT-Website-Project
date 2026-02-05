@@ -26,11 +26,11 @@ function generateCacheKey(searchParams: URLSearchParams): string {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    
+
     // Check cache first (if Redis is available)
     const cacheKey = generateCacheKey(searchParams)
     const redisConnected = await isRedisConnected()
-    
+
     if (redisConnected) {
       const cached = await cacheGet<{
         events: unknown[]
@@ -39,14 +39,14 @@ export async function GET(request: NextRequest) {
         pageSize: number
         totalPages: number
       }>(cacheKey)
-      
+
       if (cached) {
         // Return cached result with cache header
         return NextResponse.json(cached, {
           headers: {
             'X-Cache': 'HIT',
             'X-Cache-Key': cacheKey,
-          }
+          },
         })
       }
     }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const studyProgramId = searchParams.get('studyProgramId') || undefined
     const timeFrom = searchParams.get('timeFrom') || undefined
     const timeTo = searchParams.get('timeTo') || undefined
-    
+
     // Sort options
     const sortBy = searchParams.get('sortBy') || 'timeStart'
     const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc'
@@ -85,24 +85,27 @@ export async function GET(request: NextRequest) {
       } else {
         // Show events for the specific institution OR both
         const mappedInstitution = mapInstitution(institution)
-        where.OR = [
-          { institution: mappedInstitution },
-          { institution: 'BOTH' }
-        ]
+        where.OR = [{ institution: mappedInstitution }, { institution: 'BOTH' }]
       }
     }
 
     // Event type filter
     if (eventType) {
-      where.eventType = eventType as 'VORTRAG' | 'LABORFUEHRUNG' | 'RUNDGANG' | 'WORKSHOP' | 'LINK' | 'INFOSTAND'
+      where.eventType = eventType as
+        | 'VORTRAG'
+        | 'LABORFUEHRUNG'
+        | 'RUNDGANG'
+        | 'WORKSHOP'
+        | 'LINK'
+        | 'INFOSTAND'
     }
 
     // Study program filter
     if (studyProgramId) {
       where.studyPrograms = {
         some: {
-          studyProgramId: studyProgramId
-        }
+          studyProgramId: studyProgramId,
+        },
       }
     }
 
@@ -132,10 +135,10 @@ export async function GET(request: NextRequest) {
               OR: [
                 { firstName: { contains: searchTerms, mode: 'insensitive' } },
                 { lastName: { contains: searchTerms, mode: 'insensitive' } },
-              ]
-            }
-          }
-        }
+              ],
+            },
+          },
+        },
       ]
     }
 
@@ -143,8 +146,14 @@ export async function GET(request: NextRequest) {
     type EventSortField = 'timeStart' | 'title' | 'eventType' | 'institution' | 'createdAt'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orderBy: any = {}
-    const validSortFields: EventSortField[] = ['timeStart', 'title', 'eventType', 'institution', 'createdAt']
-    
+    const validSortFields: EventSortField[] = [
+      'timeStart',
+      'title',
+      'eventType',
+      'institution',
+      'createdAt',
+    ]
+
     if (validSortFields.includes(sortBy as EventSortField)) {
       orderBy[sortBy as EventSortField] = sortOrder
     } else {
@@ -168,7 +177,7 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               title: true,
-            }
+            },
           },
           studyPrograms: {
             include: {
@@ -177,23 +186,23 @@ export async function GET(request: NextRequest) {
                   id: true,
                   name: true,
                   institution: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           organizers: {
             where: {
-              internalOnly: false
+              internalOnly: false,
             },
             select: {
               id: true,
               email: true,
               phone: true,
-            }
-          }
-        }
+            },
+          },
+        },
       }),
-      prisma.event.count({ where })
+      prisma.event.count({ where }),
     ])
 
     // Map institution from Prisma enum back to frontend value
@@ -218,12 +227,14 @@ export async function GET(request: NextRequest) {
       additionalInfo: event.additionalInfo,
       photoUrl: event.photoUrl,
       institution: mapInstitutionToFrontend(event.institution),
-      location: event.location ? {
-        id: event.location.id,
-        buildingName: event.location.buildingName,
-        roomNumber: event.location.roomNumber,
-        address: event.location.address,
-      } : null,
+      location: event.location
+        ? {
+            id: event.location.id,
+            buildingName: event.location.buildingName,
+            roomNumber: event.location.roomNumber,
+            address: event.location.address,
+          }
+        : null,
       lecturers: event.lecturers,
       studyPrograms: event.studyPrograms.map((esp) => esp.studyProgram),
       organizers: event.organizers,
@@ -249,13 +260,10 @@ export async function GET(request: NextRequest) {
       headers: {
         'X-Cache': 'MISS',
         'X-Cache-Key': cacheKey,
-      }
+      },
     })
   } catch (error) {
     console.error('Error fetching public events:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
   }
 }

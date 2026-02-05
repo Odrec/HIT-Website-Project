@@ -17,7 +17,7 @@ import {
   Check,
   Copy,
   ExternalLink,
-  Info
+  Info,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -164,12 +164,14 @@ export default function EventDetailPage() {
     timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
     locationType: e.locationType as ScheduleEvent['locationType'],
     institution: e.institution as ScheduleEvent['institution'],
-    location: e.location ? {
-      id: e.location.id,
-      buildingName: e.location.buildingName,
-      roomNumber: e.location.roomNumber ?? undefined,
-      address: e.location.address ?? undefined,
-    } : undefined,
+    location: e.location
+      ? {
+          id: e.location.id,
+          buildingName: e.location.buildingName,
+          roomNumber: e.location.roomNumber ?? undefined,
+          address: e.location.address ?? undefined,
+        }
+      : undefined,
     lecturers: e.lecturers.map((l) => ({
       id: l.id,
       eventId: e.id,
@@ -204,7 +206,9 @@ export default function EventDetailPage() {
 
   const handleShareEmail = () => {
     const subject = encodeURIComponent(`HIT 2026: ${event?.title}`)
-    const body = encodeURIComponent(`Schau dir diese Veranstaltung an:\n\n${event?.title}\n\n${window.location.href}`)
+    const body = encodeURIComponent(
+      `Schau dir diese Veranstaltung an:\n\n${event?.title}\n\n${window.location.href}`
+    )
     window.open(`mailto:?subject=${subject}&body=${body}`)
   }
 
@@ -230,9 +234,7 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold text-hit-gray-900">
-          Veranstaltung nicht gefunden
-        </h1>
+        <h1 className="text-2xl font-bold text-hit-gray-900">Veranstaltung nicht gefunden</h1>
         <p className="mt-2 text-hit-gray-600">
           Die angeforderte Veranstaltung existiert nicht oder wurde entfernt.
         </p>
@@ -275,9 +277,7 @@ export default function EventDetailPage() {
             {institutionLabels[event.institution] || event.institution}
           </Badge>
         </div>
-        <h1 className="text-3xl font-bold text-hit-gray-900 lg:text-4xl">
-          {event.title}
-        </h1>
+        <h1 className="text-3xl font-bold text-hit-gray-900 lg:text-4xl">{event.title}</h1>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -301,9 +301,7 @@ export default function EventDetailPage() {
             </CardHeader>
             <CardContent>
               {event.description ? (
-                <p className="whitespace-pre-wrap text-hit-gray-700">
-                  {event.description}
-                </p>
+                <p className="whitespace-pre-wrap text-hit-gray-700">{event.description}</p>
               ) : (
                 <p className="text-hit-gray-500 italic">
                   {eventTypeDescriptions[event.eventType] || 'Keine Beschreibung verfügbar.'}
@@ -324,10 +322,7 @@ export default function EventDetailPage() {
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {event.lecturers.map((lecturer) => (
-                    <div
-                      key={lecturer.id}
-                      className="flex items-start gap-3 rounded-lg border p-4"
-                    >
+                    <div key={lecturer.id} className="flex items-start gap-3 rounded-lg border p-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-hit-uni-100 text-hit-uni-700">
                         <User className="h-5 w-5" />
                       </div>
@@ -372,16 +367,14 @@ export default function EventDetailPage() {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {event.studyPrograms.map((program) => (
-                    <Badge
-                      key={program.id}
-                      variant="outline"
-                      className="text-sm"
-                    >
+                    <Badge key={program.id} variant="outline" className="text-sm">
                       {program.name}
-                      <span className={cn(
-                        'ml-1 text-xs',
-                        program.institution === 'UNI' ? 'text-hit-uni-500' : 'text-hit-hs-500'
-                      )}>
+                      <span
+                        className={cn(
+                          'ml-1 text-xs',
+                          program.institution === 'UNI' ? 'text-hit-uni-500' : 'text-hit-hs-500'
+                        )}
+                      >
                         ({program.institution === 'UNI' ? 'Uni' : 'HS'})
                       </span>
                     </Badge>
@@ -401,9 +394,7 @@ export default function EventDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap text-hit-gray-700">
-                  {event.additionalInfo}
-                </p>
+                <p className="whitespace-pre-wrap text-hit-gray-700">{event.additionalInfo}</p>
               </CardContent>
             </Card>
           )}
@@ -414,10 +405,7 @@ export default function EventDetailPage() {
           {/* Actions */}
           <Card>
             <CardContent className="pt-6 space-y-3">
-              <AddToScheduleButton
-                event={convertToScheduleEvent(event)}
-                className="w-full"
-              />
+              <AddToScheduleButton event={convertToScheduleEvent(event)} className="w-full" />
 
               <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
                 <DialogTrigger asChild>
@@ -469,9 +457,7 @@ export default function EventDetailPage() {
               <div className="flex items-start gap-3">
                 <Calendar className="mt-0.5 h-5 w-5 text-hit-uni-500" />
                 <div>
-                  <p className="font-medium text-hit-gray-900">
-                    {formatDate(event.timeStart)}
-                  </p>
+                  <p className="font-medium text-hit-gray-900">{formatDate(event.timeStart)}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -483,9 +469,12 @@ export default function EventDetailPage() {
                   </p>
                   {event.timeEnd && (
                     <p className="text-sm text-hit-gray-600">
-                      Dauer: {Math.round(
-                        (new Date(event.timeEnd).getTime() - new Date(event.timeStart).getTime()) / (1000 * 60)
-                      )} Minuten
+                      Dauer:{' '}
+                      {Math.round(
+                        (new Date(event.timeEnd).getTime() - new Date(event.timeStart).getTime()) /
+                          (1000 * 60)
+                      )}{' '}
+                      Minuten
                     </p>
                   )}
                 </div>
@@ -503,18 +492,12 @@ export default function EventDetailPage() {
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-5 w-5 text-hit-uni-500" />
                   <div>
-                    <p className="font-medium text-hit-gray-900">
-                      {event.location.buildingName}
-                    </p>
+                    <p className="font-medium text-hit-gray-900">{event.location.buildingName}</p>
                     {event.location.roomNumber && (
-                      <p className="text-hit-gray-600">
-                        Raum {event.location.roomNumber}
-                      </p>
+                      <p className="text-hit-gray-600">Raum {event.location.roomNumber}</p>
                     )}
                     {event.location.address && (
-                      <p className="text-sm text-hit-gray-500 mt-1">
-                        {event.location.address}
-                      </p>
+                      <p className="text-sm text-hit-gray-500 mt-1">{event.location.address}</p>
                     )}
                   </div>
                 </div>
@@ -523,15 +506,11 @@ export default function EventDetailPage() {
                   <MapPin className="mt-0.5 h-5 w-5 text-hit-uni-500" />
                   <div>
                     <p className="text-sm text-hit-gray-500">Treffpunkt:</p>
-                    <p className="font-medium text-hit-gray-900">
-                      {event.meetingPoint}
-                    </p>
+                    <p className="font-medium text-hit-gray-900">{event.meetingPoint}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-hit-gray-500 italic">
-                  Ort wird noch bekannt gegeben
-                </p>
+                <p className="text-hit-gray-500 italic">Ort wird noch bekannt gegeben</p>
               )}
 
               {/* Map Link (placeholder for Phase 7) */}
@@ -583,24 +562,16 @@ export default function EventDetailPage() {
       {relatedEvents.length > 0 && (
         <div className="mt-12">
           <Separator className="mb-8" />
-          <h2 className="text-2xl font-bold text-hit-gray-900 mb-6">
-            Ähnliche Veranstaltungen
-          </h2>
+          <h2 className="text-2xl font-bold text-hit-gray-900 mb-6">Ähnliche Veranstaltungen</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {relatedEvents.slice(0, 3).map((relEvent) => (
-              <EventCard 
-                key={relEvent.id} 
-                event={relEvent} 
-                viewMode="grid"
-              />
+              <EventCard key={relEvent.id} event={relEvent} viewMode="grid" />
             ))}
           </div>
           {relatedEvents.length > 3 && (
             <div className="mt-6 text-center">
               <Link href={`/events?studyProgramId=${event.studyPrograms[0]?.id || ''}`}>
-                <Button variant="outline">
-                  Weitere ähnliche Veranstaltungen anzeigen
-                </Button>
+                <Button variant="outline">Weitere ähnliche Veranstaltungen anzeigen</Button>
               </Link>
             </div>
           )}

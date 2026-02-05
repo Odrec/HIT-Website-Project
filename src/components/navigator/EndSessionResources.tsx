@@ -68,32 +68,30 @@ export function EndSessionResources({ resources }: EndSessionResourcesProps) {
         <p className="text-sm text-muted-foreground mb-4">
           Hier findest du weitere hilfreiche Ressourcen für deine Studienentscheidung:
         </p>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {resources.map((resource, index) => {
             const Icon = getIcon(resource.icon)
             const isInternal = resource.url?.startsWith('/')
             const colorClass = getResourceColor(resource.type)
-            
+
             const content = (
-              <div className={`flex items-start gap-3 p-3 rounded-lg transition-all hover:shadow-md ${colorClass}`}>
+              <div
+                className={`flex items-start gap-3 p-3 rounded-lg transition-all hover:shadow-md ${colorClass}`}
+              >
                 <div className="flex-shrink-0 mt-0.5">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm flex items-center gap-1">
                     {resource.title}
-                    {resource.url && !isInternal && (
-                      <ExternalLink className="w-3 h-3" />
-                    )}
+                    {resource.url && !isInternal && <ExternalLink className="w-3 h-3" />}
                   </h4>
-                  <p className="text-xs opacity-80 line-clamp-2">
-                    {resource.description}
-                  </p>
+                  <p className="text-xs opacity-80 line-clamp-2">{resource.description}</p>
                 </div>
               </div>
             )
-            
+
             if (resource.url) {
               if (isInternal) {
                 return (
@@ -102,19 +100,14 @@ export function EndSessionResources({ resources }: EndSessionResourcesProps) {
                   </Link>
                 )
               }
-              
+
               return (
-                <a
-                  key={index}
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a key={index} href={resource.url} target="_blank" rel="noopener noreferrer">
                   {content}
                 </a>
               )
             }
-            
+
             return <div key={index}>{content}</div>
           })}
         </div>

@@ -1,9 +1,9 @@
 /**
  * Performance Monitoring Utilities
- * 
+ *
  * Provides utilities for measuring and tracking application performance.
  * Includes timing, metrics collection, and performance logging.
- * 
+ *
  * @module performance
  */
 
@@ -41,25 +41,25 @@ export interface APITiming {
 class PerformanceStore {
   private metrics: PerformanceMetric[] = []
   private maxSize = 1000 // Keep last 1000 metrics
-  
+
   add(metric: PerformanceMetric): void {
     this.metrics.push(metric)
     if (this.metrics.length > this.maxSize) {
       this.metrics = this.metrics.slice(-this.maxSize)
     }
   }
-  
+
   getMetrics(name?: string, since?: number): PerformanceMetric[] {
     let filtered = this.metrics
     if (name) {
-      filtered = filtered.filter(m => m.name === name)
+      filtered = filtered.filter((m) => m.name === name)
     }
     if (since) {
-      filtered = filtered.filter(m => m.timestamp >= since)
+      filtered = filtered.filter((m) => m.timestamp >= since)
     }
     return filtered
   }
-  
+
   getStats(name: string): {
     count: number
     avg: number
@@ -71,10 +71,10 @@ class PerformanceStore {
   } | null {
     const metrics = this.getMetrics(name)
     if (metrics.length === 0) return null
-    
-    const durations = metrics.map(m => m.duration).sort((a, b) => a - b)
+
+    const durations = metrics.map((m) => m.duration).sort((a, b) => a - b)
     const sum = durations.reduce((a, b) => a + b, 0)
-    
+
     return {
       count: durations.length,
       avg: sum / durations.length,
@@ -85,7 +85,7 @@ class PerformanceStore {
       p99: durations[Math.floor(durations.length * 0.99)],
     }
   }
-  
+
   clear(): void {
     this.metrics = []
   }
@@ -101,26 +101,26 @@ export class Timer {
   private startTime: number
   private checkpoints: Map<string, number> = new Map()
   private name: string
-  
+
   constructor(name: string) {
     this.name = name
     this.startTime = performance.now()
   }
-  
+
   /**
    * Add a checkpoint marker
    */
   checkpoint(label: string): void {
     this.checkpoints.set(label, performance.now() - this.startTime)
   }
-  
+
   /**
    * Get elapsed time since start
    */
   elapsed(): number {
     return performance.now() - this.startTime
   }
-  
+
   /**
    * Get time between checkpoints
    */
@@ -130,7 +130,7 @@ export class Timer {
     if (fromTime === undefined || toTime === undefined) return null
     return toTime - fromTime
   }
-  
+
   /**
    * End timer and record metric
    */
@@ -145,28 +145,28 @@ export class Timer {
         checkpoints: Object.fromEntries(this.checkpoints),
       },
     }
-    
+
     performanceStore.add(metric)
-    
+
     // Log in development
     if (process.env.NODE_ENV === 'development') {
       console.log(
         `[Perf] ${this.name}: ${duration.toFixed(2)}ms`,
-        this.checkpoints.size > 0 
+        this.checkpoints.size > 0
           ? `(${Array.from(this.checkpoints.entries())
               .map(([k, v]) => `${k}: ${v.toFixed(2)}ms`)
               .join(', ')})`
           : ''
       )
     }
-    
+
     return metric
   }
 }
 
 /**
  * Create a timer for measuring operation duration
- * 
+ *
  * @example
  * ```ts
  * const timer = createTimer('api.events.list')
@@ -183,7 +183,7 @@ export function createTimer(name: string): Timer {
 
 /**
  * Measure the duration of an async function
- * 
+ *
  * @example
  * ```ts
  * const result = await measureAsync('database.query', async () => {
@@ -210,11 +210,7 @@ export async function measureAsync<T>(
 /**
  * Measure the duration of a sync function
  */
-export function measureSync<T>(
-  name: string,
-  fn: () => T,
-  metadata?: Record<string, unknown>
-): T {
+export function measureSync<T>(name: string, fn: () => T, metadata?: Record<string, unknown>): T {
   const timer = createTimer(name)
   try {
     const result = fn()
@@ -233,19 +229,19 @@ export function createPerformanceHeaders(timing: APITiming): Record<string, stri
   const headers: Record<string, string> = {
     'Server-Timing': `total;dur=${timing.total.toFixed(2)}`,
   }
-  
+
   if (timing.database !== undefined) {
     headers['Server-Timing'] += `, db;dur=${timing.database.toFixed(2)}`
   }
-  
+
   if (timing.cache !== undefined) {
     headers['Server-Timing'] += `, cache;dur=${timing.cache.toFixed(2)}`
   }
-  
+
   if (timing.processing !== undefined) {
     headers['Server-Timing'] += `, proc;dur=${timing.processing.toFixed(2)}`
   }
-  
+
   return headers
 }
 
@@ -259,30 +255,36 @@ export function logSlowOperation(
   metadata?: Record<string, unknown>
 ): void {
   if (duration > thresholdMs) {
-    console.warn(`[Slow Operation] ${name}: ${duration.toFixed(2)}ms (threshold: ${thresholdMs}ms)`, metadata || '')
+    console.warn(
+      `[Slow Operation] ${name}: ${duration.toFixed(2)}ms (threshold: ${thresholdMs}ms)`,
+      metadata || ''
+    )
   }
 }
 
 /**
  * Get performance summary for all tracked metrics
  */
-export function getPerformanceSummary(): Record<string, {
-  count: number
-  avg: number
-  min: number
-  max: number
-  p50: number
-  p95: number
-  p99: number
-} | null> {
+export function getPerformanceSummary(): Record<
+  string,
+  {
+    count: number
+    avg: number
+    min: number
+    max: number
+    p50: number
+    p95: number
+    p99: number
+  } | null
+> {
   const metrics = performanceStore.getMetrics()
-  const names = Array.from(new Set(metrics.map(m => m.name)))
-  
+  const names = Array.from(new Set(metrics.map((m) => m.name)))
+
   const summary: Record<string, ReturnType<typeof performanceStore.getStats>> = {}
   for (const name of names) {
     summary[name] = performanceStore.getStats(name)
   }
-  
+
   return summary
 }
 
@@ -291,18 +293,14 @@ export function getPerformanceSummary(): Record<string, {
  * (For use in environments that support decorators)
  */
 export function timed(metricName?: string) {
-  return function (
-    target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
     const name = metricName || `${(target as object).constructor.name}.${propertyKey}`
-    
+
     descriptor.value = async function (...args: unknown[]) {
       return measureAsync(name, () => originalMethod.apply(this, args))
     }
-    
+
     return descriptor
   }
 }
@@ -311,6 +309,7 @@ export function timed(metricName?: string) {
  * Utility to check if performance monitoring is enabled
  */
 export function isPerformanceMonitoringEnabled(): boolean {
-  return process.env.ENABLE_PERFORMANCE_MONITORING === 'true' || 
-         process.env.NODE_ENV === 'development'
+  return (
+    process.env.ENABLE_PERFORMANCE_MONITORING === 'true' || process.env.NODE_ENV === 'development'
+  )
 }

@@ -10,50 +10,34 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* About HIT */}
           <div>
-            <h3 className="font-semibold text-hit-gray-900 mb-3">
-              Hochschulinformationstag
-            </h3>
+            <h3 className="font-semibold text-hit-gray-900 mb-3">Hochschulinformationstag</h3>
             <p className="text-sm text-hit-gray-600">
-              Der HIT bietet Studieninteressierten die Möglichkeit, 
-              Universität und Hochschule Osnabrück kennenzulernen.
+              Der HIT bietet Studieninteressierten die Möglichkeit, Universität und Hochschule
+              Osnabrück kennenzulernen.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-hit-gray-900 mb-3">
-              Schnellzugriff
-            </h3>
+            <h3 className="font-semibold text-hit-gray-900 mb-3">Schnellzugriff</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link 
-                  href="/events" 
-                  className="text-hit-gray-600 hover:text-hit-uni-500"
-                >
+                <Link href="/events" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Alle Veranstaltungen
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/schedule" 
-                  className="text-hit-gray-600 hover:text-hit-uni-500"
-                >
+                <Link href="/schedule" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Stundenplan erstellen
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/navigator" 
-                  className="text-hit-gray-600 hover:text-hit-uni-500"
-                >
+                <Link href="/navigator" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Studiennavigator
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/map" 
-                  className="text-hit-gray-600 hover:text-hit-uni-500"
-                >
+                <Link href="/map" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Campusplan
                 </Link>
               </li>
@@ -62,14 +46,12 @@ export function Footer() {
 
           {/* Institutions */}
           <div>
-            <h3 className="font-semibold text-hit-gray-900 mb-3">
-              Institutionen
-            </h3>
+            <h3 className="font-semibold text-hit-gray-900 mb-3">Institutionen</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a 
-                  href="https://www.uni-osnabrueck.de" 
-                  target="_blank" 
+                <a
+                  href="https://www.uni-osnabrueck.de"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-hit-gray-600 hover:text-hit-uni-500"
                 >
@@ -77,9 +59,9 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://www.hs-osnabrueck.de" 
-                  target="_blank" 
+                <a
+                  href="https://www.hs-osnabrueck.de"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-hit-gray-600 hover:text-hit-hs-500"
                 >
@@ -87,9 +69,9 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://www.zsb-os.de" 
-                  target="_blank" 
+                <a
+                  href="https://www.zsb-os.de"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-hit-gray-600 hover:text-hit-uni-500"
                 >
@@ -101,9 +83,7 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold text-hit-gray-900 mb-3">
-              Kontakt
-            </h3>
+            <h3 className="font-semibold text-hit-gray-900 mb-3">Kontakt</h3>
             <address className="not-italic text-sm text-hit-gray-600 space-y-1">
               <p>Zentrale Studienberatung Osnabrück</p>
               <p>Neuer Graben 27</p>
@@ -120,8 +100,8 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t text-center text-sm text-hit-gray-500">
           <p>
-            © {new Date().getFullYear()} Zentrale Studienberatung Osnabrück. 
-            Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} Zentrale Studienberatung Osnabrück. Alle Rechte
+            vorbehalten.
           </p>
           <p className="mt-2 space-x-4">
             <Link href="/impressum" className="hover:text-hit-gray-700">

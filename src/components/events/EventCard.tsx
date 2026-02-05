@@ -84,12 +84,14 @@ function convertToEvent(event: EventCardProps['event']): Event {
     timeEnd: event.timeEnd ? new Date(event.timeEnd) : undefined,
     locationType: event.locationType as Event['locationType'],
     institution: event.institution as Event['institution'],
-    location: event.location ? {
-      id: event.location.id,
-      buildingName: event.location.buildingName,
-      roomNumber: event.location.roomNumber ?? undefined,
-      address: event.location.address ?? undefined,
-    } : undefined,
+    location: event.location
+      ? {
+          id: event.location.id,
+          buildingName: event.location.buildingName,
+          roomNumber: event.location.roomNumber ?? undefined,
+          address: event.location.address ?? undefined,
+        }
+      : undefined,
     lecturers: event.lecturers.map((l) => ({
       id: l.id,
       eventId: event.id,
@@ -133,9 +135,9 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
   const getLecturerDisplay = () => {
     if (event.lecturers.length === 0) return null
-    return event.lecturers.map((l) => 
-      `${l.title ? l.title + ' ' : ''}${l.firstName} ${l.lastName}`
-    ).join(', ')
+    return event.lecturers
+      .map((l) => `${l.title ? l.title + ' ' : ''}${l.firstName} ${l.lastName}`)
+      .join(', ')
   }
 
   if (viewMode === 'grid') {
@@ -145,14 +147,10 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           {/* Optional photo */}
           {event.photoUrl && (
             <div className="relative h-40 overflow-hidden rounded-t-lg">
-              <img 
-                src={event.photoUrl} 
-                alt={event.title}
-                className="h-full w-full object-cover"
-              />
+              <img src={event.photoUrl} alt={event.title} className="h-full w-full object-cover" />
             </div>
           )}
-          
+
           <CardHeader className="pb-2">
             <div className="flex flex-wrap gap-2">
               <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
@@ -166,7 +164,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
               {event.title}
             </h3>
           </CardHeader>
-          
+
           <CardContent className="pt-0">
             {/* Time */}
             <div className="flex items-center gap-2 text-sm text-hit-gray-600">
@@ -176,7 +174,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
                 {event.timeEnd && ` - ${formatTime(event.timeEnd)}`}
               </span>
             </div>
-            
+
             {/* Date */}
             <div className="mt-1 flex items-center gap-2 text-sm text-hit-gray-600">
               <CalendarIcon className="h-4 w-4 flex-shrink-0" />
@@ -219,15 +217,11 @@ export function EventCard({ event, viewMode }: EventCardProps) {
         <div className="flex flex-col sm:flex-row">
           {/* Time Column (on larger screens) */}
           <div className="hidden sm:flex sm:w-32 sm:flex-shrink-0 sm:flex-col sm:items-center sm:justify-center sm:border-r sm:bg-hit-gray-50 sm:p-4">
-            <div className="text-2xl font-bold text-hit-uni-600">
-              {formatTime(event.timeStart)}
-            </div>
+            <div className="text-2xl font-bold text-hit-uni-600">{formatTime(event.timeStart)}</div>
             {event.timeEnd && (
               <>
                 <div className="text-hit-gray-400">bis</div>
-                <div className="text-lg text-hit-gray-600">
-                  {formatTime(event.timeEnd)}
-                </div>
+                <div className="text-lg text-hit-gray-600">{formatTime(event.timeEnd)}</div>
               </>
             )}
           </div>
@@ -248,14 +242,10 @@ export function EventCard({ event, viewMode }: EventCardProps) {
               </Badge>
             </div>
 
-            <h3 className="mt-2 text-lg font-semibold text-hit-gray-900">
-              {event.title}
-            </h3>
+            <h3 className="mt-2 text-lg font-semibold text-hit-gray-900">{event.title}</h3>
 
             {event.description && (
-              <p className="mt-2 line-clamp-2 text-sm text-hit-gray-600">
-                {event.description}
-              </p>
+              <p className="mt-2 line-clamp-2 text-sm text-hit-gray-600">{event.description}</p>
             )}
 
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-hit-gray-600">
@@ -313,9 +303,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
               size="sm"
               className="w-full sm:mb-2"
             />
-            <span className="hidden text-xs text-hit-gray-500 sm:block">
-              Details ansehen →
-            </span>
+            <span className="hidden text-xs text-hit-gray-500 sm:block">Details ansehen →</span>
           </div>
         </div>
       </Card>

@@ -12,14 +12,11 @@ export async function GET(request: NextRequest) {
     const programIds = searchParams.get('programIds')
 
     if (!programIds) {
-      return NextResponse.json(
-        { error: 'Program IDs are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Program IDs are required' }, { status: 400 })
     }
 
-    const ids = programIds.split(',').filter(id => id.trim())
-    
+    const ids = programIds.split(',').filter((id) => id.trim())
+
     if (ids.length === 0) {
       return NextResponse.json({ events: [] })
     }
@@ -32,9 +29,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Navigator events error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get events' }, { status: 500 })
   }
 }

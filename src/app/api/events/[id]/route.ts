@@ -13,46 +13,31 @@ interface RouteParams {
 /**
  * GET /api/events/[id] - Get a single event by ID
  */
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const event = await eventService.getById(id)
 
     if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
     return NextResponse.json(event)
   } catch (error) {
     console.error('Error fetching event:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 })
   }
 }
 
 /**
  * PUT /api/events/[id] - Update an event (requires authentication)
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
@@ -61,10 +46,7 @@ export async function PUT(
     // Check if event exists
     const existing = await eventService.getById(id)
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
     // Validate enum values if provided
@@ -77,7 +59,9 @@ export async function PUT(
 
     if (body.locationType && !Object.values(LocationType).includes(body.locationType)) {
       return NextResponse.json(
-        { error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}` },
+        {
+          error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}`,
+        },
         { status: 400 }
       )
     }
@@ -92,7 +76,7 @@ export async function PUT(
     // Parse dates if provided
     // Convert 'none' locationId to null (placeholder value from form)
     const locationId = body.locationId === 'none' || body.locationId === '' ? null : body.locationId
-    
+
     const updateData = {
       id,
       ...body,
@@ -106,28 +90,19 @@ export async function PUT(
     return NextResponse.json(event)
   } catch (error) {
     console.error('Error updating event:', error)
-    return NextResponse.json(
-      { error: 'Failed to update event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update event' }, { status: 500 })
   }
 }
 
 /**
  * DELETE /api/events/[id] - Delete an event (requires authentication)
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -135,10 +110,7 @@ export async function DELETE(
     // Check if event exists
     const existing = await eventService.getById(id)
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
     await eventService.delete(id)
@@ -146,9 +118,6 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting event:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 })
   }
 }

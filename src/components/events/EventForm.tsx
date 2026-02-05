@@ -77,12 +77,20 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     formState: { errors },
   } = form
 
-  const { fields: lecturerFields, append: appendLecturer, remove: removeLecturer } = useFieldArray({
+  const {
+    fields: lecturerFields,
+    append: appendLecturer,
+    remove: removeLecturer,
+  } = useFieldArray({
     control,
     name: 'lecturers',
   })
 
-  const { fields: organizerFields, append: appendOrganizer, remove: removeOrganizer } = useFieldArray({
+  const {
+    fields: organizerFields,
+    append: appendOrganizer,
+    remove: removeOrganizer,
+  } = useFieldArray({
     control,
     name: 'organizers',
   })
@@ -137,13 +145,13 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
   }))
 
   const [dateError, setDateError] = useState<string | null>(null)
-  
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setDateError(null)
-    
+
     const formData = form.getValues()
-    
+
     // Validate that end date is after start date
     if (formData.timeStart && formData.timeEnd) {
       if (formData.timeEnd <= formData.timeStart) {
@@ -151,7 +159,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
         return
       }
     }
-    
+
     await onSubmit(formData as EventFormValues)
   }
 
@@ -173,9 +181,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
       <Card>
         <CardHeader>
           <CardTitle>Grundinformationen</CardTitle>
-          <CardDescription>
-            Titel, Typ und Beschreibung der Veranstaltung
-          </CardDescription>
+          <CardDescription>Titel, Typ und Beschreibung der Veranstaltung</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -188,12 +194,8 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               placeholder="Name der Veranstaltung"
               className={errors.title ? 'border-red-500' : ''}
             />
-            {errors.title && (
-              <p className="text-sm text-red-500">{errors.title.message}</p>
-            )}
-            <p className="text-xs text-gray-500">
-              {watch('title')?.length || 0}/200 Zeichen
-            </p>
+            {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
+            <p className="text-xs text-gray-500">{watch('title')?.length || 0}/200 Zeichen</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -203,7 +205,9 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               </Label>
               <Select
                 value={watch('eventType')}
-                onValueChange={(value) => setValue('eventType', value as EventFormValues['eventType'])}
+                onValueChange={(value) =>
+                  setValue('eventType', value as EventFormValues['eventType'])
+                }
               >
                 <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Typ auswählen" />
@@ -227,7 +231,9 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               </Label>
               <Select
                 value={watch('institution')}
-                onValueChange={(value) => setValue('institution', value as EventFormValues['institution'])}
+                onValueChange={(value) =>
+                  setValue('institution', value as EventFormValues['institution'])
+                }
               >
                 <SelectTrigger className={errors.institution ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Institution auswählen" />
@@ -251,7 +257,9 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               </Label>
               <Select
                 value={watch('locationType')}
-                onValueChange={(value) => setValue('locationType', value as EventFormValues['locationType'])}
+                onValueChange={(value) =>
+                  setValue('locationType', value as EventFormValues['locationType'])
+                }
               >
                 <SelectTrigger className={errors.locationType ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Ortstyp auswählen" />
@@ -294,9 +302,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
         <Card>
           <CardHeader>
             <CardTitle>Zeit & Ort</CardTitle>
-            <CardDescription>
-              Wann und wo findet die Veranstaltung statt?
-            </CardDescription>
+            <CardDescription>Wann und wo findet die Veranstaltung statt?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -315,12 +321,10 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   onChange={(date) => setValue('timeEnd', date || null)}
                   placeholder="Endzeit auswählen"
                 />
-                {errors.timeEnd && (
-                  <p className="text-sm text-red-500">{errors.timeEnd.message}</p>
-                )}
+                {errors.timeEnd && <p className="text-sm text-red-500">{errors.timeEnd.message}</p>}
               </div>
             </div>
-            
+
             {dateError && (
               <div className="rounded-lg bg-red-50 p-3 text-red-700">
                 <p className="text-sm font-medium">{dateError}</p>
@@ -332,7 +336,9 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 <Label htmlFor="locationId">Gebäude/Raum</Label>
                 <Select
                   value={watch('locationId') || 'none'}
-                  onValueChange={(value) => setValue('locationId', value === 'none' ? undefined : value)}
+                  onValueChange={(value) =>
+                    setValue('locationId', value === 'none' ? undefined : value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Standort auswählen" />
@@ -400,9 +406,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
         <Card>
           <CardHeader>
             <CardTitle>Infomärkte</CardTitle>
-            <CardDescription>
-              An welchen Infomärkten nimmt dieser Stand teil?
-            </CardDescription>
+            <CardDescription>An welchen Infomärkten nimmt dieser Stand teil?</CardDescription>
           </CardHeader>
           <CardContent>
             <MultiSelect
@@ -466,19 +470,13 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label>Titel</Label>
-                    <Input
-                      {...register(`lecturers.${index}.title`)}
-                      placeholder="Prof. Dr."
-                    />
+                    <Input {...register(`lecturers.${index}.title`)} placeholder="Prof. Dr." />
                   </div>
                   <div className="space-y-2">
                     <Label>
                       Vorname <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      {...register(`lecturers.${index}.firstName`)}
-                      placeholder="Max"
-                    />
+                    <Input {...register(`lecturers.${index}.firstName`)} placeholder="Max" />
                     {errors.lecturers?.[index]?.firstName && (
                       <p className="text-sm text-red-500">
                         {errors.lecturers[index].firstName?.message}
@@ -489,10 +487,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                     <Label>
                       Nachname <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      {...register(`lecturers.${index}.lastName`)}
-                      placeholder="Mustermann"
-                    />
+                    <Input {...register(`lecturers.${index}.lastName`)} placeholder="Mustermann" />
                     {errors.lecturers?.[index]?.lastName && (
                       <p className="text-sm text-red-500">
                         {errors.lecturers[index].lastName?.message}
@@ -518,10 +513,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   </div>
                   <div className="space-y-2">
                     <Label>Raum</Label>
-                    <Input
-                      {...register(`lecturers.${index}.roomNumber`)}
-                      placeholder="A101"
-                    />
+                    <Input {...register(`lecturers.${index}.roomNumber`)} placeholder="A101" />
                   </div>
                 </div>
               </div>
@@ -551,9 +543,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               Ansprechpartner hinzufügen
             </Button>
           </CardTitle>
-          <CardDescription>
-            Interne Kontaktpersonen für die Organisation
-          </CardDescription>
+          <CardDescription>Interne Kontaktpersonen für die Organisation</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {organizerFields.length === 0 ? (
@@ -627,9 +617,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
       <Card>
         <CardHeader>
           <CardTitle>Zusätzliche Informationen</CardTitle>
-          <CardDescription>
-            Weitere Details und Medien
-          </CardDescription>
+          <CardDescription>Weitere Details und Medien</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -647,14 +635,8 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
           <div className="space-y-2">
             <Label htmlFor="photoUrl">Bild-URL</Label>
-            <Input
-              id="photoUrl"
-              {...register('photoUrl')}
-              placeholder="https://..."
-            />
-            {errors.photoUrl && (
-              <p className="text-sm text-red-500">{errors.photoUrl.message}</p>
-            )}
+            <Input id="photoUrl" {...register('photoUrl')} placeholder="https://..." />
+            {errors.photoUrl && <p className="text-sm text-red-500">{errors.photoUrl.message}</p>}
             <p className="text-xs text-gray-500">
               URL zu einem Bild der Veranstaltung oder des Dozenten
             </p>
@@ -669,7 +651,11 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
           Abbrechen
         </Button>
         <Button type="submit" variant="uni" disabled={isSubmitting}>
-          {isSubmitting ? 'Speichern...' : initialData?.id ? 'Änderungen speichern' : 'Veranstaltung erstellen'}
+          {isSubmitting
+            ? 'Speichern...'
+            : initialData?.id
+              ? 'Änderungen speichern'
+              : 'Veranstaltung erstellen'}
         </Button>
       </div>
     </form>

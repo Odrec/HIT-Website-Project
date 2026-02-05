@@ -1,7 +1,12 @@
 // Event Service - Business logic for event management
 
 import { prisma } from '@/lib/db/prisma'
-import type { CreateEventInput, UpdateEventInput, EventFilters, EventSortOptions } from '@/types/events'
+import type {
+  CreateEventInput,
+  UpdateEventInput,
+  EventFilters,
+  EventSortOptions,
+} from '@/types/events'
 
 // Default pagination settings
 const DEFAULT_PAGE_SIZE = 20
@@ -242,14 +247,7 @@ export const eventService = {
    * Update an existing event
    */
   async update(input: UpdateEventInput) {
-    const {
-      id,
-      lecturers,
-      organizers,
-      studyProgramIds,
-      infoMarketIds,
-      ...eventData
-    } = input
+    const { id, lecturers, organizers, studyProgramIds, infoMarketIds, ...eventData } = input
 
     // Build the update data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

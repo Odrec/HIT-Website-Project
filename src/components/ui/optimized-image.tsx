@@ -2,7 +2,7 @@
 
 /**
  * Optimized Image Component
- * 
+ *
  * Provides lazy loading, blur placeholder, and responsive sizing
  * for better performance and Core Web Vitals.
  */
@@ -27,13 +27,13 @@ interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
 /**
  * Default blur placeholder data URL (gray)
  */
-const DEFAULT_BLUR_DATA_URL = 
+const DEFAULT_BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNFNUU3RUIiLz48L3N2Zz4='
 
 /**
  * Placeholder SVG for missing/error images
  */
-const PLACEHOLDER_IMAGE = 
+const PLACEHOLDER_IMAGE =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNMTgxLjMxNCAxMzFIMjE4LjY4NkMyMjMuMTA0IDEzMSAyMjYuNjg2IDEzNC41ODIgMjI2LjY4NiAxMzlWMTYxQzIyNi42ODYgMTY1LjQxOCAyMjMuMTA0IDE2OSAyMTguNjg2IDE2OUgxODEuMzE0QzE3Ni44OTYgMTY5IDE3My4zMTQgMTY1LjQxOCAxNzMuMzE0IDE2MVYxMzlDMTczLjMxNCAxMzQuNTgyIDE3Ni44OTYgMTMxIDE4MS4zMTQgMTMxWiIgc3Ryb2tlPSIjOUI5QjlCIiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIxODciIGN5PSIxNDIiIHI9IjUiIGZpbGw9IiM5QjlCOUIiLz48cGF0aCBkPSJNMTczLjMxNCAxNjNMMTg0LjA2OSAxNTIuMjQ1QzE4NS4yNDEgMTUxLjA3MyAxODcuMTA5IDE1MS4wNzMgMTg4LjI4MSAxNTIuMjQ1TDE5OS4wMzYgMTYzIiBzdHJva2U9IiM5QjlCOUIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xOTcuNDk1IDE1OC45OTVMMjA1LjEyMSAxNTEuMzY5QzIwNi4yOTMgMTUwLjE5NyAyMDguMTYxIDE1MC4xOTcgMjA5LjMzMyAxNTEuMzY5TDIyNi42ODYgMTY4Ljc0NCIgc3Ryb2tlPSIjOUI5QjlCIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4='
 
 export function OptimizedImage({
@@ -85,22 +85,15 @@ export function OptimizedImage({
   }, [])
 
   // Determine the image source
-  const imageSrc = hasError 
-    ? (fallbackSrc || PLACEHOLDER_IMAGE)
-    : src
+  const imageSrc = hasError ? fallbackSrc || PLACEHOLDER_IMAGE : src
 
   // Calculate aspect ratio style
-  const aspectRatioStyle = aspectRatio 
-    ? { aspectRatio } 
-    : undefined
+  const aspectRatioStyle = aspectRatio ? { aspectRatio } : undefined
 
   return (
-    <div 
+    <div
       ref={imageRef}
-      className={cn(
-        'relative overflow-hidden bg-gray-100',
-        wrapperClassName
-      )}
+      className={cn('relative overflow-hidden bg-gray-100', wrapperClassName)}
       style={aspectRatioStyle}
     >
       {isInView && (
@@ -121,13 +114,10 @@ export function OptimizedImage({
           {...props}
         />
       )}
-      
+
       {/* Loading skeleton */}
       {!isLoaded && isInView && !hasError && (
-        <div 
-          className="absolute inset-0 animate-pulse bg-gray-200"
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 animate-pulse bg-gray-200" aria-hidden="true" />
       )}
     </div>
   )

@@ -25,9 +25,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate')
       ? new Date(searchParams.get('startDate')!)
       : undefined
-    const endDate = searchParams.get('endDate')
-      ? new Date(searchParams.get('endDate')!)
-      : undefined
+    const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
 
     // Parse sort options
     const sortField = (searchParams.get('sortField') || 'createdAt') as
@@ -60,10 +58,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching events:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
   }
 }
 
@@ -75,10 +70,7 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -101,7 +93,9 @@ export async function POST(request: NextRequest) {
 
     if (!Object.values(LocationType).includes(body.locationType)) {
       return NextResponse.json(
-        { error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}` },
+        {
+          error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}`,
+        },
         { status: 400 }
       )
     }
@@ -116,7 +110,7 @@ export async function POST(request: NextRequest) {
     // Parse dates if provided
     // Convert 'none' locationId to null (placeholder value from form)
     const locationId = body.locationId === 'none' || body.locationId === '' ? null : body.locationId
-    
+
     const eventData = {
       ...body,
       locationId,
@@ -129,9 +123,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
     console.error('Error creating event:', error)
-    return NextResponse.json(
-      { error: 'Failed to create event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create event' }, { status: 500 })
   }
 }

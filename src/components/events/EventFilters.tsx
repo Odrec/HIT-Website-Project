@@ -99,7 +99,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
 
   const handleChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value }
-    
+
     // Clear study program if institution changes and the selected program doesn't match
     if (key === 'institution' && filters.studyProgramId) {
       const selectedProgram = studyPrograms.find((sp) => sp.id === filters.studyProgramId)
@@ -107,7 +107,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
         newFilters.studyProgramId = ''
       }
     }
-    
+
     onChange(newFilters)
   }
 
@@ -164,7 +164,9 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
             <Label htmlFor="studyProgram">Studiengang</Label>
             <Select
               value={filters.studyProgramId || 'all'}
-              onValueChange={(value) => handleChange('studyProgramId', value === 'all' ? '' : value)}
+              onValueChange={(value) =>
+                handleChange('studyProgramId', value === 'all' ? '' : value)
+              }
               disabled={loadingPrograms}
             >
               <SelectTrigger id="studyProgram">

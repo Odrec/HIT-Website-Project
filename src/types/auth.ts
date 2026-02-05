@@ -64,12 +64,7 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
     'schedules:delete',
     'admin:access',
   ],
-  [UserRole.ORGANIZER]: [
-    'events:read',
-    'events:create',
-    'events:update',
-    'schedules:read',
-  ],
+  [UserRole.ORGANIZER]: ['events:read', 'events:create', 'events:update', 'schedules:read'],
   [UserRole.PUBLIC]: [
     'events:read',
     'schedules:read',

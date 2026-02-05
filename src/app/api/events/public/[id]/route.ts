@@ -6,10 +6,7 @@ import { prisma } from '@/lib/db/prisma'
 /**
  * GET /api/events/public/[id] - Get a single event with related events
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 
@@ -27,7 +24,7 @@ export async function GET(
             email: true,
             building: true,
             roomNumber: true,
-          }
+          },
         },
         studyPrograms: {
           include: {
@@ -36,50 +33,47 @@ export async function GET(
                 id: true,
                 name: true,
                 institution: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         organizers: {
           where: {
-            internalOnly: false
+            internalOnly: false,
           },
           select: {
             id: true,
             email: true,
             phone: true,
-          }
+          },
         },
         infoMarkets: {
           include: {
-            market: true
-          }
-        }
-      }
+            market: true,
+          },
+        },
+      },
     })
 
     if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
     // Get related events based on study programs
     const studyProgramIds = event.studyPrograms.map((esp) => esp.studyProgramId)
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let relatedEvents: any[] = []
-    
+
     if (studyProgramIds.length > 0) {
       relatedEvents = await prisma.event.findMany({
         where: {
           id: { not: event.id },
           studyPrograms: {
             some: {
-              studyProgramId: { in: studyProgramIds }
-            }
-          }
+              studyProgramId: { in: studyProgramIds },
+            },
+          },
         },
         take: 6,
         orderBy: { timeStart: 'asc' },
@@ -91,7 +85,7 @@ export async function GET(
               firstName: true,
               lastName: true,
               title: true,
-            }
+            },
           },
           studyPrograms: {
             include: {
@@ -100,21 +94,21 @@ export async function GET(
                   id: true,
                   name: true,
                   institution: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           organizers: {
             where: {
-              internalOnly: false
+              internalOnly: false,
             },
             select: {
               id: true,
               email: true,
               phone: true,
-            }
+            },
           },
-        }
+        },
       })
     }
 
@@ -122,9 +116,9 @@ export async function GET(
     if (relatedEvents.length < 3) {
       const additionalEvents = await prisma.event.findMany({
         where: {
-          id: { 
+          id: {
             not: event.id,
-            notIn: relatedEvents.map((e) => e.id)
+            notIn: relatedEvents.map((e) => e.id),
           },
           eventType: event.eventType,
         },
@@ -138,7 +132,7 @@ export async function GET(
               firstName: true,
               lastName: true,
               title: true,
-            }
+            },
           },
           studyPrograms: {
             include: {
@@ -147,21 +141,21 @@ export async function GET(
                   id: true,
                   name: true,
                   institution: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           organizers: {
             where: {
-              internalOnly: false
+              internalOnly: false,
             },
             select: {
               id: true,
               email: true,
               phone: true,
-            }
+            },
           },
-        }
+        },
       })
       relatedEvents = [...relatedEvents, ...additionalEvents]
     }
@@ -189,12 +183,14 @@ export async function GET(
       additionalInfo: e.additionalInfo,
       photoUrl: e.photoUrl,
       institution: mapInstitutionToFrontend(e.institution),
-      location: e.location ? {
-        id: e.location.id,
-        buildingName: e.location.buildingName,
-        roomNumber: e.location.roomNumber,
-        address: e.location.address,
-      } : null,
+      location: e.location
+        ? {
+            id: e.location.id,
+            buildingName: e.location.buildingName,
+            roomNumber: e.location.roomNumber,
+            address: e.location.address,
+          }
+        : null,
       lecturers: e.lecturers,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       studyPrograms: e.studyPrograms.map((esp: any) => esp.studyProgram),
@@ -209,9 +205,6 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error fetching event:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 })
   }
 }

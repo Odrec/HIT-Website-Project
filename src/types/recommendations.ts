@@ -15,7 +15,14 @@ export interface TimeSlot {
  * Reason why an event was recommended
  */
 export interface RecommendationReason {
-  type: 'study_program' | 'event_type' | 'time_fit' | 'popularity' | 'diversity' | 'location' | 'no_conflict'
+  type:
+    | 'study_program'
+    | 'event_type'
+    | 'time_fit'
+    | 'popularity'
+    | 'diversity'
+    | 'location'
+    | 'no_conflict'
   description: string
   weight: number // 0-1 contribution to overall score
 }
@@ -49,25 +56,25 @@ export interface RecommendationGroup {
 export interface RecommendationContext {
   // User's current schedule
   scheduledEventIds: string[]
-  
+
   // Preferred study programs (from navigator or explicit selection)
   studyProgramIds: string[]
-  
+
   // Available time windows
   availableTimeSlots: TimeSlot[]
-  
+
   // Institution preference
   institution?: 'UNI' | 'HOCHSCHULE' | 'BOTH'
-  
+
   // Event types the user is interested in
   preferredEventTypes?: string[]
-  
+
   // Events the user has already viewed
   viewedEventIds?: string[]
-  
+
   // Events the user explicitly dismissed
   dismissedEventIds?: string[]
-  
+
   // Maximum travel time between events (minutes)
   maxTravelTime?: number
 }
@@ -79,19 +86,19 @@ export interface RecommendationFilters {
   // Limit to specific time range
   startDate?: Date
   endDate?: Date
-  
+
   // Only show events that don't conflict
   excludeConflicts?: boolean
-  
+
   // Only show high-demand events
   onlyHighDemand?: boolean
-  
+
   // Event types to include
   eventTypes?: string[]
-  
+
   // Minimum score threshold
   minScore?: number
-  
+
   // Maximum number of recommendations
   limit?: number
 }

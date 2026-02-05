@@ -1,15 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Settings,
-  Calendar,
-  Bell,
-  Database,
-  Save,
-  RefreshCw,
-  Info,
-} from 'lucide-react'
+import { Settings, Calendar, Bell, Database, Save, RefreshCw, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -91,9 +83,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Einstellungen</h1>
-          <p className="text-muted-foreground">
-            Konfigurieren Sie die Anwendungseinstellungen
-          </p>
+          <p className="text-muted-foreground">Konfigurieren Sie die Anwendungseinstellungen</p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="mr-2 h-4 w-4" />
@@ -223,9 +213,7 @@ export default function SettingsPage() {
             <Database className="h-5 w-5" />
             System
           </CardTitle>
-          <CardDescription>
-            Konfigurieren Sie Cache und Systemeinstellungen
-          </CardDescription>
+          <CardDescription>Konfigurieren Sie Cache und Systemeinstellungen</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center space-x-2">
@@ -303,9 +291,9 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Cache leeren</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie den gesamten Cache leeren möchten? 
-              Dies kann die Performance der Anwendung kurzzeitig beeinträchtigen, 
-              da alle Daten neu aus der Datenbank geladen werden müssen.
+              Sind Sie sicher, dass Sie den gesamten Cache leeren möchten? Dies kann die Performance
+              der Anwendung kurzzeitig beeinträchtigen, da alle Daten neu aus der Datenbank geladen
+              werden müssen.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

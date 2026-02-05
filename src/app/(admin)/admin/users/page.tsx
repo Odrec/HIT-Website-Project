@@ -172,9 +172,7 @@ export default function UsersPage() {
         body.password = formData.password
       }
 
-      const url = editingUser
-        ? `/api/users/${editingUser.id}`
-        : '/api/users'
+      const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users'
       const method = editingUser ? 'PUT' : 'POST'
 
       const response = await fetch(url, {
@@ -229,9 +227,7 @@ export default function UsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Benutzer</h1>
-          <p className="text-muted-foreground">
-            Verwalten Sie Benutzerkonten und Berechtigungen
-          </p>
+          <p className="text-muted-foreground">Verwalten Sie Benutzerkonten und Berechtigungen</p>
         </div>
         <Button onClick={openCreateDialog}>
           <Plus className="mr-2 h-4 w-4" />
@@ -256,7 +252,10 @@ export default function UsersPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Select value={roleFilter || "__all__"} onValueChange={(v) => setRoleFilter(v === "__all__" ? "" : v)}>
+            <Select
+              value={roleFilter || '__all__'}
+              onValueChange={(v) => setRoleFilter(v === '__all__' ? '' : v)}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Alle Rollen" />
               </SelectTrigger>
@@ -306,9 +305,7 @@ export default function UsersPage() {
                   const RoleIcon = roleIcons[user.role]
                   return (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.email}
-                      </TableCell>
+                      <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.name || '-'}</TableCell>
                       <TableCell>
                         <Badge className={roleColors[user.role]}>
@@ -358,9 +355,7 @@ export default function UsersPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingUser ? 'Benutzer bearbeiten' : 'Neuer Benutzer'}
-            </DialogTitle>
+            <DialogTitle>{editingUser ? 'Benutzer bearbeiten' : 'Neuer Benutzer'}</DialogTitle>
             <DialogDescription>
               {editingUser
                 ? 'Bearbeiten Sie die Details des Benutzers'
@@ -374,9 +369,7 @@ export default function UsersPage() {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="benutzer@example.com"
               />
             </div>
@@ -385,9 +378,7 @@ export default function UsersPage() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Max Mustermann"
               />
             </div>
@@ -432,9 +423,7 @@ export default function UsersPage() {
                 id="password"
                 type="password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder={editingUser ? '••••••••' : 'Mindestens 8 Zeichen'}
               />
             </div>
@@ -443,8 +432,8 @@ export default function UsersPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               disabled={saving || !formData.email.trim() || (!editingUser && !formData.password)}
             >
               {saving ? 'Speichern...' : editingUser ? 'Speichern' : 'Erstellen'}
@@ -459,8 +448,8 @@ export default function UsersPage() {
           <DialogHeader>
             <DialogTitle>Benutzer löschen</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie den Benutzer &quot;{userToDelete?.email}&quot; löschen möchten? 
-              Diese Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie den Benutzer &quot;{userToDelete?.email}&quot; löschen
+              möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -473,11 +462,7 @@ export default function UsersPage() {
             >
               Abbrechen
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>

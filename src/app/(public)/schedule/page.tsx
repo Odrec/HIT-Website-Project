@@ -56,7 +56,7 @@ function SchedulePageContent() {
   const router = useRouter()
   const { state, clearSchedule, getConflicts, getScheduleUrl, addEvent } = useSchedule()
   const { toast } = useToast()
-  
+
   const [view, setView] = useState<'timeline' | 'list'>('timeline')
   const [selectedDate, setSelectedDate] = useState<Date>(HIT_DATE)
   const [copied, setCopied] = useState(false)
@@ -81,7 +81,7 @@ function SchedulePageContent() {
           title: 'Geteilter Zeitplan',
           description: `${eventIds.length} Events werden geladen...`,
         })
-        
+
         // Fetch events and add them to schedule
         fetchSharedEvents(eventIds)
       } catch {
@@ -132,8 +132,9 @@ function SchedulePageContent() {
       try {
         const eventIds = state.items
           .filter((item) => item.event.timeStart)
-          .sort((a, b) =>
-            new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
+          .sort(
+            (a, b) =>
+              new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
           )
           .map((item) => item.eventId)
 
@@ -257,7 +258,7 @@ function SchedulePageContent() {
       if (item.event.timeStart && item.event.timeEnd) {
         const startDate = new Date(item.event.timeStart)
         const endDate = new Date(item.event.timeEnd)
-        
+
         ical += 'BEGIN:VEVENT\r\n'
         ical += `UID:${item.event.id}@hit-osnabrueck.de\r\n`
         ical += `DTSTAMP:${format(new Date(), "yyyyMMdd'T'HHmmss'Z'")}\r\n`
@@ -325,11 +326,7 @@ function SchedulePageContent() {
         {state.items.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={handleShareSchedule}>
-              {copied ? (
-                <Check className="h-4 w-4 mr-2" />
-              ) : (
-                <Share2 className="h-4 w-4 mr-2" />
-              )}
+              {copied ? <Check className="h-4 w-4 mr-2" /> : <Share2 className="h-4 w-4 mr-2" />}
               {copied ? 'Kopiert!' : 'Teilen'}
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportIcal}>
@@ -360,8 +357,8 @@ function SchedulePageContent() {
             <CalendarPlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">Dein Zeitplan ist leer</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Durchsuche die Events und füge sie zu deinem persönlichen Zeitplan hinzu,
-              um deinen HIT-Tag zu planen.
+              Durchsuche die Events und füge sie zu deinem persönlichen Zeitplan hinzu, um deinen
+              HIT-Tag zu planen.
             </p>
             <Button asChild>
               <Link href="/events">
@@ -391,12 +388,9 @@ function SchedulePageContent() {
                     scheduleDates.map((date) => {
                       const dateEvents = state.items.filter(
                         (item) =>
-                          item.event.timeStart &&
-                          isSameDay(new Date(item.event.timeStart), date)
+                          item.event.timeStart && isSameDay(new Date(item.event.timeStart), date)
                       )
-                      const hasConflicts = dateEvents.some((e) =>
-                        conflictEventIds.has(e.eventId)
-                      )
+                      const hasConflicts = dateEvents.some((e) => conflictEventIds.has(e.eventId))
 
                       return (
                         <Button
@@ -410,9 +404,7 @@ function SchedulePageContent() {
                             <Badge variant="secondary" className="text-xs">
                               {dateEvents.length}
                             </Badge>
-                            {hasConflicts && (
-                              <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                            )}
+                            {hasConflicts && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
                           </div>
                         </Button>
                       )
@@ -533,11 +525,7 @@ function SchedulePageContent() {
                 </h3>
                 <div className="space-y-4">
                   {eventsWithoutTime.map((item) => (
-                    <ScheduleEventCard
-                      key={item.id}
-                      scheduleEvent={item}
-                      hasConflict={false}
-                    />
+                    <ScheduleEventCard key={item.id} scheduleEvent={item} hasConflict={false} />
                   ))}
                 </div>
               </div>
@@ -561,7 +549,11 @@ function SchedulePageContent() {
                 {travelAnalyses.filter((a) => a.status !== 'ok').length}
               </Badge>
             )}
-            {showRouteMap ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+            {showRouteMap ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
           </Button>
           <Button
             variant={showAnalysis ? 'default' : 'outline'}
@@ -569,7 +561,11 @@ function SchedulePageContent() {
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             Zeitplan-Analyse
-            {showAnalysis ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+            {showAnalysis ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
           </Button>
           <Button
             variant={showRecommendations ? 'default' : 'outline'}
@@ -577,7 +573,11 @@ function SchedulePageContent() {
           >
             <Sparkles className="h-4 w-4 mr-2" />
             Empfehlungen
-            {showRecommendations ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+            {showRecommendations ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
           </Button>
         </div>
 
@@ -619,7 +619,7 @@ function SchedulePageContent() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="mt-4 flex justify-end">
                   <Button asChild variant="outline">
                     <Link href="/route-planner">
@@ -642,27 +642,18 @@ function SchedulePageContent() {
 
         {/* Personalized Recommendations */}
         {showRecommendations && (
-          <RecommendationList
-            showFilters={true}
-            showGroups={true}
-            limit={12}
-          />
+          <RecommendationList showFilters={true} showGroups={true} limit={12} />
         )}
       </div>
 
       {/* Print-only full schedule */}
       <div className="hidden print:block mt-8">
-        <h2 className="text-xl font-bold mb-4">
-          HIT 2026 - Mein Zeitplan
-        </h2>
+        <h2 className="text-xl font-bold mb-4">HIT 2026 - Mein Zeitplan</h2>
         {state.items
           .sort((a, b) => {
             if (!a.event.timeStart) return 1
             if (!b.event.timeStart) return -1
-            return (
-              new Date(a.event.timeStart).getTime() -
-              new Date(b.event.timeStart).getTime()
-            )
+            return new Date(a.event.timeStart).getTime() - new Date(b.event.timeStart).getTime()
           })
           .map((item) => (
             <div key={item.id} className="mb-4 pb-4 border-b">
@@ -672,9 +663,7 @@ function SchedulePageContent() {
                   {format(new Date(item.event.timeStart), 'EEEE, d. MMMM yyyy, HH:mm', {
                     locale: de,
                   })}
-                  {item.event.timeEnd && (
-                    <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>
-                  )}
+                  {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
                 </div>
               )}
               {item.event.location && (
@@ -692,15 +681,17 @@ function SchedulePageContent() {
 
 export default function SchedulePage() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-64 mb-8" />
-        <div className="grid gap-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <div className="grid gap-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SchedulePageContent />
     </Suspense>
   )

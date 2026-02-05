@@ -12,9 +12,6 @@ export async function GET() {
     return NextResponse.json(markets)
   } catch (error) {
     console.error('Error fetching info markets:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch information markets' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch information markets' }, { status: 500 })
   }
 }

@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-  Calendar, 
-  Search, 
-  Clock, 
-  MapPin, 
+import {
+  Calendar,
+  Search,
+  Clock,
+  MapPin,
   GraduationCap,
   Compass,
   ArrowRight,
   Users,
   Building2,
-  Sparkles
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -76,7 +76,7 @@ export default function HomePage() {
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString('de-DE', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -85,7 +85,7 @@ export default function HomePage() {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     })
   }
 
@@ -96,32 +96,38 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative">
           <div className="max-w-3xl">
-            <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">
-              November 2026
-            </Badge>
+            <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Hochschul&shy;informationstag 2026
             </h1>
             <p className="mt-6 text-lg text-white/90 max-w-2xl">
-              Entdecken Sie die Universität und Hochschule Osnabrück! 
-              Besuchen Sie Vorträge, Laborführungen und Workshops zu über 200 Studiengängen.
+              Entdecken Sie die Universität und Hochschule Osnabrück! Besuchen Sie Vorträge,
+              Laborführungen und Workshops zu über 200 Studiengängen.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="/events">
-                <Button size="lg" variant="secondary" className="bg-white text-hit-uni-700 hover:bg-white/90">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white text-hit-uni-700 hover:bg-white/90"
+                >
                   <Calendar className="mr-2 h-5 w-5" />
                   Alle Veranstaltungen
                 </Button>
               </Link>
               <Link href="/navigator">
-                <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white bg-transparent hover:bg-white/10"
+                >
                   <Compass className="mr-2 h-5 w-5" />
                   Studiennavigator
                 </Button>
               </Link>
             </div>
           </div>
-          
+
           {/* Stats */}
           <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:mt-16">
             <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
@@ -161,7 +167,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-            
+
             <Link href="/schedule" className="group">
               <Card className="h-full transition-shadow hover:shadow-md">
                 <CardContent className="flex items-center gap-4 p-4">
@@ -175,7 +181,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-            
+
             <Link href="/programs" className="group">
               <Card className="h-full transition-shadow hover:shadow-md">
                 <CardContent className="flex items-center gap-4 p-4">
@@ -189,7 +195,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-            
+
             <Link href="/map" className="group">
               <Card className="h-full transition-shadow hover:shadow-md">
                 <CardContent className="flex items-center gap-4 p-4">
@@ -215,9 +221,7 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-hit-gray-900 lg:text-3xl">
                 Kommende Veranstaltungen
               </h2>
-              <p className="mt-2 text-hit-gray-600">
-                Entdecken Sie unsere nächsten Events
-              </p>
+              <p className="mt-2 text-hit-gray-600">Entdecken Sie unsere nächsten Events</p>
             </div>
             <Link href="/events" className="hidden sm:block">
               <Button variant="outline">
@@ -253,9 +257,7 @@ export default function HomePage() {
                           {eventTypeLabels[event.eventType]}
                         </Badge>
                       </div>
-                      <CardTitle className="line-clamp-2 text-lg mt-2">
-                        {event.title}
-                      </CardTitle>
+                      <CardTitle className="line-clamp-2 text-lg mt-2">{event.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {event.description && (
@@ -311,7 +313,7 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold text-hit-gray-900 text-center lg:text-3xl mb-8">
             Zwei Hochschulen – ein Informationstag
           </h2>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             {/* Universität */}
             <Card className="overflow-hidden border-t-4 border-t-hit-uni-500">
@@ -342,7 +344,10 @@ export default function HomePage() {
                   </li>
                 </ul>
                 <Link href="/events?institution=UNI" className="block mt-4">
-                  <Button variant="outline" className="w-full text-hit-uni-700 border-hit-uni-300 hover:bg-hit-uni-50">
+                  <Button
+                    variant="outline"
+                    className="w-full text-hit-uni-700 border-hit-uni-300 hover:bg-hit-uni-50"
+                  >
                     Uni-Veranstaltungen
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -379,7 +384,10 @@ export default function HomePage() {
                   </li>
                 </ul>
                 <Link href="/events?institution=HS" className="block mt-4">
-                  <Button variant="outline" className="w-full text-hit-hs-700 border-hit-hs-300 hover:bg-hit-hs-50">
+                  <Button
+                    variant="outline"
+                    className="w-full text-hit-hs-700 border-hit-hs-300 hover:bg-hit-hs-50"
+                  >
                     HS-Veranstaltungen
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -397,16 +405,25 @@ export default function HomePage() {
             Bereit für den Hochschulinformationstag?
           </h2>
           <p className="mt-4 text-white/90 max-w-2xl mx-auto">
-            Erstellen Sie jetzt Ihren persönlichen Stundenplan und verpassen Sie keine Veranstaltung.
+            Erstellen Sie jetzt Ihren persönlichen Stundenplan und verpassen Sie keine
+            Veranstaltung.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/events">
-              <Button size="lg" variant="secondary" className="bg-white text-hit-uni-700 hover:bg-white/90">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="bg-white text-hit-uni-700 hover:bg-white/90"
+              >
                 Veranstaltungen entdecken
               </Button>
             </Link>
             <Link href="/schedule">
-              <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white/10">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white bg-transparent hover:bg-white/10"
+              >
                 Stundenplan erstellen
               </Button>
             </Link>

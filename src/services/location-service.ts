@@ -11,10 +11,7 @@ export const locationService = {
    */
   async list() {
     return prisma.location.findMany({
-      orderBy: [
-        { buildingName: 'asc' },
-        { roomNumber: 'asc' },
-      ],
+      orderBy: [{ buildingName: 'asc' }, { roomNumber: 'asc' }],
     })
   },
 
@@ -48,13 +45,16 @@ export const locationService = {
   /**
    * Update a location
    */
-  async update(id: string, data: Partial<{
-    buildingName: string
-    roomNumber?: string
-    address?: string
-    latitude?: number
-    longitude?: number
-  }>) {
+  async update(
+    id: string,
+    data: Partial<{
+      buildingName: string
+      roomNumber?: string
+      address?: string
+      latitude?: number
+      longitude?: number
+    }>
+  ) {
     return prisma.location.update({
       where: { id },
       data,

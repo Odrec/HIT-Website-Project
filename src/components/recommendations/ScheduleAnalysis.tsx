@@ -20,7 +20,7 @@ import {
   BarChart3,
   RefreshCw,
   Trash2,
-  X
+  X,
 } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import type { ScheduleOptimization, ScheduleOptimizationResult } from '@/types/recommendations'
@@ -35,15 +35,14 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [selectedOptimization, setSelectedOptimization] = useState<ScheduleOptimization | null>(null)
+  const [selectedOptimization, setSelectedOptimization] = useState<ScheduleOptimization | null>(
+    null
+  )
   const [dialogOpen, setDialogOpen] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   // Stabilize scheduledEventIds with useMemo and create a stable key
-  const scheduledEventIds = useMemo(
-    () => state.items.map(item => item.eventId),
-    [state.items]
-  )
+  const scheduledEventIds = useMemo(() => state.items.map((item) => item.eventId), [state.items])
   const scheduledEventIdsKey = scheduledEventIds.join(',')
 
   useEffect(() => {
@@ -110,7 +109,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
   }
 
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1)
+    setRefreshTrigger((prev) => prev + 1)
   }
 
   const handleOptimizationClick = (opt: ScheduleOptimization) => {
@@ -122,7 +121,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
 
   const handleRemoveEvent = (eventId: string) => {
     // Find the event title from state.items
-    const item = state.items.find(i => i.eventId === eventId)
+    const item = state.items.find((i) => i.eventId === eventId)
     if (item) {
       removeEvent(item.eventId)
     }
@@ -132,11 +131,11 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
 
   // Get event titles for the selected optimization
   const getEventTitlesForOptimization = (opt: ScheduleOptimization) => {
-    return opt.suggestedAction.eventIds.map(eventId => {
-      const item = state.items.find(i => i.eventId === eventId)
+    return opt.suggestedAction.eventIds.map((eventId) => {
+      const item = state.items.find((i) => i.eventId === eventId)
       return {
         eventId,
-        title: item?.event.title || 'Unbekannte Veranstaltung'
+        title: item?.event.title || 'Unbekannte Veranstaltung',
       }
     })
   }
@@ -195,14 +194,15 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
               {analysis.currentScore}
             </div>
             <div className="flex-1">
-              <Progress 
-                value={analysis.currentScore} 
-                className="h-3"
-              />
+              <Progress value={analysis.currentScore} className="h-3" />
               <p className="text-sm text-gray-500 mt-1">
                 {analysis.currentScore >= 80 && 'Ausgezeichneter Zeitplan!'}
-                {analysis.currentScore >= 60 && analysis.currentScore < 80 && 'Guter Zeitplan mit Verbesserungspotenzial'}
-                {analysis.currentScore >= 40 && analysis.currentScore < 60 && 'Zeitplan könnte optimiert werden'}
+                {analysis.currentScore >= 60 &&
+                  analysis.currentScore < 80 &&
+                  'Guter Zeitplan mit Verbesserungspotenzial'}
+                {analysis.currentScore >= 40 &&
+                  analysis.currentScore < 60 &&
+                  'Zeitplan könnte optimiert werden'}
                 {analysis.currentScore < 40 && 'Zeitplan benötigt Überarbeitung'}
               </p>
             </div>
@@ -225,11 +225,13 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
                 <li key={idx} className="text-sm text-yellow-800 p-2 bg-yellow-100 rounded">
                   <div className="flex items-center gap-2 mb-1">
                     <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                    <span className="font-medium">{conflict.overlapMinutes} Min. Überschneidung</span>
+                    <span className="font-medium">
+                      {conflict.overlapMinutes} Min. Überschneidung
+                    </span>
                   </div>
                   <div className="ml-6 text-yellow-700">
-                    <p className="truncate">„{conflict.event1Title}"</p>
-                    <p className="truncate">„{conflict.event2Title}"</p>
+                    <p className="truncate">&bdquo;{conflict.event1Title}&ldquo;</p>
+                    <p className="truncate">&bdquo;{conflict.event2Title}&ldquo;</p>
                   </div>
                 </li>
               ))}
@@ -263,11 +265,22 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
                 <li key={idx} className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">
                     <span className="font-medium">
-                      {new Date(gap.start).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })}
+                      {new Date(gap.start).toLocaleDateString('de-DE', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                      })}
                     </span>
                     {': '}
-                    {new Date(gap.start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} -
-                    {new Date(gap.end).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(gap.start).toLocaleTimeString('de-DE', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    -
+                    {new Date(gap.end).toLocaleTimeString('de-DE', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                   <Badge variant="secondary">{gap.durationMinutes} Min.</Badge>
                 </li>
@@ -300,11 +313,13 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
             <div>
               <h4 className="text-sm font-medium text-gray-600 mb-2">Standorte</h4>
               <div className="flex flex-wrap gap-2">
-                {Object.entries(analysis.diversity.locationDistribution).map(([location, count]) => (
-                  <Badge key={location} variant="outline">
-                    {location}: {count}
-                  </Badge>
-                ))}
+                {Object.entries(analysis.diversity.locationDistribution).map(
+                  ([location, count]) => (
+                    <Badge key={location} variant="outline">
+                      {location}: {count}
+                    </Badge>
+                  )
+                )}
               </div>
             </div>
           )}
@@ -348,11 +363,9 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
               <Lightbulb className="h-5 w-5 text-yellow-500" />
               Optimierungsvorschlag
             </DialogTitle>
-            <DialogDescription>
-              {selectedOptimization?.description}
-            </DialogDescription>
+            <DialogDescription>{selectedOptimization?.description}</DialogDescription>
           </DialogHeader>
-          
+
           {selectedOptimization && selectedOptimization.suggestedAction.action === 'remove' && (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
@@ -367,15 +380,11 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
                     onClick={() => handleRemoveEvent(eventId)}
                   >
                     <Trash2 className="h-4 w-4 text-red-500 flex-shrink-0" />
-                    <span className="truncate">„{title}" entfernen</span>
+                    <span className="truncate">&bdquo;{title}&ldquo; entfernen</span>
                   </Button>
                 ))}
               </div>
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setDialogOpen(false)}
-              >
+              <Button variant="ghost" className="w-full" onClick={() => setDialogOpen(false)}>
                 <X className="h-4 w-4 mr-2" />
                 Abbrechen
               </Button>
@@ -384,14 +393,8 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
 
           {selectedOptimization && selectedOptimization.suggestedAction.action !== 'remove' && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                {selectedOptimization.suggestedAction.reason}
-              </p>
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setDialogOpen(false)}
-              >
+              <p className="text-sm text-gray-600">{selectedOptimization.suggestedAction.reason}</p>
+              <Button variant="ghost" className="w-full" onClick={() => setDialogOpen(false)}>
                 Schließen
               </Button>
             </div>

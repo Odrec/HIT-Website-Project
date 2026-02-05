@@ -338,12 +338,12 @@ export const CAMPUS_AREAS: CampusArea[] = [
   {
     id: 'schloss',
     name: 'Schloss Campus',
-    center: { latitude: 52.2725, longitude: 8.0440 },
+    center: { latitude: 52.2725, longitude: 8.044 },
     bounds: {
       north: 52.2745,
       south: 52.2705,
-      east: 8.0480,
-      west: 8.0400,
+      east: 8.048,
+      west: 8.04,
     },
   },
   {
@@ -351,10 +351,10 @@ export const CAMPUS_AREAS: CampusArea[] = [
     name: 'Westerberg Campus',
     center: { latitude: 52.2815, longitude: 8.0245 },
     bounds: {
-      north: 52.2850,
-      south: 52.2780,
-      east: 8.0300,
-      west: 8.0190,
+      north: 52.285,
+      south: 52.278,
+      east: 8.03,
+      west: 8.019,
     },
   },
   {
@@ -362,10 +362,10 @@ export const CAMPUS_AREAS: CampusArea[] = [
     name: 'Caprivi Campus (Hochschule)',
     center: { latitude: 52.2758, longitude: 8.0152 },
     bounds: {
-      north: 52.2780,
-      south: 52.2740,
-      east: 8.0200,
-      west: 8.0100,
+      north: 52.278,
+      south: 52.274,
+      east: 8.02,
+      west: 8.01,
     },
   },
   {
@@ -373,10 +373,10 @@ export const CAMPUS_AREAS: CampusArea[] = [
     name: 'Haste Campus (Hochschule)',
     center: { latitude: 52.3008, longitude: 7.9847 },
     bounds: {
-      north: 52.3030,
-      south: 52.2990,
-      east: 7.9900,
-      west: 7.9800,
+      north: 52.303,
+      south: 52.299,
+      east: 7.99,
+      west: 7.98,
     },
   },
 ]

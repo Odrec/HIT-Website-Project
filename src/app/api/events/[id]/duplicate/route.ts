@@ -12,18 +12,12 @@ interface RouteParams {
 /**
  * POST /api/events/[id]/duplicate - Duplicate an event (requires authentication)
  */
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
@@ -31,10 +25,7 @@ export async function POST(
     // Check if event exists
     const existing = await eventService.getById(id)
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
     const duplicatedEvent = await eventService.duplicate(id)
@@ -42,9 +33,6 @@ export async function POST(
     return NextResponse.json(duplicatedEvent, { status: 201 })
   } catch (error) {
     console.error('Error duplicating event:', error)
-    return NextResponse.json(
-      { error: 'Failed to duplicate event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to duplicate event' }, { status: 500 })
   }
 }

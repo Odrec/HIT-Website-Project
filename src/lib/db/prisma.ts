@@ -21,8 +21,7 @@ const pool =
   globalForPrisma.pool ??
   new Pool({
     connectionString:
-      process.env.DATABASE_URL ||
-      'postgresql://hit_user:hit_password@localhost:5432/hit_db',
+      process.env.DATABASE_URL || 'postgresql://hit_user:hit_password@localhost:5432/hit_db',
   })
 
 // Create adapter
@@ -32,10 +31,7 @@ export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
 
 if (process.env.NODE_ENV !== 'production') {

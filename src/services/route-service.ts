@@ -42,10 +42,7 @@ export function calculateDistance(from: Coordinates, to: Coordinates): number {
  * Calculate walking time between two points
  * @returns Walking time in seconds
  */
-export function calculateWalkingTime(
-  distance: number,
-  speed: WalkingSpeed = 'normal'
-): number {
+export function calculateWalkingTime(distance: number, speed: WalkingSpeed = 'normal'): number {
   // Import the constant values directly since we can't use the const object
   const speeds: Record<WalkingSpeed, number> = {
     slow: 0.8,
@@ -217,7 +214,7 @@ export function findBuilding(idOrName: string): BuildingInfo | undefined {
       hasAccessibility: true,
     },
   ]
-  
+
   const lowerId = idOrName.toLowerCase()
   return buildings.find(
     (b) =>
@@ -429,7 +426,8 @@ export async function getAllBuildings(): Promise<BuildingInfo[]> {
     const dbLocation = locations.find(
       (loc) =>
         loc.buildingName.toLowerCase().includes(building.name.toLowerCase()) ||
-        (building.shortName && loc.buildingName.toLowerCase().includes(building.shortName.toLowerCase()))
+        (building.shortName &&
+          loc.buildingName.toLowerCase().includes(building.shortName.toLowerCase()))
     )
     return {
       ...building,
@@ -481,10 +479,7 @@ function calculateRouteLeg(
 /**
  * Check for travel time issues between events
  */
-function checkTravelWarnings(
-  legs: RouteLeg[],
-  settings: TravelTimeSettings
-): RouteWarning[] {
+function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): RouteWarning[] {
   const warnings: RouteWarning[] = []
   const bufferSeconds = settings.bufferMinutes * 60
   const warningThreshold = settings.minWarningMinutes * 60
@@ -590,9 +585,7 @@ export function calculateRoute(
 /**
  * Get coordinates for an event from its location
  */
-export async function getEventCoordinates(
-  eventId: string
-): Promise<Coordinates | null> {
+export async function getEventCoordinates(eventId: string): Promise<Coordinates | null> {
   const event = await prisma.event.findUnique({
     where: { id: eventId },
     include: { location: true },
@@ -752,8 +745,7 @@ export async function analyzeTravelTimes(
     if (fromCoords && toCoords && eventFrom.timeEnd && eventTo.timeStart) {
       const distance = calculateDistance(fromCoords, toCoords)
       const walkingTime = calculateWalkingTime(distance, settings.walkingSpeed)
-      const timeBetweenEvents =
-        (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
+      const timeBetweenEvents = (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
       const timeMargin = timeBetweenEvents - walkingTime - settings.bufferMinutes * 60
 
       let status: 'ok' | 'tight' | 'insufficient'
@@ -794,12 +786,14 @@ export async function getSuggestedAlternatives(
     bufferMinutes: 5,
     minWarningMinutes: 3,
   }
-): Promise<{
-  eventId: string
-  title: string
-  reason: string
-  newTravelTime: number
-}[]> {
+): Promise<
+  {
+    eventId: string
+    title: string
+    reason: string
+    newTravelTime: number
+  }[]
+> {
   // Get the conflicting event
   const conflictingEvent = await prisma.event.findUnique({
     where: { id: conflictingEventId },

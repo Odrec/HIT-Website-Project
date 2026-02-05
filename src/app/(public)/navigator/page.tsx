@@ -16,9 +16,8 @@ export default function NavigatorPage() {
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold mb-2">Studiennavigator</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Finde den passenden Studiengang für dich! Unser KI-gestützter Navigator
-          hilft dir dabei, basierend auf deinen Interessen und Zielen die
-          besten Studiengänge zu entdecken.
+          Finde den passenden Studiengang für dich! Unser KI-gestützter Navigator hilft dir dabei,
+          basierend auf deinen Interessen und Zielen die besten Studiengänge zu entdecken.
         </p>
       </div>
 

@@ -23,19 +23,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     })
 
     if (!cluster) {
-      return NextResponse.json(
-        { error: 'Cluster not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Cluster not found' }, { status: 404 })
     }
 
     return NextResponse.json(cluster)
   } catch (error) {
     console.error('Error fetching cluster:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch cluster' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch cluster' }, { status: 500 })
   }
 }
 
@@ -47,10 +41,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -61,18 +52,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Cluster not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Cluster not found' }, { status: 404 })
     }
 
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Missing required field: name' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
     const cluster = await prisma.studyProgramCluster.update({
@@ -89,10 +74,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(cluster)
   } catch (error) {
     console.error('Error updating cluster:', error)
-    return NextResponse.json(
-      { error: 'Failed to update cluster' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update cluster' }, { status: 500 })
   }
 }
 
@@ -104,10 +86,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { id } = await params
@@ -117,10 +96,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id },
     })
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Cluster not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Cluster not found' }, { status: 404 })
     }
 
     // Note: Deleting a cluster will set clusterId to null on associated programs (onDelete: SetNull)
@@ -131,9 +107,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting cluster:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete cluster' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to delete cluster' }, { status: 500 })
   }
 }

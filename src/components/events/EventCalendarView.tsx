@@ -62,10 +62,27 @@ const eventTypeLabels: Record<string, string> = {
 
 // Time slots for the HIT event (8:00 - 18:00)
 const timeSlots = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-  '17:00', '17:30', '18:00'
+  '08:00',
+  '08:30',
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+  '17:00',
+  '17:30',
+  '18:00',
 ]
 
 /**
@@ -75,7 +92,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
   // Group events by date
   const eventsByDate = useMemo(() => {
     const grouped: Record<string, Event[]> = {}
-    
+
     events.forEach((event) => {
       const dateKey = format(parseISO(event.timeStart), 'yyyy-MM-dd')
       if (!grouped[dateKey]) {
@@ -86,9 +103,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
 
     // Sort events within each day by start time
     Object.values(grouped).forEach((dayEvents) => {
-      dayEvents.sort((a, b) => 
-        new Date(a.timeStart).getTime() - new Date(b.timeStart).getTime()
-      )
+      dayEvents.sort((a, b) => new Date(a.timeStart).getTime() - new Date(b.timeStart).getTime())
     })
 
     return grouped
@@ -100,14 +115,14 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
   const getEventPosition = (event: Event) => {
     const startTime = parseISO(event.timeStart)
     const endTime = event.timeEnd ? parseISO(event.timeEnd) : null
-    
+
     const startHour = startTime.getHours()
     const startMinute = startTime.getMinutes()
-    
+
     // Calculate position from 8:00 (0%)
     const startSlot = (startHour - 8) * 2 + (startMinute >= 30 ? 1 : 0)
     const top = Math.max(0, startSlot) * (100 / timeSlots.length)
-    
+
     // Calculate height based on duration
     let height = 100 / timeSlots.length // Default 30min
     if (endTime) {
@@ -117,7 +132,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
       const durationSlots = Math.max(1, endSlot - startSlot)
       height = durationSlots * (100 / timeSlots.length)
     }
-    
+
     return { top: `${top}%`, height: `${Math.min(height, 100 - top)}%` }
   }
 
@@ -134,13 +149,11 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
       {dates.map((date) => {
         const dayEvents = eventsByDate[date]
         const displayDate = format(parseISO(date), 'EEEE, dd. MMMM yyyy', { locale: de })
-        
+
         return (
           <div key={date}>
             {/* Date Header */}
-            <h2 className="mb-4 text-lg font-semibold text-hit-gray-900">
-              {displayDate}
-            </h2>
+            <h2 className="mb-4 text-lg font-semibold text-hit-gray-900">{displayDate}</h2>
 
             {/* Day Timeline */}
             <Card className="overflow-hidden">
@@ -181,10 +194,14 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                       const overlappingEvents = dayEvents.filter((e, i) => {
                         if (i >= eventIndex) return false
                         const eStart = new Date(e.timeStart).getTime()
-                        const eEnd = e.timeEnd ? new Date(e.timeEnd).getTime() : eStart + 30 * 60 * 1000
+                        const eEnd = e.timeEnd
+                          ? new Date(e.timeEnd).getTime()
+                          : eStart + 30 * 60 * 1000
                         const eventStart = new Date(event.timeStart).getTime()
-                        const eventEnd = event.timeEnd ? new Date(event.timeEnd).getTime() : eventStart + 30 * 60 * 1000
-                        return (eventStart < eEnd && eventEnd > eStart)
+                        const eventEnd = event.timeEnd
+                          ? new Date(event.timeEnd).getTime()
+                          : eventStart + 30 * 60 * 1000
+                        return eventStart < eEnd && eventEnd > eStart
                       })
                       const leftOffset = overlappingEvents.length * 20
 
@@ -205,7 +222,8 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                             className={cn(
                               'h-full rounded-md border p-2 transition-shadow hover:shadow-md overflow-hidden',
                               'bg-white border-l-4',
-                              eventTypeColors[event.eventType]?.replace('bg-', 'border-l-') || 'border-l-gray-500'
+                              eventTypeColors[event.eventType]?.replace('bg-', 'border-l-') ||
+                                'border-l-gray-500'
                             )}
                           >
                             <div className="flex items-start justify-between gap-2">
@@ -218,10 +236,11 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                                   eventTypeColors[event.eventType] || 'bg-gray-500'
                                 )}
                               >
-                                {eventTypeLabels[event.eventType]?.slice(0, 4) || event.eventType.slice(0, 4)}
+                                {eventTypeLabels[event.eventType]?.slice(0, 4) ||
+                                  event.eventType.slice(0, 4)}
                               </Badge>
                             </div>
-                            
+
                             <div className="mt-1 flex flex-wrap gap-2 text-xs text-hit-gray-600">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />

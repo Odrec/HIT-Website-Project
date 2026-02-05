@@ -15,10 +15,7 @@ export async function GET() {
     return NextResponse.json(clusters)
   } catch (error) {
     console.error('Error fetching clusters:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch clusters' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch clusters' }, { status: 500 })
   }
 }
 
@@ -30,20 +27,14 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const body = await request.json()
 
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Missing required field: name' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
     const cluster = await prisma.studyProgramCluster.create({
@@ -59,9 +50,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(cluster, { status: 201 })
   } catch (error) {
     console.error('Error creating cluster:', error)
-    return NextResponse.json(
-      { error: 'Failed to create cluster' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create cluster' }, { status: 500 })
   }
 }

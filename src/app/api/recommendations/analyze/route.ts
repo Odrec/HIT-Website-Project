@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const { scheduledEventIds } = body
 
     if (!scheduledEventIds || !Array.isArray(scheduledEventIds)) {
-      return NextResponse.json(
-        { error: 'scheduledEventIds array required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'scheduledEventIds array required' }, { status: 400 })
     }
 
     const analysis = await recommendationService.analyzeSchedule(scheduledEventIds)
@@ -24,9 +21,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(analysis)
   } catch (error) {
     console.error('Error analyzing schedule:', error)
-    return NextResponse.json(
-      { error: 'Failed to analyze schedule' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to analyze schedule' }, { status: 500 })
   }
 }

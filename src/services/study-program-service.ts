@@ -16,10 +16,7 @@ export const studyProgramService = {
       include: {
         cluster: true,
       },
-      orderBy: [
-        { institution: 'asc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
   },
 

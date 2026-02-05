@@ -17,7 +17,8 @@ function RecommendationsPageContent() {
           Empfehlungen für dich
         </h1>
         <p className="text-muted-foreground mt-2">
-          Personalisierte Veranstaltungsempfehlungen basierend auf deinem Zeitplan und deinen Interessen
+          Personalisierte Veranstaltungsempfehlungen basierend auf deinem Zeitplan und deinen
+          Interessen
         </p>
       </div>
 
@@ -28,17 +29,11 @@ function RecommendationsPageContent() {
             <Sparkles className="h-4 w-4 mr-2" />
             Empfehlungen
           </TabsTrigger>
-          <TabsTrigger value="analysis">
-            Zeitplan-Analyse
-          </TabsTrigger>
+          <TabsTrigger value="analysis">Zeitplan-Analyse</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recommendations">
-          <RecommendationList 
-            showFilters={true}
-            showGroups={true}
-            limit={24}
-          />
+          <RecommendationList showFilters={true} showGroups={true} limit={24} />
         </TabsContent>
 
         <TabsContent value="analysis">
@@ -51,16 +46,18 @@ function RecommendationsPageContent() {
 
 export default function RecommendationsPage() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-64 mb-8" />
-        <div className="grid gap-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <div className="grid gap-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <RecommendationsPageContent />
     </Suspense>
   )

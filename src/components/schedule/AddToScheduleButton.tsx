@@ -49,17 +49,10 @@ export function AddToScheduleButton({
         variant={inSchedule ? 'secondary' : variant}
         size="icon"
         onClick={handleClick}
-        className={cn(
-          inSchedule && 'bg-green-100 text-green-700 hover:bg-green-200',
-          className
-        )}
+        className={cn(inSchedule && 'bg-green-100 text-green-700 hover:bg-green-200', className)}
         title={inSchedule ? 'Aus Zeitplan entfernen' : 'Zum Zeitplan hinzufügen'}
       >
-        {inSchedule ? (
-          <CalendarCheck className="h-4 w-4" />
-        ) : (
-          <CalendarPlus className="h-4 w-4" />
-        )}
+        {inSchedule ? <CalendarCheck className="h-4 w-4" /> : <CalendarPlus className="h-4 w-4" />}
       </Button>
     )
   }
@@ -69,10 +62,7 @@ export function AddToScheduleButton({
       variant={inSchedule ? 'secondary' : variant}
       size={size}
       onClick={handleClick}
-      className={cn(
-        inSchedule && 'bg-green-100 text-green-700 hover:bg-green-200',
-        className
-      )}
+      className={cn(inSchedule && 'bg-green-100 text-green-700 hover:bg-green-200', className)}
     >
       {inSchedule ? (
         <>

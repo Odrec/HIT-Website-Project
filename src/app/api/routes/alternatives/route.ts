@@ -17,17 +17,11 @@ export async function POST(request: NextRequest) {
     const { conflictingEventId, scheduledEventIds, settings } = body
 
     if (!conflictingEventId) {
-      return NextResponse.json(
-        { error: 'conflictingEventId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'conflictingEventId is required' }, { status: 400 })
     }
 
     if (!scheduledEventIds || !Array.isArray(scheduledEventIds)) {
-      return NextResponse.json(
-        { error: 'scheduledEventIds array is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'scheduledEventIds array is required' }, { status: 400 })
     }
 
     const travelSettings: TravelTimeSettings = {
@@ -48,9 +42,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Alternatives fetch error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get alternative events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get alternative events' }, { status: 500 })
   }
 }

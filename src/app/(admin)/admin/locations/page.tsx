@@ -1,15 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import {
-  Plus,
-  Search,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  MapPin,
-  Building,
-} from 'lucide-react'
+import { Plus, Search, MoreHorizontal, Pencil, Trash2, MapPin, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -140,9 +132,7 @@ export default function LocationsPage() {
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       }
 
-      const url = editingLocation
-        ? `/api/locations/${editingLocation.id}`
-        : '/api/locations'
+      const url = editingLocation ? `/api/locations/${editingLocation.id}` : '/api/locations'
       const method = editingLocation ? 'PUT' : 'POST'
 
       const response = await fetch(url, {
@@ -318,9 +308,7 @@ export default function LocationsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingLocation ? 'Ort bearbeiten' : 'Neuer Ort'}
-            </DialogTitle>
+            <DialogTitle>{editingLocation ? 'Ort bearbeiten' : 'Neuer Ort'}</DialogTitle>
             <DialogDescription>
               {editingLocation
                 ? 'Bearbeiten Sie die Details des Ortes'
@@ -333,9 +321,7 @@ export default function LocationsPage() {
               <Input
                 id="buildingName"
                 value={formData.buildingName}
-                onChange={(e) =>
-                  setFormData({ ...formData, buildingName: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, buildingName: e.target.value })}
                 placeholder="z.B. AVZ, Schloss, Gebäude A"
               />
             </div>
@@ -344,9 +330,7 @@ export default function LocationsPage() {
               <Input
                 id="roomNumber"
                 value={formData.roomNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, roomNumber: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
                 placeholder="z.B. 101, Hörsaal 1"
               />
             </div>
@@ -355,9 +339,7 @@ export default function LocationsPage() {
               <Input
                 id="address"
                 value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="z.B. Barbarastraße 22"
               />
             </div>
@@ -369,9 +351,7 @@ export default function LocationsPage() {
                   type="number"
                   step="any"
                   value={formData.latitude}
-                  onChange={(e) =>
-                    setFormData({ ...formData, latitude: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
                   placeholder="52.2815"
                 />
               </div>
@@ -382,9 +362,7 @@ export default function LocationsPage() {
                   type="number"
                   step="any"
                   value={formData.longitude}
-                  onChange={(e) =>
-                    setFormData({ ...formData, longitude: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                   placeholder="8.0231"
                 />
               </div>
@@ -422,11 +400,7 @@ export default function LocationsPage() {
             >
               Abbrechen
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>

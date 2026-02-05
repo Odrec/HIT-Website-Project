@@ -61,7 +61,7 @@ const CAMPUS_AREAS: { id: string; name: string }[] = [
 export default function RoutePlannerPage() {
   const router = useRouter()
   const { state } = useSchedule()
-  
+
   const [view, setView] = useState<'map' | 'list'>('map')
   const [selectedCampus, setSelectedCampus] = useState('all')
   const [walkingSpeed, setWalkingSpeed] = useState<WalkingSpeed>('normal')
@@ -106,8 +106,7 @@ export default function RoutePlannerPage() {
           .filter((item) => item.event.timeStart)
           .sort(
             (a, b) =>
-              new Date(a.event.timeStart!).getTime() -
-              new Date(b.event.timeStart!).getTime()
+              new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
           )
           .map((item) => item.eventId)
 
@@ -200,10 +199,7 @@ export default function RoutePlannerPage() {
           {/* Walking speed selector */}
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-muted-foreground" />
-            <Select
-              value={walkingSpeed}
-              onValueChange={(v) => setWalkingSpeed(v as WalkingSpeed)}
-            >
+            <Select value={walkingSpeed} onValueChange={(v) => setWalkingSpeed(v as WalkingSpeed)}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Gehgeschwindigkeit" />
               </SelectTrigger>
@@ -252,9 +248,7 @@ export default function RoutePlannerPage() {
                   <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>Ihr Zeitplan ist leer.</p>
                   <Button asChild className="mt-4" variant="outline">
-                    <Link href="/events">
-                      Events durchsuchen
-                    </Link>
+                    <Link href="/events">Events durchsuchen</Link>
                   </Button>
                 </div>
               ) : (
@@ -266,28 +260,20 @@ export default function RoutePlannerPage() {
                     <div className="bg-muted/50 rounded-lg p-4">
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
-                          <div className="text-2xl font-bold">
-                            {route.waypoints.length}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Stationen
-                          </div>
+                          <div className="text-2xl font-bold">{route.waypoints.length}</div>
+                          <div className="text-xs text-muted-foreground">Stationen</div>
                         </div>
                         <div>
                           <div className="text-2xl font-bold">
                             {formatDistance(route.totalDistance)}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            Gesamt
-                          </div>
+                          <div className="text-xs text-muted-foreground">Gesamt</div>
                         </div>
                         <div>
                           <div className="text-2xl font-bold">
                             {formatDuration(route.totalDuration)}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            Gehzeit
-                          </div>
+                          <div className="text-xs text-muted-foreground">Gehzeit</div>
                         </div>
                       </div>
                     </div>
@@ -311,15 +297,13 @@ export default function RoutePlannerPage() {
                             {index + 1}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">
-                              {item.event.title}
-                            </p>
+                            <p className="font-medium truncate">{item.event.title}</p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              {new Date(item.event.timeStart!).toLocaleTimeString(
-                                'de-DE',
-                                { hour: '2-digit', minute: '2-digit' }
-                              )}
+                              {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
                               {item.event.location && (
                                 <>
                                   <span>•</span>
@@ -368,10 +352,7 @@ export default function RoutePlannerPage() {
                     Campus Karte
                   </CardTitle>
                   {/* Campus filter */}
-                  <Select
-                    value={selectedCampus}
-                    onValueChange={setSelectedCampus}
-                  >
+                  <Select value={selectedCampus} onValueChange={setSelectedCampus}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Campus auswählen" />
                     </SelectTrigger>
@@ -408,17 +389,13 @@ export default function RoutePlannerPage() {
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-bold text-lg">
-                            {selectedBuilding.name}
-                          </h3>
+                          <h3 className="font-bold text-lg">{selectedBuilding.name}</h3>
                           {selectedBuilding.shortName && (
                             <p className="text-sm text-muted-foreground">
                               ({selectedBuilding.shortName})
                             </p>
                           )}
-                          <p className="text-sm mt-2">
-                            {selectedBuilding.address}
-                          </p>
+                          <p className="text-sm mt-2">{selectedBuilding.address}</p>
                           <div className="flex items-center gap-3 mt-3">
                             <Badge
                               variant="secondary"
@@ -426,21 +403,17 @@ export default function RoutePlannerPage() {
                                 selectedBuilding.campus === 'schloss'
                                   ? 'bg-purple-100 text-purple-800'
                                   : selectedBuilding.campus === 'westerberg'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : selectedBuilding.campus === 'caprivi'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-orange-100 text-orange-800'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : selectedBuilding.campus === 'caprivi'
+                                      ? 'bg-green-100 text-green-800'
+                                      : 'bg-orange-100 text-orange-800'
                               }
                             >
-                              {CAMPUS_AREAS.find(
-                                (c) => c.id === selectedBuilding.campus
-                              )?.name || selectedBuilding.campus}
+                              {CAMPUS_AREAS.find((c) => c.id === selectedBuilding.campus)?.name ||
+                                selectedBuilding.campus}
                             </Badge>
                             {selectedBuilding.hasAccessibility && (
-                              <span
-                                className="text-green-600"
-                                title="Barrierefrei"
-                              >
+                              <span className="text-green-600" title="Barrierefrei">
                                 ♿ Barrierefrei
                               </span>
                             )}
@@ -451,11 +424,7 @@ export default function RoutePlannerPage() {
                             </p>
                           )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedBuilding(null)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedBuilding(null)}>
                           ✕
                         </Button>
                       </div>
@@ -463,17 +432,11 @@ export default function RoutePlannerPage() {
                         selectedBuilding.eventCount > 0 && (
                           <div className="mt-4 pt-4 border-t">
                             <p className="text-sm text-muted-foreground">
-                              <strong>{selectedBuilding.eventCount}</strong>{' '}
-                              Veranstaltung(en) an diesem Standort
+                              <strong>{selectedBuilding.eventCount}</strong> Veranstaltung(en) an
+                              diesem Standort
                             </p>
-                            <Button
-                              asChild
-                              variant="link"
-                              className="p-0 h-auto mt-1"
-                            >
-                              <Link
-                                href={`/events?building=${selectedBuilding.name}`}
-                              >
+                            <Button asChild variant="link" className="p-0 h-auto mt-1">
+                              <Link href={`/events?building=${selectedBuilding.name}`}>
                                 Events anzeigen
                                 <ChevronRight className="h-4 w-4 ml-1" />
                               </Link>
@@ -494,10 +457,7 @@ export default function RoutePlannerPage() {
                     <Building2 className="h-5 w-5" />
                     Gebäudeliste
                   </CardTitle>
-                  <Select
-                    value={selectedCampus}
-                    onValueChange={setSelectedCampus}
-                  >
+                  <Select value={selectedCampus} onValueChange={setSelectedCampus}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Campus auswählen" />
                     </SelectTrigger>
@@ -522,17 +482,19 @@ export default function RoutePlannerPage() {
                   <div className="space-y-4">
                     {/* Group by campus */}
                     {Object.entries(
-                      filteredBuildings.reduce((acc, building) => {
-                        const campus = building.campus || 'other'
-                        if (!acc[campus]) acc[campus] = []
-                        acc[campus].push(building)
-                        return acc
-                      }, {} as Record<string, BuildingInfo[]>)
+                      filteredBuildings.reduce(
+                        (acc, building) => {
+                          const campus = building.campus || 'other'
+                          if (!acc[campus]) acc[campus] = []
+                          acc[campus].push(building)
+                          return acc
+                        },
+                        {} as Record<string, BuildingInfo[]>
+                      )
                     ).map(([campus, campusBuildings]) => (
                       <div key={campus}>
                         <h3 className="font-semibold text-lg mb-3">
-                          {CAMPUS_AREAS.find((c) => c.id === campus)?.name ||
-                            campus}
+                          {CAMPUS_AREAS.find((c) => c.id === campus)?.name || campus}
                         </h3>
                         <div className="space-y-2">
                           {campusBuildings.map((building) => (
@@ -559,9 +521,7 @@ export default function RoutePlannerPage() {
                                   </p>
                                   <div className="flex items-center gap-2 mt-2">
                                     {building.hasAccessibility && (
-                                      <span className="text-green-600 text-sm">
-                                        ♿
-                                      </span>
+                                      <span className="text-green-600 text-sm">♿</span>
                                     )}
                                     {building.eventCount !== undefined &&
                                       building.eventCount > 0 && (
@@ -604,20 +564,18 @@ export default function RoutePlannerPage() {
               <h3 className="font-semibold mb-2">Tipps zur Routenplanung</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>
-                  • Planen Sie genügend Zeit zwischen Veranstaltungen an
-                  verschiedenen Standorten ein (mindestens 10-15 Minuten)
+                  • Planen Sie genügend Zeit zwischen Veranstaltungen an verschiedenen Standorten
+                  ein (mindestens 10-15 Minuten)
                 </li>
                 <li>
-                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi
-                  dauert zu Fuß ca. 15-20 Minuten
+                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 15-20
+                  Minuten
                 </li>
                 <li>
-                  • Zwischen Caprivi und Haste Campus empfehlen wir den Bus zu
-                  nutzen (Linie X)
+                  • Zwischen Caprivi und Haste Campus empfehlen wir den Bus zu nutzen (Linie X)
                 </li>
                 <li>
-                  • Achten Sie auf orangene/rote Warnungen - diese zeigen
-                  kritische Zeitfenster an
+                  • Achten Sie auf orangene/rote Warnungen - diese zeigen kritische Zeitfenster an
                 </li>
               </ul>
             </div>

@@ -14,17 +14,14 @@ export async function GET(request: NextRequest) {
 
     // Session ID is optional now - if not found, create one
     let session = sessionId ? navigatorService.getSession(sessionId) : null
-    
+
     // If session not found, create a new one
     if (!session) {
       session = navigatorService.createSession()
       console.log('Created new session for recommendations:', session.id)
     }
 
-    const recommendations = await navigatorService.getRecommendations(
-      session.id,
-      limit
-    )
+    const recommendations = await navigatorService.getRecommendations(session.id, limit)
 
     return NextResponse.json({
       programs: recommendations.programs,
@@ -35,9 +32,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Recommendations error:', error)
-    return NextResponse.json(
-      { error: 'Failed to get recommendations' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get recommendations' }, { status: 500 })
   }
 }

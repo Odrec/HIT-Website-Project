@@ -4,12 +4,8 @@ import * as React from 'react'
 import { X, Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Button as _Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 
 export interface MultiSelectOption {
@@ -43,12 +39,11 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const [search, setSearch] = React.useState('')
+  const popoverContentId = React.useId()
 
   const filteredOptions = React.useMemo(() => {
     if (!search) return options
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(search.toLowerCase())
-    )
+    return options.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()))
   }, [options, search])
 
   const groupedOptions = React.useMemo(() => {
@@ -91,6 +86,7 @@ export function MultiSelect({
         <div
           role="combobox"
           aria-expanded={isOpen}
+          aria-controls={popoverContentId}
           aria-disabled={disabled}
           tabIndex={disabled ? -1 : 0}
           className={cn(
@@ -114,11 +110,7 @@ export function MultiSelect({
               <span>{placeholder}</span>
             ) : selectedOptions.length <= maxDisplay ? (
               selectedOptions.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant="secondary"
-                  className="mr-1"
-                >
+                <Badge key={option.value} variant="secondary" className="mr-1">
                   {option.label}
                   <span
                     role="button"
@@ -142,9 +134,7 @@ export function MultiSelect({
                 </Badge>
               ))
             ) : (
-              <Badge variant="secondary">
-                {selectedOptions.length} selected
-              </Badge>
+              <Badge variant="secondary">{selectedOptions.length} selected</Badge>
             )}
           </div>
           <div className="flex items-center gap-1 ml-2">
@@ -173,7 +163,7 @@ export function MultiSelect({
           </div>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent id={popoverContentId} className="w-full p-0" align="start">
         <div className="p-2 border-b">
           <Input
             placeholder={searchPlaceholder}
@@ -184,9 +174,7 @@ export function MultiSelect({
         </div>
         <div className="max-h-64 overflow-y-auto p-1">
           {filteredOptions.length === 0 ? (
-            <div className="py-6 text-center text-sm text-muted-foreground">
-              {emptyText}
-            </div>
+            <div className="py-6 text-center text-sm text-muted-foreground">{emptyText}</div>
           ) : (
             Object.entries(groupedOptions).map(([group, groupOptions]) => (
               <div key={group}>
@@ -212,9 +200,7 @@ export function MultiSelect({
                           : 'opacity-50'
                       )}
                     >
-                      {value.includes(option.value) && (
-                        <Check className="h-3 w-3" />
-                      )}
+                      {value.includes(option.value) && <Check className="h-3 w-3" />}
                     </div>
                     {option.label}
                   </button>

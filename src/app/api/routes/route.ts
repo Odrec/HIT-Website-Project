@@ -1,16 +1,7 @@
 // Route Planning API - Main Route Endpoint
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  calculateRoute,
-  calculateScheduleRoute,
-  findBuilding,
-} from '@/services/route-service'
-import type {
-  RouteWaypoint,
-  Coordinates,
-  TravelTimeSettings,
-  WalkingSpeed,
-} from '@/types/routes'
+import { calculateRoute, calculateScheduleRoute, findBuilding } from '@/services/route-service'
+import type { RouteWaypoint, Coordinates, TravelTimeSettings, WalkingSpeed } from '@/types/routes'
 
 /**
  * GET /api/routes
@@ -38,17 +29,11 @@ export async function GET(request: NextRequest) {
     const toBuilding = findBuilding(to)
 
     if (!fromBuilding) {
-      return NextResponse.json(
-        { error: `Building not found: ${from}` },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: `Building not found: ${from}` }, { status: 404 })
     }
 
     if (!toBuilding) {
-      return NextResponse.json(
-        { error: `Building not found: ${to}` },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: `Building not found: ${to}` }, { status: 404 })
     }
 
     const waypoints: RouteWaypoint[] = [
@@ -79,10 +64,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(route)
   } catch (error) {
     console.error('Route calculation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to calculate route' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to calculate route' }, { status: 500 })
   }
 }
 
@@ -99,13 +81,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const {
-      waypoints,
-      scheduledEventIds,
-      includeCurrentLocation,
-      currentCoordinates,
-      settings,
-    } = body
+    const { waypoints, scheduledEventIds, includeCurrentLocation, currentCoordinates, settings } =
+      body
 
     const travelSettings: TravelTimeSettings = {
       walkingSpeed: settings?.walkingSpeed || 'normal',
@@ -138,9 +115,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Route calculation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to calculate route' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to calculate route' }, { status: 500 })
   }
 }

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -31,24 +31,20 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
   const [result, setResult] = useState<BatchAddResult | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const scheduledEventIds = state.items.map(item => item.eventId)
+  const scheduledEventIds = state.items.map((item) => item.eventId)
 
   // Filter recommendations that aren't already in schedule
-  const availableRecommendations = recommendations.filter(
-    rec => !isInSchedule(rec.event.id)
-  )
+  const availableRecommendations = recommendations.filter((rec) => !isInSchedule(rec.event.id))
 
   const handleOpen = () => {
-    setSelectedIds(availableRecommendations.map(r => r.event.id))
+    setSelectedIds(availableRecommendations.map((r) => r.event.id))
     setResult(null)
     setOpen(true)
   }
 
   const toggleSelection = (eventId: string) => {
-    setSelectedIds(prev => 
-      prev.includes(eventId)
-        ? prev.filter(id => id !== eventId)
-        : [...prev, eventId]
+    setSelectedIds((prev) =>
+      prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId]
     )
   }
 
@@ -76,11 +72,11 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
       setResult(batchResult)
 
       // Add events to local schedule
-      const eventsToAdd = recommendations.filter(rec => 
+      const eventsToAdd = recommendations.filter((rec) =>
         batchResult.addedEventIds.includes(rec.event.id)
       )
-      
-      eventsToAdd.forEach(rec => {
+
+      eventsToAdd.forEach((rec) => {
         addEvent(rec.event)
       })
 
@@ -96,7 +92,7 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
     return null
   }
 
-  const conflictCount = availableRecommendations.filter(r => r.conflictsWithSchedule).length
+  const conflictCount = availableRecommendations.filter((r) => r.conflictsWithSchedule).length
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -121,7 +117,8 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
               <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
                 <AlertTriangle className="h-5 w-5" />
                 <span className="text-sm">
-                  {conflictCount} Veranstaltung{conflictCount > 1 ? 'en' : ''} mit Zeitüberschneidungen
+                  {conflictCount} Veranstaltung{conflictCount > 1 ? 'en' : ''} mit
+                  Zeitüberschneidungen
                 </span>
               </div>
             )}
@@ -157,10 +154,11 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{rec.event.title}</p>
                     <p className="text-xs text-gray-500">
-                      {rec.event.timeStart && new Date(rec.event.timeStart).toLocaleTimeString('de-DE', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {rec.event.timeStart &&
+                        new Date(rec.event.timeStart).toLocaleTimeString('de-DE', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -179,10 +177,7 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
               <Button variant="outline" onClick={() => setOpen(false)}>
                 Abbrechen
               </Button>
-              <Button
-                onClick={handleBatchAdd}
-                disabled={loading || selectedIds.length === 0}
-              >
+              <Button onClick={handleBatchAdd} disabled={loading || selectedIds.length === 0}>
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -218,15 +213,14 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
                   <AlertTriangle className="h-4 w-4 inline mr-2" />
-                  {result.conflictCount} Veranstaltung{result.conflictCount !== 1 ? 'en' : ''} hatten Zeitkonflikte
+                  {result.conflictCount} Veranstaltung{result.conflictCount !== 1 ? 'en' : ''}{' '}
+                  hatten Zeitkonflikte
                 </p>
               </div>
             )}
 
             <DialogFooter>
-              <Button onClick={() => setOpen(false)}>
-                Schließen
-              </Button>
+              <Button onClick={() => setOpen(false)}>Schließen</Button>
             </DialogFooter>
           </div>
         )}

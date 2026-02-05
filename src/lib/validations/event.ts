@@ -17,51 +17,58 @@ export const organizerSchema = z.object({
   internalOnly: z.boolean().default(true),
 })
 
-export const eventFormSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(200, 'Title must be less than 200 characters'),
-  description: z
-    .string()
-    .max(5000, 'Description must be less than 5000 characters')
-    .optional()
-    .default(''),
-  eventType: z.enum([
-    'VORTRAG',
-    'LABORFUEHRUNG',
-    'RUNDGANG',
-    'WORKSHOP',
-    'LINK',
-    'INFOSTAND',
-  ]),
-  timeStart: z.date().optional().nullable(),
-  timeEnd: z.date().optional().nullable(),
-  locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),
-  locationDetails: z.record(z.string(), z.unknown()).optional(),
-  roomRequest: z.string().max(500, 'Room request must be less than 500 characters').optional().default(''),
-  meetingPoint: z.string().max(500, 'Meeting point must be less than 500 characters').optional().default(''),
-  additionalInfo: z.string().max(2000, 'Additional info must be less than 2000 characters').optional().default(''),
-  photoUrl: z.string().url('Invalid URL').optional().or(z.literal('')).default(''),
-  institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
-  locationId: z.string().optional().default(''),
-  lecturers: z.array(lecturerSchema).default([]),
-  organizers: z.array(organizerSchema).default([]),
-  studyProgramIds: z.array(z.string()).default([]),
-  infoMarketIds: z.array(z.string()).default([]),
-}).refine(
-  (data) => {
-    // If event has a time start and time end, end should be after start
-    if (data.timeStart && data.timeEnd) {
-      return data.timeEnd > data.timeStart
+export const eventFormSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, 'Title is required')
+      .max(200, 'Title must be less than 200 characters'),
+    description: z
+      .string()
+      .max(5000, 'Description must be less than 5000 characters')
+      .optional()
+      .default(''),
+    eventType: z.enum(['VORTRAG', 'LABORFUEHRUNG', 'RUNDGANG', 'WORKSHOP', 'LINK', 'INFOSTAND']),
+    timeStart: z.date().optional().nullable(),
+    timeEnd: z.date().optional().nullable(),
+    locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),
+    locationDetails: z.record(z.string(), z.unknown()).optional(),
+    roomRequest: z
+      .string()
+      .max(500, 'Room request must be less than 500 characters')
+      .optional()
+      .default(''),
+    meetingPoint: z
+      .string()
+      .max(500, 'Meeting point must be less than 500 characters')
+      .optional()
+      .default(''),
+    additionalInfo: z
+      .string()
+      .max(2000, 'Additional info must be less than 2000 characters')
+      .optional()
+      .default(''),
+    photoUrl: z.string().url('Invalid URL').optional().or(z.literal('')).default(''),
+    institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
+    locationId: z.string().optional().default(''),
+    lecturers: z.array(lecturerSchema).default([]),
+    organizers: z.array(organizerSchema).default([]),
+    studyProgramIds: z.array(z.string()).default([]),
+    infoMarketIds: z.array(z.string()).default([]),
+  })
+  .refine(
+    (data) => {
+      // If event has a time start and time end, end should be after start
+      if (data.timeStart && data.timeEnd) {
+        return data.timeEnd > data.timeStart
+      }
+      return true
+    },
+    {
+      message: 'End time must be after start time',
+      path: ['timeEnd'],
     }
-    return true
-  },
-  {
-    message: 'End time must be after start time',
-    path: ['timeEnd'],
-  }
-)
+  )
 
 export type EventFormValues = z.infer<typeof eventFormSchema>
 

@@ -10,15 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import {
-  Calendar,
-  Clock,
-  AlertTriangle,
-  Trash2,
-  X,
-  ChevronRight,
-  ArrowRight,
-} from 'lucide-react'
+import { Calendar, Clock, AlertTriangle, Trash2, X, ChevronRight, ArrowRight } from 'lucide-react'
 
 interface ScheduleSidebarProps {
   isOpen: boolean
@@ -36,11 +28,7 @@ const eventTypeColors: Record<string, string> = {
   INFOSTAND: 'bg-pink-100 text-pink-800',
 }
 
-export function ScheduleSidebar({
-  isOpen,
-  onClose,
-  className,
-}: ScheduleSidebarProps) {
+export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarProps) {
   const { state, removeEvent, clearSchedule, getConflicts } = useSchedule()
   const conflicts = getConflicts()
 
@@ -64,12 +52,7 @@ export function ScheduleSidebar({
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
 
       {/* Sidebar */}
       <div
@@ -84,9 +67,7 @@ export function ScheduleSidebar({
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Mein Zeitplan</h2>
-            {state.items.length > 0 && (
-              <Badge variant="secondary">{state.items.length}</Badge>
-            )}
+            {state.items.length > 0 && <Badge variant="secondary">{state.items.length}</Badge>}
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
@@ -125,28 +106,20 @@ export function ScheduleSidebar({
               {/* Event list */}
               {sortedItems.map((item) => {
                 const hasConflict = conflicts.some(
-                  (c) =>
-                    c.event1.eventId === item.eventId ||
-                    c.event2.eventId === item.eventId
+                  (c) => c.event1.eventId === item.eventId || c.event2.eventId === item.eventId
                 )
 
                 return (
                   <Card
                     key={item.id}
-                    className={cn(
-                      'transition-all',
-                      hasConflict && 'ring-2 ring-yellow-500'
-                    )}
+                    className={cn('transition-all', hasConflict && 'ring-2 ring-yellow-500')}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-grow min-w-0">
                           <Badge
                             variant="outline"
-                            className={cn(
-                              'text-xs mb-1',
-                              eventTypeColors[item.event.eventType]
-                            )}
+                            className={cn('text-xs mb-1', eventTypeColors[item.event.eventType])}
                           >
                             {item.event.eventType}
                           </Badge>
@@ -177,9 +150,7 @@ export function ScheduleSidebar({
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          {hasConflict && (
-                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                          )}
+                          {hasConflict && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -203,11 +174,7 @@ export function ScheduleSidebar({
           <div className="flex gap-2">
             {state.items.length > 0 && (
               <>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={handleClear}
-                >
+                <Button variant="outline" className="flex-1" onClick={handleClear}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Leeren
                 </Button>
@@ -232,10 +199,7 @@ interface ScheduleFloatingButtonProps {
   className?: string
 }
 
-export function ScheduleFloatingButton({
-  onClick,
-  className,
-}: ScheduleFloatingButtonProps) {
+export function ScheduleFloatingButton({ onClick, className }: ScheduleFloatingButtonProps) {
   const { state, getConflicts } = useSchedule()
   const hasConflicts = getConflicts().length > 0
 
@@ -254,15 +218,10 @@ export function ScheduleFloatingButton({
     >
       <Calendar className="h-5 w-5 mr-2" />
       <span>Zeitplan</span>
-      <Badge
-        variant={hasConflicts ? 'destructive' : 'secondary'}
-        className="ml-2"
-      >
+      <Badge variant={hasConflicts ? 'destructive' : 'secondary'} className="ml-2">
         {state.items.length}
       </Badge>
-      {hasConflicts && (
-        <AlertTriangle className="h-4 w-4 ml-1" />
-      )}
+      {hasConflicts && <AlertTriangle className="h-4 w-4 ml-1" />}
     </Button>
   )
 }

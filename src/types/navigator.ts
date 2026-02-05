@@ -41,24 +41,24 @@ export interface MessageMetadata {
  * Types of questions the navigator can ask
  */
 export type QuestionType =
-  | 'interests'           // General interests
-  | 'skills'              // Skills and abilities
-  | 'career'              // Career goals
-  | 'institution'         // Uni vs Hochschule preference
-  | 'study_format'        // Full-time, part-time, etc.
-  | 'subjects'            // Specific subject interests
-  | 'lehramt'             // Teacher training specific
-  | 'clarification'       // Follow-up clarification
-  | 'confirmation'        // Confirming understanding
+  | 'interests' // General interests
+  | 'skills' // Skills and abilities
+  | 'career' // Career goals
+  | 'institution' // Uni vs Hochschule preference
+  | 'study_format' // Full-time, part-time, etc.
+  | 'subjects' // Specific subject interests
+  | 'lehramt' // Teacher training specific
+  | 'clarification' // Follow-up clarification
+  | 'confirmation' // Confirming understanding
 
 /**
  * Recommended program with relevance score
  */
 export interface ProgramRecommendation {
   program: StudyProgram
-  relevanceScore: number       // 0-100
-  matchReasons: string[]       // Why this program was recommended
-  relatedEvents?: Event[]      // Events for this program
+  relevanceScore: number // 0-100
+  matchReasons: string[] // Why this program was recommended
+  relatedEvents?: Event[] // Events for this program
 }
 
 /**
@@ -89,7 +89,7 @@ export interface SupportResource {
   phone?: string
   email?: string
   url?: string
-  available: string         // e.g., "24/7" or "Mo-Fr 9-17"
+  available: string // e.g., "24/7" or "Mo-Fr 9-17"
 }
 
 /**
@@ -107,12 +107,12 @@ export interface EndSessionResource {
  * Types of end-session resources
  */
 export type ResourceType =
-  | 'counseling'            // Studienberatung
-  | 'trial'                 // Schnupperstudium
-  | 'events'                // Upcoming events
-  | 'aptitude_test'         // Eignungstests
-  | 'information'           // Additional info links
-  | 'application'           // Application info
+  | 'counseling' // Studienberatung
+  | 'trial' // Schnupperstudium
+  | 'events' // Upcoming events
+  | 'aptitude_test' // Eignungstests
+  | 'information' // Additional info links
+  | 'application' // Application info
 
 /**
  * Navigator API request to send a message
@@ -179,7 +179,7 @@ export interface LLMCompletionResponse {
   content: string
   suggestedResponses?: string[]
   detectedIntents?: string[]
-  recommendedPrograms?: string[]    // Program IDs
+  recommendedPrograms?: string[] // Program IDs
   crisisKeywords?: string[]
 }
 

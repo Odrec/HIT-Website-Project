@@ -11,7 +11,7 @@ import type { BatchAddRequest } from '@/types/recommendations'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     const batchRequest: BatchAddRequest = {
       eventIds: body.eventIds || [],
       skipConflicts: body.skipConflicts ?? true,
@@ -21,10 +21,7 @@ export async function POST(request: NextRequest) {
     const scheduledEventIds = body.scheduledEventIds || []
 
     if (batchRequest.eventIds.length === 0) {
-      return NextResponse.json(
-        { error: 'No event IDs provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'No event IDs provided' }, { status: 400 })
     }
 
     const result = await recommendationService.batchAddEvents(batchRequest, scheduledEventIds)
@@ -32,9 +29,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error batch adding events:', error)
-    return NextResponse.json(
-      { error: 'Failed to batch add events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to batch add events' }, { status: 500 })
   }
 }

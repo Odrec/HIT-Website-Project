@@ -74,10 +74,7 @@ const QUESTION_TEMPLATES: Record<QuestionType, string[]> = {
     'Möchtest du später an Grundschulen, Haupt-/Realschulen oder Gymnasien unterrichten?',
     'Welche Fächerkombination könntest du dir für das Lehramt vorstellen?',
   ],
-  clarification: [
-    'Kannst du mir mehr darüber erzählen?',
-    'Was genau meinst du damit?',
-  ],
+  clarification: ['Kannst du mir mehr darüber erzählen?', 'Was genau meinst du damit?'],
   confirmation: [
     'Habe ich das richtig verstanden, dass...?',
     'Zusammenfassend interessierst du dich also für...?',
@@ -121,31 +118,52 @@ export function getSession(sessionId: string): NavigatorSession | undefined {
 export function detectCrisis(message: string): CrisisDetection {
   const lowerMessage = message.toLowerCase()
   const detectedKeywords: string[] = []
-  
+
   // Import crisis keywords
   const crisisKeywords = [
-    'selbstmord', 'suizid', 'umbringen', 'sterben wollen', 'nicht mehr leben',
-    'keinen sinn', 'hoffnungslos', 'aufgeben', 'depressiv', 'depression',
-    'verzweifelt', 'einsam', 'isoliert', 'panik', 'angst', 'überwältigt',
-    'überfordert', 'burnout', 'zusammenbruch'
+    'selbstmord',
+    'suizid',
+    'umbringen',
+    'sterben wollen',
+    'nicht mehr leben',
+    'keinen sinn',
+    'hoffnungslos',
+    'aufgeben',
+    'depressiv',
+    'depression',
+    'verzweifelt',
+    'einsam',
+    'isoliert',
+    'panik',
+    'angst',
+    'überwältigt',
+    'überfordert',
+    'burnout',
+    'zusammenbruch',
   ]
-  
+
   for (const keyword of crisisKeywords) {
     if (lowerMessage.includes(keyword)) {
       detectedKeywords.push(keyword)
     }
   }
-  
+
   if (detectedKeywords.length === 0) {
     return { detected: false, keywords: [], severity: 'low', resources: [] }
   }
-  
+
   // Determine severity
-  const highSeverityWords = ['selbstmord', 'suizid', 'umbringen', 'sterben wollen', 'nicht mehr leben']
-  const hasHighSeverity = detectedKeywords.some(k => highSeverityWords.includes(k))
-  
+  const highSeverityWords = [
+    'selbstmord',
+    'suizid',
+    'umbringen',
+    'sterben wollen',
+    'nicht mehr leben',
+  ]
+  const hasHighSeverity = detectedKeywords.some((k) => highSeverityWords.includes(k))
+
   const severity = hasHighSeverity ? 'high' : detectedKeywords.length > 2 ? 'medium' : 'low'
-  
+
   return {
     detected: true,
     keywords: detectedKeywords,
@@ -176,18 +194,20 @@ async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResp
   const openaiApiKey = process.env.OPENAI_API_KEY
   const googleApiKey = process.env.GOOGLE_AI_API_KEY
   const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-  
+
   // Try OpenAI first if available
   if (openaiApiKey) {
     return callOpenAI(request, openaiApiKey, openaiModel)
   }
-  
+
   // Fall back to Google Gemini
   if (googleApiKey) {
     return callGemini(request, googleApiKey)
   }
-  
-  console.warn('No AI API key configured (OPENAI_API_KEY or GOOGLE_AI_API_KEY), using fallback responses')
+
+  console.warn(
+    'No AI API key configured (OPENAI_API_KEY or GOOGLE_AI_API_KEY), using fallback responses'
+  )
   return getFallbackResponse(request)
 }
 
@@ -204,11 +224,11 @@ async function callOpenAI(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
-        messages: request.messages.map(m => ({
+        messages: request.messages.map((m) => ({
           role: m.role,
           content: m.content,
         })),
@@ -240,7 +260,7 @@ async function callGemini(
   apiKey: string
 ): Promise<LLMCompletionResponse> {
   const model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
-  
+
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -250,7 +270,7 @@ async function callGemini(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: request.messages.map(m => ({
+          contents: request.messages.map((m) => ({
             role: m.role === 'assistant' ? 'model' : m.role,
             parts: [{ text: m.content }],
           })),
@@ -280,7 +300,9 @@ async function callGemini(
 /**
  * Parse AI response and extract structured data
  */
-function parseAIResponse(content: string): LLMCompletionResponse & { shouldEndSession?: boolean; summary?: string } {
+function parseAIResponse(
+  content: string
+): LLMCompletionResponse & { shouldEndSession?: boolean; summary?: string } {
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
@@ -306,34 +328,63 @@ function parseAIResponse(content: string): LLMCompletionResponse & { shouldEndSe
  * Fallback response when LLM is not available
  */
 function getFallbackResponse(request: LLMCompletionRequest): LLMCompletionResponse {
-  const messageCount = request.messages.filter(m => m.role === 'user').length
-  
+  const messageCount = request.messages.filter((m) => m.role === 'user').length
+
   const questions = [
     {
-      message: 'Willkommen beim Studiennavigator! Was interessiert dich besonders? Welche Themen oder Fächer faszinieren dich?',
-      suggestions: ['Naturwissenschaften und Technik', 'Sprachen und Kultur', 'Wirtschaft und Management', 'Soziales und Gesundheit'],
+      message:
+        'Willkommen beim Studiennavigator! Was interessiert dich besonders? Welche Themen oder Fächer faszinieren dich?',
+      suggestions: [
+        'Naturwissenschaften und Technik',
+        'Sprachen und Kultur',
+        'Wirtschaft und Management',
+        'Soziales und Gesundheit',
+      ],
     },
     {
-      message: 'Das ist interessant! Arbeitest du lieber praktisch mit konkreten Projekten oder beschäftigst du dich gerne mit theoretischen Konzepten?',
-      suggestions: ['Praktisch - ich will direkt anwenden', 'Theoretisch - ich will verstehen warum', 'Eine Mischung aus beidem'],
+      message:
+        'Das ist interessant! Arbeitest du lieber praktisch mit konkreten Projekten oder beschäftigst du dich gerne mit theoretischen Konzepten?',
+      suggestions: [
+        'Praktisch - ich will direkt anwenden',
+        'Theoretisch - ich will verstehen warum',
+        'Eine Mischung aus beidem',
+      ],
     },
     {
-      message: 'Gut zu wissen! Hast du schon eine Vorstellung, in welchem Bereich du später arbeiten möchtest?',
-      suggestions: ['In der Forschung', 'In einem Unternehmen', 'Im öffentlichen Dienst', 'Selbstständig', 'Noch keine Ahnung'],
+      message:
+        'Gut zu wissen! Hast du schon eine Vorstellung, in welchem Bereich du später arbeiten möchtest?',
+      suggestions: [
+        'In der Forschung',
+        'In einem Unternehmen',
+        'Im öffentlichen Dienst',
+        'Selbstständig',
+        'Noch keine Ahnung',
+      ],
     },
     {
-      message: 'Möchtest du lieber an einer Universität oder einer Hochschule studieren? Die Uni ist forschungsorientierter, die Hochschule praxisnäher.',
-      suggestions: ['Universität', 'Hochschule', 'Das ist mir egal', 'Erkläre mir den Unterschied genauer'],
+      message:
+        'Möchtest du lieber an einer Universität oder einer Hochschule studieren? Die Uni ist forschungsorientierter, die Hochschule praxisnäher.',
+      suggestions: [
+        'Universität',
+        'Hochschule',
+        'Das ist mir egal',
+        'Erkläre mir den Unterschied genauer',
+      ],
     },
     {
-      message: 'Basierend auf deinen Antworten kann ich dir einige Studiengänge empfehlen. Schau sie dir an und klicke auf die Veranstaltungen, die dich interessieren!',
-      suggestions: ['Zeige mir die Empfehlungen', 'Ich habe noch mehr Fragen', 'Starte nochmal von vorne'],
+      message:
+        'Basierend auf deinen Antworten kann ich dir einige Studiengänge empfehlen. Schau sie dir an und klicke auf die Veranstaltungen, die dich interessieren!',
+      suggestions: [
+        'Zeige mir die Empfehlungen',
+        'Ich habe noch mehr Fragen',
+        'Starte nochmal von vorne',
+      ],
     },
   ]
-  
+
   const idx = Math.min(messageCount, questions.length - 1)
   const question = questions[idx]
-  
+
   return {
     content: question.message,
     suggestedResponses: question.suggestions,
@@ -352,19 +403,19 @@ export async function processMessage(
   crisis?: CrisisDetection
 }> {
   let session = sessions.get(sessionId)
-  
+
   if (!session) {
     session = createSession()
     session.id = sessionId
     sessions.set(sessionId, session)
   }
-  
+
   // Check for crisis keywords
   const crisis = detectCrisis(userMessage)
   if (crisis.detected) {
     session.crisisDetected = true
   }
-  
+
   // Add user message to session
   const userMsg: NavigatorMessage = {
     id: `msg-${Date.now()}`,
@@ -373,7 +424,7 @@ export async function processMessage(
     timestamp: new Date(),
   }
   session.messages.push(userMsg)
-  
+
   // If crisis detected, provide support resources
   if (crisis.detected && crisis.severity === 'high') {
     const supportMessage: NavigatorMessage = {
@@ -386,7 +437,7 @@ Die Telefonseelsorge ist rund um die Uhr erreichbar unter 0800 111 0 111 (kosten
 Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber dein Wohlbefinden hat Priorität.`,
       timestamp: new Date(),
       metadata: {
-        resources: crisis.resources.map(r => ({
+        resources: crisis.resources.map((r) => ({
           type: 'counseling' as const,
           title: r.name,
           description: r.description,
@@ -396,13 +447,13 @@ Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber d
     }
     session.messages.push(supportMessage)
     sessions.set(sessionId, session)
-    
+
     return { session, response: supportMessage, crisis }
   }
-  
+
   // Count exchanges (user messages)
-  const userMessageCount = session.messages.filter(m => m.role === 'user').length
-  
+  const userMessageCount = session.messages.filter((m) => m.role === 'user').length
+
   // Build conversation history for LLM with context
   const contextInfo = `
 
@@ -412,24 +463,27 @@ AKTUELLER STATUS:
 - ${userMessageCount >= 5 ? 'JETZT das Gespräch beenden mit shouldEndSession: true!' : ''}
 
 Bisherige Antworten des Users:
-${session.messages.filter(m => m.role === 'user').map((m, i) => `${i + 1}. "${m.content}"`).join('\n')}
+${session.messages
+  .filter((m) => m.role === 'user')
+  .map((m, i) => `${i + 1}. "${m.content}"`)
+  .join('\n')}
 `
-  
+
   const llmMessages = [
     { role: 'system' as const, content: SYSTEM_PROMPT + contextInfo },
-    ...session.messages.map(m => ({
+    ...session.messages.map((m) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
   ]
-  
+
   // Call LLM
   const llmResponse = await callLLM({
     messages: llmMessages,
     temperature: 0.7,
     maxTokens: 1024,
   })
-  
+
   // Create assistant message
   const assistantMsg: NavigatorMessage = {
     id: `msg-${Date.now() + 1}`,
@@ -441,22 +495,22 @@ ${session.messages.filter(m => m.role === 'user').map((m, i) => `${i + 1}. "${m.
       questionType: llmResponse.detectedIntents?.[0] as QuestionType | undefined,
     },
   }
-  
+
   session.messages.push(assistantMsg)
-  
+
   // Track asked question type
   if (llmResponse.detectedIntents?.[0]) {
     session.askedQuestions.push(llmResponse.detectedIntents[0])
   }
-  
+
   // Check if session should end - either from LLM or after 5+ user messages
   const extendedResponse = llmResponse as LLMCompletionResponse & { shouldEndSession?: boolean }
   if (extendedResponse.shouldEndSession || userMessageCount >= 5 || session.messages.length >= 12) {
     session.completed = true
   }
-  
+
   sessions.set(sessionId, session)
-  
+
   return { session, response: assistantMsg, crisis: crisis.detected ? crisis : undefined }
 }
 
@@ -472,14 +526,15 @@ export async function getRecommendations(
   endResources: EndSessionResource[]
 }> {
   const session = sessions.get(sessionId)
-  
+
   // Extract keywords from conversation
-  const conversationText = session?.messages
-    .filter(m => m.role === 'user')
-    .map(m => m.content)
-    .join(' ')
-    .toLowerCase() || ''
-  
+  const conversationText =
+    session?.messages
+      .filter((m) => m.role === 'user')
+      .map((m) => m.content)
+      .join(' ')
+      .toLowerCase() || ''
+
   // Get all programs from database
   const programs = await prisma.studyProgram.findMany({
     include: {
@@ -496,28 +551,28 @@ export async function getRecommendations(
       },
     },
   })
-  
+
   // Score programs based on keyword matching
-  const scoredPrograms = programs.map(program => {
+  const scoredPrograms = programs.map((program) => {
     let score = 50 // Base score
     const reasons: string[] = []
-    
+
     // Check for keyword matches
     const programName = program.name.toLowerCase()
     const clusterName = program.cluster?.name?.toLowerCase() || ''
-    
+
     // DIRECT PROGRAM NAME MATCH - highest priority!
     // Extract core program name (without degree suffix like B.Eng., M.Sc., etc.)
     const coreNameMatch = programName.match(/^([^(]+)/)
     const coreName = coreNameMatch ? coreNameMatch[1].trim() : programName
-    
+
     // Check if user explicitly mentioned this program name
     if (conversationText.includes(coreName)) {
       score += 40 // Very high boost for explicit mention
       reasons.push('Direkt von dir erwähnt')
     } else {
       // Check for partial matches of significant words in program name
-      const programWords = coreName.split(/\s+/).filter(w => w.length > 4)
+      const programWords = coreName.split(/\s+/).filter((w) => w.length > 4)
       for (const word of programWords) {
         if (conversationText.includes(word)) {
           score += 35 // High boost for mentioning key program words
@@ -526,29 +581,59 @@ export async function getRecommendations(
         }
       }
     }
-    
+
     // Interest matching
-    if (conversationText.includes('technik') && (programName.includes('technik') || programName.includes('ingenieur') || programName.includes('maschinenbau'))) {
+    if (
+      conversationText.includes('technik') &&
+      (programName.includes('technik') ||
+        programName.includes('ingenieur') ||
+        programName.includes('maschinenbau'))
+    ) {
       score += 20
       reasons.push('Passt zu deinem Interesse an Technik')
     }
-    if (conversationText.includes('naturwissenschaft') && (programName.includes('physik') || programName.includes('chemie') || programName.includes('biologie'))) {
+    if (
+      conversationText.includes('naturwissenschaft') &&
+      (programName.includes('physik') ||
+        programName.includes('chemie') ||
+        programName.includes('biologie'))
+    ) {
       score += 20
       reasons.push('Naturwissenschaftlicher Studiengang')
     }
-    if (conversationText.includes('wirtschaft') && (programName.includes('wirtschaft') || programName.includes('bwl') || programName.includes('management'))) {
+    if (
+      conversationText.includes('wirtschaft') &&
+      (programName.includes('wirtschaft') ||
+        programName.includes('bwl') ||
+        programName.includes('management'))
+    ) {
       score += 20
       reasons.push('Wirtschaftlicher Schwerpunkt')
     }
-    if (conversationText.includes('sozial') && (programName.includes('sozial') || programName.includes('pädagogik') || programName.includes('psychologie'))) {
+    if (
+      conversationText.includes('sozial') &&
+      (programName.includes('sozial') ||
+        programName.includes('pädagogik') ||
+        programName.includes('psychologie'))
+    ) {
       score += 20
       reasons.push('Sozialwissenschaftlicher Fokus')
     }
-    if (conversationText.includes('sprache') && (programName.includes('sprach') || programName.includes('germanistik') || programName.includes('anglistik'))) {
+    if (
+      conversationText.includes('sprache') &&
+      (programName.includes('sprach') ||
+        programName.includes('germanistik') ||
+        programName.includes('anglistik'))
+    ) {
       score += 20
       reasons.push('Sprachwissenschaftlicher Studiengang')
     }
-    if (conversationText.includes('informatik') && (programName.includes('informatik') || programName.includes('software') || programName.includes('computer'))) {
+    if (
+      conversationText.includes('informatik') &&
+      (programName.includes('informatik') ||
+        programName.includes('software') ||
+        programName.includes('computer'))
+    ) {
       score += 25
       reasons.push('Informatik-Studiengang')
     }
@@ -556,15 +641,17 @@ export async function getRecommendations(
       score += 30
       reasons.push('Lehramtsstudiengang')
     }
-    
+
     // Institution preference - check for full names and abbreviations
-    const wantsUni = conversationText.includes('universität') ||
-                     /\buni\b/.test(conversationText) ||
-                     conversationText.includes('uos')
-    const wantsHS = conversationText.includes('hochschule') ||
-                    /\bhs\b/.test(conversationText) ||
-                    conversationText.includes('osnabrück hochschule')
-    
+    const wantsUni =
+      conversationText.includes('universität') ||
+      /\buni\b/.test(conversationText) ||
+      conversationText.includes('uos')
+    const wantsHS =
+      conversationText.includes('hochschule') ||
+      /\bhs\b/.test(conversationText) ||
+      conversationText.includes('osnabrück hochschule')
+
     if (wantsUni && program.institution === 'UNI') {
       score += 15
       reasons.push('An der Universität (deine Präferenz)')
@@ -580,7 +667,7 @@ export async function getRecommendations(
     if (wantsHS && !wantsUni && program.institution === 'UNI') {
       score -= 5
     }
-    
+
     // Practical vs theoretical preference
     if (conversationText.includes('praktisch') && program.institution === 'HOCHSCHULE') {
       score += 10
@@ -590,16 +677,16 @@ export async function getRecommendations(
       score += 10
       reasons.push('Forschungsorientiertes Studium')
     }
-    
+
     // Add some randomness to avoid identical results
     score += Math.random() * 5
-    
+
     if (reasons.length === 0) {
       reasons.push('Könnte zu deinen Interessen passen')
     }
-    
+
     // Map events
-    const relatedEvents: Event[] = program.events.map(ep => ({
+    const relatedEvents: Event[] = program.events.map((ep) => ({
       id: ep.event.id,
       title: ep.event.title,
       description: ep.event.description || undefined,
@@ -614,14 +701,16 @@ export async function getRecommendations(
       photoUrl: ep.event.photoUrl || undefined,
       institution: ep.event.institution as unknown as Institution,
       locationId: ep.event.locationId || undefined,
-      location: ep.event.location ? {
-        id: ep.event.location.id,
-        buildingName: ep.event.location.buildingName,
-        roomNumber: ep.event.location.roomNumber || undefined,
-        address: ep.event.location.address || undefined,
-        latitude: ep.event.location.latitude || undefined,
-        longitude: ep.event.location.longitude || undefined,
-      } : undefined,
+      location: ep.event.location
+        ? {
+            id: ep.event.location.id,
+            buildingName: ep.event.location.buildingName,
+            roomNumber: ep.event.location.roomNumber || undefined,
+            address: ep.event.location.address || undefined,
+            latitude: ep.event.location.latitude || undefined,
+            longitude: ep.event.location.longitude || undefined,
+          }
+        : undefined,
       createdAt: new Date(ep.event.createdAt),
       updatedAt: new Date(ep.event.updatedAt),
     }))
@@ -631,11 +720,13 @@ export async function getRecommendations(
       name: program.name,
       institution: program.institution as unknown as Institution,
       clusterId: program.clusterId || undefined,
-      cluster: program.cluster ? {
-        id: program.cluster.id,
-        name: program.cluster.name,
-        description: program.cluster.description || undefined,
-      } : undefined,
+      cluster: program.cluster
+        ? {
+            id: program.cluster.id,
+            name: program.cluster.name,
+            description: program.cluster.description || undefined,
+          }
+        : undefined,
     }
 
     return {
@@ -645,12 +736,12 @@ export async function getRecommendations(
       relatedEvents,
     } as ProgramRecommendation
   })
-  
+
   // Sort by score and limit - only include programs with 60%+ relevance
   scoredPrograms.sort((a, b) => b.relevanceScore - a.relevanceScore)
-  const qualifiedPrograms = scoredPrograms.filter(p => p.relevanceScore >= 60)
+  const qualifiedPrograms = scoredPrograms.filter((p) => p.relevanceScore >= 60)
   const topPrograms = qualifiedPrograms.slice(0, limit)
-  
+
   // Group by cluster
   const clusterMap: Record<string, ProgramRecommendation[]> = {}
   for (const prog of topPrograms) {
@@ -670,12 +761,14 @@ export async function getRecommendations(
       clusters.push({
         cluster,
         programs: progs,
-        averageScore: progs.reduce((acc: number, p: ProgramRecommendation) => acc + p.relevanceScore, 0) / progs.length,
+        averageScore:
+          progs.reduce((acc: number, p: ProgramRecommendation) => acc + p.relevanceScore, 0) /
+          progs.length,
       })
     }
   }
   clusters.sort((a, b) => b.averageScore - a.averageScore)
-  
+
   // End session resources
   const endResources: EndSessionResource[] = [
     {
@@ -707,7 +800,7 @@ export async function getRecommendations(
       icon: 'ClipboardCheck',
     },
   ]
-  
+
   return { programs: topPrograms, clusters, endResources }
 }
 
@@ -738,49 +831,53 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       timeStart: 'asc',
     },
   })
-  
-  return events.map((e): Event => ({
-    id: e.id,
-    title: e.title,
-    description: e.description || undefined,
-    eventType: e.eventType as unknown as EventType,
-    timeStart: e.timeStart ? new Date(e.timeStart) : undefined,
-    timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
-    locationType: e.locationType as unknown as LocationType,
-    locationDetails: e.locationDetails as Record<string, unknown> | undefined,
-    roomRequest: e.roomRequest || undefined,
-    meetingPoint: e.meetingPoint || undefined,
-    additionalInfo: e.additionalInfo || undefined,
-    photoUrl: e.photoUrl || undefined,
-    institution: e.institution as unknown as Institution,
-    locationId: e.locationId || undefined,
-    location: e.location ? {
-      id: e.location.id,
-      buildingName: e.location.buildingName,
-      roomNumber: e.location.roomNumber || undefined,
-      address: e.location.address || undefined,
-      latitude: e.location.latitude || undefined,
-      longitude: e.location.longitude || undefined,
-    } : undefined,
-    lecturers: e.lecturers.map(l => ({
-      id: l.id,
-      eventId: l.eventId,
-      firstName: l.firstName,
-      lastName: l.lastName,
-      title: l.title || undefined,
-      email: l.email || undefined,
-      building: l.building || undefined,
-      roomNumber: l.roomNumber || undefined,
-    })),
-    studyPrograms: e.studyPrograms.map(sp => ({
-      id: sp.studyProgram.id,
-      name: sp.studyProgram.name,
-      institution: sp.studyProgram.institution as unknown as Institution,
-      clusterId: sp.studyProgram.clusterId || undefined,
-    })),
-    createdAt: new Date(e.createdAt),
-    updatedAt: new Date(e.updatedAt),
-  }))
+
+  return events.map(
+    (e): Event => ({
+      id: e.id,
+      title: e.title,
+      description: e.description || undefined,
+      eventType: e.eventType as unknown as EventType,
+      timeStart: e.timeStart ? new Date(e.timeStart) : undefined,
+      timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
+      locationType: e.locationType as unknown as LocationType,
+      locationDetails: e.locationDetails as Record<string, unknown> | undefined,
+      roomRequest: e.roomRequest || undefined,
+      meetingPoint: e.meetingPoint || undefined,
+      additionalInfo: e.additionalInfo || undefined,
+      photoUrl: e.photoUrl || undefined,
+      institution: e.institution as unknown as Institution,
+      locationId: e.locationId || undefined,
+      location: e.location
+        ? {
+            id: e.location.id,
+            buildingName: e.location.buildingName,
+            roomNumber: e.location.roomNumber || undefined,
+            address: e.location.address || undefined,
+            latitude: e.location.latitude || undefined,
+            longitude: e.location.longitude || undefined,
+          }
+        : undefined,
+      lecturers: e.lecturers.map((l) => ({
+        id: l.id,
+        eventId: l.eventId,
+        firstName: l.firstName,
+        lastName: l.lastName,
+        title: l.title || undefined,
+        email: l.email || undefined,
+        building: l.building || undefined,
+        roomNumber: l.roomNumber || undefined,
+      })),
+      studyPrograms: e.studyPrograms.map((sp) => ({
+        id: sp.studyProgram.id,
+        name: sp.studyProgram.name,
+        institution: sp.studyProgram.institution as unknown as Institution,
+        clusterId: sp.studyProgram.clusterId || undefined,
+      })),
+      createdAt: new Date(e.createdAt),
+      updatedAt: new Date(e.updatedAt),
+    })
+  )
 }
 
 /**

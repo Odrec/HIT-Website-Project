@@ -9,7 +9,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { RefreshCw, Filter, Sparkles, TrendingUp } from 'lucide-react'
 import { RecommendationCard } from './RecommendationCard'
 import { useSchedule } from '@/contexts/schedule-context'
-import type { RecommendationResult, EventRecommendation, RecommendationGroup } from '@/types/recommendations'
+import type {
+  RecommendationResult,
+  EventRecommendation,
+  RecommendationGroup,
+} from '@/types/recommendations'
 
 interface RecommendationListProps {
   studyProgramIds?: string[]
@@ -45,13 +49,12 @@ export function RecommendationList({
 
   // Create a stable key for scheduled event IDs to track schedule changes
   const scheduledEventIdsKey = useMemo(
-    () => state.items.map(item => item.eventId).join(','),
+    () => state.items.map((item) => item.eventId).join(','),
     [state.items]
   )
 
   // Fetch recommendations on mount and when filters or schedule changes
   useEffect(() => {
-
     // Cancel any pending request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -63,8 +66,8 @@ export function RecommendationList({
       setError(null)
 
       try {
-        const scheduledEventIds = state.items.map(item => item.eventId)
-        
+        const scheduledEventIds = state.items.map((item) => item.eventId)
+
         const response = await fetch('/api/recommendations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -105,11 +108,11 @@ export function RecommendationList({
         abortControllerRef.current.abort()
       }
     }
-  // Re-fetch when filters, refreshTrigger, or schedule changes
+    // Re-fetch when filters, refreshTrigger, or schedule changes
   }, [excludeConflicts, onlyHighDemand, refreshTrigger, scheduledEventIdsKey])
 
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1)
+    setRefreshTrigger((prev) => prev + 1)
   }
 
   const handleViewDetails = (eventId: string) => {
@@ -121,15 +124,15 @@ export function RecommendationList({
   }
 
   const handleDismiss = (eventId: string) => {
-    setDismissedIds(prev => [...prev, eventId])
-    setRecommendations(prev => prev.filter(rec => rec.event.id !== eventId))
+    setDismissedIds((prev) => [...prev, eventId])
+    setRecommendations((prev) => prev.filter((rec) => rec.event.id !== eventId))
   }
 
   const filteredRecommendations = selectedGroup
-    ? recommendations.filter(rec => {
-        const group = groups.find(g => g.category === selectedGroup)
+    ? recommendations.filter((rec) => {
+        const group = groups.find((g) => g.category === selectedGroup)
         if (!group) return false
-        return group.recommendations.some(r => r.event.id === rec.event.id)
+        return group.recommendations.some((r) => r.event.id === rec.event.id)
       })
     : recommendations
 

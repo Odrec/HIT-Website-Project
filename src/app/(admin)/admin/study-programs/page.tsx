@@ -105,7 +105,10 @@ export default function StudyProgramsPage() {
 
   // Delete Dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'program' | 'cluster'; item: StudyProgram | Cluster } | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<{
+    type: 'program' | 'cluster'
+    item: StudyProgram | Cluster
+  } | null>(null)
   const [deleting, setDeleting] = useState(false)
 
   const fetchData = useCallback(async () => {
@@ -265,9 +268,10 @@ export default function StudyProgramsPage() {
 
     setDeleting(true)
     try {
-      const url = itemToDelete.type === 'program'
-        ? `/api/study-programs/${itemToDelete.item.id}`
-        : `/api/study-programs/clusters/${itemToDelete.item.id}`
+      const url =
+        itemToDelete.type === 'program'
+          ? `/api/study-programs/${itemToDelete.item.id}`
+          : `/api/study-programs/clusters/${itemToDelete.item.id}`
 
       const response = await fetch(url, { method: 'DELETE' })
 
@@ -293,9 +297,7 @@ export default function StudyProgramsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Studiengänge</h1>
-          <p className="text-muted-foreground">
-            Verwalten Sie Studiengänge und Cluster
-          </p>
+          <p className="text-muted-foreground">Verwalten Sie Studiengänge und Cluster</p>
         </div>
       </div>
 
@@ -338,7 +340,10 @@ export default function StudyProgramsPage() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                <Select value={institutionFilter || "__all__"} onValueChange={(v) => setInstitutionFilter(v === "__all__" ? "" : v)}>
+                <Select
+                  value={institutionFilter || '__all__'}
+                  onValueChange={(v) => setInstitutionFilter(v === '__all__' ? '' : v)}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Alle Institutionen" />
                   </SelectTrigger>
@@ -370,7 +375,9 @@ export default function StudyProgramsPage() {
                 </div>
               ) : filteredPrograms.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  {search || institutionFilter ? 'Keine Studiengänge gefunden' : 'Noch keine Studiengänge vorhanden'}
+                  {search || institutionFilter
+                    ? 'Keine Studiengänge gefunden'
+                    : 'Noch keine Studiengänge vorhanden'}
                 </div>
               ) : (
                 <Table>
@@ -482,7 +489,9 @@ export default function StudyProgramsPage() {
                   </TableHeader>
                   <TableBody>
                     {clusters.map((cluster) => {
-                      const programCount = studyPrograms.filter(p => p.clusterId === cluster.id).length
+                      const programCount = studyPrograms.filter(
+                        (p) => p.clusterId === cluster.id
+                      ).length
                       return (
                         <TableRow key={cluster.id}>
                           <TableCell className="font-medium">
@@ -553,9 +562,7 @@ export default function StudyProgramsPage() {
               <Input
                 id="programName"
                 value={programFormData.name}
-                onChange={(e) =>
-                  setProgramFormData({ ...programFormData, name: e.target.value })
-                }
+                onChange={(e) => setProgramFormData({ ...programFormData, name: e.target.value })}
                 placeholder="z.B. Informatik, BWL, Maschinenbau"
               />
             </div>
@@ -595,9 +602,12 @@ export default function StudyProgramsPage() {
             <div className="space-y-2">
               <Label htmlFor="cluster">Cluster</Label>
               <Select
-                value={programFormData.clusterId || "__none__"}
+                value={programFormData.clusterId || '__none__'}
                 onValueChange={(value) =>
-                  setProgramFormData({ ...programFormData, clusterId: value === "__none__" ? "" : value })
+                  setProgramFormData({
+                    ...programFormData,
+                    clusterId: value === '__none__' ? '' : value,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -621,7 +631,10 @@ export default function StudyProgramsPage() {
             <Button variant="outline" onClick={() => setProgramDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button onClick={handleSaveProgram} disabled={savingProgram || !programFormData.name.trim()}>
+            <Button
+              onClick={handleSaveProgram}
+              disabled={savingProgram || !programFormData.name.trim()}
+            >
               {savingProgram ? 'Speichern...' : editingProgram ? 'Speichern' : 'Erstellen'}
             </Button>
           </DialogFooter>
@@ -632,9 +645,7 @@ export default function StudyProgramsPage() {
       <Dialog open={clusterDialogOpen} onOpenChange={setClusterDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingCluster ? 'Cluster bearbeiten' : 'Neuer Cluster'}
-            </DialogTitle>
+            <DialogTitle>{editingCluster ? 'Cluster bearbeiten' : 'Neuer Cluster'}</DialogTitle>
             <DialogDescription>
               {editingCluster
                 ? 'Bearbeiten Sie die Details des Clusters'
@@ -647,9 +658,7 @@ export default function StudyProgramsPage() {
               <Input
                 id="clusterName"
                 value={clusterFormData.name}
-                onChange={(e) =>
-                  setClusterFormData({ ...clusterFormData, name: e.target.value })
-                }
+                onChange={(e) => setClusterFormData({ ...clusterFormData, name: e.target.value })}
                 placeholder="z.B. Naturwissenschaften, Wirtschaft"
               />
             </div>
@@ -669,7 +678,10 @@ export default function StudyProgramsPage() {
             <Button variant="outline" onClick={() => setClusterDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button onClick={handleSaveCluster} disabled={savingCluster || !clusterFormData.name.trim()}>
+            <Button
+              onClick={handleSaveCluster}
+              disabled={savingCluster || !clusterFormData.name.trim()}
+            >
               {savingCluster ? 'Speichern...' : editingCluster ? 'Speichern' : 'Erstellen'}
             </Button>
           </DialogFooter>
@@ -684,11 +696,12 @@ export default function StudyProgramsPage() {
               {itemToDelete?.type === 'program' ? 'Studiengang löschen' : 'Cluster löschen'}
             </DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie &quot;{itemToDelete?.item.name}&quot; löschen möchten? 
-              Diese Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie &quot;{itemToDelete?.item.name}&quot; löschen möchten? Diese
+              Aktion kann nicht rückgängig gemacht werden.
               {itemToDelete?.type === 'cluster' && (
                 <span className="block mt-2 text-amber-600">
-                  Hinweis: Die zugehörigen Studiengänge werden nicht gelöscht, sondern nur vom Cluster getrennt.
+                  Hinweis: Die zugehörigen Studiengänge werden nicht gelöscht, sondern nur vom
+                  Cluster getrennt.
                 </span>
               )}
             </DialogDescription>
@@ -703,11 +716,7 @@ export default function StudyProgramsPage() {
             >
               Abbrechen
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>

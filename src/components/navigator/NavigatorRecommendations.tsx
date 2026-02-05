@@ -103,11 +103,9 @@ export function NavigatorRecommendations({
                       <span className="text-lg font-medium text-muted-foreground">
                         #{index + 1}
                       </span>
-                      <CardTitle className="text-base">
-                        {rec.program.name}
-                      </CardTitle>
+                      <CardTitle className="text-base">{rec.program.name}</CardTitle>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Building2 className="w-4 h-4" />
                       <span>{getInstitutionLabel(rec.program.institution)}</span>
@@ -149,10 +147,7 @@ export function NavigatorRecommendations({
                           key={event.id}
                           className="flex items-center gap-2 p-2 bg-muted rounded-md"
                         >
-                          <Link
-                            href={`/events/${event.id}`}
-                            className="flex-1 hover:underline"
-                          >
+                          <Link href={`/events/${event.id}`} className="flex-1 hover:underline">
                             <div className="font-medium text-sm">{event.title}</div>
                             {event.timeStart && (
                               <div className="text-xs text-muted-foreground">
@@ -169,7 +164,7 @@ export function NavigatorRecommendations({
                           <AddToScheduleButton event={event as Event} size="sm" variant="ghost" />
                         </div>
                       ))}
-                      
+
                       {rec.relatedEvents!.length > 3 && (
                         <Button
                           variant="ghost"

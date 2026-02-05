@@ -50,20 +50,20 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
   const initializeSession = useCallback(async () => {
     if (initializingRef.current || sessionId) return
     initializingRef.current = true
-    
+
     setIsLoading(true)
     try {
       const response = await fetch('/api/navigator')
       if (!response.ok) throw new Error('Failed to initialize')
-      
+
       const data = await response.json()
       setSessionId(data.sessionId)
-      
+
       // Set the model name if provided
       if (data.model) {
         setModelName(data.model)
       }
-      
+
       const initialMessage: NavigatorMessageType = {
         id: data.message.id,
         role: 'assistant',
@@ -71,7 +71,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         timestamp: new Date(data.message.timestamp),
         metadata: data.message.metadata,
       }
-      
+
       setMessages([initialMessage])
       setSuggestions(data.message.metadata?.suggestedResponses || [])
     } catch (error) {
@@ -161,9 +161,9 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
       const url = sessionId
         ? `/api/navigator/recommendations?sessionId=${sessionId}&limit=10`
         : `/api/navigator/recommendations?limit=10`
-      
+
       const response = await fetch(url)
-      
+
       if (!response.ok) {
         console.error('Recommendations response not ok:', response.status)
         // Still show the panel even if there's an error
@@ -175,7 +175,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
       setRecommendations(data.programs || [])
       setEndResources(data.endResources || [])
       setShowRecommendations(true)
-      
+
       // Update session ID if a new one was created
       if (data.newSessionId && data.newSessionId !== sessionId) {
         setSessionId(data.newSessionId)
@@ -240,17 +240,10 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
                   Studiennavigator
                 </CardTitle>
                 {modelName && (
-                  <span className="text-xs text-muted-foreground">
-                    Powered by {modelName}
-                  </span>
+                  <span className="text-xs text-muted-foreground">Powered by {modelName}</span>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRestart}
-                disabled={isLoading}
-              >
+              <Button variant="ghost" size="sm" onClick={handleRestart} disabled={isLoading}>
                 <RotateCcw className="w-4 h-4 mr-1" />
                 Neu starten
               </Button>
@@ -296,10 +289,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
             )}
 
             {/* Input */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 border-t flex gap-2"
-            >
+            <form onSubmit={handleSubmit} className="p-4 border-t flex gap-2">
               <Input
                 ref={inputRef}
                 value={inputValue}
@@ -308,11 +298,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
                 disabled={isLoading}
                 className="flex-1"
               />
-              <Button
-                type="submit"
-                disabled={isLoading || !inputValue.trim()}
-                size="icon"
-              >
+              <Button type="submit" disabled={isLoading || !inputValue.trim()} size="icon">
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
@@ -333,9 +319,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
             onViewEvents={handleViewEvents}
           />
 
-          {endResources.length > 0 && (
-            <EndSessionResources resources={endResources} />
-          )}
+          {endResources.length > 0 && <EndSessionResources resources={endResources} />}
         </div>
       )}
 

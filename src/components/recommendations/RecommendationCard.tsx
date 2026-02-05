@@ -4,15 +4,7 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  Clock, 
-  MapPin, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
-  Plus,
-  Star
-} from 'lucide-react'
+import { Clock, MapPin, TrendingUp, AlertTriangle, CheckCircle, Plus, Star } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import type { EventRecommendation } from '@/types/recommendations'
 
@@ -22,13 +14,14 @@ interface RecommendationCardProps {
   onDismiss?: (eventId: string) => void
 }
 
-export function RecommendationCard({ 
-  recommendation, 
+export function RecommendationCard({
+  recommendation,
   onViewDetails,
-  onDismiss 
+  onDismiss,
 }: RecommendationCardProps) {
   const { addEvent, isInSchedule } = useSchedule()
-  const { event, score, reasons, conflictsWithSchedule, isHighDemand, travelTimeFromPrevious } = recommendation
+  const { event, score, reasons, conflictsWithSchedule, isHighDemand, travelTimeFromPrevious } =
+    recommendation
   const isScheduled = isInSchedule(event.id)
 
   const handleAddToSchedule = () => {
@@ -71,7 +64,9 @@ export function RecommendationCard({
   return (
     <Card className={`relative ${conflictsWithSchedule ? 'border-yellow-400 bg-yellow-50' : ''}`}>
       {/* Score Badge */}
-      <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-sm font-semibold ${getScoreColor(score)}`}>
+      <div
+        className={`absolute top-3 right-3 px-2 py-1 rounded-full text-sm font-semibold ${getScoreColor(score)}`}
+      >
         {score}% Match
       </div>
 
@@ -95,9 +90,7 @@ export function RecommendationCard({
 
       <CardContent className="space-y-3">
         {/* Event Type */}
-        <Badge variant="outline">
-          {eventTypeLabels[event.eventType] || event.eventType}
-        </Badge>
+        <Badge variant="outline">{eventTypeLabels[event.eventType] || event.eventType}</Badge>
 
         {/* Time and Date */}
         {event.timeStart && (
@@ -158,9 +151,9 @@ export function RecommendationCard({
               Im Zeitplan
             </Button>
           ) : (
-            <Button 
-              variant="default" 
-              size="sm" 
+            <Button
+              variant="default"
+              size="sm"
               onClick={handleAddToSchedule}
               className="flex-1"
               disabled={conflictsWithSchedule}
@@ -169,16 +162,12 @@ export function RecommendationCard({
               Hinzufügen
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onViewDetails?.(event.id)}
-          >
+          <Button variant="outline" size="sm" onClick={() => onViewDetails?.(event.id)}>
             Details
           </Button>
           {onDismiss && !isScheduled && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => onDismiss(event.id)}
               className="text-gray-500"

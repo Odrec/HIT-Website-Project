@@ -8,14 +8,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Clock,
-  MapPin,
-  AlertTriangle,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-} from 'lucide-react'
+import { Clock, MapPin, AlertTriangle, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 
 interface ScheduleTimelineProps {
   selectedDate?: Date
@@ -48,7 +41,11 @@ const eventTypeColors: Record<string, string> = {
 const TIME_SLOTS = Array.from({ length: 21 }, (_, i) => {
   const hour = Math.floor(i / 2) + 8
   const minute = (i % 2) * 30
-  return { hour, minute, label: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}` }
+  return {
+    hour,
+    minute,
+    label: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+  }
 })
 
 interface TimeSlotEvent {
@@ -248,10 +245,12 @@ export function ScheduleTimeline({
                           >
                             {eventTypeLabels[item.scheduleEvent.event.eventType]}
                           </Badge>
-                          <h4 className={cn(
-                            'font-medium line-clamp-2',
-                            compact ? 'text-xs' : 'text-sm'
-                          )}>
+                          <h4
+                            className={cn(
+                              'font-medium line-clamp-2',
+                              compact ? 'text-xs' : 'text-sm'
+                            )}
+                          >
                             {item.scheduleEvent.event.title}
                           </h4>
                         </div>
@@ -271,7 +270,10 @@ export function ScheduleTimeline({
                               <span>
                                 {format(new Date(item.scheduleEvent.event.timeStart), 'HH:mm')}
                                 {item.scheduleEvent.event.timeEnd && (
-                                  <> - {format(new Date(item.scheduleEvent.event.timeEnd), 'HH:mm')}</>
+                                  <>
+                                    {' '}
+                                    - {format(new Date(item.scheduleEvent.event.timeEnd), 'HH:mm')}
+                                  </>
                                 )}
                               </span>
                             </div>
@@ -329,9 +331,7 @@ export function ScheduleTimeline({
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-destructive hover:text-destructive"
-                            onClick={() =>
-                              handleRemoveEvent(item.scheduleEvent.eventId)
-                            }
+                            onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
                             title="Entfernen"
                           >
                             <Trash2 className="h-3 w-3" />

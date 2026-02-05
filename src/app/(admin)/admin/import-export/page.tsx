@@ -23,7 +23,7 @@ export default function ImportExportPage() {
     try {
       const response = await fetch('/api/events?pageSize=1000')
       const data = await response.json()
-      
+
       // Convert to CSV
       const events = data.data || []
       if (events.length === 0) {
@@ -47,41 +47,47 @@ export default function ImportExportPage() {
         'Dozenten',
       ]
 
-      const rows = events.map((event: {
-        id: string
-        title: string
-        description: string | null
-        eventType: string
-        institution: string
-        timeStart: string | null
-        timeEnd: string | null
-        locationType: string
-        meetingPoint: string | null
-        additionalInfo: string | null
-        photoUrl: string | null
-        studyPrograms: { studyProgram: { name: string } }[]
-        lecturers: { firstName: string; lastName: string; title: string | null }[]
-      }) => [
-        event.id,
-        event.title,
-        event.description || '',
-        event.eventType,
-        event.institution,
-        event.timeStart || '',
-        event.timeEnd || '',
-        event.locationType,
-        event.meetingPoint || '',
-        event.additionalInfo || '',
-        event.photoUrl || '',
-        event.studyPrograms?.map((sp: { studyProgram: { name: string } }) => sp.studyProgram.name).join('; ') || '',
-        event.lecturers?.map((l: { firstName: string; lastName: string; title: string | null }) => 
-          `${l.title || ''} ${l.firstName} ${l.lastName}`.trim()
-        ).join('; ') || '',
-      ])
+      const rows = events.map(
+        (event: {
+          id: string
+          title: string
+          description: string | null
+          eventType: string
+          institution: string
+          timeStart: string | null
+          timeEnd: string | null
+          locationType: string
+          meetingPoint: string | null
+          additionalInfo: string | null
+          photoUrl: string | null
+          studyPrograms: { studyProgram: { name: string } }[]
+          lecturers: { firstName: string; lastName: string; title: string | null }[]
+        }) => [
+          event.id,
+          event.title,
+          event.description || '',
+          event.eventType,
+          event.institution,
+          event.timeStart || '',
+          event.timeEnd || '',
+          event.locationType,
+          event.meetingPoint || '',
+          event.additionalInfo || '',
+          event.photoUrl || '',
+          event.studyPrograms
+            ?.map((sp: { studyProgram: { name: string } }) => sp.studyProgram.name)
+            .join('; ') || '',
+          event.lecturers
+            ?.map((l: { firstName: string; lastName: string; title: string | null }) =>
+              `${l.title || ''} ${l.firstName} ${l.lastName}`.trim()
+            )
+            .join('; ') || '',
+        ]
+      )
 
       const csvContent = [
         headers.join(','),
-        ...rows.map((row: string[]) => 
+        ...rows.map((row: string[]) =>
           row.map((cell: string) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
         ),
       ].join('\n')
@@ -114,7 +120,7 @@ export default function ImportExportPage() {
     try {
       const text = await file.text()
       const lines = text.split('\n').filter((line) => line.trim())
-      
+
       if (lines.length < 2) {
         setImportResult({
           success: false,
@@ -126,15 +132,13 @@ export default function ImportExportPage() {
 
       // Parse CSV
       const headers = parseCSVLine(lines[0])
-      const titleIndex = headers.findIndex((h) => 
-        h.toLowerCase().includes('titel') || h.toLowerCase().includes('title')
+      const titleIndex = headers.findIndex(
+        (h) => h.toLowerCase().includes('titel') || h.toLowerCase().includes('title')
       )
-      const typeIndex = headers.findIndex((h) => 
-        h.toLowerCase().includes('typ') || h.toLowerCase().includes('type')
+      const typeIndex = headers.findIndex(
+        (h) => h.toLowerCase().includes('typ') || h.toLowerCase().includes('type')
       )
-      const institutionIndex = headers.findIndex((h) => 
-        h.toLowerCase().includes('institution')
-      )
+      const institutionIndex = headers.findIndex((h) => h.toLowerCase().includes('institution'))
 
       if (titleIndex === -1) {
         setImportResult({
@@ -166,11 +170,18 @@ export default function ImportExportPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               title,
-              eventType: ['VORTRAG', 'LABORFUEHRUNG', 'RUNDGANG', 'WORKSHOP', 'LINK', 'INFOSTAND'].includes(eventType) 
-                ? eventType 
+              eventType: [
+                'VORTRAG',
+                'LABORFUEHRUNG',
+                'RUNDGANG',
+                'WORKSHOP',
+                'LINK',
+                'INFOSTAND',
+              ].includes(eventType)
+                ? eventType
                 : 'VORTRAG',
-              institution: ['UNI', 'HOCHSCHULE', 'BOTH'].includes(institution) 
-                ? institution 
+              institution: ['UNI', 'HOCHSCHULE', 'BOTH'].includes(institution)
+                ? institution
                 : 'BOTH',
               locationType: 'OTHER',
             }),
@@ -215,7 +226,7 @@ export default function ImportExportPage() {
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i]
-      
+
       if (char === '"') {
         if (inQuotes && line[i + 1] === '"') {
           current += '"'
@@ -230,7 +241,7 @@ export default function ImportExportPage() {
         current += char
       }
     }
-    
+
     result.push(current)
     return result
   }
@@ -246,7 +257,7 @@ export default function ImportExportPage() {
       'Treffpunkt',
       'Zusätzliche Info',
     ]
-    
+
     const example = [
       'Einführung in die Informatik',
       'Vortrag über Grundlagen der Programmierung',
@@ -258,10 +269,7 @@ export default function ImportExportPage() {
       'Keine Vorkenntnisse erforderlich',
     ]
 
-    const csvContent = [
-      headers.join(','),
-      example.map((cell) => `"${cell}"`).join(','),
-    ].join('\n')
+    const csvContent = [headers.join(','), example.map((cell) => `"${cell}"`).join(',')].join('\n')
 
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -278,9 +286,7 @@ export default function ImportExportPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Import / Export</h1>
-        <p className="text-gray-500">
-          Veranstaltungen als CSV importieren oder exportieren
-        </p>
+        <p className="text-gray-500">Veranstaltungen als CSV importieren oder exportieren</p>
       </div>
 
       <Tabs defaultValue="export" className="space-y-4">
@@ -386,8 +392,8 @@ export default function ImportExportPage() {
                     importResult.success
                       ? 'bg-green-50 text-green-700'
                       : importResult.imported > 0
-                      ? 'bg-yellow-50 text-yellow-700'
-                      : 'bg-red-50 text-red-700'
+                        ? 'bg-yellow-50 text-yellow-700'
+                        : 'bg-red-50 text-red-700'
                   }`}
                 >
                   <div className="flex items-center gap-2">

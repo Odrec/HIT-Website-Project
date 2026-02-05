@@ -20,10 +20,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error getting popular events:', error)
-    return NextResponse.json(
-      { error: 'Failed to get popular events' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get popular events' }, { status: 500 })
   }
 }
 
@@ -37,10 +34,7 @@ export async function POST(request: NextRequest) {
     const { eventId, action } = body
 
     if (!eventId) {
-      return NextResponse.json(
-        { error: 'Event ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Event ID required' }, { status: 400 })
     }
 
     if (action === 'view') {
@@ -57,9 +51,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error tracking event popularity:', error)
-    return NextResponse.json(
-      { error: 'Failed to track event popularity' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to track event popularity' }, { status: 500 })
   }
 }

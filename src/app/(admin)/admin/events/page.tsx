@@ -190,9 +190,7 @@ export default function EventsListPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Veranstaltungen</h1>
-          <p className="text-gray-500">
-            {loading ? '...' : `${total} Veranstaltungen`}
-          </p>
+          <p className="text-gray-500">{loading ? '...' : `${total} Veranstaltungen`}</p>
         </div>
         <Link href="/admin/events/new">
           <Button variant="uni">
@@ -224,7 +222,10 @@ export default function EventsListPage() {
                   />
                 </div>
               </div>
-              <Select value={eventType || 'all'} onValueChange={(v) => setEventType(v === 'all' ? '' : v)}>
+              <Select
+                value={eventType || 'all'}
+                onValueChange={(v) => setEventType(v === 'all' ? '' : v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Veranstaltungstyp" />
                 </SelectTrigger>
@@ -237,7 +238,10 @@ export default function EventsListPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={institution || 'all'} onValueChange={(v) => setInstitution(v === 'all' ? '' : v)}>
+              <Select
+                value={institution || 'all'}
+                onValueChange={(v) => setInstitution(v === 'all' ? '' : v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Institution" />
                 </SelectTrigger>
@@ -256,12 +260,7 @@ export default function EventsListPage() {
                 <Search className="mr-2 h-4 w-4" />
                 Suchen
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
                 Filter zurücksetzen
               </Button>
             </div>
@@ -308,10 +307,7 @@ export default function EventsListPage() {
           ) : (
             <div className="divide-y">
               {events.map((event) => (
-                <div
-                  key={event.id}
-                  className="flex items-start gap-4 p-4 hover:bg-gray-50"
-                >
+                <div key={event.id} className="flex items-start gap-4 p-4 hover:bg-gray-50">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-2 mb-1">
                       <Link
@@ -334,9 +330,7 @@ export default function EventsListPage() {
                       </Badge>
                     </div>
                     {event.description && (
-                      <p className="text-sm text-gray-500 line-clamp-1 mb-2">
-                        {event.description}
-                      </p>
+                      <p className="text-sm text-gray-500 line-clamp-1 mb-2">{event.description}</p>
                     )}
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                       {event.timeStart && (
@@ -367,9 +361,7 @@ export default function EventsListPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/admin/events/${event.id}`)}
-                      >
+                      <DropdownMenuItem onClick={() => router.push(`/admin/events/${event.id}`)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Bearbeiten
                       </DropdownMenuItem>
@@ -432,9 +424,8 @@ export default function EventsListPage() {
           <DialogHeader>
             <DialogTitle>Veranstaltung löschen</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie die Veranstaltung{' '}
-              <strong>{eventToDelete?.title}</strong> löschen möchten? Diese
-              Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie die Veranstaltung <strong>{eventToDelete?.title}</strong>{' '}
+              löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -445,11 +436,7 @@ export default function EventsListPage() {
             >
               Abbrechen
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>

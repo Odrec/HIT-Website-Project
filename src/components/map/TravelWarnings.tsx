@@ -81,7 +81,7 @@ export default function TravelWarnings({
                     {analysis.status === 'insufficient' ? 'Nicht genug Zeit' : 'Knappe Zeit'}
                   </Badge>
                 </div>
-                
+
                 <div className="text-sm space-y-1">
                   <p>
                     <button
@@ -98,7 +98,7 @@ export default function TravelWarnings({
                       {analysis.eventToTitle}
                     </button>
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-3 text-gray-600">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
@@ -108,11 +108,9 @@ export default function TravelWarnings({
                       <Clock className="h-3.5 w-3.5" />
                       Gehzeit: {formatTime(analysis.walkingTime)}
                     </span>
-                    <span>
-                      Verfügbar: {formatTime(analysis.timeBetweenEvents)}
-                    </span>
+                    <span>Verfügbar: {formatTime(analysis.timeBetweenEvents)}</span>
                   </div>
-                  
+
                   {analysis.timeMargin < 0 && (
                     <p className="text-red-600 font-medium">
                       {formatTime(Math.abs(analysis.timeMargin))} zu wenig
@@ -120,7 +118,7 @@ export default function TravelWarnings({
                   )}
                 </div>
               </div>
-              
+
               {onFindAlternative && analysis.status === 'insufficient' && (
                 <Button
                   variant="outline"
@@ -142,8 +140,8 @@ export default function TravelWarnings({
               warning.severity === 'error'
                 ? 'bg-red-50 border-red-200'
                 : warning.severity === 'warning'
-                ? 'bg-yellow-50 border-yellow-200'
-                : 'bg-blue-50 border-blue-200'
+                  ? 'bg-yellow-50 border-yellow-200'
+                  : 'bg-blue-50 border-blue-200'
             }`}
           >
             <div className="flex items-center gap-2">
