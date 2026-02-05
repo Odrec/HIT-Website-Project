@@ -1,8 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { format } from 'date-fns'
@@ -72,7 +70,7 @@ interface EventsResponse {
   totalPages: number
 }
 
-export default function EventsListPage() {
+function EventsListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -187,7 +185,7 @@ export default function EventsListPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -444,6 +442,58 @@ export default function EventsListPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  )
+}
+
+function EventsListSkeleton() {
+  return (
+    <>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="mt-1 h-5 w-32" />
+        </div>
+        <Skeleton className="h-10 w-40" />
+      </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <Skeleton className="h-5 w-20" />
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-4">
+            <Skeleton className="h-10 md:col-span-2" />
+            <Skeleton className="h-10" />
+            <Skeleton className="h-10" />
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-0">
+          <div className="space-y-4 p-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex gap-4">
+                <Skeleton className="h-20 w-20 rounded" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  )
+}
+
+export default function EventsListPage() {
+  return (
+    <div className="space-y-6">
+      <Suspense fallback={<EventsListSkeleton />}>
+        <EventsListContent />
+      </Suspense>
     </div>
   )
 }

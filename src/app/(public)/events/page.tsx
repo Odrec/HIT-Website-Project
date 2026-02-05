@@ -1,8 +1,6 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Calendar, Grid3X3, List, Search, Filter, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -56,7 +54,7 @@ interface FilterState {
   timeTo: string
 }
 
-export default function PublicEventsPage() {
+function EventsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -176,7 +174,7 @@ export default function PublicEventsPage() {
   const totalPages = Math.ceil(totalEvents / pageSize)
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
@@ -364,6 +362,37 @@ export default function PublicEventsPage() {
           )}
         </>
       )}
+    </>
+  )
+}
+
+function EventsSkeleton() {
+  return (
+    <>
+      <div className="mb-8">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="mt-2 h-5 w-72" />
+      </div>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <Skeleton className="h-10 w-full lg:max-w-md" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+      </div>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-hit-uni-500" />
+      </div>
+    </>
+  )
+}
+
+export default function PublicEventsPage() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Suspense fallback={<EventsSkeleton />}>
+        <EventsContent />
+      </Suspense>
     </div>
   )
 }
