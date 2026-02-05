@@ -96,9 +96,13 @@ export function Header() {
                 <span>{session.user?.name || session.user?.email}</span>
               </div>
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={async () => {
+                  await signOut({ redirect: false })
+                  window.location.href = '/'
+                }}
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -190,11 +194,13 @@ export function Header() {
                   {session.user?.name || session.user?.email}
                 </span>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     setMobileMenuOpen(false)
-                    signOut({ callbackUrl: '/' })
+                    await signOut({ redirect: false })
+                    window.location.href = '/'
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
