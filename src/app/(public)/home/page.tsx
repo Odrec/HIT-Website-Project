@@ -182,7 +182,7 @@ export default function HomePage() {
               </Card>
             </Link>
 
-            <Link href="/programs" className="group">
+            <Link href="/navigator" className="group">
               <Card className="h-full transition-shadow hover:shadow-md">
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
@@ -196,7 +196,7 @@ export default function HomePage() {
               </Card>
             </Link>
 
-            <Link href="/map" className="group">
+            <Link href="/route-planner" className="group">
               <Card className="h-full transition-shadow hover:shadow-md">
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition-colors">

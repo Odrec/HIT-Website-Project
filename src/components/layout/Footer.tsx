@@ -37,7 +37,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/map" className="text-hit-gray-600 hover:text-hit-uni-500">
+                <Link href="/route-planner" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Campusplan
                 </Link>
               </li>
