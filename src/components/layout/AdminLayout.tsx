@@ -122,10 +122,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className="mt-3 w-full justify-start"
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={async () => {
+              await signOut({ redirect: false })
+              window.location.href = '/'
+            }}
           >
             <LogOut className="mr-2 h-4 w-4" />
             Abmelden
