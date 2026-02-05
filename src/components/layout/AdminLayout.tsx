@@ -35,7 +35,7 @@ const sidebarItems = [
   },
   {
     title: 'Studiengänge',
-    href: '/admin/programs',
+    href: '/admin/study-programs',
     icon: GraduationCap,
   },
   {
