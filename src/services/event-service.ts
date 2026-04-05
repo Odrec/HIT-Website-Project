@@ -1,5 +1,6 @@
 // Event Service - Business logic for event management
 
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db/prisma'
 import type {
   CreateEventInput,
@@ -191,12 +192,18 @@ export const eventService = {
       organizers = [],
       studyProgramIds = [],
       infoMarketIds = [],
+      locationId,
+      locationDetails,
       ...eventData
     } = input
 
     return prisma.event.create({
       data: {
         ...eventData,
+        ...(locationDetails !== undefined && {
+          locationDetails: locationDetails as Prisma.InputJsonValue,
+        }),
+        ...(locationId && { location: { connect: { id: locationId } } }),
         lecturers: {
           create: lecturers.map((lecturer) => ({
             firstName: lecturer.firstName,
