@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Calendar,
   Clock,
@@ -285,13 +286,13 @@ export default function EventDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Photo */}
           {event.photoUrl && (
-            <div className="overflow-hidden rounded-lg">
-              {/* TODO: migrate to next/image once image.remotePatterns is configured for admin-uploaded URLs */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="relative h-64 overflow-hidden rounded-lg lg:h-80">
+              <Image
                 src={event.photoUrl}
                 alt={event.title}
-                className="h-64 w-full object-cover lg:h-80"
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 66vw, 100vw"
               />
             </div>
           )}

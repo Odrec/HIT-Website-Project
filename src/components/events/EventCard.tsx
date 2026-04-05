@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Clock, MapPin, User, GraduationCap, Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -147,9 +148,13 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           {/* Optional photo */}
           {event.photoUrl && (
             <div className="relative h-40 overflow-hidden rounded-t-lg">
-              {/* TODO: migrate to next/image once image.remotePatterns is configured for admin-uploaded URLs */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={event.photoUrl} alt={event.title} className="h-full w-full object-cover" />
+              <Image
+                src={event.photoUrl}
+                alt={event.title}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
             </div>
           )}
 
