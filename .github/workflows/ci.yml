@@ -35,7 +35,6 @@ jobs:
           DATABASE_URL: "postgresql://user:password@localhost:5432/test"
           NEXTAUTH_SECRET: "test-secret-for-build"
           NEXTAUTH_URL: "http://localhost:3000"
-          NEXT_PUBLIC_APP_URL: "http://localhost:3000"
 
   test:
     name: Test

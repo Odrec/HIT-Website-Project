@@ -13,27 +13,18 @@ const serverEnv = {
   NODE_ENV: process.env.NODE_ENV,
 } as const
 
-// Client-side environment variables (prefixed with NEXT_PUBLIC_)
-const clientEnv = {
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-} as const
-
 /**
  * Validate that all required environment variables are set
  * Call this at application startup
  */
 export function validateEnv(): void {
   const requiredServerVars = ['DATABASE_URL', 'NEXTAUTH_SECRET'] as const
-  const requiredClientVars = ['NEXT_PUBLIC_APP_URL'] as const
 
   const missingServerVars = requiredServerVars.filter((key) => !serverEnv[key])
-  const missingClientVars = requiredClientVars.filter((key) => !clientEnv[key])
 
-  const allMissing = [...missingServerVars, ...missingClientVars]
-
-  if (allMissing.length > 0) {
+  if (missingServerVars.length > 0) {
     throw new Error(
-      `Missing required environment variables: ${allMissing.join(', ')}\n` +
+      `Missing required environment variables: ${missingServerVars.join(', ')}\n` +
         'Please check your .env.local file and ensure all required variables are set.'
     )
   }
@@ -60,17 +51,6 @@ export function getServerEnv() {
 }
 
 /**
- * Get client-side environment variables
- * Safe to use in client-side code
- */
-export function getClientEnv() {
-  return {
-    appUrl: clientEnv.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  }
-}
-
-/**
  * Type definitions for environment variables
  */
 export type ServerEnv = ReturnType<typeof getServerEnv>
-export type ClientEnv = ReturnType<typeof getClientEnv>

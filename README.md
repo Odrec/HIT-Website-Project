@@ -156,7 +156,6 @@ The AI-powered Study Navigator requires one of these providers:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_APP_URL` | Public URL (for client-side) | `http://localhost:3000` |
 | `NODE_ENV` | Environment mode | `development` |
 
 ---

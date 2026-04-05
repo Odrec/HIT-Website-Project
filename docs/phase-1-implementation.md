@@ -229,7 +229,6 @@ NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 
 # Application
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NODE_ENV="development"
 ```
 
