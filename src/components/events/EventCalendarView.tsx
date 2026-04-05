@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { format, parseISO, isSameDay } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'

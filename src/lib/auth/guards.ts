@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getSession, getCurrentUser } from './session'
+import { getCurrentUser } from './session'
 import { hasPermission, canAccessAdmin, type UserRole, type Permission } from './rbac'
 
 /**

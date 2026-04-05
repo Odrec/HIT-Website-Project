@@ -1,7 +1,6 @@
 // Route Planning API - Buildings Endpoint
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllBuildings, findBuilding } from '@/services/route-service'
-import type { BuildingInfo } from '@/types/routes'
+import { getAllBuildings } from '@/services/route-service'
 
 /**
  * GET /api/routes/buildings

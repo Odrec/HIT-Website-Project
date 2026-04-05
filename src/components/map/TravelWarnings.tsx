@@ -58,7 +58,7 @@ export default function TravelWarnings({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {issues.map((analysis, index) => (
+        {issues.map((analysis) => (
           <div
             key={`${analysis.eventFromId}-${analysis.eventToId}`}
             className={`p-3 rounded-lg border ${

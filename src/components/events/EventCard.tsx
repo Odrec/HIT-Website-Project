@@ -147,6 +147,8 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           {/* Optional photo */}
           {event.photoUrl && (
             <div className="relative h-40 overflow-hidden rounded-t-lg">
+              {/* TODO: migrate to next/image once image.remotePatterns is configured for admin-uploaded URLs */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={event.photoUrl} alt={event.title} className="h-full w-full object-cover" />
             </div>
           )}

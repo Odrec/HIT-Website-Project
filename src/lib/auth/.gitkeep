@@ -1,2 +1,2 @@
 # Authentication utilities directory
-# Contains: auth-options.ts, session.ts, rbac.ts
+# Contains: session.ts, rbac.ts, guards.ts (Auth.js config is at src/auth.ts)

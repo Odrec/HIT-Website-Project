@@ -150,6 +150,7 @@ export class Timer {
 
     // Log in development
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console -- dev-only performance trace
       console.log(
         `[Perf] ${this.name}: ${duration.toFixed(2)}ms`,
         this.checkpoints.size > 0

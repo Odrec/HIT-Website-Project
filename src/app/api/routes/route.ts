@@ -1,7 +1,7 @@
 // Route Planning API - Main Route Endpoint
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateRoute, calculateScheduleRoute, findBuilding } from '@/services/route-service'
-import type { RouteWaypoint, Coordinates, TravelTimeSettings, WalkingSpeed } from '@/types/routes'
+import type { RouteWaypoint, TravelTimeSettings, WalkingSpeed } from '@/types/routes'
 
 /**
  * GET /api/routes

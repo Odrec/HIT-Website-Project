@@ -2,8 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { eventService } from '@/services'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { auth } from '@/auth'
 import { EventType, Institution, LocationType } from '@/types/events'
 
 /**
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
-import { format, addDays, startOfDay, isSameDay, parseISO } from 'date-fns'
+import { format, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -10,7 +10,7 @@ import { useSchedule } from '@/contexts/schedule-context'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,18 +18,16 @@ import { ScheduleTimeline } from '@/components/schedule/ScheduleTimeline'
 import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import { TravelWarnings, RouteInfo } from '@/components/map'
-import type { Route, TravelTimeAnalysis, BuildingInfo } from '@/types/routes'
+import type { Route, TravelTimeAnalysis } from '@/types/routes'
 import {
   Calendar,
   List,
   Clock,
-  Download,
   Share2,
   Printer,
   Trash2,
   AlertTriangle,
   CalendarPlus,
-  Copy,
   Check,
   FileText,
   CalendarDays,
@@ -93,6 +91,10 @@ function SchedulePageContent() {
         setIsLoadingShared(false)
       }
     }
+    // fetchSharedEvents is defined in component scope and only called from
+    // inside this effect — including it would create a new reference each
+    // render and retrigger the share-link import on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, state.isLoaded, state.items.length, toast])
 
   const fetchSharedEvents = async (eventIds: string[]) => {

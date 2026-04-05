@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     // If session not found, create a new one
     if (!session) {
       session = navigatorService.createSession()
+      // eslint-disable-next-line no-console -- intentional trace log for session creation
       console.log('Created new session for recommendations:', session.id)
     }
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { format, parseISO, isSameDay } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
 import { cn } from '@/lib/utils'

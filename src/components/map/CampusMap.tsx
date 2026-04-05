@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import type {
-  BuildingInfo,
-  Route,
-  Coordinates,
-  RouteWaypoint,
-  TravelTimeAnalysis,
-} from '@/types/routes'
+import type { BuildingInfo, Route, Coordinates, TravelTimeAnalysis } from '@/types/routes'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamic import for Leaflet (no SSR)
@@ -43,7 +37,7 @@ export default function CampusMap({
   buildings = [],
   route,
   travelAnalyses = [],
-  selectedBuilding,
+  selectedBuilding: _selectedBuilding,
   currentLocation,
   onBuildingClick,
   className = '',
@@ -52,15 +46,16 @@ export default function CampusMap({
   height = '500px',
 }: CampusMapProps) {
   const [isClient, setIsClient] = useState(false)
-  const [leaflet, setLeaflet] = useState<any>(null)
+  const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
 
   useEffect(() => {
     setIsClient(true)
     // Import Leaflet CSS and library on client side
     import('leaflet').then((L) => {
       setLeaflet(L)
-      // Fix for default marker icons
-      delete (L.Icon.Default.prototype as any)._getIconUrl
+      // Fix for default marker icons — Leaflet stores _getIconUrl as a private
+      // property not exposed on the public type, so we reach into the prototype.
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
       L.Icon.Default.mergeOptions({
         iconRetinaUrl:
           'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',

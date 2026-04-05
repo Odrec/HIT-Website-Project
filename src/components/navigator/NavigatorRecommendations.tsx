@@ -13,7 +13,6 @@ import {
   ChevronUp,
   ExternalLink,
   Star,
-  Plus,
 } from 'lucide-react'
 import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
 import type { ProgramRecommendation, ClusterRecommendation } from '@/types/navigator'
@@ -28,7 +27,6 @@ interface NavigatorRecommendationsProps {
 
 export function NavigatorRecommendations({
   programs,
-  clusters,
   onProgramSelect,
   onViewEvents,
 }: NavigatorRecommendationsProps) {

@@ -33,7 +33,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
   const [endResources, setEndResources] = useState<EndSessionResource[]>([])
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState<CrisisDetection | null>(null)
-  const [isComplete, setIsComplete] = useState(false)
+  const [, setIsComplete] = useState(false)
   const [modelName, setModelName] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)

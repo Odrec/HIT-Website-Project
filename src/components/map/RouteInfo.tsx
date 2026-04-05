@@ -3,7 +3,7 @@
 import { MapPin, Clock, Footprints, Navigation } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import type { Route, RouteLeg } from '@/types/routes'
+import type { Route } from '@/types/routes'
 
 interface RouteInfoProps {
   route?: Route | null

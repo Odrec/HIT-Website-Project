@@ -6,16 +6,12 @@ import type {
   RouteLeg,
   Route,
   RouteWarning,
-  RouteRequest,
   ScheduleRouteRequest,
   BuildingInfo,
   TravelTimeAnalysis,
   TravelTimeSettings,
   WalkingSpeed,
   RouteGeometry,
-  WALKING_SPEEDS,
-  OSNABRUECK_BUILDINGS,
-  DEFAULT_TRAVEL_SETTINGS,
 } from '@/types/routes'
 import { prisma } from '@/lib/db/prisma'
 
@@ -482,7 +478,6 @@ function calculateRouteLeg(
 function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): RouteWarning[] {
   const warnings: RouteWarning[] = []
   const bufferSeconds = settings.bufferMinutes * 60
-  const warningThreshold = settings.minWarningMinutes * 60
 
   legs.forEach((leg, index) => {
     const from = leg.startWaypoint

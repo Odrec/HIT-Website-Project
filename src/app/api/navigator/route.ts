@@ -77,7 +77,7 @@ export async function GET() {
     const session = navigatorService.createSession()
 
     // Generate initial greeting
-    const result = await navigatorService.processMessage(session.id, '__INIT__')
+    await navigatorService.processMessage(session.id, '__INIT__')
 
     return NextResponse.json({
       sessionId: session.id,

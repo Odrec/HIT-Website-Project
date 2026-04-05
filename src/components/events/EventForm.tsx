@@ -70,7 +70,6 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
   const {
     register,
-    handleSubmit,
     control,
     watch,
     setValue,

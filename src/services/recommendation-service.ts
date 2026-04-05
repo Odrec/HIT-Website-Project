@@ -634,7 +634,7 @@ export const recommendationService = {
     }
 
     // For each day, merge overlapping periods and find gaps
-    for (const [day, dayEvents] of Object.entries(eventsByDay)) {
+    for (const [, dayEvents] of Object.entries(eventsByDay)) {
       if (dayEvents.length < 2) continue // Need at least 2 events to have a gap
 
       // Sort by start time

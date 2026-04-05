@@ -25,10 +25,12 @@ function createRedisClient(): Redis {
   })
 
   client.on('connect', () => {
+    // eslint-disable-next-line no-console -- intentional connection lifecycle log
     console.log('[Redis] Connected successfully')
   })
 
   client.on('ready', () => {
+    // eslint-disable-next-line no-console -- intentional connection lifecycle log
     console.log('[Redis] Ready to accept commands')
   })
 

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
   SelectContent,
@@ -18,29 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { TravelWarnings, RouteInfo } from '@/components/map'
-import type {
-  Route,
-  TravelTimeAnalysis,
-  BuildingInfo,
-  WalkingSpeed,
-  CampusArea,
-} from '@/types/routes'
+import { TravelWarnings } from '@/components/map'
+import type { Route, TravelTimeAnalysis, BuildingInfo, WalkingSpeed } from '@/types/routes'
 import {
   MapPin,
   Navigation,
   Calendar,
   Clock,
-  Footprints,
-  AlertTriangle,
   Building2,
   Info,
   Settings,
-  RotateCcw,
   List,
   Map as MapIcon,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react'
 
 // Dynamic import for map component (no SSR)

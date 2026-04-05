@@ -2,8 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { locationService } from '@/services'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateLocationCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
@@ -55,7 +54,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }

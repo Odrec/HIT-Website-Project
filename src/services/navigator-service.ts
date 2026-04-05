@@ -40,48 +40,6 @@ REGELN:
 Antworte auf Deutsch als normaler Text (KEIN JSON). Sei freundlich und kurz.`
 
 /**
- * Question templates for variety
- */
-const QUESTION_TEMPLATES: Record<QuestionType, string[]> = {
-  interests: [
-    'Was interessiert dich besonders? Welche Themen begeistern dich?',
-    'Womit beschäftigst du dich gerne in deiner Freizeit?',
-    'Welche Schulfächer haben dir am meisten Spaß gemacht?',
-  ],
-  skills: [
-    'Wo liegen deine Stärken? Was kannst du besonders gut?',
-    'Arbeitest du lieber praktisch oder theoretisch?',
-    'Magst du eher analytische Aufgaben oder kreative Projekte?',
-  ],
-  career: [
-    'Hast du schon Vorstellungen, was du später beruflich machen möchtest?',
-    'In welchem Bereich siehst du dich nach dem Studium arbeiten?',
-    'Ist dir ein sicherer Beruf wichtiger oder die Selbstverwirklichung?',
-  ],
-  institution: [
-    'Weißt du schon, ob du eher an einer Universität oder Hochschule studieren möchtest?',
-    'Bevorzugst du einen stärker forschungsorientierten (Uni) oder praxisnahen (Hochschule) Ansatz?',
-  ],
-  study_format: [
-    'Möchtest du in Vollzeit studieren oder bevorzugst du ein Teilzeit-/duales Studium?',
-    'Ist dir wichtig, während des Studiums bereits praktische Erfahrung zu sammeln?',
-  ],
-  subjects: [
-    'Gibt es bestimmte Fachrichtungen, die dich besonders ansprechen?',
-    'Interessierst du dich eher für Naturwissenschaften, Geisteswissenschaften oder Wirtschaft?',
-  ],
-  lehramt: [
-    'Möchtest du später an Grundschulen, Haupt-/Realschulen oder Gymnasien unterrichten?',
-    'Welche Fächerkombination könntest du dir für das Lehramt vorstellen?',
-  ],
-  clarification: ['Kannst du mir mehr darüber erzählen?', 'Was genau meinst du damit?'],
-  confirmation: [
-    'Habe ich das richtig verstanden, dass...?',
-    'Zusammenfassend interessierst du dich also für...?',
-  ],
-}
-
-/**
  * Generate a unique session ID
  */
 function generateSessionId(): string {
@@ -559,7 +517,6 @@ export async function getRecommendations(
 
     // Check for keyword matches
     const programName = program.name.toLowerCase()
-    const clusterName = program.cluster?.name?.toLowerCase() || ''
 
     // DIRECT PROGRAM NAME MATCH - highest priority!
     // Extract core program name (without degree suffix like B.Eng., M.Sc., etc.)

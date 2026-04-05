@@ -1,7 +1,5 @@
 // Route Planning Types
 
-import type { Location } from './events'
-
 /**
  * Geographic coordinates
  */

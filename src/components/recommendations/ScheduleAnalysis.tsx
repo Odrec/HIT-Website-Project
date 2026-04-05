@@ -92,20 +92,16 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
     return () => {
       abortControllerRef.current?.abort()
     }
-  }, [scheduledEventIdsKey, refreshTrigger]) // Use stable key instead of array
+    // Use stable key (scheduledEventIdsKey) instead of the scheduledEventIds
+    // array to avoid triggering reanalysis on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scheduledEventIdsKey, refreshTrigger])
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600'
     if (score >= 60) return 'text-blue-600'
     if (score >= 40) return 'text-yellow-600'
     return 'text-red-600'
-  }
-
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return 'bg-green-500'
-    if (score >= 60) return 'bg-blue-500'
-    if (score >= 40) return 'bg-yellow-500'
-    return 'bg-red-500'
   }
 
   const handleRefresh = () => {

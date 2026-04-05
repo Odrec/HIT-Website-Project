@@ -80,15 +80,6 @@ export default function HomePage() {
     })
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('de-DE', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-  }
-
   return (
     <div className="flex flex-col">
       {/* Hero Section */}

@@ -286,6 +286,8 @@ export default function EventDetailPage() {
           {/* Photo */}
           {event.photoUrl && (
             <div className="overflow-hidden rounded-lg">
+              {/* TODO: migrate to next/image once image.remotePatterns is configured for admin-uploaded URLs */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={event.photoUrl}
                 alt={event.title}

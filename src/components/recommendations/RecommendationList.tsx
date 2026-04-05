@@ -108,7 +108,12 @@ export function RecommendationList({
         abortControllerRef.current.abort()
       }
     }
-    // Re-fetch when filters, refreshTrigger, or schedule changes
+    // Re-fetch when filters, refreshTrigger, or schedule changes.
+    // Other recommendation inputs (institution, studyProgramIds, etc.) are
+    // intentionally omitted — they come from parent props that rarely change,
+    // and state.items/dismissedIds are snapshotted at fetch time inside the
+    // effect via the closure to avoid refetch loops.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [excludeConflicts, onlyHighDemand, refreshTrigger, scheduledEventIdsKey])
 
   const handleRefresh = () => {

@@ -3,7 +3,6 @@
 import { Suspense } from 'react'
 import { Sparkles } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 

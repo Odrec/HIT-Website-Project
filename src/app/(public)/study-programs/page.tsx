@@ -30,12 +30,6 @@ interface StudyProgram {
   cluster: Cluster | null
 }
 
-const institutionLabels: Record<string, string> = {
-  UNI: 'Universität',
-  HOCHSCHULE: 'Hochschule',
-  BOTH: 'Beide Hochschulen',
-}
-
 const institutionColors: Record<string, string> = {
   UNI: 'bg-hit-uni-100 text-hit-uni-800 border-hit-uni-200',
   HOCHSCHULE: 'bg-hit-hs-100 text-hit-hs-800 border-hit-hs-200',
@@ -266,7 +260,9 @@ export default function StudyProgramsPage() {
       {/* Navigator CTA */}
       <section className="bg-gradient-to-r from-hit-uni-600 to-hit-hs-500 py-8 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-xl font-bold lg:text-2xl">Noch unsicher, welcher Studiengang passt?</h2>
+          <h2 className="text-xl font-bold lg:text-2xl">
+            Noch unsicher, welcher Studiengang passt?
+          </h2>
           <p className="mt-2 text-white/90">
             Unser KI-gestützter Studiennavigator hilft Ihnen, den richtigen Studiengang zu finden.
           </p>

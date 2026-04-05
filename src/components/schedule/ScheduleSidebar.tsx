@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import Link from 'next/link'
@@ -8,9 +7,8 @@ import { useSchedule } from '@/contexts/schedule-context'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Calendar, Clock, AlertTriangle, Trash2, X, ChevronRight, ArrowRight } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Calendar, Clock, AlertTriangle, Trash2, X, ArrowRight } from 'lucide-react'
 
 interface ScheduleSidebarProps {
   isOpen: boolean

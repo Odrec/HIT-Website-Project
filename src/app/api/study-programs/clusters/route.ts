@@ -3,8 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { studyProgramService } from '@/services'
 import { prisma } from '@/lib/db/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { auth } from '@/auth'
 
 /**
  * GET /api/study-programs/clusters - List all study program clusters
@@ -25,7 +24,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
