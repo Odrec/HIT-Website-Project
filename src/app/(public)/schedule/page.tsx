@@ -47,7 +47,7 @@ const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
 })
 
 // HIT Event date (typically November 2026)
-const HIT_DATE = new Date('2026-11-14')
+const HIT_DATE = new Date('2026-11-19')
 
 function SchedulePageContent() {
   const searchParams = useSearchParams()

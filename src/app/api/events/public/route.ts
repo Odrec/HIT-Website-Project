@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {}
+    const where: any = { AND: [] }
 
     // Map institution from frontend value to Prisma enum value
     // Frontend uses: UNI, HS, BOTH
@@ -80,66 +80,89 @@ export async function GET(request: NextRequest) {
     // Institution filter
     if (institution) {
       if (institution === 'BOTH') {
-        // Show events for both institutions
-        where.institution = 'BOTH'
+        where.AND.push({ institution: 'BOTH' })
       } else {
-        // Show events for the specific institution OR both
         const mappedInstitution = mapInstitution(institution)
-        where.OR = [{ institution: mappedInstitution }, { institution: 'BOTH' }]
+        where.AND.push({
+          OR: [{ institution: mappedInstitution }, { institution: 'BOTH' }],
+        })
       }
     }
 
     // Event type filter
     if (eventType) {
-      where.eventType = eventType as
-        | 'VORTRAG'
-        | 'LABORFUEHRUNG'
-        | 'RUNDGANG'
-        | 'WORKSHOP'
-        | 'LINK'
-        | 'INFOSTAND'
+      where.AND.push({
+        eventType: eventType as
+          | 'VORTRAG'
+          | 'LABORFUEHRUNG'
+          | 'RUNDGANG'
+          | 'WORKSHOP'
+          | 'LINK'
+          | 'INFOSTAND',
+      })
     }
 
     // Study program filter
     if (studyProgramId) {
-      where.studyPrograms = {
-        some: {
-          studyProgramId: studyProgramId,
-        },
-      }
-    }
-
-    // Time filters (filter by time of day regardless of date)
-    // These will be used for events on the HIT day
-    if (timeFrom || timeTo) {
-      // For now, we filter by the full datetime
-      // In a real HIT scenario, we'd filter by time within the event day
-      if (timeFrom) {
-        // Construct a filter that matches events starting after this time
-        // This is a simplified version - in production you'd use database functions
-      }
-      if (timeTo) {
-        // Construct a filter that matches events ending before this time
-      }
-    }
-
-    // Full-text search across title, description, and lecturer names
-    if (search) {
-      const searchTerms = search.trim().toLowerCase()
-      where.OR = [
-        { title: { contains: searchTerms, mode: 'insensitive' } },
-        { description: { contains: searchTerms, mode: 'insensitive' } },
-        {
-          lecturers: {
-            some: {
-              OR: [
-                { firstName: { contains: searchTerms, mode: 'insensitive' } },
-                { lastName: { contains: searchTerms, mode: 'insensitive' } },
-              ],
-            },
+      where.AND.push({
+        studyPrograms: {
+          some: {
+            studyProgramId: studyProgramId,
           },
         },
-      ]
+      })
+    }
+
+    // Time filters - filter by time of day on the HIT date
+    // Frontend sends time strings like "09:00", "14:30"
+    // We construct full datetimes using the HIT date (2026-11-19)
+    const HIT_DATE = '2026-11-19'
+    if (timeFrom) {
+      const fromDateTime = new Date(`${HIT_DATE}T${timeFrom}:00`)
+      if (!isNaN(fromDateTime.getTime())) {
+        where.AND.push({ timeStart: { gte: fromDateTime } })
+      }
+    }
+    if (timeTo) {
+      const toDateTime = new Date(`${HIT_DATE}T${timeTo}:00`)
+      if (!isNaN(toDateTime.getTime())) {
+        where.AND.push({ timeStart: { lte: toDateTime } })
+      }
+    }
+
+    // Full-text search across title, description, lecturer names, and study program names
+    if (search) {
+      const searchTerms = search.trim().toLowerCase()
+      where.AND.push({
+        OR: [
+          { title: { contains: searchTerms, mode: 'insensitive' } },
+          { description: { contains: searchTerms, mode: 'insensitive' } },
+          {
+            lecturers: {
+              some: {
+                OR: [
+                  { firstName: { contains: searchTerms, mode: 'insensitive' } },
+                  { lastName: { contains: searchTerms, mode: 'insensitive' } },
+                ],
+              },
+            },
+          },
+          {
+            studyPrograms: {
+              some: {
+                studyProgram: {
+                  name: { contains: searchTerms, mode: 'insensitive' },
+                },
+              },
+            },
+          },
+        ],
+      })
+    }
+
+    // Remove empty AND array to avoid Prisma issues
+    if (where.AND.length === 0) {
+      delete where.AND
     }
 
     // Build sort options

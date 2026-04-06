@@ -26,7 +26,7 @@ import {
 
 export default function SettingsPage() {
   // Event settings
-  const [eventDate, setEventDate] = useState('2026-11-14')
+  const [eventDate, setEventDate] = useState('2026-11-19')
   const [eventStartTime, setEventStartTime] = useState('08:00')
   const [eventEndTime, setEventEndTime] = useState('18:00')
   const [defaultEventDuration, setDefaultEventDuration] = useState('60')

@@ -79,9 +79,16 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
   }, [])
 
   // Filter study programs based on selected institution
+  // Map frontend value (HS) to Prisma enum (HOCHSCHULE) for comparison
+  const mapInstitutionToEnum = (inst: string): string => {
+    if (inst === 'HS') return 'HOCHSCHULE'
+    return inst
+  }
+
   const filteredStudyPrograms = studyPrograms.filter((sp) => {
     if (!filters.institution || filters.institution === 'BOTH') return true
-    return sp.institution === filters.institution
+    const mappedInstitution = mapInstitutionToEnum(filters.institution)
+    return sp.institution === mappedInstitution || sp.institution === 'BOTH'
   })
 
   // Group study programs by cluster
@@ -103,8 +110,11 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
     // Clear study program if institution changes and the selected program doesn't match
     if (key === 'institution' && filters.studyProgramId) {
       const selectedProgram = studyPrograms.find((sp) => sp.id === filters.studyProgramId)
-      if (selectedProgram && value !== 'BOTH' && selectedProgram.institution !== value) {
-        newFilters.studyProgramId = ''
+      if (selectedProgram && value !== 'BOTH') {
+        const mappedValue = mapInstitutionToEnum(value)
+        if (selectedProgram.institution !== mappedValue && selectedProgram.institution !== 'BOTH') {
+          newFilters.studyProgramId = ''
+        }
       }
     }
 
@@ -113,9 +123,85 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
 
   const hasFilters = Object.values(filters).some((v) => v)
 
+  // Count active filters for the badge
+  const activeFilterCount = Object.values(filters).filter((v) => v).length
+
   return (
-    <Card>
+    <Card className={hasFilters ? 'border-hit-uni-300 bg-hit-uni-50/30' : ''}>
       <CardContent className="pt-6">
+        {/* Active filters summary */}
+        {hasFilters && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-hit-gray-700">
+              {activeFilterCount} Filter aktiv:
+            </span>
+            {filters.eventType && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
+                {eventTypes.find((t) => t.value === filters.eventType)?.label}
+                <button
+                  onClick={() => handleChange('eventType', '')}
+                  className="ml-0.5 hover:text-hit-uni-900"
+                  aria-label="Filter entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {filters.institution && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
+                {institutions.find((i) => i.value === filters.institution)?.label}
+                <button
+                  onClick={() => handleChange('institution', '')}
+                  className="ml-0.5 hover:text-hit-uni-900"
+                  aria-label="Filter entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {filters.studyProgramId && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
+                {studyPrograms.find((sp) => sp.id === filters.studyProgramId)?.name || 'Studiengang'}
+                <button
+                  onClick={() => handleChange('studyProgramId', '')}
+                  className="ml-0.5 hover:text-hit-uni-900"
+                  aria-label="Filter entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {filters.timeFrom && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
+                Ab {filters.timeFrom}
+                <button
+                  onClick={() => handleChange('timeFrom', '')}
+                  className="ml-0.5 hover:text-hit-uni-900"
+                  aria-label="Filter entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {filters.timeTo && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
+                Bis {filters.timeTo}
+                <button
+                  onClick={() => handleChange('timeTo', '')}
+                  className="ml-0.5 hover:text-hit-uni-900"
+                  aria-label="Filter entfernen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClear} className="ml-auto h-7 text-xs">
+              <X className="mr-1 h-3 w-3" />
+              Alle zurücksetzen
+            </Button>
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {/* Event Type */}
           <div className="space-y-2">
@@ -124,7 +210,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               value={filters.eventType || 'all'}
               onValueChange={(value) => handleChange('eventType', value === 'all' ? '' : value)}
             >
-              <SelectTrigger id="eventType">
+              <SelectTrigger id="eventType" className={filters.eventType ? 'border-hit-uni-400' : ''}>
                 <SelectValue placeholder="Alle Arten" />
               </SelectTrigger>
               <SelectContent>
@@ -145,7 +231,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               value={filters.institution || 'all'}
               onValueChange={(value) => handleChange('institution', value === 'all' ? '' : value)}
             >
-              <SelectTrigger id="institution">
+              <SelectTrigger id="institution" className={filters.institution ? 'border-hit-uni-400' : ''}>
                 <SelectValue placeholder="Alle Institutionen" />
               </SelectTrigger>
               <SelectContent>
@@ -169,23 +255,29 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               }
               disabled={loadingPrograms}
             >
-              <SelectTrigger id="studyProgram">
+              <SelectTrigger id="studyProgram" className={filters.studyProgramId ? 'border-hit-uni-400' : ''}>
                 <SelectValue placeholder={loadingPrograms ? 'Laden...' : 'Alle Studiengänge'} />
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 <SelectItem value="all">Alle Studiengänge</SelectItem>
-                {Object.entries(groupedPrograms).map(([clusterName, programs]) => (
-                  <div key={clusterName}>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-hit-gray-500">
-                      {clusterName}
-                    </div>
-                    {programs.map((program) => (
-                      <SelectItem key={program.id} value={program.id}>
-                        {program.name}
-                      </SelectItem>
-                    ))}
+                {filteredStudyPrograms.length === 0 && !loadingPrograms ? (
+                  <div className="px-2 py-3 text-center text-sm text-hit-gray-500">
+                    Keine Studiengänge für diese Institution gefunden.
                   </div>
-                ))}
+                ) : (
+                  Object.entries(groupedPrograms).map(([clusterName, programs]) => (
+                    <div key={clusterName}>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-hit-gray-500">
+                        {clusterName}
+                      </div>
+                      {programs.map((program) => (
+                        <SelectItem key={program.id} value={program.id}>
+                          {program.name}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -198,6 +290,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               type="time"
               value={filters.timeFrom}
               onChange={(e) => handleChange('timeFrom', e.target.value)}
+              className={filters.timeFrom ? 'border-hit-uni-400' : ''}
             />
           </div>
 
@@ -209,19 +302,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               type="time"
               value={filters.timeTo}
               onChange={(e) => handleChange('timeTo', e.target.value)}
+              className={filters.timeTo ? 'border-hit-uni-400' : ''}
             />
           </div>
         </div>
-
-        {/* Clear Button */}
-        {hasFilters && (
-          <div className="mt-4 flex justify-end">
-            <Button variant="ghost" size="sm" onClick={onClear}>
-              <X className="mr-2 h-4 w-4" />
-              Alle Filter zurücksetzen
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   )

@@ -55,3 +55,9 @@ prisma/*.db-journal
 docs/EXECUTIVE-SUMMARY.md
 docs/implementation-plan.md
 docs/requirements-analysis.md
+
+# Superpowers plans (local only)
+docs/superpowers/
+
+# Playwright MCP artifacts
+.playwright-mcp/
