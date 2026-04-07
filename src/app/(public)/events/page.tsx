@@ -2,16 +2,19 @@
 
 import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Calendar, Grid3X3, List, Search, Filter, Loader2 } from 'lucide-react'
+import { Calendar, Grid3X3, List, Search, Filter, Loader2, BookOpen, ArrowDownAZ } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
 import { EventCalendarView } from '@/components/events/EventCalendarView'
 import { cn } from '@/lib/utils'
 
 type ViewMode = 'list' | 'grid' | 'calendar'
+type BrowseMode = 'all' | 'cluster' | 'az'
 
 interface Event {
   id: string
@@ -60,6 +63,9 @@ function EventsContent() {
 
   // View mode
   const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [browseMode, setBrowseMode] = useState<BrowseMode>(
+    (searchParams.get('browse') as BrowseMode) || 'all'
+  )
   const [showFilters, setShowFilters] = useState(false)
 
   // Data state
@@ -67,7 +73,8 @@ function EventsContent() {
   const [loading, setLoading] = useState(true)
   const [totalEvents, setTotalEvents] = useState(0)
   const [page, setPage] = useState(1)
-  const pageSize = 12
+  // Load more events for cluster/A-Z views since they group client-side
+  const pageSize = browseMode === 'all' ? 12 : 200
 
   // Search and filters
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
@@ -140,11 +147,12 @@ function EventsContent() {
     if (filters.timeTo) params.set('timeTo', filters.timeTo)
     if (sortBy !== 'timeStart') params.set('sortBy', sortBy)
     if (sortOrder !== 'asc') params.set('sortOrder', sortOrder)
+    if (browseMode !== 'all') params.set('browse', browseMode)
 
     const queryString = params.toString()
     const newUrl = queryString ? `/events?${queryString}` : '/events'
     router.replace(newUrl, { scroll: false })
-  }, [debouncedSearch, filters, sortBy, sortOrder, router])
+  }, [debouncedSearch, filters, sortBy, sortOrder, browseMode, router])
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters)
@@ -283,21 +291,44 @@ function EventsContent() {
         </div>
       )}
 
-      {/* Results Count */}
-      <div className="mb-4 flex items-center justify-between text-sm text-hit-gray-600">
-        <span>
-          {loading ? (
-            <Skeleton className="h-4 w-32" />
-          ) : (
-            `${totalEvents} Veranstaltung${totalEvents !== 1 ? 'en' : ''} gefunden`
-          )}
-        </span>
-        {hasActiveFilters && (
+      {/* Browse Mode Tabs */}
+      <Tabs
+        value={browseMode}
+        onValueChange={(v) => { setBrowseMode(v as BrowseMode); setPage(1) }}
+        className="mb-4"
+      >
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="all" className="gap-1.5">
+              <List className="h-3.5 w-3.5" />
+              Alle
+            </TabsTrigger>
+            <TabsTrigger value="cluster" className="gap-1.5">
+              <BookOpen className="h-3.5 w-3.5" />
+              Nach Cluster
+            </TabsTrigger>
+            <TabsTrigger value="az" className="gap-1.5">
+              <ArrowDownAZ className="h-3.5 w-3.5" />
+              A-Z Studiengänge
+            </TabsTrigger>
+          </TabsList>
+          <span className="text-sm text-hit-gray-600">
+            {loading ? (
+              <Skeleton className="h-4 w-32" />
+            ) : (
+              `${totalEvents} Veranstaltung${totalEvents !== 1 ? 'en' : ''}`
+            )}
+          </span>
+        </div>
+      </Tabs>
+
+      {hasActiveFilters && (
+        <div className="mb-4 flex justify-end">
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             Filter zurücksetzen
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Content */}
       {loading ? (
@@ -319,11 +350,15 @@ function EventsContent() {
             </Button>
           )}
         </div>
+      ) : browseMode === 'cluster' ? (
+        <ClusterView events={events} viewMode={viewMode} />
+      ) : browseMode === 'az' ? (
+        <AZView events={events} viewMode={viewMode} />
       ) : viewMode === 'calendar' ? (
         <EventCalendarView events={events} />
       ) : (
         <>
-          {/* List/Grid View */}
+          {/* Flat List/Grid View */}
           <div
             className={cn(
               viewMode === 'grid'
@@ -363,6 +398,215 @@ function EventsContent() {
         </>
       )}
     </>
+  )
+}
+
+/**
+ * Cluster view - events grouped by study program cluster
+ */
+function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: ViewMode }) {
+  const viewMode = rawViewMode === 'calendar' ? 'list' : rawViewMode
+  // Build cluster -> events map via study programs
+  const clusterMap = new Map<string, { name: string; events: Map<string, Event> }>()
+  const unclustered = new Map<string, Event>()
+
+  for (const event of events) {
+    if (event.studyPrograms.length === 0) {
+      unclustered.set(event.id, event)
+      continue
+    }
+    // An event can appear under multiple clusters via its study programs
+    // We deduplicate by event id within each cluster
+    let addedToCluster = false
+    for (const sp of event.studyPrograms) {
+      // We need cluster info - since we don't have it in the event data,
+      // group by the first letter of the study program as a proxy,
+      // or better: group by study program name directly
+      // For now, group events by their study programs
+      const key = sp.name
+      if (!clusterMap.has(key)) {
+        clusterMap.set(key, { name: sp.name, events: new Map() })
+      }
+      clusterMap.get(key)!.events.set(event.id, event)
+      addedToCluster = true
+    }
+    if (!addedToCluster) {
+      unclustered.set(event.id, event)
+    }
+  }
+
+  // Sort clusters alphabetically
+  const sortedClusters = Array.from(clusterMap.entries()).sort((a, b) =>
+    a[1].name.localeCompare(b[1].name, 'de')
+  )
+
+  return (
+    <div className="space-y-6">
+      {sortedClusters.map(([key, cluster]) => (
+        <Card key={key}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="h-5 w-5 text-hit-uni-500" />
+              {cluster.name}
+              <span className="text-sm font-normal text-hit-gray-500">
+                ({cluster.events.size} Veranstaltung{cluster.events.size !== 1 ? 'en' : ''})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              )}
+            >
+              {Array.from(cluster.events.values()).map((event) => (
+                <EventCard key={event.id} event={event} viewMode={viewMode} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+      {unclustered.size > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="h-5 w-5 text-hit-gray-400" />
+              Weitere Veranstaltungen
+              <span className="text-sm font-normal text-hit-gray-500">
+                ({unclustered.size})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              )}
+            >
+              {Array.from(unclustered.values()).map((event) => (
+                <EventCard key={event.id} event={event} viewMode={viewMode} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+/**
+ * A-Z view - events grouped alphabetically by study program name
+ */
+function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: ViewMode }) {
+  const viewMode = rawViewMode === 'calendar' ? 'list' : rawViewMode
+  // Build letter -> study programs -> events
+  const letterMap = new Map<string, Map<string, { name: string; events: Map<string, Event> }>>()
+  const noProgram = new Map<string, Event>()
+
+  for (const event of events) {
+    if (event.studyPrograms.length === 0) {
+      noProgram.set(event.id, event)
+      continue
+    }
+    for (const sp of event.studyPrograms) {
+      const letter = sp.name.charAt(0).toUpperCase()
+      if (!letterMap.has(letter)) {
+        letterMap.set(letter, new Map())
+      }
+      const programsInLetter = letterMap.get(letter)!
+      if (!programsInLetter.has(sp.id)) {
+        programsInLetter.set(sp.id, { name: sp.name, events: new Map() })
+      }
+      programsInLetter.get(sp.id)!.events.set(event.id, event)
+    }
+  }
+
+  const sortedLetters = Array.from(letterMap.keys()).sort((a, b) => a.localeCompare(b, 'de'))
+
+  return (
+    <div className="space-y-6">
+      {/* Letter quick nav */}
+      <div className="flex flex-wrap gap-1">
+        {sortedLetters.map((letter) => (
+          <a
+            key={letter}
+            href={`#letter-${letter}`}
+            className="flex h-8 w-8 items-center justify-center rounded bg-hit-uni-50 text-sm font-semibold text-hit-uni-700 hover:bg-hit-uni-100"
+          >
+            {letter}
+          </a>
+        ))}
+      </div>
+
+      {sortedLetters.map((letter) => {
+        const programs = Array.from(letterMap.get(letter)!.values()).sort((a, b) =>
+          a.name.localeCompare(b.name, 'de')
+        )
+        return (
+          <div key={letter} id={`letter-${letter}`}>
+            <h2 className="mb-3 text-2xl font-bold text-hit-uni-600">{letter}</h2>
+            <div className="space-y-4">
+              {programs.map((program) => (
+                <Card key={program.name}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <ArrowDownAZ className="h-4 w-4 text-hit-uni-500" />
+                      {program.name}
+                      <span className="text-sm font-normal text-hit-gray-500">
+                        ({program.events.size})
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div
+                      className={cn(
+                        viewMode === 'grid'
+                          ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                          : 'flex flex-col gap-3'
+                      )}
+                    >
+                      {Array.from(program.events.values()).map((event) => (
+                        <EventCard key={event.id} event={event} viewMode={viewMode} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {noProgram.size > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              Ohne Studiengangszuordnung
+              <span className="text-sm font-normal text-hit-gray-500">
+                ({noProgram.size})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              )}
+            >
+              {Array.from(noProgram.values()).map((event) => (
+                <EventCard key={event.id} event={event} viewMode={viewMode} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }
 
