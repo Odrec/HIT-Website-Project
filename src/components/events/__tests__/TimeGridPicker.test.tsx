@@ -11,6 +11,6 @@ describe('TimeGridPicker', () => {
 
   it('shows placeholder when no value', () => {
     render(<TimeGridPicker value="" onChange={vi.fn()} label="Beginn" />)
-    expect(screen.getByText('Uhrzeit waehlen')).toBeInTheDocument()
+    expect(screen.getByText('Uhrzeit wählen')).toBeInTheDocument()
   })
 })
