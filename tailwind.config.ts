@@ -51,31 +51,57 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // University (Uni) brand colors
+        // University (Uni) brand colors - Corporate Design: burgundy #AC0634
         'hit-uni': {
-          50: '#e6f0ff',
-          100: '#cce0ff',
-          200: '#99c2ff',
-          300: '#66a3ff',
-          400: '#3385ff',
-          500: '#003366', // Primary Uni blue
-          600: '#002952',
-          700: '#001f3d',
-          800: '#001429',
-          900: '#000a14',
+          50: '#fdf2f4',
+          100: '#fbe5e9',
+          200: '#f7ced6',
+          300: '#f0a4b4',
+          400: '#e6708b',
+          500: '#AC0634', // Primary Uni burgundy (Pantone 201)
+          600: '#96052d',
+          700: '#7a0425',
+          800: '#5e031c',
+          900: '#420213',
         },
-        // Hochschule brand colors
+        // Hochschule brand colors - Corporate Design: cyan blue #009EE3
         'hit-hs': {
-          50: '#fff5eb',
-          100: '#ffebd6',
-          200: '#ffd6ad',
-          300: '#ffc285',
-          400: '#ffad5c',
-          500: '#FF6B00', // Primary Hochschule orange
-          600: '#cc5600',
-          700: '#994000',
-          800: '#662b00',
-          900: '#331500',
+          50: '#e6f5fd',
+          100: '#ccebfb',
+          200: '#99d7f7',
+          300: '#66c3f3',
+          400: '#33afef',
+          500: '#009EE3', // Primary HS cyan blue (Process Cyan C)
+          600: '#007eb6',
+          700: '#005f88',
+          800: '#003f5b',
+          900: '#00202d',
+        },
+        // Uni secondary color - gold #FBB900
+        'hit-uni-gold': {
+          50: '#fef9e6',
+          100: '#fef3cc',
+          200: '#fde799',
+          300: '#fcdb66',
+          400: '#fbca33',
+          500: '#FBB900', // Uni gold (Pantone 137)
+          600: '#c99400',
+          700: '#966f00',
+          800: '#644a00',
+          900: '#322500',
+        },
+        // HS secondary grays from CD Manual
+        'hit-hs-gray': {
+          light: '#CBCCCC',  // Cool Gray 6C
+          DEFAULT: '#8B8C8E', // Cool Gray 9C
+          dark: '#5E5E5D',   // Cool Gray 11C
+        },
+        // Störer accent colors from CD Manual
+        'hit-stoerer': {
+          1: '#273c49',
+          2: '#465765',
+          3: '#707B86',
+          4: '#8B8C8E',
         },
         // Accent/success colors
         'hit-accent': {
@@ -133,13 +159,13 @@ const config: Config = {
         '3xl': '1.5rem',
       },
       boxShadow: {
-        'hit': '0 4px 6px -1px rgba(0, 51, 102, 0.1), 0 2px 4px -1px rgba(0, 51, 102, 0.06)',
-        'hit-lg': '0 10px 15px -3px rgba(0, 51, 102, 0.1), 0 4px 6px -2px rgba(0, 51, 102, 0.05)',
+        'hit': '0 4px 6px -1px rgba(172, 6, 52, 0.1), 0 2px 4px -1px rgba(172, 6, 52, 0.06)',
+        'hit-lg': '0 10px 15px -3px rgba(172, 6, 52, 0.1), 0 4px 6px -2px rgba(172, 6, 52, 0.05)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-hit': 'linear-gradient(135deg, #003366 0%, #FF6B00 100%)',
+        'gradient-hit': 'linear-gradient(135deg, #AC0634 0%, #009EE3 100%)',
       },
       keyframes: {
         "accordion-down": {
