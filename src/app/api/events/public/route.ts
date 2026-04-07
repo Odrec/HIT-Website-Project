@@ -97,7 +97,8 @@ export async function GET(request: NextRequest) {
           | 'LABORFUEHRUNG'
           | 'RUNDGANG'
           | 'WORKSHOP'
-          | 'LINK'
+          | 'ONLINE'
+          | 'VIDEO'
           | 'INFOSTAND',
       })
     }
@@ -115,8 +116,10 @@ export async function GET(request: NextRequest) {
 
     // Time filters - filter by time of day on the HIT date
     // Frontend sends time strings like "09:00", "14:30"
-    // We construct full datetimes using the HIT date (2026-11-19)
-    const HIT_DATE = '2026-11-19'
+    // We construct full datetimes using the HIT date from settings
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } })
+    const hitDateObj = settings?.hitDate ?? new Date('2026-11-19')
+    const HIT_DATE = hitDateObj.toISOString().slice(0, 10)
     if (timeFrom) {
       const fromDateTime = new Date(`${HIT_DATE}T${timeFrom}:00`)
       if (!isNaN(fromDateTime.getTime())) {
