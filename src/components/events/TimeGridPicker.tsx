@@ -33,7 +33,7 @@ export function TimeGridPicker({ value, onChange, label, required, disabled }: T
       </Label>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger>
-          <SelectValue placeholder="Uhrzeit waehlen" />
+          <SelectValue placeholder="Uhrzeit wählen" />
         </SelectTrigger>
         <SelectContent>
           {TIME_SLOTS.map((time) => (

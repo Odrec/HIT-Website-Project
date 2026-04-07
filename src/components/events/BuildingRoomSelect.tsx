@@ -28,9 +28,9 @@ export function BuildingRoomSelect({ buildingId, roomId, onBuildingChange, onRoo
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div className="space-y-1.5">
-        <Label>Gebaeude</Label>
+        <Label>Gebäude</Label>
         <Select value={buildingId} onValueChange={(v) => { onBuildingChange(v); onRoomChange('') }} disabled={loading}>
-          <SelectTrigger><SelectValue placeholder={loading ? 'Laden...' : 'Gebaeude waehlen'} /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={loading ? 'Laden...' : 'Gebäude wählen'} /></SelectTrigger>
           <SelectContent>
             {buildings.map(b => <SelectItem key={b.id} value={b.id}>{b.name}{b.campus && ` (${b.campus})`}</SelectItem>)}
           </SelectContent>
@@ -39,7 +39,7 @@ export function BuildingRoomSelect({ buildingId, roomId, onBuildingChange, onRoo
       <div className="space-y-1.5">
         <Label>Raum</Label>
         <Select value={roomId} onValueChange={onRoomChange} disabled={!buildingId || rooms.length === 0}>
-          <SelectTrigger><SelectValue placeholder={!buildingId ? 'Erst Gebaeude waehlen' : 'Raum waehlen'} /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={!buildingId ? 'Erst Gebäude wählen' : 'Raum wählen'} /></SelectTrigger>
           <SelectContent>
             {rooms.map(r => <SelectItem key={r.id} value={r.id}>{r.name}{r.floor && ` (${r.floor})`}</SelectItem>)}
           </SelectContent>

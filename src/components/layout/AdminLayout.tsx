@@ -45,7 +45,7 @@ const sidebarItems = [
     icon: MapPin,
   },
   {
-    title: 'Gebaeude',
+    title: 'Gebäude',
     href: '/admin/buildings',
     icon: Building2,
   },

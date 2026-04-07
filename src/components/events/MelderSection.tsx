@@ -51,7 +51,7 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
     <Card className="border-l-4 border-l-hit-uni-500">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Melder-Profil</CardTitle>
-        <CardDescription className="text-xs">Wird automatisch aus Ihrem Profil ausgefuellt. Aenderungen gelten nur fuer diese Veranstaltung.</CardDescription>
+        <CardDescription className="text-xs">Wird automatisch aus Ihrem Profil ausgefüllt. Änderungen gelten nur für diese Veranstaltung.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -76,9 +76,9 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Zugehoerigkeit <span className="text-red-500">*</span></Label>
+            <Label>Zugehörigkeit <span className="text-red-500">*</span></Label>
             <Select value={value.affiliation} onValueChange={v => updateField('affiliation', v)}>
-              <SelectTrigger><SelectValue placeholder="Waehlen..." /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Wählen..." /></SelectTrigger>
               <SelectContent>
                 {Object.entries(affiliationLabels).map(([val, label]) => (
                   <SelectItem key={val} value={val}>{label}</SelectItem>
@@ -87,7 +87,7 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Fakultaet</Label>
+            <Label>Fakultät</Label>
             <Input value={value.fakultaet} onChange={e => updateField('fakultaet', e.target.value)} />
           </div>
         </div>

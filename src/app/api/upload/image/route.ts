@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Datei ist zu gross (max. 5MB)' }, { status: 400 })
+    return NextResponse.json({ error: 'Datei ist zu groß (max. 5MB)' }, { status: 400 })
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'

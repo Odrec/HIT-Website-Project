@@ -187,7 +187,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     .map((sp) => ({
       value: sp.id,
       label: sp.name,
-      group: sp.cluster?.name || (sp.institution === 'UNI' ? 'Universitaet' : 'Hochschule'),
+      group: sp.cluster?.name || (sp.institution === 'UNI' ? 'Universität' : 'Hochschule'),
     }))
 
   // Convert info markets to multi-select options
@@ -275,7 +275,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               <Textarea
                 id="description"
                 {...register('description')}
-                placeholder="Ausfuehrliche Beschreibung der Veranstaltung..."
+                placeholder="Ausführliche Beschreibung der Veranstaltung..."
                 rows={3}
                 className={errors.description ? 'border-red-500' : ''}
               />
@@ -299,7 +299,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   }
                 >
                   <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Typ auswaehlen" />
+                    <SelectValue placeholder="Typ auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(eventTypeLabels).map(([value, label]) => (
@@ -325,7 +325,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   }
                 >
                   <SelectTrigger className={errors.institution ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Institution auswaehlen" />
+                    <SelectValue placeholder="Institution auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(institutionLabels).map(([value, label]) => (
@@ -347,7 +347,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 checked={watch('isCrossProgram')}
                 onCheckedChange={(checked) => setValue('isCrossProgram', checked as boolean)}
               />
-              <Label htmlFor="isCrossProgram">Studiengangsuebergreifend</Label>
+              <Label htmlFor="isCrossProgram">Studiengangsübergreifend</Label>
             </div>
           </CardContent>
         </Card>
@@ -437,7 +437,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 }
               >
                 <SelectTrigger className={errors.locationType ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Ortstyp auswaehlen" />
+                  <SelectValue placeholder="Ortstyp auswählen" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(locationTypeLabels).map(([value, label]) => (
@@ -462,7 +462,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Standort auswaehlen" />
+                    <SelectValue placeholder="Standort auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Kein Standort</SelectItem>
@@ -482,7 +482,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               <Input
                 id="meetingPoint"
                 {...register('meetingPoint')}
-                placeholder="z.B. Foyer des Hauptgebaeudes"
+                placeholder="z.B. Foyer des Hauptgebäudes"
               />
               {errors.meetingPoint && (
                 <p className="text-sm text-red-500">{errors.meetingPoint.message}</p>
@@ -492,14 +492,14 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
         </Card>
       </div>
 
-      {/* Row 3: Studiengaenge + Dozierende */}
+      {/* Row 3: Studiengänge + Dozierende */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Section 5: Studiengaenge */}
+        {/* Section 5: Studiengänge */}
         <Card className="border-l-4 border-l-[#9333ea]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Studiengaenge</CardTitle>
+            <CardTitle className="text-base">Studiengänge</CardTitle>
             <CardDescription className="text-xs">
-              Welche Studiengaenge werden bei dieser Veranstaltung vorgestellt?
+              Welche Studiengänge werden bei dieser Veranstaltung vorgestellt?
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -509,11 +509,11 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               onChange={(value) => setValue('studyProgramIds', value)}
               placeholder={
                 watchIsCrossProgram
-                  ? 'Studiengangsuebergreifend (alle)'
-                  : 'Studiengaenge auswaehlen...'
+                  ? 'Studiengangsübergreifend (alle)'
+                  : 'Studiengänge auswählen...'
               }
               searchPlaceholder="Studiengang suchen..."
-              emptyText="Keine Studiengaenge gefunden"
+              emptyText="Keine Studiengänge gefunden"
               disabled={watchIsCrossProgram}
             />
           </CardContent>
@@ -538,16 +538,16 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                 }
               >
                 <Plus className="mr-1 h-4 w-4" />
-                Dozent hinzufuegen
+                Dozent hinzufügen
               </Button>
             </CardTitle>
             <CardDescription className="text-xs">
-              Wer haelt die Veranstaltung oder fuehrt durch das Programm?
+              Wer hält die Veranstaltung oder führt durch das Programm?
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {lecturerFields.length === 0 ? (
-              <p className="text-sm text-gray-500">Keine Dozenten hinzugefuegt</p>
+              <p className="text-sm text-gray-500">Keine Dozenten hinzugefügt</p>
             ) : (
               lecturerFields.map((field, index) => (
                 <div key={field.id} className="border rounded-lg p-3 space-y-3">
@@ -602,7 +602,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Zugehoerigkeit</Label>
+                      <Label>Zugehörigkeit</Label>
                       <Select
                         value={watch(`lecturers.${index}.affiliation`) || ''}
                         onValueChange={(value) =>
@@ -613,10 +613,10 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Waehlen..." />
+                          <SelectValue placeholder="Wählen..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="UNI">Universitaet</SelectItem>
+                          <SelectItem value="UNI">Universität</SelectItem>
                           <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
                           <SelectItem value="EXTERN">Extern</SelectItem>
                         </SelectContent>
@@ -630,10 +630,10 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
         </Card>
       </div>
 
-      {/* Row 4: Foto & Zusaetzliches (full width) */}
+      {/* Row 4: Foto & Zusätzliches (full width) */}
       <Card className="border-l-4 border-l-[#f59e0b]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Foto & Zusaetzliches</CardTitle>
+          <CardTitle className="text-base">Foto & Zusätzliches</CardTitle>
           <CardDescription className="text-xs">Weitere Details und Medien</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -643,11 +643,11 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
           />
 
           <div className="space-y-1.5">
-            <Label htmlFor="additionalInfo">Zusaetzliche Hinweise</Label>
+            <Label htmlFor="additionalInfo">Zusätzliche Hinweise</Label>
             <Textarea
               id="additionalInfo"
               {...register('additionalInfo')}
-              placeholder="Weitere wichtige Informationen fuer Besucher..."
+              placeholder="Weitere wichtige Informationen für Besucher..."
               rows={3}
             />
             {errors.additionalInfo && (
@@ -664,9 +664,9 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
       {watchEventType === 'INFOSTAND' && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Infomaerkte</CardTitle>
+            <CardTitle className="text-base">Infomärkte</CardTitle>
             <CardDescription className="text-xs">
-              An welchen Infomaerkten nimmt dieser Stand teil?
+              An welchen Infomärkten nimmt dieser Stand teil?
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -674,7 +674,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               options={infoMarketOptions}
               value={watch('infoMarketIds') || []}
               onChange={(value) => setValue('infoMarketIds', value)}
-              placeholder="Infomaerkte auswaehlen..."
+              placeholder="Infomärkte auswählen..."
             />
           </CardContent>
         </Card>
@@ -698,16 +698,16 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               }
             >
               <Plus className="mr-1 h-4 w-4" />
-              Ansprechpartner hinzufuegen
+              Ansprechpartner hinzufügen
             </Button>
           </CardTitle>
           <CardDescription className="text-xs">
-            Interne Kontaktpersonen fuer die Organisation
+            Interne Kontaktpersonen für die Organisation
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {organizerFields.length === 0 ? (
-            <p className="text-sm text-gray-500">Keine Ansprechpartner hinzugefuegt</p>
+            <p className="text-sm text-gray-500">Keine Ansprechpartner hinzugefügt</p>
           ) : (
             organizerFields.map((field, index) => (
               <div key={field.id} className="border rounded-lg p-3 space-y-3">

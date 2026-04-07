@@ -178,11 +178,11 @@ export default function BuildingsPage() {
         fetchBuildings()
       } else {
         const error = await response.json()
-        alert(error.message || 'Fehler beim Loeschen')
+        alert(error.message || 'Fehler beim Löschen')
       }
     } catch (error) {
       console.error('Failed to delete building:', error)
-      alert('Fehler beim Loeschen')
+      alert('Fehler beim Löschen')
     } finally {
       setDeletingBuilding(false)
     }
@@ -258,11 +258,11 @@ export default function BuildingsPage() {
         fetchBuildings()
       } else {
         const error = await response.json()
-        alert(error.message || 'Fehler beim Loeschen')
+        alert(error.message || 'Fehler beim Löschen')
       }
     } catch (error) {
       console.error('Failed to delete room:', error)
-      alert('Fehler beim Loeschen')
+      alert('Fehler beim Löschen')
     } finally {
       setDeletingRoom(false)
     }
@@ -273,12 +273,12 @@ export default function BuildingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gebaeude</h1>
-          <p className="text-muted-foreground">Verwalten Sie Gebaeude und deren Raeume</p>
+          <h1 className="text-2xl font-bold tracking-tight">Gebäude</h1>
+          <p className="text-muted-foreground">Verwalten Sie Gebäude und deren Räume</p>
         </div>
         <Button onClick={openCreateBuildingDialog}>
           <Plus className="mr-2 h-4 w-4" />
-          Gebaeude hinzufuegen
+          Gebäude hinzufügen
         </Button>
       </div>
 
@@ -292,7 +292,7 @@ export default function BuildingsPage() {
       ) : buildings.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Noch keine Gebaeude vorhanden
+            Noch keine Gebäude vorhanden
           </CardContent>
         </Card>
       ) : (
@@ -303,7 +303,7 @@ export default function BuildingsPage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  Gebaeude ({buildings.length})
+                  Gebäude ({buildings.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -314,7 +314,7 @@ export default function BuildingsPage() {
                       <TableHead>Name</TableHead>
                       <TableHead>Campus</TableHead>
                       <TableHead>Adresse</TableHead>
-                      <TableHead>Raeume</TableHead>
+                      <TableHead>Räume</TableHead>
                       <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -370,7 +370,7 @@ export default function BuildingsPage() {
                                   }}
                                 >
                                   <Trash2 className="h-4 w-4 mr-1" />
-                                  Loeschen
+                                  Löschen
                                 </Button>
                               </div>
                             </TableCell>
@@ -382,7 +382,7 @@ export default function BuildingsPage() {
                                   <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold flex items-center gap-2">
                                       <DoorOpen className="h-4 w-4" />
-                                      Raeume
+                                      Räume
                                     </h4>
                                     <Button
                                       size="sm"
@@ -390,12 +390,12 @@ export default function BuildingsPage() {
                                       onClick={() => openAddRoomDialog(building.id)}
                                     >
                                       <Plus className="h-4 w-4 mr-1" />
-                                      Raum hinzufuegen
+                                      Raum hinzufügen
                                     </Button>
                                   </div>
                                   {!building.rooms || building.rooms.length === 0 ? (
                                     <p className="text-sm text-muted-foreground py-2">
-                                      Noch keine Raeume vorhanden
+                                      Noch keine Räume vorhanden
                                     </p>
                                   ) : (
                                     <Table>
@@ -433,7 +433,7 @@ export default function BuildingsPage() {
                                                   }}
                                                 >
                                                   <Trash2 className="h-4 w-4 mr-1" />
-                                                  Loeschen
+                                                  Löschen
                                                 </Button>
                                               </div>
                                             </TableCell>
@@ -468,7 +468,7 @@ export default function BuildingsPage() {
                         <CardTitle className="text-base truncate">{building.name}</CardTitle>
                       </div>
                       <Badge variant="secondary" className="shrink-0">
-                        {building.rooms?.length ?? 0} Raeume
+                        {building.rooms?.length ?? 0} Räume
                       </Badge>
                     </div>
                     {(building.campus || building.address) && (
@@ -500,7 +500,7 @@ export default function BuildingsPage() {
                         }}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
-                        Loeschen
+                        Löschen
                       </Button>
                     </div>
 
@@ -511,7 +511,7 @@ export default function BuildingsPage() {
                     >
                       <span className="flex items-center gap-1">
                         <DoorOpen className="h-4 w-4" />
-                        Raeume
+                        Räume
                       </span>
                       {isExpanded ? (
                         <ChevronDown className="h-4 w-4" />
@@ -524,7 +524,7 @@ export default function BuildingsPage() {
                       <div className="space-y-2 border-t pt-3">
                         {!building.rooms || building.rooms.length === 0 ? (
                           <p className="text-sm text-muted-foreground">
-                            Noch keine Raeume vorhanden
+                            Noch keine Räume vorhanden
                           </p>
                         ) : (
                           <div className="space-y-2">
@@ -573,7 +573,7 @@ export default function BuildingsPage() {
                           onClick={() => openAddRoomDialog(building.id)}
                         >
                           <Plus className="h-4 w-4 mr-1" />
-                          Raum hinzufuegen
+                          Raum hinzufügen
                         </Button>
                       </div>
                     )}
@@ -590,12 +590,12 @@ export default function BuildingsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingBuilding ? 'Gebaeude bearbeiten' : 'Gebaeude hinzufuegen'}
+              {editingBuilding ? 'Gebäude bearbeiten' : 'Gebäude hinzufügen'}
             </DialogTitle>
             <DialogDescription>
               {editingBuilding
-                ? 'Bearbeiten Sie die Details des Gebaeudes'
-                : 'Fuegen Sie ein neues Gebaeude hinzu'}
+                ? 'Bearbeiten Sie die Details des Gebäudes'
+                : 'Fügen Sie ein neues Gebäude hinzu'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -605,7 +605,7 @@ export default function BuildingsPage() {
                 id="building-name"
                 value={buildingForm.name}
                 onChange={(e) => setBuildingForm({ ...buildingForm, name: e.target.value })}
-                placeholder="z.B. AVZ, Hauptgebaeude"
+                placeholder="z.B. AVZ, Hauptgebäude"
               />
             </div>
             <div className="space-y-2">
@@ -635,7 +635,7 @@ export default function BuildingsPage() {
               onClick={handleSaveBuilding}
               disabled={savingBuilding || !buildingForm.name.trim()}
             >
-              {savingBuilding ? 'Speichern...' : editingBuilding ? 'Speichern' : 'Hinzufuegen'}
+              {savingBuilding ? 'Speichern...' : editingBuilding ? 'Speichern' : 'Hinzufügen'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -645,11 +645,11 @@ export default function BuildingsPage() {
       <Dialog open={deleteBuildingDialogOpen} onOpenChange={setDeleteBuildingDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Gebaeude loeschen</DialogTitle>
+            <DialogTitle>Gebäude löschen</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie das Gebaeude &quot;{buildingToDelete?.name}&quot; loeschen
-              moechten? Alle zugehoerigen Raeume werden ebenfalls geloescht. Diese Aktion kann nicht
-              rueckgaengig gemacht werden.
+              Sind Sie sicher, dass Sie das Gebäude &quot;{buildingToDelete?.name}&quot; löschen
+              möchten? Alle zugehörigen Räume werden ebenfalls gelöscht. Diese Aktion kann nicht
+              rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -663,7 +663,7 @@ export default function BuildingsPage() {
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDeleteBuilding} disabled={deletingBuilding}>
-              {deletingBuilding ? 'Loeschen...' : 'Loeschen'}
+              {deletingBuilding ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -673,11 +673,11 @@ export default function BuildingsPage() {
       <Dialog open={roomDialogOpen} onOpenChange={setRoomDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingRoom ? 'Raum bearbeiten' : 'Raum hinzufuegen'}</DialogTitle>
+            <DialogTitle>{editingRoom ? 'Raum bearbeiten' : 'Raum hinzufügen'}</DialogTitle>
             <DialogDescription>
               {editingRoom
                 ? 'Bearbeiten Sie die Details des Raumes'
-                : 'Fuegen Sie einen neuen Raum hinzu'}
+                : 'Fügen Sie einen neuen Raum hinzu'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -708,7 +708,7 @@ export default function BuildingsPage() {
               onClick={handleSaveRoom}
               disabled={savingRoom || !roomForm.name.trim()}
             >
-              {savingRoom ? 'Speichern...' : editingRoom ? 'Speichern' : 'Hinzufuegen'}
+              {savingRoom ? 'Speichern...' : editingRoom ? 'Speichern' : 'Hinzufügen'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -718,10 +718,10 @@ export default function BuildingsPage() {
       <Dialog open={deleteRoomDialogOpen} onOpenChange={setDeleteRoomDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Raum loeschen</DialogTitle>
+            <DialogTitle>Raum löschen</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie den Raum &quot;{roomToDelete?.name}&quot; loeschen
-              moechten? Diese Aktion kann nicht rueckgaengig gemacht werden.
+              Sind Sie sicher, dass Sie den Raum &quot;{roomToDelete?.name}&quot; löschen
+              möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -735,7 +735,7 @@ export default function BuildingsPage() {
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDeleteRoom} disabled={deletingRoom}>
-              {deletingRoom ? 'Loeschen...' : 'Loeschen'}
+              {deletingRoom ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>
         </DialogContent>

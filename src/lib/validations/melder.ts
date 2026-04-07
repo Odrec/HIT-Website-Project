@@ -5,10 +5,10 @@ export const affiliationValues = ['UNI', 'HOCHSCHULE', 'EXTERN'] as const
 export const melderFormSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich').max(200),
   title: z.string().max(100).optional().or(z.literal('')),
-  email: z.string().email('Ungueltige E-Mail-Adresse'),
+  email: z.string().email('Ungültige E-Mail-Adresse'),
   phone: z.string().max(50).optional().or(z.literal('')),
   affiliation: z.enum(affiliationValues, {
-    message: 'Zugehoerigkeit ist erforderlich',
+    message: 'Zugehörigkeit ist erforderlich',
   }),
   fakultaet: z.string().max(200).optional().or(z.literal('')),
   fachbereich: z.string().max(200).optional().or(z.literal('')),
@@ -18,7 +18,7 @@ export const melderFormSchema = z.object({
 export type MelderFormData = z.infer<typeof melderFormSchema>
 
 export const affiliationLabels: Record<string, string> = {
-  UNI: 'Universitaet Osnabrueck',
-  HOCHSCHULE: 'Hochschule Osnabrueck',
+  UNI: 'Universität Osnabrück',
+  HOCHSCHULE: 'Hochschule Osnabrück',
   EXTERN: 'Extern',
 }

@@ -38,7 +38,7 @@ interface Melder {
 }
 
 const affiliationLabels: Record<string, string> = {
-  UNI: 'Universitaet',
+  UNI: 'Universität',
   HOCHSCHULE: 'Hochschule',
   EXTERN: 'Extern',
 }
@@ -77,7 +77,7 @@ export default function MeldersPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Melder</h1>
-        <p className="text-muted-foreground">Uebersicht aller registrierten Melder</p>
+        <p className="text-muted-foreground">Übersicht aller registrierten Melder</p>
       </div>
 
       {/* Content */}
@@ -110,8 +110,8 @@ export default function MeldersPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>E-Mail</TableHead>
-                      <TableHead>Zugehoerigkeit</TableHead>
-                      <TableHead>Fakultaet</TableHead>
+                      <TableHead>Zugehörigkeit</TableHead>
+                      <TableHead>Fakultät</TableHead>
                       <TableHead>Fachbereich</TableHead>
                       <TableHead>Veranstaltungen</TableHead>
                     </TableRow>
@@ -170,7 +170,7 @@ export default function MeldersPage() {
                   <p className="text-muted-foreground">{melder.email}</p>
                   {melder.fakultaet && (
                     <p>
-                      <span className="font-medium">Fakultaet: </span>
+                      <span className="font-medium">Fakultät: </span>
                       {melder.fakultaet}
                     </p>
                   )}

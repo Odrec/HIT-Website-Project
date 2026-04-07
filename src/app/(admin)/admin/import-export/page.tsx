@@ -45,9 +45,9 @@ export default function ImportExportPage() {
         'Foto-URL',
         'Studiengänge',
         'Dozenten',
-        'Studiengangsuebergreifend',
+        'Studiengangsübergreifend',
         'Ortshinweis',
-        'Gebaeude',
+        'Gebäude',
         'Raum',
         'Melder',
       ]

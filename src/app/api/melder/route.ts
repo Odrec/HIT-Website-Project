@@ -21,13 +21,13 @@ export async function POST(request: Request) {
 
   if (!name || !email || !affiliation) {
     return NextResponse.json(
-      { error: 'Name, E-Mail und Zugehoerigkeit sind erforderlich' },
+      { error: 'Name, E-Mail und Zugehörigkeit sind erforderlich' },
       { status: 400 }
     )
   }
   const validAffiliations = ['UNI', 'HOCHSCHULE', 'EXTERN']
   if (!validAffiliations.includes(affiliation)) {
-    return NextResponse.json({ error: 'Ungueltige Zugehoerigkeit' }, { status: 400 })
+    return NextResponse.json({ error: 'Ungültige Zugehörigkeit' }, { status: 400 })
   }
 
   const melder = await prisma.melder.upsert({
