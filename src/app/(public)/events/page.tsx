@@ -47,6 +47,7 @@ interface Event {
     name: string
     institution: string
   }>
+  isCrossProgram?: boolean
 }
 
 interface FilterState {
@@ -409,8 +410,13 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
   // Build cluster -> events map via study programs
   const clusterMap = new Map<string, { name: string; events: Map<string, Event> }>()
   const unclustered = new Map<string, Event>()
+  const crossProgram = new Map<string, Event>()
 
   for (const event of events) {
+    if (event.isCrossProgram) {
+      crossProgram.set(event.id, event)
+      continue
+    }
     if (event.studyPrograms.length === 0) {
       unclustered.set(event.id, event)
       continue
@@ -494,6 +500,32 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
           </CardContent>
         </Card>
       )}
+      {crossProgram.size > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="h-5 w-5 text-hit-uni-400" />
+              Studiengangsübergreifend
+              <span className="text-sm font-normal text-hit-gray-500">
+                ({crossProgram.size} Veranstaltung{crossProgram.size !== 1 ? 'en' : ''})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              )}
+            >
+              {Array.from(crossProgram.values()).map((event) => (
+                <EventCard key={event.id} event={event} viewMode={viewMode} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
@@ -506,8 +538,13 @@ function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: 
   // Build letter -> study programs -> events
   const letterMap = new Map<string, Map<string, { name: string; events: Map<string, Event> }>>()
   const noProgram = new Map<string, Event>()
+  const crossProgram = new Map<string, Event>()
 
   for (const event of events) {
+    if (event.isCrossProgram) {
+      crossProgram.set(event.id, event)
+      continue
+    }
     if (event.studyPrograms.length === 0) {
       noProgram.set(event.id, event)
       continue
@@ -600,6 +637,32 @@ function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: 
               )}
             >
               {Array.from(noProgram.values()).map((event) => (
+                <EventCard key={event.id} event={event} viewMode={viewMode} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {crossProgram.size > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ArrowDownAZ className="h-4 w-4 text-hit-uni-400" />
+              Studiengangsübergreifend
+              <span className="text-sm font-normal text-hit-gray-500">
+                ({crossProgram.size})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'flex flex-col gap-3'
+              )}
+            >
+              {Array.from(crossProgram.values()).map((event) => (
                 <EventCard key={event.id} event={event} viewMode={viewMode} />
               ))}
             </div>
