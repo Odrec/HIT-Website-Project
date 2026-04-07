@@ -7,8 +7,7 @@ export const lecturerSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   title: z.string().optional().default(''),
   email: z.string().email('Invalid email').optional().or(z.literal('')).default(''),
-  building: z.string().optional().default(''),
-  roomNumber: z.string().optional().default(''),
+  affiliation: z.enum(['UNI', 'HOCHSCHULE', 'EXTERN']).optional().or(z.literal('')),
 })
 
 export const organizerSchema = z.object({
@@ -28,7 +27,7 @@ export const eventFormSchema = z
       .max(5000, 'Description must be less than 5000 characters')
       .optional()
       .default(''),
-    eventType: z.enum(['VORTRAG', 'LABORFUEHRUNG', 'RUNDGANG', 'WORKSHOP', 'LINK', 'INFOSTAND']),
+    eventType: z.enum(['VORTRAG', 'LABORFUEHRUNG', 'RUNDGANG', 'WORKSHOP', 'ONLINE', 'VIDEO', 'INFOSTAND']),
     timeStart: z.date().optional().nullable(),
     timeEnd: z.date().optional().nullable(),
     locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),
@@ -55,6 +54,11 @@ export const eventFormSchema = z
     organizers: z.array(organizerSchema).default([]),
     studyProgramIds: z.array(z.string()).default([]),
     infoMarketIds: z.array(z.string()).default([]),
+    isCrossProgram: z.boolean().default(false),
+    locationHint: z.string().max(500).optional().or(z.literal('')),
+    buildingId: z.string().optional().or(z.literal('')),
+    roomId: z.string().optional().or(z.literal('')),
+    melderId: z.string().optional().or(z.literal('')),
   })
   .refine(
     (data) => {
@@ -85,6 +89,10 @@ export const defaultEventValues: Partial<EventFormValues> = {
   organizers: [],
   studyProgramIds: [],
   infoMarketIds: [],
+  isCrossProgram: false,
+  locationHint: '',
+  buildingId: '',
+  roomId: '',
 }
 
 // Event type labels for display
@@ -93,7 +101,8 @@ export const eventTypeLabels: Record<string, string> = {
   LABORFUEHRUNG: 'Laborführung',
   RUNDGANG: 'Rundgang',
   WORKSHOP: 'Workshop',
-  LINK: 'Link',
+  ONLINE: 'Online',
+  VIDEO: 'Video',
   INFOSTAND: 'Infostand',
 }
 

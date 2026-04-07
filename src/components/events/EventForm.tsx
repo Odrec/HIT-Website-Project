@@ -297,7 +297,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
       </Card>
 
       {/* Time & Location */}
-      {watchEventType !== 'LINK' && (
+      {watchEventType !== 'ONLINE' && watchEventType !== 'VIDEO' && (
         <Card>
           <CardHeader>
             <CardTitle>Zeit & Ort</CardTitle>
@@ -433,8 +433,6 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                   lastName: '',
                   title: '',
                   email: '',
-                  building: '',
-                  roomNumber: '',
                 })
               }
             >
@@ -502,17 +500,6 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
                       {...register(`lecturers.${index}.email`)}
                       placeholder="max.mustermann@uni.de"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Gebäude</Label>
-                    <Input
-                      {...register(`lecturers.${index}.building`)}
-                      placeholder="Hauptgebäude"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Raum</Label>
-                    <Input {...register(`lecturers.${index}.roomNumber`)} placeholder="A101" />
                   </div>
                 </div>
               </div>
