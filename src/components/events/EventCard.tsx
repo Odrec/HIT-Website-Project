@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Clock, MapPin, User, GraduationCap, Calendar as CalendarIcon } from 'lucide-react'
+import { Clock, MapPin, User, GraduationCap } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -120,10 +120,6 @@ export function EventCard({ event, viewMode }: EventCardProps) {
     return format(new Date(dateString), 'HH:mm', { locale: de })
   }
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd. MMM yyyy', { locale: de })
-  }
-
   const getLocationDisplay = () => {
     if (event.location) {
       return `${event.location.buildingName}${event.location.roomNumber ? `, Raum ${event.location.roomNumber}` : ''}`
@@ -159,7 +155,28 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           )}
 
           <CardHeader className="pb-2">
-            <div className="flex flex-wrap gap-2">
+            {/* Study Programs - PRIMARY, displayed large */}
+            {event.studyPrograms.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {event.studyPrograms.slice(0, 2).map((sp) => (
+                  <span key={sp.id} className="text-sm font-semibold text-hit-uni-600">
+                    {sp.name}
+                  </span>
+                ))}
+                {event.studyPrograms.length > 2 && (
+                  <span className="text-sm font-semibold text-hit-gray-400">
+                    +{event.studyPrograms.length - 2} weitere
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Title - secondary, smaller */}
+            <h3 className="mt-1 line-clamp-2 text-sm text-hit-gray-700 leading-tight">
+              {event.title}
+            </h3>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
               <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
                 {eventTypeLabels[event.eventType] || event.eventType}
               </Badge>
@@ -167,9 +184,6 @@ export function EventCard({ event, viewMode }: EventCardProps) {
                 {institutionLabels[event.institution] || event.institution}
               </Badge>
             </div>
-            <h3 className="mt-2 line-clamp-2 font-semibold text-hit-gray-900 leading-tight">
-              {event.title}
-            </h3>
           </CardHeader>
 
           <CardContent className="pt-0">
@@ -182,33 +196,11 @@ export function EventCard({ event, viewMode }: EventCardProps) {
               </span>
             </div>
 
-            {/* Date */}
-            <div className="mt-1 flex items-center gap-2 text-sm text-hit-gray-600">
-              <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-              <span>{formatDate(event.timeStart)}</span>
-            </div>
-
             {/* Location */}
             {getLocationDisplay() && (
               <div className="mt-1 flex items-center gap-2 text-sm text-hit-gray-600">
                 <MapPin className="h-4 w-4 flex-shrink-0" />
                 <span className="line-clamp-1">{getLocationDisplay()}</span>
-              </div>
-            )}
-
-            {/* Study Programs (max 2) */}
-            {event.studyPrograms.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1">
-                {event.studyPrograms.slice(0, 2).map((sp) => (
-                  <Badge key={sp.id} variant="outline" className="text-xs">
-                    {sp.name.length > 20 ? sp.name.slice(0, 20) + '...' : sp.name}
-                  </Badge>
-                ))}
-                {event.studyPrograms.length > 2 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{event.studyPrograms.length - 2}
-                  </Badge>
-                )}
               </div>
             )}
           </CardContent>
@@ -235,7 +227,24 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
           {/* Main Content */}
           <div className="flex-1 p-4 sm:p-6">
-            <div className="flex flex-wrap items-start gap-2">
+            {/* Study Programs - PRIMARY, displayed prominently */}
+            {event.studyPrograms.length > 0 && (
+              <div className="flex items-start gap-2">
+                <GraduationCap className="mt-0.5 h-5 w-5 flex-shrink-0 text-hit-uni-500" />
+                <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                  {event.studyPrograms.map((sp, i) => (
+                    <span key={sp.id} className="text-base font-semibold text-hit-uni-700">
+                      {sp.name}{i < event.studyPrograms.length - 1 ? ',' : ''}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Title - secondary, smaller */}
+            <h3 className="mt-1 text-sm text-hit-gray-700">{event.title}</h3>
+
+            <div className="mt-2 flex flex-wrap items-start gap-2">
               <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
                 {eventTypeLabels[event.eventType] || event.eventType}
               </Badge>
@@ -249,19 +258,11 @@ export function EventCard({ event, viewMode }: EventCardProps) {
               </Badge>
             </div>
 
-            <h3 className="mt-2 text-lg font-semibold text-hit-gray-900">{event.title}</h3>
-
             {event.description && (
-              <p className="mt-2 line-clamp-2 text-sm text-hit-gray-600">{event.description}</p>
+              <p className="mt-2 line-clamp-2 text-sm text-hit-gray-500">{event.description}</p>
             )}
 
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-hit-gray-600">
-              {/* Date */}
-              <div className="flex items-center gap-1">
-                <CalendarIcon className="h-4 w-4" />
-                <span>{formatDate(event.timeStart)}</span>
-              </div>
-
               {/* Location */}
               {getLocationDisplay() && (
                 <div className="flex items-center gap-1">
@@ -278,25 +279,6 @@ export function EventCard({ event, viewMode }: EventCardProps) {
                 </div>
               )}
             </div>
-
-            {/* Study Programs */}
-            {event.studyPrograms.length > 0 && (
-              <div className="mt-3 flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-hit-gray-400" />
-                <div className="flex flex-wrap gap-1">
-                  {event.studyPrograms.slice(0, 3).map((sp) => (
-                    <Badge key={sp.id} variant="outline" className="text-xs">
-                      {sp.name.length > 25 ? sp.name.slice(0, 25) + '...' : sp.name}
-                    </Badge>
-                  ))}
-                  {event.studyPrograms.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{event.studyPrograms.length - 3} weitere
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Action Column */}
