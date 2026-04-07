@@ -51,12 +51,12 @@ function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-[#003366] to-[#FF6B00]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-hit-uni-500 to-hit-hs-500">
             <Calendar className="h-7 w-7 text-white" />
           </div>
         </div>
         <CardTitle className="text-2xl">
-          <span className="text-[#003366]">HIT</span>
+          <span className="text-hit-uni-500">HIT</span>
           <span className="text-gray-400"> Admin</span>
         </CardTitle>
         <CardDescription>
@@ -113,7 +113,7 @@ function LoginForm() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          <Link href="/" className="hover:text-[#003366]">
+          <Link href="/" className="hover:text-hit-uni-500">
             ← Zurück zur Startseite
           </Link>
         </div>
