@@ -155,8 +155,54 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
             {/* Date Header */}
             <h2 className="mb-4 text-lg font-semibold text-hit-gray-900">{displayDate}</h2>
 
-            {/* Day Timeline */}
-            <Card className="overflow-hidden">
+            {/* Mobile: Chronological list view */}
+            <div className="space-y-2 md:hidden">
+              {dayEvents.map((event) => (
+                <Link key={event.id} href={`/events/${event.id}`} className="block">
+                  <Card
+                    className={cn(
+                      'border-l-4 p-3 transition-shadow hover:shadow-md',
+                      eventTypeColors[event.eventType]?.replace('bg-', 'border-l-') ||
+                        'border-l-gray-500'
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 text-sm text-hit-gray-600">
+                          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>
+                            {format(parseISO(event.timeStart), 'HH:mm')}
+                            {event.timeEnd &&
+                              ` – ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                          </span>
+                        </div>
+                        <h3 className="mt-1 text-sm font-medium text-hit-gray-900 line-clamp-2">
+                          {event.title}
+                        </h3>
+                        {event.location && (
+                          <div className="mt-1 flex items-center gap-1 text-xs text-hit-gray-500">
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">{event.location.buildingName}</span>
+                          </div>
+                        )}
+                      </div>
+                      <Badge
+                        className={cn(
+                          'flex-shrink-0 text-[10px] text-white',
+                          eventTypeColors[event.eventType] || 'bg-gray-500'
+                        )}
+                      >
+                        {eventTypeLabels[event.eventType]?.slice(0, 4) ||
+                          event.eventType.slice(0, 4)}
+                      </Badge>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop: Day Timeline */}
+            <Card className="hidden overflow-hidden md:block">
               <div className="flex">
                 {/* Time Column */}
                 <div className="w-16 flex-shrink-0 border-r bg-hit-gray-50">
@@ -245,7 +291,8 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.timeStart), 'HH:mm')}
-                                {event.timeEnd && ` - ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                                {event.timeEnd &&
+                                  ` - ${format(parseISO(event.timeEnd), 'HH:mm')}`}
                               </span>
                               {event.location && (
                                 <span className="flex items-center gap-1">
