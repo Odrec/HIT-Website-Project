@@ -45,6 +45,11 @@ export default function ImportExportPage() {
         'Foto-URL',
         'Studiengänge',
         'Dozenten',
+        'Studiengangsuebergreifend',
+        'Ortshinweis',
+        'Gebaeude',
+        'Raum',
+        'Melder',
       ]
 
       const rows = events.map(
@@ -62,6 +67,11 @@ export default function ImportExportPage() {
           photoUrl: string | null
           studyPrograms: { studyProgram: { name: string } }[]
           lecturers: { firstName: string; lastName: string; title: string | null }[]
+          isCrossProgram?: boolean
+          locationHint?: string | null
+          building?: { name: string } | null
+          room?: { name: string } | null
+          melder?: { name: string } | null
         }) => [
           event.id,
           event.title,
@@ -82,6 +92,11 @@ export default function ImportExportPage() {
               `${l.title || ''} ${l.firstName} ${l.lastName}`.trim()
             )
             .join('; ') || '',
+          event.isCrossProgram ? 'Ja' : 'Nein',
+          event.locationHint || '',
+          event.building?.name || '',
+          event.room?.name || '',
+          event.melder?.name || '',
         ]
       )
 
@@ -251,7 +266,7 @@ export default function ImportExportPage() {
     const headers = [
       'Titel',
       'Beschreibung',
-      'Typ (VORTRAG/LABORFUEHRUNG/RUNDGANG/WORKSHOP/LINK/INFOSTAND)',
+      'Typ (VORTRAG/LABORFUEHRUNG/RUNDGANG/WORKSHOP/ONLINE/VIDEO/INFOSTAND)',
       'Institution (UNI/HOCHSCHULE/BOTH)',
       'Beginn (ISO 8601)',
       'Ende (ISO 8601)',
@@ -428,7 +443,7 @@ export default function ImportExportPage() {
                 <ul className="mt-2 list-inside list-disc text-sm text-gray-600">
                   <li>Die erste Zeile muss Spaltenüberschriften enthalten</li>
                   <li>Mindestens die Spalte &quot;Titel&quot; muss vorhanden sein</li>
-                  <li>Typ: VORTRAG, LABORFUEHRUNG, RUNDGANG, WORKSHOP, LINK, INFOSTAND</li>
+                  <li>Typ: VORTRAG, LABORFUEHRUNG, RUNDGANG, WORKSHOP, ONLINE, VIDEO, INFOSTAND</li>
                   <li>Institution: UNI, HOCHSCHULE, BOTH</li>
                   <li>Datums-Format: ISO 8601 (z.B. 2026-11-14T10:00:00)</li>
                 </ul>
