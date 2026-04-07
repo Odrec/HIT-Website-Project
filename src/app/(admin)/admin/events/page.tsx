@@ -169,7 +169,8 @@ function EventsListContent() {
       LABORFUEHRUNG: 'bg-purple-100 text-purple-800',
       RUNDGANG: 'bg-green-100 text-green-800',
       WORKSHOP: 'bg-orange-100 text-orange-800',
-      LINK: 'bg-gray-100 text-gray-800',
+      ONLINE: 'bg-gray-100 text-gray-800',
+      VIDEO: 'bg-red-100 text-red-800',
       INFOSTAND: 'bg-yellow-100 text-yellow-800',
     }
     return colors[type] || 'bg-gray-100 text-gray-800'

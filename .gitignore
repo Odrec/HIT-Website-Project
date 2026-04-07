@@ -56,8 +56,9 @@ docs/EXECUTIVE-SUMMARY.md
 docs/implementation-plan.md
 docs/requirements-analysis.md
 
-# Superpowers plans (local only)
+# Superpowers plans and brainstorm sessions (local only)
 docs/superpowers/
+.superpowers/
 
 # Playwright MCP artifacts
 .playwright-mcp/

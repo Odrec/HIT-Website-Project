@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Clock, MapPin, User, GraduationCap } from 'lucide-react'
+import { Clock, MapPin, User, GraduationCap, Info } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -40,6 +40,9 @@ interface EventCardProps {
     }>
     meetingPoint?: string | null
     photoUrl?: string | null
+    locationHint?: string | null
+    building?: { id: string; name: string } | null
+    room?: { id: string; name: string } | null
   }
   viewMode: 'list' | 'grid'
 }
@@ -49,7 +52,8 @@ const eventTypeLabels: Record<string, string> = {
   LABORFUEHRUNG: 'Laborführung',
   RUNDGANG: 'Rundgang',
   WORKSHOP: 'Workshop',
-  LINK: 'Online-Link',
+  ONLINE: 'Online',
+  VIDEO: 'Video',
   INFOSTAND: 'Infostand',
 }
 
@@ -58,7 +62,8 @@ const eventTypeColors: Record<string, string> = {
   LABORFUEHRUNG: 'bg-purple-100 text-purple-800',
   RUNDGANG: 'bg-green-100 text-green-800',
   WORKSHOP: 'bg-orange-100 text-orange-800',
-  LINK: 'bg-gray-100 text-gray-800',
+  ONLINE: 'bg-gray-100 text-gray-800',
+  VIDEO: 'bg-red-100 text-red-800',
   INFOSTAND: 'bg-pink-100 text-pink-800',
 }
 
@@ -197,12 +202,26 @@ export function EventCard({ event, viewMode }: EventCardProps) {
             </div>
 
             {/* Location */}
-            {getLocationDisplay() && (
-              <div className="mt-1 flex items-center gap-2 text-sm text-hit-gray-600">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span className="line-clamp-1">{getLocationDisplay()}</span>
-              </div>
-            )}
+            <div className="mt-1 flex flex-col gap-0.5 text-sm text-hit-gray-600">
+              {event.building ? (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                  {event.building.name}
+                  {event.room && `, ${event.room.name}`}
+                </span>
+              ) : getLocationDisplay() ? (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                  <span className="line-clamp-1">{getLocationDisplay()}</span>
+                </span>
+              ) : null}
+              {event.locationHint && (
+                <span className="flex items-center gap-1 italic text-hit-gray-500">
+                  <Info className="h-3 w-3 flex-shrink-0" />
+                  {event.locationHint}
+                </span>
+              )}
+            </div>
           </CardContent>
         </Card>
       </Link>
@@ -264,10 +283,24 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-hit-gray-600">
               {/* Location */}
-              {getLocationDisplay() && (
+              {event.building ? (
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>
+                    {event.building.name}
+                    {event.room && `, ${event.room.name}`}
+                  </span>
+                </div>
+              ) : getLocationDisplay() ? (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
                   <span>{getLocationDisplay()}</span>
+                </div>
+              ) : null}
+              {event.locationHint && (
+                <div className="flex items-center gap-1 italic text-hit-gray-500">
+                  <Info className="h-4 w-4" />
+                  <span>{event.locationHint}</span>
                 </div>
               )}
 

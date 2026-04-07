@@ -113,6 +113,11 @@ export async function POST(request: NextRequest) {
     const eventData = {
       ...body,
       locationId,
+      isCrossProgram: body.isCrossProgram ?? false,
+      locationHint: body.locationHint || null,
+      melderId: body.melderId || null,
+      buildingId: body.buildingId || null,
+      roomId: body.roomId || null,
       timeStart: body.timeStart ? new Date(body.timeStart) : undefined,
       timeEnd: body.timeEnd ? new Date(body.timeEnd) : undefined,
     }

@@ -26,7 +26,8 @@ enum EventType {
   LABORFUEHRUNG
   RUNDGANG
   WORKSHOP
-  LINK
+  ONLINE
+  VIDEO
   INFOSTAND
 }
 
@@ -40,6 +41,12 @@ enum UserRole {
   ADMIN
   ORGANIZER
   PUBLIC
+}
+
+enum Affiliation {
+  UNI
+  HOCHSCHULE
+  EXTERN
 }
 
 // =============================================================================
@@ -119,8 +126,16 @@ model Event {
   additionalInfo  String?                   @db.Text
   photoUrl        String?                   @db.VarChar(500)
   institution     Institution
+  isCrossProgram  Boolean                   @default(false)
+  locationHint    String?
   locationId      String?
   location        Location?                 @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  melderId        String?
+  melder          Melder?                   @relation(fields: [melderId], references: [id])
+  buildingId      String?
+  building        Building?                 @relation(fields: [buildingId], references: [id])
+  roomId          String?
+  room            Room?                     @relation(fields: [roomId], references: [id])
   lecturers       Lecturer[]
   organizers      EventOrganizer[]
   studyPrograms   EventStudyProgram[]
@@ -135,26 +150,30 @@ model Event {
   @@index([timeStart])
   @@index([locationId])
   @@index([createdAt])
-  
+  @@index([melderId])
+  @@index([buildingId])
+  @@index([roomId])
+
   // Compound indexes for common query patterns
   @@index([institution, eventType])      // Filtering by institution and type
   @@index([timeStart, timeEnd])          // Time range queries
   @@index([institution, timeStart])      // Events by institution sorted by time
-  
+
   @@map("events")
 }
 
 /// Lecturer/speaker for an event
 model Lecturer {
-  id         String  @id @default(cuid())
-  eventId    String
-  event      Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  firstName  String  @db.VarChar(100)
-  lastName   String  @db.VarChar(100)
-  title      String? @db.VarChar(50)
-  email      String? @db.VarChar(200)
-  building   String? @db.VarChar(100)
-  roomNumber String? @db.VarChar(50)
+  id          String       @id @default(cuid())
+  eventId     String
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  title       String?
+  email       String?
+  affiliation Affiliation?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([eventId])
   @@map("lecturers")
@@ -209,6 +228,7 @@ model User {
   name          String?        @db.VarChar(200)
   role          UserRole       @default(PUBLIC)
   schedules     UserSchedule[]
+  melder        Melder?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -248,4 +268,60 @@ model ScheduleItem {
   @@unique([scheduleId, eventId])
   @@index([eventId])
   @@map("schedule_items")
+}
+
+// =============================================================================
+// Site Config & Submission Tables
+// =============================================================================
+
+/// Singleton for site-wide configuration
+model SiteSettings {
+  id        String    @id @default("default")
+  hitDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/// Reporter/submitter profile linked to a User account
+model Melder {
+  id          String      @id @default(cuid())
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  title       String?
+  email       String
+  phone       String?
+  affiliation Affiliation
+  fakultaet   String?
+  fachbereich String?
+  room        String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  events      Event[]
+}
+
+/// Campus building
+model Building {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  campus    String?
+  rooms     Room[]
+  events    Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Room within a building
+model Room {
+  id         String   @id @default(cuid())
+  name       String
+  floor      String?
+  buildingId String
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  events     Event[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([buildingId])
 }

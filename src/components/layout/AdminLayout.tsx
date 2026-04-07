@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   ChevronLeft,
+  Building2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,16 @@ const sidebarItems = [
     title: 'Standorte',
     href: '/admin/locations',
     icon: MapPin,
+  },
+  {
+    title: 'Gebäude',
+    href: '/admin/buildings',
+    icon: Building2,
+  },
+  {
+    title: 'Melder',
+    href: '/admin/melders',
+    icon: Users,
   },
   {
     title: 'Benutzer',

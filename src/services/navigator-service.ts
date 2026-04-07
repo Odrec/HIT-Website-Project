@@ -12,7 +12,7 @@ import type {
   QuestionType,
   EndSessionResource,
 } from '@/types/navigator'
-import { Institution, EventType, LocationType } from '@/types/events'
+import { Institution, EventType, LocationType, Affiliation } from '@/types/events'
 import type { StudyProgram, Event } from '@/types/events'
 
 // In-memory session store (in production, use Redis)
@@ -657,6 +657,8 @@ export async function getRecommendations(
       additionalInfo: ep.event.additionalInfo || undefined,
       photoUrl: ep.event.photoUrl || undefined,
       institution: ep.event.institution as unknown as Institution,
+      isCrossProgram: ep.event.isCrossProgram ?? false,
+      locationHint: ep.event.locationHint ?? null,
       locationId: ep.event.locationId || undefined,
       location: ep.event.location
         ? {
@@ -668,6 +670,9 @@ export async function getRecommendations(
             longitude: ep.event.location.longitude || undefined,
           }
         : undefined,
+      melderId: ep.event.melderId ?? null,
+      buildingId: ep.event.buildingId ?? null,
+      roomId: ep.event.roomId ?? null,
       createdAt: new Date(ep.event.createdAt),
       updatedAt: new Date(ep.event.updatedAt),
     }))
@@ -804,6 +809,8 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       additionalInfo: e.additionalInfo || undefined,
       photoUrl: e.photoUrl || undefined,
       institution: e.institution as unknown as Institution,
+      isCrossProgram: e.isCrossProgram ?? false,
+      locationHint: e.locationHint ?? null,
       locationId: e.locationId || undefined,
       location: e.location
         ? {
@@ -815,6 +822,9 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
             longitude: e.location.longitude || undefined,
           }
         : undefined,
+      melderId: e.melderId ?? null,
+      buildingId: e.buildingId ?? null,
+      roomId: e.roomId ?? null,
       lecturers: e.lecturers.map((l) => ({
         id: l.id,
         eventId: l.eventId,
@@ -822,8 +832,7 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
         lastName: l.lastName,
         title: l.title || undefined,
         email: l.email || undefined,
-        building: l.building || undefined,
-        roomNumber: l.roomNumber || undefined,
+        affiliation: l.affiliation as unknown as Affiliation | undefined || undefined,
       })),
       studyPrograms: e.studyPrograms.map((sp) => ({
         id: sp.studyProgram.id,

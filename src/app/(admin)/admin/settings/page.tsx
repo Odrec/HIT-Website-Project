@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar, Bell, Database, Save, RefreshCw, Info } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,8 +26,10 @@ import {
 } from '@/components/ui/dialog'
 
 export default function SettingsPage() {
+  const { toast } = useToast()
+
   // Event settings
-  const [eventDate, setEventDate] = useState('2026-11-19')
+  const [eventDate, setEventDate] = useState('')
   const [eventStartTime, setEventStartTime] = useState('08:00')
   const [eventEndTime, setEventEndTime] = useState('18:00')
   const [defaultEventDuration, setDefaultEventDuration] = useState('60')
@@ -45,15 +48,39 @@ export default function SettingsPage() {
   const [clearCacheDialogOpen, setClearCacheDialogOpen] = useState(false)
   const [clearingCache, setClearingCache] = useState(false)
 
+  // Load settings from API on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.hitDate) {
+            setEventDate(data.hitDate.slice(0, 10))
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
     try {
-      // In a real implementation, this would save to an API/database
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      alert('Einstellungen gespeichert')
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hitDate: eventDate || null }),
+      })
+      if (!response.ok) {
+        throw new Error('Save failed')
+      }
+      toast({ title: 'Einstellungen gespeichert' })
     } catch (error) {
       console.error('Failed to save settings:', error)
-      alert('Fehler beim Speichern')
+      toast({ variant: 'destructive', title: 'Fehler beim Speichern' })
     } finally {
       setSaving(false)
     }

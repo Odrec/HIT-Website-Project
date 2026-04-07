@@ -25,6 +25,11 @@ export default function NewEventPage() {
         },
         body: JSON.stringify({
           ...data,
+          isCrossProgram: data.isCrossProgram ?? false,
+          locationHint: data.locationHint || null,
+          melderId: data.melderId || null,
+          buildingId: data.buildingId || null,
+          roomId: data.roomId || null,
           timeStart: data.timeStart?.toISOString(),
           timeEnd: data.timeEnd?.toISOString(),
         }),

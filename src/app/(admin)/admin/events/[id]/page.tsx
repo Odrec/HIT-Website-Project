@@ -23,6 +23,11 @@ interface EventData {
   photoUrl: string | null
   institution: string
   locationId: string | null
+  isCrossProgram: boolean
+  locationHint: string | null
+  melderId: string | null
+  buildingId: string | null
+  roomId: string | null
   lecturers: {
     firstName: string
     lastName: string
@@ -30,6 +35,7 @@ interface EventData {
     email: string | null
     building: string | null
     roomNumber: string | null
+    affiliation: string | null
   }[]
   organizers: {
     email: string
@@ -80,6 +86,11 @@ export default function EditEventPage() {
         },
         body: JSON.stringify({
           ...data,
+          isCrossProgram: data.isCrossProgram ?? false,
+          locationHint: data.locationHint || null,
+          melderId: data.melderId || null,
+          buildingId: data.buildingId || null,
+          roomId: data.roomId || null,
           timeStart: data.timeStart?.toISOString(),
           timeEnd: data.timeEnd?.toISOString(),
         }),
@@ -147,8 +158,7 @@ export default function EditEventPage() {
       lastName: l.lastName,
       title: l.title || '',
       email: l.email || '',
-      building: l.building || '',
-      roomNumber: l.roomNumber || '',
+      affiliation: (l.affiliation as 'UNI' | 'HOCHSCHULE' | 'EXTERN') || '',
     })),
     organizers: event.organizers.map((o) => ({
       email: o.email,
@@ -157,6 +167,11 @@ export default function EditEventPage() {
     })),
     studyProgramIds: event.studyPrograms.map((sp) => sp.studyProgramId),
     infoMarketIds: event.infoMarkets.map((im) => im.marketId),
+    isCrossProgram: event.isCrossProgram ?? false,
+    locationHint: event.locationHint || '',
+    melderId: event.melderId || '',
+    buildingId: event.buildingId || '',
+    roomId: event.roomId || '',
   }
 
   return (

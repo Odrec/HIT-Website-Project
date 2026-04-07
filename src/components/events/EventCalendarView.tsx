@@ -47,7 +47,8 @@ const eventTypeColors: Record<string, string> = {
   LABORFUEHRUNG: 'bg-purple-500',
   RUNDGANG: 'bg-green-500',
   WORKSHOP: 'bg-orange-500',
-  LINK: 'bg-gray-500',
+  ONLINE: 'bg-gray-500',
+  VIDEO: 'bg-red-500',
   INFOSTAND: 'bg-pink-500',
 }
 
@@ -56,7 +57,8 @@ const eventTypeLabels: Record<string, string> = {
   LABORFUEHRUNG: 'Laborführung',
   RUNDGANG: 'Rundgang',
   WORKSHOP: 'Workshop',
-  LINK: 'Online-Link',
+  ONLINE: 'Online',
+  VIDEO: 'Video',
   INFOSTAND: 'Infostand',
 }
 

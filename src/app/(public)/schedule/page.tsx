@@ -46,8 +46,8 @@ const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
   loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
 })
 
-// HIT Event date (typically November 2026)
-const HIT_DATE = new Date('2026-11-19')
+// Fallback HIT date used until the settings fetch resolves
+const FALLBACK_HIT_DATE = new Date('2026-11-19')
 
 function SchedulePageContent() {
   const searchParams = useSearchParams()
@@ -56,7 +56,25 @@ function SchedulePageContent() {
   const { toast } = useToast()
 
   const [view, setView] = useState<'timeline' | 'list'>('timeline')
-  const [selectedDate, setSelectedDate] = useState<Date>(HIT_DATE)
+  const [selectedDate, setSelectedDate] = useState<Date>(FALLBACK_HIT_DATE)
+
+  // Load HIT date from settings
+  useEffect(() => {
+    const fetchHitDate = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.hitDate) {
+            setSelectedDate(new Date(data.hitDate))
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch HIT date:', error)
+      }
+    }
+    fetchHitDate()
+  }, [])
   const [copied, setCopied] = useState(false)
   const [isLoadingShared, setIsLoadingShared] = useState(false)
   const [showRecommendations, setShowRecommendations] = useState(true)
@@ -413,11 +431,11 @@ function SchedulePageContent() {
                     })
                   ) : (
                     <Button
-                      variant={isSameDay(HIT_DATE, selectedDate) ? 'default' : 'outline'}
+                      variant="default"
                       className="w-full"
-                      onClick={() => setSelectedDate(HIT_DATE)}
+                      onClick={() => setSelectedDate(selectedDate)}
                     >
-                      {format(HIT_DATE, 'EEE, d. MMM yyyy', { locale: de })}
+                      {format(selectedDate, 'EEE, d. MMM yyyy', { locale: de })}
                     </Button>
                   )}
                 </div>
