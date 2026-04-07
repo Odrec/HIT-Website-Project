@@ -85,7 +85,8 @@ const eventTypeLabels: Record<string, string> = {
   LABORFUEHRUNG: 'Laborführung',
   RUNDGANG: 'Rundgang',
   WORKSHOP: 'Workshop',
-  LINK: 'Online-Link',
+  ONLINE: 'Online',
+  VIDEO: 'Video',
   INFOSTAND: 'Infostand',
 }
 
@@ -94,7 +95,8 @@ const eventTypeDescriptions: Record<string, string> = {
   LABORFUEHRUNG: 'Entdecken Sie unsere Labore und Forschungseinrichtungen.',
   RUNDGANG: 'Ein geführter Rundgang durch die Einrichtungen.',
   WORKSHOP: 'Praktische Übungen und Aktivitäten.',
-  LINK: 'Online verfügbare Informationen.',
+  ONLINE: 'Online verfügbare Informationen.',
+  VIDEO: 'Online verfügbares Video.',
   INFOSTAND: 'Besuchen Sie unseren Informationsstand.',
 }
 
@@ -103,7 +105,8 @@ const eventTypeColors: Record<string, string> = {
   LABORFUEHRUNG: 'bg-purple-100 text-purple-800',
   RUNDGANG: 'bg-green-100 text-green-800',
   WORKSHOP: 'bg-orange-100 text-orange-800',
-  LINK: 'bg-gray-100 text-gray-800',
+  ONLINE: 'bg-gray-100 text-gray-800',
+  VIDEO: 'bg-red-100 text-red-800',
   INFOSTAND: 'bg-pink-100 text-pink-800',
 }
 

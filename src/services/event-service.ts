@@ -194,6 +194,9 @@ export const eventService = {
       infoMarketIds = [],
       locationId,
       locationDetails,
+      melderId,
+      buildingId,
+      roomId,
       ...eventData
     } = input
 
@@ -204,14 +207,16 @@ export const eventService = {
           locationDetails: locationDetails as Prisma.InputJsonValue,
         }),
         ...(locationId && { location: { connect: { id: locationId } } }),
+        ...(melderId && { melder: { connect: { id: melderId } } }),
+        ...(buildingId && { building: { connect: { id: buildingId } } }),
+        ...(roomId && { room: { connect: { id: roomId } } }),
         lecturers: {
           create: lecturers.map((lecturer) => ({
             firstName: lecturer.firstName,
             lastName: lecturer.lastName,
             title: lecturer.title,
             email: lecturer.email,
-            building: lecturer.building,
-            roomNumber: lecturer.roomNumber,
+            affiliation: lecturer.affiliation,
           })),
         },
         organizers: {
@@ -269,8 +274,7 @@ export const eventService = {
           lastName: lecturer.lastName,
           title: lecturer.title,
           email: lecturer.email,
-          building: lecturer.building,
-          roomNumber: lecturer.roomNumber,
+          affiliation: lecturer.affiliation,
         })),
       }
     }
@@ -378,8 +382,7 @@ export const eventService = {
             lastName: lecturer.lastName,
             title: lecturer.title,
             email: lecturer.email,
-            building: lecturer.building,
-            roomNumber: lecturer.roomNumber,
+            affiliation: lecturer.affiliation,
           })),
         },
         organizers: {

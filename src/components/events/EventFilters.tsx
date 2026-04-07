@@ -43,7 +43,8 @@ const eventTypes = [
   { value: 'LABORFUEHRUNG', label: 'Laborführung' },
   { value: 'RUNDGANG', label: 'Rundgang' },
   { value: 'WORKSHOP', label: 'Workshop' },
-  { value: 'LINK', label: 'Online-Link' },
+  { value: 'ONLINE', label: 'Online' },
+  { value: 'VIDEO', label: 'Video' },
   { value: 'INFOSTAND', label: 'Infostand' },
 ]
 

@@ -461,7 +461,8 @@ export const recommendationService = {
       LABORFUEHRUNG: 'Laborführungen',
       RUNDGANG: 'Rundgänge',
       WORKSHOP: 'Workshops',
-      LINK: 'Online-Links',
+      ONLINE: 'Online-Veranstaltungen',
+      VIDEO: 'Videos',
       INFOSTAND: 'Infostände',
     }
 

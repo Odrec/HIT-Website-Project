@@ -175,7 +175,8 @@ export default function ImportExportPage() {
                 'LABORFUEHRUNG',
                 'RUNDGANG',
                 'WORKSHOP',
-                'LINK',
+                'ONLINE',
+                'VIDEO',
                 'INFOSTAND',
               ].includes(eventType)
                 ? eventType

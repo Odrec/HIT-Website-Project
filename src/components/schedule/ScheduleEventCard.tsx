@@ -32,7 +32,8 @@ const eventTypeLabels: Record<string, string> = {
   LABORFUEHRUNG: 'Laborführung',
   RUNDGANG: 'Rundgang',
   WORKSHOP: 'Workshop',
-  LINK: 'Link',
+  ONLINE: 'Online',
+  VIDEO: 'Video',
   INFOSTAND: 'Infostand',
 }
 
@@ -42,7 +43,8 @@ const eventTypeColors: Record<string, string> = {
   LABORFUEHRUNG: 'bg-purple-100 text-purple-800 border-purple-200',
   RUNDGANG: 'bg-green-100 text-green-800 border-green-200',
   WORKSHOP: 'bg-orange-100 text-orange-800 border-orange-200',
-  LINK: 'bg-gray-100 text-gray-800 border-gray-200',
+  ONLINE: 'bg-gray-100 text-gray-800 border-gray-200',
+  VIDEO: 'bg-red-100 text-red-800 border-red-200',
   INFOSTAND: 'bg-pink-100 text-pink-800 border-pink-200',
 }
 

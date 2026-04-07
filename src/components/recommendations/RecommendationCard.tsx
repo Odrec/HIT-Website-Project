@@ -57,7 +57,8 @@ export function RecommendationCard({
     LABORFUEHRUNG: 'Laborführung',
     RUNDGANG: 'Rundgang',
     WORKSHOP: 'Workshop',
-    LINK: 'Online-Link',
+    ONLINE: 'Online',
+    VIDEO: 'Video',
     INFOSTAND: 'Infostand',
   }
 
