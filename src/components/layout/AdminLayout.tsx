@@ -50,6 +50,11 @@ const sidebarItems = [
     icon: Building2,
   },
   {
+    title: 'Melder',
+    href: '/admin/melders',
+    icon: Users,
+  },
+  {
     title: 'Benutzer',
     href: '/admin/users',
     icon: Users,
