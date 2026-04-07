@@ -103,6 +103,12 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // isCrossProgram filter
+    const isCrossProgram = searchParams.get('isCrossProgram')
+    if (isCrossProgram === 'true') {
+      where.AND.push({ isCrossProgram: true })
+    }
+
     // Study program filter
     if (studyProgramId) {
       where.AND.push({
@@ -197,6 +203,9 @@ export async function GET(request: NextRequest) {
         take: pageSize,
         include: {
           location: true,
+          melder: true,
+          building: true,
+          room: { include: { building: true } },
           lecturers: {
             select: {
               id: true,
@@ -253,6 +262,8 @@ export async function GET(request: NextRequest) {
       additionalInfo: event.additionalInfo,
       photoUrl: event.photoUrl,
       institution: mapInstitutionToFrontend(event.institution),
+      isCrossProgram: event.isCrossProgram,
+      locationHint: event.locationHint,
       location: event.location
         ? {
             id: event.location.id,
@@ -261,6 +272,9 @@ export async function GET(request: NextRequest) {
             address: event.location.address,
           }
         : null,
+      melder: event.melder,
+      building: event.building,
+      room: event.room,
       lecturers: event.lecturers,
       studyPrograms: event.studyPrograms.map((esp) => esp.studyProgram),
       organizers: event.organizers,
