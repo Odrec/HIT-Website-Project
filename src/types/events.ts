@@ -124,15 +124,15 @@ export interface Event {
   additionalInfo?: string
   photoUrl?: string
   institution: Institution
-  isCrossProgram: boolean
-  locationHint: string | null
+  isCrossProgram?: boolean
+  locationHint?: string | null
   locationId?: string
   location?: Location
-  melderId: string | null
+  melderId?: string | null
   melder?: Melder | null
-  buildingId: string | null
+  buildingId?: string | null
   building?: Building | null
-  roomId: string | null
+  roomId?: string | null
   room?: Room | null
   lecturers?: Lecturer[]
   organizers?: EventOrganizer[]

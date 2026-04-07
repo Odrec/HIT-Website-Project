@@ -334,8 +334,6 @@ async function main() {
         lastName: 'Müller',
         title: 'Prof. Dr.',
         email: 'thomas.mueller@uni-osnabrueck.de',
-        building: 'Gebäude 93',
-        roomNumber: '93/E02',
       },
     }),
     prisma.lecturer.create({
@@ -345,8 +343,6 @@ async function main() {
         lastName: 'Schmidt',
         title: 'Prof. Dr.-Ing.',
         email: 'anna.schmidt@hs-osnabrueck.de',
-        building: 'Caprivi',
-        roomNumber: 'CN 123',
       },
     }),
     prisma.lecturer.create({

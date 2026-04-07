@@ -22,8 +22,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             lastName: true,
             title: true,
             email: true,
-            building: true,
-            roomNumber: true,
           },
         },
         studyPrograms: {
