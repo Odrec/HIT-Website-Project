@@ -182,6 +182,7 @@ export interface EventFilters {
   startDate?: Date
   endDate?: Date
   search?: string
+  isCrossProgram?: boolean
 }
 
 export interface EventSortOptions {

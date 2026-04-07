@@ -92,6 +92,10 @@ export const eventService = {
       }
     }
 
+    if (filters.isCrossProgram !== undefined) {
+      where.isCrossProgram = filters.isCrossProgram
+    }
+
     if (filters.search) {
       where.OR = [
         { title: { contains: filters.search, mode: 'insensitive' } },
@@ -121,6 +125,9 @@ export const eventService = {
           location: true,
           lecturers: true,
           organizers: true,
+          melder: true,
+          building: true,
+          room: { include: { building: true } },
           studyPrograms: {
             include: {
               studyProgram: true,
@@ -165,6 +172,9 @@ export const eventService = {
         location: true,
         lecturers: true,
         organizers: true,
+        melder: true,
+        building: true,
+        room: { include: { building: true } },
         studyPrograms: {
           include: {
             studyProgram: {
@@ -203,6 +213,8 @@ export const eventService = {
     return prisma.event.create({
       data: {
         ...eventData,
+        isCrossProgram: (input.isCrossProgram) ?? false,
+        locationHint: input.locationHint || null,
         ...(locationDetails !== undefined && {
           locationDetails: locationDetails as Prisma.InputJsonValue,
         }),
@@ -241,6 +253,9 @@ export const eventService = {
         location: true,
         lecturers: true,
         organizers: true,
+        melder: true,
+        building: true,
+        room: { include: { building: true } },
         studyPrograms: {
           include: {
             studyProgram: true,
@@ -259,11 +274,18 @@ export const eventService = {
    * Update an existing event
    */
   async update(input: UpdateEventInput) {
-    const { id, lecturers, organizers, studyProgramIds, infoMarketIds, ...eventData } = input
+    const { id, lecturers, organizers, studyProgramIds, infoMarketIds, melderId, buildingId, roomId, ...eventData } = input
 
     // Build the update data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = { ...eventData }
+    const updateData: any = {
+      ...eventData,
+      isCrossProgram: input.isCrossProgram ?? false,
+      locationHint: input.locationHint || null,
+      ...(melderId !== undefined && { melderId: melderId || null }),
+      ...(buildingId !== undefined && { buildingId: buildingId || null }),
+      ...(roomId !== undefined && { roomId: roomId || null }),
+    }
 
     // Handle lecturers update (delete and recreate)
     if (lecturers !== undefined) {
@@ -318,6 +340,9 @@ export const eventService = {
         location: true,
         lecturers: true,
         organizers: true,
+        melder: true,
+        building: true,
+        room: { include: { building: true } },
         studyPrograms: {
           include: {
             studyProgram: true,
@@ -375,7 +400,12 @@ export const eventService = {
         additionalInfo: original.additionalInfo,
         photoUrl: original.photoUrl,
         institution: original.institution,
+        isCrossProgram: original.isCrossProgram,
+        locationHint: original.locationHint,
         locationId: original.locationId,
+        melderId: original.melderId,
+        buildingId: original.buildingId,
+        roomId: original.roomId,
         lecturers: {
           create: original.lecturers.map((lecturer) => ({
             firstName: lecturer.firstName,
@@ -407,6 +437,9 @@ export const eventService = {
         location: true,
         lecturers: true,
         organizers: true,
+        melder: true,
+        building: true,
+        room: { include: { building: true } },
         studyPrograms: {
           include: {
             studyProgram: true,
