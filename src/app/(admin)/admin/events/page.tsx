@@ -99,12 +99,10 @@ function EventsListContent() {
   // Fetch deadline status for organizers
   useEffect(() => {
     if (!isOrganizer) return
-    fetch('/api/settings')
+    fetch('/api/settings/deadline')
       .then((r) => r.json())
-      .then((s) => {
-        if (s.deadlineEnabled && s.submissionDeadline) {
-          setDeadlinePassed(new Date(s.submissionDeadline) < new Date())
-        }
+      .then((info) => {
+        setDeadlinePassed(info.passed)
       })
       .catch(() => {})
   }, [isOrganizer])
