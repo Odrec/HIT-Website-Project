@@ -1,17 +1,11 @@
 import nodemailer from 'nodemailer'
-import {
-  generateNewEventEmail,
-  generateEditEventEmail,
-  detectChanges,
-} from '@/lib/email-templates'
+import { generateNewEventEmail, generateEditEventEmail, detectChanges } from '@/lib/email-templates'
 import type { EmailEvent } from '@/lib/email-templates'
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 function isConfigured(): boolean {
-  return Boolean(
-    process.env.SMTP_HOST && process.env.EMAIL_FROM && process.env.EMAIL_TO
-  )
+  return Boolean(process.env.SMTP_HOST && process.env.EMAIL_FROM && process.env.EMAIL_TO)
 }
 
 function createTransport() {
@@ -20,13 +14,12 @@ function createTransport() {
     host: process.env.SMTP_HOST,
     port,
     secure: port === 465,
-    auth:
-      process.env.SMTP_USER
-        ? {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          }
-        : undefined,
+    auth: process.env.SMTP_USER
+      ? {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        }
+      : undefined,
   })
 }
 
@@ -38,7 +31,7 @@ function createTransport() {
  */
 export async function sendEventCreatedEmail(event: EmailEvent): Promise<void> {
   if (!isConfigured()) {
-    console.log('[email] SMTP not configured — skipping sendEventCreatedEmail')
+    console.warn('[email] SMTP not configured — skipping sendEventCreatedEmail')
     return
   }
 
@@ -66,14 +59,14 @@ export async function sendEventUpdatedEmail(
   newEvent: EmailEvent
 ): Promise<void> {
   if (!isConfigured()) {
-    console.log('[email] SMTP not configured — skipping sendEventUpdatedEmail')
+    console.warn('[email] SMTP not configured — skipping sendEventUpdatedEmail')
     return
   }
 
   try {
     const changes = detectChanges(oldEvent, newEvent)
     if (changes.length === 0) {
-      console.log('[email] No changes detected — skipping sendEventUpdatedEmail')
+      console.warn('[email] No changes detected — skipping sendEventUpdatedEmail')
       return
     }
 

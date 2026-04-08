@@ -480,11 +480,17 @@ export default function ImportExportPage() {
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">Statisches HTML-Backup</CardTitle>
                   <CardDescription className="text-xs">
-                    Erstellen Sie eine statische HTML-Datei mit allen Veranstaltungen als Offline-Backup.
+                    Erstellen Sie eine statische HTML-Datei mit allen Veranstaltungen als
+                    Offline-Backup.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <Button variant="outline" size="sm" onClick={handleHtmlExport} disabled={htmlExportLoading}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleHtmlExport}
+                    disabled={htmlExportLoading}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     {htmlExportLoading ? 'Wird erstellt...' : 'Jetzt exportieren'}
                   </Button>
@@ -507,7 +513,9 @@ export default function ImportExportPage() {
                             <Input
                               type="date"
                               value={schedule.startDate}
-                              onChange={(e) => setSchedule({ ...schedule, startDate: e.target.value })}
+                              onChange={(e) =>
+                                setSchedule({ ...schedule, startDate: e.target.value })
+                              }
                               className="w-auto"
                             />
                           </div>
@@ -515,14 +523,21 @@ export default function ImportExportPage() {
                             <label className="text-xs text-muted-foreground">Häufigkeit</label>
                             <select
                               value={schedule.frequency}
-                              onChange={(e) => setSchedule({ ...schedule, frequency: e.target.value })}
+                              onChange={(e) =>
+                                setSchedule({ ...schedule, frequency: e.target.value })
+                              }
                               className="rounded-md border bg-white px-3 py-2 text-sm h-10"
                             >
                               <option value="daily">Täglich</option>
                               <option value="weekly">Wöchentlich</option>
                             </select>
                           </div>
-                          <Button onClick={handleSaveSchedule} disabled={scheduleLoading} variant="outline" size="sm">
+                          <Button
+                            onClick={handleSaveSchedule}
+                            disabled={scheduleLoading}
+                            variant="outline"
+                            size="sm"
+                          >
                             {scheduleLoading ? 'Speichern...' : 'Speichern'}
                           </Button>
                         </div>

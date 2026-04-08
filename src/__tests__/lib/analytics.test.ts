@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { trackEvent, trackSearch } from '@/lib/analytics'
 
 describe('trackEvent', () => {
@@ -9,7 +9,11 @@ describe('trackEvent', () => {
   it('pushes trackEvent to _paq when available', () => {
     trackEvent('schedule', 'add', 'Informatik erleben')
     expect((window as { _paq?: unknown[][] })._paq).toContainEqual([
-      'trackEvent', 'schedule', 'add', 'Informatik erleben', undefined,
+      'trackEvent',
+      'schedule',
+      'add',
+      'Informatik erleben',
+      undefined,
     ])
   })
 
@@ -21,7 +25,11 @@ describe('trackEvent', () => {
   it('includes numeric value when provided', () => {
     trackEvent('filter', 'institution', 'UNI', 1)
     expect((window as { _paq?: unknown[][] })._paq).toContainEqual([
-      'trackEvent', 'filter', 'institution', 'UNI', 1,
+      'trackEvent',
+      'filter',
+      'institution',
+      'UNI',
+      1,
     ])
   })
 })
@@ -34,7 +42,10 @@ describe('trackSearch', () => {
   it('pushes trackSiteSearch to _paq', () => {
     trackSearch('informatik', 'events', 5)
     expect((window as { _paq?: unknown[][] })._paq).toContainEqual([
-      'trackSiteSearch', 'informatik', 'events', 5,
+      'trackSiteSearch',
+      'informatik',
+      'events',
+      5,
     ])
   })
 })
