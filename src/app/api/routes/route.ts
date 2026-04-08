@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       minWarningMinutes: 3,
     }
 
-    const route = calculateRoute(waypoints, settings)
+    const route = await calculateRoute(waypoints, settings)
 
     return NextResponse.json(route)
   } catch (error) {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // If waypoints provided, calculate direct route
     if (waypoints && Array.isArray(waypoints) && waypoints.length >= 2) {
-      const route = calculateRoute(waypoints, travelSettings)
+      const route = await calculateRoute(waypoints, travelSettings)
       return NextResponse.json(route)
     }
 
