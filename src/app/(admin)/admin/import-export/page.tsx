@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Upload,
   FileSpreadsheet,
@@ -15,11 +15,14 @@ import {
   Users,
   GraduationCap,
   ShoppingBag,
+  Download,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import { ExportCard } from '@/components/admin/ExportCard'
+import { useToast } from '@/hooks/use-toast'
 
 interface ImportResult {
   success: boolean
@@ -31,6 +34,65 @@ export default function ImportExportPage() {
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toast } = useToast()
+  const [htmlExportLoading, setHtmlExportLoading] = useState(false)
+  const [schedule, setSchedule] = useState({ enabled: false, startDate: '', frequency: 'daily' })
+  const [scheduleLoading, setScheduleLoading] = useState(false)
+
+  // Load existing schedule
+  useEffect(() => {
+    fetch('/api/admin/export-schedule')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.startDate) {
+          setSchedule({
+            enabled: data.enabled,
+            startDate: data.startDate.slice(0, 10),
+            frequency: data.frequency,
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const handleHtmlExport = async () => {
+    setHtmlExportLoading(true)
+    try {
+      const response = await fetch('/api/export/html')
+      if (!response.ok) throw new Error('Export failed')
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `hit-2026-events-${new Date().toISOString().slice(0, 10)}.html`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      toast({ title: 'Export erstellt', description: 'Die HTML-Datei wurde heruntergeladen.' })
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Export fehlgeschlagen.' })
+    } finally {
+      setHtmlExportLoading(false)
+    }
+  }
+
+  const handleSaveSchedule = async () => {
+    setScheduleLoading(true)
+    try {
+      const response = await fetch('/api/admin/export-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(schedule),
+      })
+      if (!response.ok) throw new Error('Save failed')
+      toast({ title: 'Gespeichert', description: 'Export-Zeitplan wurde aktualisiert.' })
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Speichern fehlgeschlagen.' })
+    } finally {
+      setScheduleLoading(false)
+    }
+  }
 
   const handleExportCSV = async () => {
     try {
@@ -406,6 +468,67 @@ export default function ImportExportPage() {
                     <FileText className="mr-2 h-4 w-4" />
                     Herunterladen
                   </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">HTML-Backup</h2>
+            <div className="mt-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium">Statisches HTML-Backup</CardTitle>
+                  <CardDescription className="text-xs">
+                    Erstellen Sie eine statische HTML-Datei mit allen Veranstaltungen als Offline-Backup.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <Button variant="outline" size="sm" onClick={handleHtmlExport} disabled={htmlExportLoading}>
+                    <Download className="mr-2 h-4 w-4" />
+                    {htmlExportLoading ? 'Wird erstellt...' : 'Jetzt exportieren'}
+                  </Button>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium text-sm mb-3">Automatischer Export</h4>
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={schedule.enabled}
+                          onChange={(e) => setSchedule({ ...schedule, enabled: e.target.checked })}
+                        />
+                        <span className="text-sm">Automatischen Export aktivieren</span>
+                      </label>
+                      {schedule.enabled && (
+                        <div className="flex flex-wrap gap-4 items-end">
+                          <div>
+                            <label className="text-xs text-muted-foreground">Startdatum</label>
+                            <Input
+                              type="date"
+                              value={schedule.startDate}
+                              onChange={(e) => setSchedule({ ...schedule, startDate: e.target.value })}
+                              className="w-auto"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Häufigkeit</label>
+                            <select
+                              value={schedule.frequency}
+                              onChange={(e) => setSchedule({ ...schedule, frequency: e.target.value })}
+                              className="rounded-md border bg-white px-3 py-2 text-sm h-10"
+                            >
+                              <option value="daily">Täglich</option>
+                              <option value="weekly">Wöchentlich</option>
+                            </select>
+                          </div>
+                          <Button onClick={handleSaveSchedule} disabled={scheduleLoading} variant="outline" size="sm">
+                            {scheduleLoading ? 'Speichern...' : 'Speichern'}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
