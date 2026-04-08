@@ -31,12 +31,13 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | Feature | Description |
 |---------|-------------|
 | **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views) |
-| **Schedule Builder** | Create personalized event schedules with conflict detection |
+| **Schedule Builder** | Create personalized event schedules with conflict detection, QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini |
 | **Route Planner** | Navigate between campus locations with walking time estimates |
 | **Event Recommendations** | Smart suggestions based on interests and schedule |
 | **Admin Interface** | Manage events, programs, locations, users, and room assignments |
-| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet |
+| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet, iCal export |
+| **Legal Pages** | Impressum, Datenschutz, Barrierefreiheit (BITV 2.0) |
 
 ---
 
@@ -52,7 +53,8 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Auth** | NextAuth v5 (role-based: Admin, Organizer, Public) |
 | **Maps** | Leaflet + React-Leaflet |
 | **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 |
-| **Exports** | ExcelJS, @react-pdf/renderer |
+| **Exports** | ExcelJS, @react-pdf/renderer, iCal |
+| **Sharing** | nanoid (short links), qrcode.react (QR codes) |
 | **Testing** | Vitest + React Testing Library |
 | **Deployment** | Vercel + Docker |
 
@@ -215,6 +217,8 @@ After running the seed script:
 | `/api/routes` | POST | Calculate route between locations | No |
 | `/api/recommendations` | POST | Get event recommendations | No |
 | `/api/navigator` | POST | AI navigator chat | No |
+| `/api/schedule/share` | POST | Create short link for schedule sharing | No |
+| `/api/schedule/share/[code]` | GET | Look up shared schedule by code | No |
 
 ### Admin Endpoints (Authentication Required)
 
