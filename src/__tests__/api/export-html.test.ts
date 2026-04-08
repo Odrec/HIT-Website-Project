@@ -12,7 +12,7 @@ import { GET } from '@/app/api/export/html/route'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 
-const mockAuth = vi.mocked(auth)
+const mockAuth = vi.mocked(auth) as unknown as ReturnType<typeof vi.fn>
 const mockFindMany = vi.mocked(prisma.event.findMany)
 
 const mockEvents = [

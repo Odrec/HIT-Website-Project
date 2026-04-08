@@ -45,8 +45,6 @@ function labelInstitution(institution: Institution): string {
       return 'Hochschule Osnabrück'
     case 'BOTH':
       return 'Beide'
-    case 'EXTERN':
-      return 'Extern'
     default:
       return String(institution)
   }
