@@ -176,7 +176,7 @@ export default function CampusMap({
                               ? 'bg-blue-100 text-blue-800'
                               : building.campus === 'caprivi'
                                 ? 'bg-green-100 text-green-800'
-                                : 'bg-orange-100 text-orange-800'
+                                : 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {building.campus === 'schloss'
@@ -185,7 +185,7 @@ export default function CampusMap({
                             ? 'Westerberg'
                             : building.campus === 'caprivi'
                               ? 'Caprivi (HS)'
-                              : 'Haste (HS)'}
+                              : 'Sonstige'}
                       </span>
                       {building.hasAccessibility && (
                         <span className="text-green-600" title="Barrierefrei">

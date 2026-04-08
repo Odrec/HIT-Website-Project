@@ -45,7 +45,6 @@ const CAMPUS_AREAS: { id: string; name: string }[] = [
   { id: 'schloss', name: 'Schloss Campus' },
   { id: 'westerberg', name: 'Westerberg Campus' },
   { id: 'caprivi', name: 'Caprivi (Hochschule)' },
-  { id: 'haste', name: 'Haste (Hochschule)' },
 ]
 
 export default function RoutePlannerPage() {
@@ -562,7 +561,7 @@ export default function RoutePlannerPage() {
                   Minuten
                 </li>
                 <li>
-                  • Zwischen Caprivi und Haste Campus empfehlen wir den Bus zu nutzen (Linie X)
+                  • Zwischen den Standorten empfehlen wir den Bus zu nutzen (Linie X)
                 </li>
                 <li>
                   • Achten Sie auf orangene/rote Warnungen - diese zeigen kritische Zeitfenster an

@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { fetchWalkingDirections } from '@/services/google-directions'
 
-// Building coordinates for seeding (all buildings except Haste)
+// Building coordinates for seeding
 const SEED_BUILDINGS = [
   { id: 'schloss', lat: 52.2725, lng: 8.044 },
   { id: 'aula', lat: 52.2718, lng: 8.0448 },

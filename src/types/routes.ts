@@ -107,7 +107,7 @@ export interface BuildingInfo {
   shortName?: string
   coordinates: Coordinates
   address: string
-  campus: 'schloss' | 'westerberg' | 'haste' | 'caprivi' | 'other'
+  campus: 'schloss' | 'westerberg' | 'caprivi' | 'other'
   hasAccessibility: boolean
   accessibilityNotes?: string
   eventCount?: number
@@ -308,25 +308,6 @@ export const OSNABRUECK_BUILDINGS: BuildingInfo[] = [
     campus: 'caprivi',
     hasAccessibility: true,
   },
-  // Hochschule Haste Campus
-  {
-    id: 'haste-a',
-    name: 'Haste Gebäude A',
-    shortName: 'HA-A',
-    coordinates: { latitude: 52.3006, longitude: 7.9843 },
-    address: 'Am Krümpel 31, 49090 Osnabrück',
-    campus: 'haste',
-    hasAccessibility: true,
-  },
-  {
-    id: 'haste-b',
-    name: 'Haste Gebäude B',
-    shortName: 'HA-B',
-    coordinates: { latitude: 52.3011, longitude: 7.9851 },
-    address: 'Am Krümpel 31, 49090 Osnabrück',
-    campus: 'haste',
-    hasAccessibility: true,
-  },
 ]
 
 /**
@@ -364,17 +345,6 @@ export const CAMPUS_AREAS: CampusArea[] = [
       south: 52.274,
       east: 8.02,
       west: 8.01,
-    },
-  },
-  {
-    id: 'haste',
-    name: 'Haste Campus (Hochschule)',
-    center: { latitude: 52.3008, longitude: 7.9847 },
-    bounds: {
-      north: 52.303,
-      south: 52.299,
-      east: 7.99,
-      west: 7.98,
     },
   },
 ]

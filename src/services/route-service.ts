@@ -190,25 +190,6 @@ export function findBuilding(idOrName: string): BuildingInfo | undefined {
       campus: 'caprivi',
       hasAccessibility: true,
     },
-    // Hochschule Haste Campus
-    {
-      id: 'haste-a',
-      name: 'Haste Gebäude A',
-      shortName: 'HA-A',
-      coordinates: { latitude: 52.3006, longitude: 7.9843 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
-    {
-      id: 'haste-b',
-      name: 'Haste Gebäude B',
-      shortName: 'HA-B',
-      coordinates: { latitude: 52.3011, longitude: 7.9851 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
   ]
 
   const lowerId = idOrName.toLowerCase()
@@ -385,25 +366,6 @@ export async function getAllBuildings(): Promise<BuildingInfo[]> {
       coordinates: { latitude: 52.2751, longitude: 8.0141 },
       address: 'Caprivistraße 30, 49076 Osnabrück',
       campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    // Hochschule Haste Campus
-    {
-      id: 'haste-a',
-      name: 'Haste Gebäude A',
-      shortName: 'HA-A',
-      coordinates: { latitude: 52.3006, longitude: 7.9843 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
-    {
-      id: 'haste-b',
-      name: 'Haste Gebäude B',
-      shortName: 'HA-B',
-      coordinates: { latitude: 52.3011, longitude: 7.9851 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
       hasAccessibility: true,
     },
   ]
