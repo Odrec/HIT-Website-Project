@@ -12,9 +12,9 @@ export default function BarrierefreiheitPage() {
           <CardContent className="prose prose-sm max-w-none pt-6">
             <p>
               Die Zentrale Studienberatung Osnabrück ist bemüht, den Webauftritt des
-              Hochschulinformationstags (HIT) im Einklang mit den nationalen
-              Rechtsvorschriften zur Umsetzung der Richtlinie (EU) 2016/2102 des
-              Europäischen Parlaments barrierefrei zugänglich zu machen.
+              Hochschulinformationstags (HIT) im Einklang mit den nationalen Rechtsvorschriften zur
+              Umsetzung der Richtlinie (EU) 2016/2102 des Europäischen Parlaments barrierefrei
+              zugänglich zu machen.
             </p>
             <p>
               Diese Erklärung zur Barrierefreiheit gilt für die Website{' '}
@@ -29,9 +29,9 @@ export default function BarrierefreiheitPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Diese Website ist mit den Web Content Accessibility Guidelines (WCAG)
-              2.1 Level AA und der BITV 2.0 teilweise vereinbar. Die nachstehend
-              aufgeführten Inhalte sind nicht barrierefrei.
+              Diese Website ist mit den Web Content Accessibility Guidelines (WCAG) 2.1 Level AA und
+              der BITV 2.0 teilweise vereinbar. Die nachstehend aufgeführten Inhalte sind nicht
+              barrierefrei.
             </p>
           </CardContent>
         </Card>
@@ -41,21 +41,17 @@ export default function BarrierefreiheitPage() {
             <CardTitle>Nicht barrierefreie Inhalte</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
-            <p>
-              Die folgenden Inhalte sind aus den genannten Gründen nicht barrierefrei:
-            </p>
+            <p>Die folgenden Inhalte sind aus den genannten Gründen nicht barrierefrei:</p>
             <ul>
               <li>
-                Die interaktive Campuskarte (Leaflet) ist möglicherweise nicht
-                vollständig mit Screenreadern bedienbar.
+                Die interaktive Campuskarte (Leaflet) ist möglicherweise nicht vollständig mit
+                Screenreadern bedienbar.
               </li>
               <li>
-                Der visuelle Zeitplan (Timeline-Ansicht) bietet eine alternative
-                Listenansicht für Screenreader-Nutzer.
+                Der visuelle Zeitplan (Timeline-Ansicht) bietet eine alternative Listenansicht für
+                Screenreader-Nutzer.
               </li>
-              <li>
-                PDF-Dokumente sind möglicherweise nicht vollständig barrierefrei.
-              </li>
+              <li>PDF-Dokumente sind möglicherweise nicht vollständig barrierefrei.</li>
             </ul>
           </CardContent>
         </Card>
@@ -66,12 +62,10 @@ export default function BarrierefreiheitPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Diese Erklärung wurde am{' '}
-              <strong>{new Date().toLocaleDateString('de-DE')}</strong> erstellt.
+              Diese Erklärung wurde am <strong>{new Date().toLocaleDateString('de-DE')}</strong>{' '}
+              erstellt.
             </p>
-            <p>
-              Die Überprüfung basiert auf einer Selbstbewertung.
-            </p>
+            <p>Die Überprüfung basiert auf einer Selbstbewertung.</p>
           </CardContent>
         </Card>
 
@@ -81,8 +75,8 @@ export default function BarrierefreiheitPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Wenn Ihnen Mängel in Bezug auf die barrierefreie Gestaltung auffallen,
-              können Sie uns kontaktieren:
+              Wenn Ihnen Mängel in Bezug auf die barrierefreie Gestaltung auffallen, können Sie uns
+              kontaktieren:
             </p>
             <p>
               Zentrale Studienberatung Osnabrück
@@ -105,14 +99,12 @@ export default function BarrierefreiheitPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Wenn auch nach Ihrem Feedback an den oben genannten Kontakt keine
-              zufriedenstellende Lösung gefunden wurde, können Sie sich an die
-              Schlichtungsstelle nach § 16 BGG wenden:
+              Wenn auch nach Ihrem Feedback an den oben genannten Kontakt keine zufriedenstellende
+              Lösung gefunden wurde, können Sie sich an die Schlichtungsstelle nach § 16 BGG wenden:
             </p>
             <p>
-              Schlichtungsstelle nach dem Behindertengleichstellungsgesetz bei dem
-              Beauftragten der Bundesregierung für die Belange von Menschen mit
-              Behinderungen
+              Schlichtungsstelle nach dem Behindertengleichstellungsgesetz bei dem Beauftragten der
+              Bundesregierung für die Belange von Menschen mit Behinderungen
               <br />
               Mauerstraße 53
               <br />

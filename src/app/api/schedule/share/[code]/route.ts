@@ -13,17 +13,11 @@ export async function GET(
     })
 
     if (!shared) {
-      return NextResponse.json(
-        { error: 'Schedule not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
     }
 
     return NextResponse.json({ eventIds: shared.eventIds })
   } catch {
-    return NextResponse.json(
-      { error: 'Failed to load shared schedule' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to load shared schedule' }, { status: 500 })
   }
 }

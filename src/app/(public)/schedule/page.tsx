@@ -354,7 +354,12 @@ function SchedulePageContent() {
 
         {state.items.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleShareSchedule} disabled={shareLoading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShareSchedule}
+              disabled={shareLoading}
+            >
               {shareLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -685,21 +690,12 @@ function SchedulePageContent() {
           <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Zeitplan teilen</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShareData(null)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setShareData(null)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
             <div className="flex justify-center mb-4">
-              <QRCodeSVG
-                value={shareData.url}
-                size={200}
-                level="M"
-                marginSize={2}
-              />
+              <QRCodeSVG value={shareData.url} size={200} level="M" marginSize={2} />
             </div>
             <div className="flex items-center gap-2 mb-4">
               <input
@@ -721,9 +717,7 @@ function SchedulePageContent() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-gray-500 text-center">
-              QR-Code scannen oder Link teilen
-            </p>
+            <p className="text-xs text-gray-500 text-center">QR-Code scannen oder Link teilen</p>
           </div>
         </div>
       )}
@@ -754,10 +748,7 @@ function SchedulePageContent() {
               .sort((a, b) => {
                 if (!a.event.timeStart) return 1
                 if (!b.event.timeStart) return -1
-                return (
-                  new Date(a.event.timeStart).getTime() -
-                  new Date(b.event.timeStart).getTime()
-                )
+                return new Date(a.event.timeStart).getTime() - new Date(b.event.timeStart).getTime()
               })
               .map((item, index) => (
                 <tr
@@ -766,12 +757,8 @@ function SchedulePageContent() {
                   style={{ borderBottom: '1px solid #ddd' }}
                 >
                   <td className="py-2 px-2 whitespace-nowrap">
-                    {item.event.timeStart
-                      ? format(new Date(item.event.timeStart), 'HH:mm')
-                      : '—'}
-                    {item.event.timeEnd && (
-                      <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>
-                    )}
+                    {item.event.timeStart ? format(new Date(item.event.timeStart), 'HH:mm') : '—'}
+                    {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
                   </td>
                   <td className="py-2 px-2 font-medium">{item.event.title}</td>
                   <td className="py-2 px-2 text-gray-600">
@@ -780,12 +767,8 @@ function SchedulePageContent() {
                       .toLowerCase()
                       .replace(/^\w/, (c: string) => c.toUpperCase()) ?? '—'}
                   </td>
-                  <td className="py-2 px-2">
-                    {item.event.location?.buildingName ?? '—'}
-                  </td>
-                  <td className="py-2 px-2">
-                    {item.event.location?.roomNumber ?? '—'}
-                  </td>
+                  <td className="py-2 px-2">{item.event.location?.buildingName ?? '—'}</td>
+                  <td className="py-2 px-2">{item.event.location?.roomNumber ?? '—'}</td>
                 </tr>
               ))}
           </tbody>

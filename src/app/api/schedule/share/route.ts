@@ -8,10 +8,7 @@ export async function POST(request: NextRequest) {
     const { eventIds } = body
 
     if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
-      return NextResponse.json(
-        { error: 'eventIds array is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'eventIds array is required' }, { status: 400 })
     }
 
     // Sort for consistent dedup
@@ -36,9 +33,6 @@ export async function POST(request: NextRequest) {
     const url = `${new URL(request.url).origin}/s/${shared.code}`
     return NextResponse.json({ code: shared.code, url })
   } catch {
-    return NextResponse.json(
-      { error: 'Failed to create shared schedule' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create shared schedule' }, { status: 500 })
   }
 }

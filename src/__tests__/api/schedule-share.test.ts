@@ -97,7 +97,9 @@ describe('GET /api/schedule/share/[code]', () => {
     })
 
     const request = new Request('http://localhost/api/schedule/share/abc123')
-    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ code: 'abc123' }) })
+    const response = await GET(request as unknown as NextRequest, {
+      params: Promise.resolve({ code: 'abc123' }),
+    })
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -108,7 +110,9 @@ describe('GET /api/schedule/share/[code]', () => {
     mockFindUnique.mockResolvedValue(null)
 
     const request = new Request('http://localhost/api/schedule/share/nope99')
-    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ code: 'nope99' }) })
+    const response = await GET(request as unknown as NextRequest, {
+      params: Promise.resolve({ code: 'nope99' }),
+    })
 
     expect(response.status).toBe(404)
   })

@@ -14,8 +14,8 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Die Zentrale Studienberatung Osnabrück (ZSB) ist eine gemeinsame
-              Einrichtung der Universität Osnabrück und der Hochschule Osnabrück.
+              Die Zentrale Studienberatung Osnabrück (ZSB) ist eine gemeinsame Einrichtung der
+              Universität Osnabrück und der Hochschule Osnabrück.
             </p>
             <p>
               <strong>Universität Osnabrück</strong>
@@ -99,17 +99,15 @@ export default function ImpressumPage() {
           <CardContent className="prose prose-sm max-w-none">
             <h4 className="font-semibold mt-0">Haftung für Inhalte</h4>
             <p>
-              Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für
-              die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir
-              jedoch keine Gewähr übernehmen.
+              Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
+              Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
             </p>
             <h4 className="font-semibold">Haftung für Links</h4>
             <p>
-              Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren
-              Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden
-              Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten
-              Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten
-              verantwortlich.
+              Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir
+              keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr
+              übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter
+              oder Betreiber der Seiten verantwortlich.
             </p>
           </CardContent>
         </Card>
