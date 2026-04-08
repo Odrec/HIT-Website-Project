@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     await updateBusPosition(bus.id, { latitude, longitude, heading, speed })
 
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true, busName: bus.name })
   } catch (error) {
     console.error('Error updating bus position:', error)
     return NextResponse.json({ error: 'Failed to update position' }, { status: 500 })

@@ -61,10 +61,13 @@ function GuideTrackingContent() {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({}),
-    }).then((res) => {
+    }).then(async (res) => {
       if (res.status === 401) {
         setError('Ungültiger Link. Bitte kontaktieren Sie den Admin für einen neuen QR-Code.')
         setStatus('error')
+      } else if (res.ok) {
+        const data = await res.json()
+        if (data.busName) setBusName(data.busName)
       }
     })
   }, [token])
