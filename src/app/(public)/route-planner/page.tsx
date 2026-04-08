@@ -387,7 +387,7 @@ export default function RoutePlannerPage() {
                     <MapIcon className="h-5 w-5" />
                     Campus Karte
                   </CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Button
                       variant={showBusLayer ? 'default' : 'outline'}
                       size="sm"
@@ -403,8 +403,8 @@ export default function RoutePlannerPage() {
                     </Button>
                     {/* Campus filter */}
                     <Select value={selectedCampus} onValueChange={setSelectedCampus}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Campus auswählen" />
+                      <SelectTrigger className="w-[140px] sm:w-[180px]">
+                        <SelectValue placeholder="Campus" />
                       </SelectTrigger>
                       <SelectContent className="z-[1000]">
                         {CAMPUS_AREAS.map((area) => (
