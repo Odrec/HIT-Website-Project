@@ -1,7 +1,7 @@
 # HIT-Website Project
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)](https://redis.io/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -30,12 +30,13 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 
 | Feature | Description |
 |---------|-------------|
-| **Event Browsing** | Browse and search all HIT events with advanced filtering |
+| **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views) |
 | **Schedule Builder** | Create personalized event schedules with conflict detection |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini |
 | **Route Planner** | Navigate between campus locations with walking time estimates |
 | **Event Recommendations** | Smart suggestions based on interests and schedule |
-| **Admin Interface** | Manage events, programs, locations, and users |
+| **Admin Interface** | Manage events, programs, locations, users, and room assignments |
+| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet |
 
 ---
 
@@ -43,14 +44,16 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 
 | Category | Technology |
 |----------|------------|
-| **Framework** | Next.js 14 with App Router |
-| **Language** | TypeScript 5.0 |
+| **Framework** | Next.js 16 with App Router |
+| **Language** | TypeScript 5, React 19 |
 | **Styling** | Tailwind CSS + shadcn/ui |
-| **Database** | PostgreSQL 16 with Prisma ORM |
+| **Database** | PostgreSQL 16 with Prisma 6 ORM |
 | **Cache** | Redis 7 (ioredis) |
-| **Auth** | NextAuth.js with credentials provider |
+| **Auth** | NextAuth v5 (role-based: Admin, Organizer, Public) |
 | **Maps** | Leaflet + React-Leaflet |
 | **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 |
+| **Exports** | ExcelJS, @react-pdf/renderer |
+| **Testing** | Vitest + React Testing Library |
 | **Deployment** | Vercel + Docker |
 
 ---
@@ -166,11 +169,12 @@ The AI-powered Study Navigator requires one of these providers:
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── (public)/          # Public routes (events, schedule, navigator)
-│   ├── (admin)/           # Admin routes (protected)
-│   └── api/               # API routes
+│   ├── (admin)/           # Admin routes (events, room assignments, import/export)
+│   └── api/               # API routes (includes export/excel, export/pdf)
 ├── components/
 │   ├── ui/                # shadcn/ui base components
 │   ├── layout/            # Layout components (Header, Footer, etc.)
+│   ├── admin/             # Admin components (ExportCard, etc.)
 │   ├── events/            # Event-related components
 │   ├── schedule/          # Schedule builder components
 │   ├── navigator/         # AI navigator components
@@ -221,6 +225,8 @@ After running the seed script:
 | `/api/users` | GET, POST | Manage users |
 | `/api/locations` | POST, PUT, DELETE | Manage locations |
 | `/api/study-programs` | POST, PUT, DELETE | Manage study programs |
+| `/api/export/excel?view=<type>` | GET | Excel export (8 view types) |
+| `/api/export/pdf/booklet` | GET | PDF program booklet |
 
 ---
 
