@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap, Search, Building2, Filter, BookOpen } from 'lucide-react'
+import { GraduationCap, Search, Building2, Filter, BookOpen, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -26,6 +26,7 @@ interface StudyProgram {
   id: string
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+  url: string | null
   clusterId: string | null
   cluster: Cluster | null
 }
@@ -225,28 +226,39 @@ export default function StudyProgramsPage() {
                       {groupedPrograms[clusterName]
                         .sort((a, b) => a.name.localeCompare(b.name, 'de'))
                         .map((program) => (
-                          <Link
+                          <div
                             key={program.id}
-                            href={`/events?studyProgram=${program.id}`}
-                            className="group"
+                            className="flex items-center gap-3 p-3 rounded-lg border bg-white hover:shadow-md hover:border-green-300 transition-all"
                           >
-                            <div className="flex items-center gap-3 p-3 rounded-lg border bg-white hover:shadow-md hover:border-green-300 transition-all">
-                              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                              <span className="flex-1 text-sm font-medium group-hover:text-green-700">
-                                {program.name}
-                              </span>
-                              <Badge
-                                variant="outline"
-                                className={`text-xs ${institutionColors[program.institution]}`}
+                            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <Link
+                              href={`/events?studyProgram=${program.id}`}
+                              className="flex-1 text-sm font-medium hover:text-green-700"
+                            >
+                              {program.name}
+                            </Link>
+                            {program.url && (
+                              <a
+                                href={program.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-green-700 flex-shrink-0"
+                                title="Zur Studiengang-Seite"
                               >
-                                {program.institution === 'UNI'
-                                  ? 'Uni'
-                                  : program.institution === 'HOCHSCHULE'
-                                    ? 'HS'
-                                    : 'Beide'}
-                              </Badge>
-                            </div>
-                          </Link>
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${institutionColors[program.institution]}`}
+                            >
+                              {program.institution === 'UNI'
+                                ? 'Uni'
+                                : program.institution === 'HOCHSCHULE'
+                                  ? 'HS'
+                                  : 'Beide'}
+                            </Badge>
+                          </div>
                         ))}
                     </div>
                   </CardContent>

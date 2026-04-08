@@ -31,6 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 id: true,
                 name: true,
                 institution: true,
+                url: true,
               },
             },
           },

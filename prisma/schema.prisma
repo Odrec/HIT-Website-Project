@@ -70,6 +70,7 @@ model StudyProgram {
   id          String                @id @default(cuid())
   name        String                @db.VarChar(200)
   institution Institution
+  url         String?               @db.VarChar(500)
   clusterId   String?
   cluster     StudyProgramCluster?  @relation(fields: [clusterId], references: [id], onDelete: SetNull)
   events      EventStudyProgram[]

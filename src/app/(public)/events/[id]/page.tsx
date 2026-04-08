@@ -72,6 +72,7 @@ interface Event {
     id: string
     name: string
     institution: string
+    url: string | null
   }>
   organizers: Array<{
     id: string
@@ -190,6 +191,7 @@ export default function EventDetailPage() {
       id: sp.id,
       name: sp.name,
       institution: sp.institution as ScheduleEvent['institution'],
+      url: sp.url ?? null,
     })),
     meetingPoint: e.meetingPoint ?? undefined,
     photoUrl: e.photoUrl ?? undefined,
@@ -372,19 +374,27 @@ export default function EventDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {event.studyPrograms.map((program) => (
-                    <Badge key={program.id} variant="outline" className="text-sm">
-                      {program.name}
-                      <span
-                        className={cn(
-                          'ml-1 text-xs',
-                          program.institution === 'UNI' ? 'text-hit-uni-500' : 'text-hit-hs-500'
-                        )}
-                      >
-                        ({program.institution === 'UNI' ? 'Uni' : 'HS'})
-                      </span>
-                    </Badge>
-                  ))}
+                  {event.studyPrograms.map((program) => {
+                    const badge = (
+                      <Badge key={program.id} variant="outline" className={cn("text-sm", program.url && "hover:bg-accent cursor-pointer")}>
+                        {program.name}
+                        <span
+                          className={cn(
+                            'ml-1 text-xs',
+                            program.institution === 'UNI' ? 'text-hit-uni-500' : 'text-hit-hs-500'
+                          )}
+                        >
+                          ({program.institution === 'UNI' ? 'Uni' : 'HS'})
+                        </span>
+                        {program.url && <ExternalLink className="ml-1 h-3 w-3" />}
+                      </Badge>
+                    )
+                    return program.url ? (
+                      <a key={program.id} href={program.url} target="_blank" rel="noopener noreferrer">
+                        {badge}
+                      </a>
+                    ) : badge
+                  })}
                 </div>
               </CardContent>
             </Card>

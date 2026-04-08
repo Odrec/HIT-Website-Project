@@ -221,6 +221,7 @@ export async function GET(request: NextRequest) {
                   id: true,
                   name: true,
                   institution: true,
+                  url: true,
                 },
               },
             },

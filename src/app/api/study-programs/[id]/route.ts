@@ -73,6 +73,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         name: body.name,
         institution: body.institution,
+        url: body.url || null,
         clusterId: body.clusterId || null,
       },
       include: {

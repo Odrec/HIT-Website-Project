@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name,
         institution: body.institution,
+        url: body.url || null,
         clusterId: body.clusterId || null,
       },
       include: {

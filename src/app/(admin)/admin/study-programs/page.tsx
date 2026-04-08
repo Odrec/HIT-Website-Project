@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Folder,
   Building2,
+  ExternalLink,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,6 +60,7 @@ interface StudyProgram {
   id: string
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+  url: string | null
   clusterId: string | null
   cluster: Cluster | null
   createdAt: string
@@ -91,6 +93,7 @@ export default function StudyProgramsPage() {
   const [programFormData, setProgramFormData] = useState({
     name: '',
     institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
+    url: '',
     clusterId: '',
   })
 
@@ -155,6 +158,7 @@ export default function StudyProgramsPage() {
     setProgramFormData({
       name: '',
       institution: 'UNI',
+      url: '',
       clusterId: '',
     })
     setProgramDialogOpen(true)
@@ -165,6 +169,7 @@ export default function StudyProgramsPage() {
     setProgramFormData({
       name: program.name,
       institution: program.institution,
+      url: program.url || '',
       clusterId: program.clusterId || '',
     })
     setProgramDialogOpen(true)
@@ -178,6 +183,7 @@ export default function StudyProgramsPage() {
       const body = {
         name: programFormData.name.trim(),
         institution: programFormData.institution,
+        url: programFormData.url.trim() || null,
         clusterId: programFormData.clusterId || null,
       }
 
@@ -396,6 +402,17 @@ export default function StudyProgramsPage() {
                           <div className="flex items-center gap-2">
                             <GraduationCap className="h-4 w-4 text-muted-foreground" />
                             {program.name}
+                            {program.url && (
+                              <a
+                                href={program.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground"
+                                title={program.url}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -598,6 +615,19 @@ export default function StudyProgramsPage() {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="programUrl">Website-Link</Label>
+              <Input
+                id="programUrl"
+                type="url"
+                value={programFormData.url}
+                onChange={(e) => setProgramFormData({ ...programFormData, url: e.target.value })}
+                placeholder="https://www.uni-osnabrueck.de/studiengang/..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Link zur Studiengang-Seite der Uni/Hochschule (optional)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="cluster">Cluster</Label>
