@@ -42,7 +42,12 @@ interface MelderSectionProps {
   onMelderIdChange: (id: string) => void
 }
 
-export function MelderSection({ value, onChange, melderId, onMelderIdChange }: MelderSectionProps) {
+export function MelderSection({
+  value,
+  onChange,
+  melderId: _melderId,
+  onMelderIdChange,
+}: MelderSectionProps) {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
