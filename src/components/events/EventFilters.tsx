@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { trackEvent } from '@/lib/analytics'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -119,6 +120,9 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
       }
     }
 
+    if (value) {
+      trackEvent('filter', key, value)
+    }
     onChange(newFilters)
   }
 

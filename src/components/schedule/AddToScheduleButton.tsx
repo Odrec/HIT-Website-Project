@@ -1,5 +1,6 @@
 'use client'
 
+import { trackEvent } from '@/lib/analytics'
 import { useSchedule } from '@/contexts/schedule-context'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -30,12 +31,14 @@ export function AddToScheduleButton({
   const handleClick = () => {
     if (inSchedule) {
       removeEvent(event.id)
+      trackEvent('schedule', 'remove', event.title)
       toast({
         title: 'Entfernt',
         description: `"${event.title}" wurde aus deinem Zeitplan entfernt.`,
       })
     } else {
       addEvent(event)
+      trackEvent('schedule', 'add', event.title)
       toast({
         title: 'Hinzugefügt',
         description: `"${event.title}" wurde zu deinem Zeitplan hinzugefügt.`,

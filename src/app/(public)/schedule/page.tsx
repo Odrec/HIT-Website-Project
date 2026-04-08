@@ -41,6 +41,7 @@ import {
   Copy,
   Loader2,
 } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 import { useToast } from '@/hooks/use-toast'
 
 // Dynamic import for map component (no SSR)
@@ -259,6 +260,7 @@ function SchedulePageContent() {
       if (!response.ok) throw new Error('Share failed')
       const data = await response.json()
       setShareData(data)
+      trackEvent('schedule', 'share')
     } catch {
       toast({
         variant: 'destructive',
@@ -271,6 +273,7 @@ function SchedulePageContent() {
   }
 
   const handlePrint = () => {
+    trackEvent('schedule', 'print')
     window.print()
   }
 
@@ -316,6 +319,7 @@ function SchedulePageContent() {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
+    trackEvent('schedule', 'export-calendar')
 
     toast({
       title: 'Kalender exportiert',

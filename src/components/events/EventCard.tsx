@@ -1,5 +1,6 @@
 'use client'
 
+import { trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, MapPin, User, GraduationCap, Info } from 'lucide-react'
@@ -144,7 +145,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
   if (viewMode === 'grid') {
     return (
-      <Link href={`/events/${event.id}`}>
+      <Link href={`/events/${event.id}`} onClick={() => trackEvent('event', 'detail-open', event.title)}>
         <Card className="h-full transition-shadow hover:shadow-lg">
           {/* Optional photo */}
           {event.photoUrl && (
@@ -230,7 +231,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
   // List view
   return (
-    <Link href={`/events/${event.id}`}>
+    <Link href={`/events/${event.id}`} onClick={() => trackEvent('event', 'detail-open', event.title)}>
       <Card className="transition-shadow hover:shadow-lg">
         <div className="flex flex-col sm:flex-row">
           {/* Time Column (on larger screens) */}
