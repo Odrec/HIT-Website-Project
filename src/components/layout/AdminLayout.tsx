@@ -16,6 +16,7 @@ import {
   Building2,
   FileSpreadsheet,
   ArrowLeftRight,
+  Settings,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -65,6 +66,12 @@ const sidebarItems = [
     title: 'Import / Export',
     href: '/admin/import-export',
     icon: FileSpreadsheet,
+  },
+  {
+    title: 'Einstellungen',
+    href: '/admin/settings',
+    icon: Settings,
+    adminOnly: true,
   },
   {
     title: 'Benutzer',
