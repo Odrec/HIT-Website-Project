@@ -58,13 +58,28 @@ interface EventFormProps {
   initialData?: Partial<EventFormValues> & { id?: string }
   onSubmit: (data: EventFormValues) => Promise<void>
   isSubmitting?: boolean
+  isAdmin?: boolean
 }
 
-export function EventForm({ initialData, onSubmit, isSubmitting = false }: EventFormProps) {
+export function EventForm({ initialData, onSubmit, isSubmitting = false, isAdmin }: EventFormProps) {
   const [locations, setLocations] = useState<Location[]>([])
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([])
   const [infoMarkets, setInfoMarkets] = useState<InfoMarket[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [deadlineInfo, setDeadlineInfo] = useState<{
+    deadline: string | null
+    deadlineEnabled: boolean
+    passed: boolean
+    daysRemaining: number | null
+  } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/settings/deadline')
+      .then((res) => res.json())
+      .then(setDeadlineInfo)
+      .catch(console.error)
+  }, [])
 
   // Melder state (not part of form schema, display-only)
   const [melderData, setMelderData] = useState<MelderData>(defaultMelderData)
@@ -198,6 +213,8 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     label: `${im.name} (${im.location})`,
   }))
 
+  const isLocked = !!(deadlineInfo?.passed && !isAdmin)
+
   const [dateError, setDateError] = useState<string | null>(null)
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -239,6 +256,27 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
+      {/* Deadline banner */}
+      {deadlineInfo && deadlineInfo.deadline && (
+        <div className={`p-3 rounded-lg mb-4 ${
+          deadlineInfo.passed
+            ? 'bg-red-50 border border-red-200 text-red-800'
+            : 'bg-blue-50 border border-blue-200 text-blue-800'
+        }`}>
+          {deadlineInfo.passed ? (
+            <>
+              <p className="font-medium">🔒 Anmeldefrist abgelaufen ({new Date(deadlineInfo.deadline).toLocaleDateString('de-DE')})</p>
+              <p className="text-sm mt-1">Änderungen nur durch Administratoren möglich.</p>
+            </>
+          ) : (
+            <p className="text-sm">
+              📅 Anmeldefrist: {new Date(deadlineInfo.deadline).toLocaleDateString('de-DE')}
+              {deadlineInfo.daysRemaining !== null && ` (noch ${deadlineInfo.daysRemaining} Tage)`}
+            </p>
+          )}
+        </div>
+      )}
+      <fieldset disabled={isLocked || false}>
       {/* Row 1: Melder + Veranstaltungsinfo */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Section 1: Melder-Profil */}
@@ -767,7 +805,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
       {/* Submit */}
       <div className="pt-2">
-        <Button type="submit" variant="uni" disabled={isSubmitting} className="w-full md:w-auto">
+        <Button type="submit" variant="uni" disabled={isSubmitting || isLocked} className="w-full md:w-auto">
           {isSubmitting
             ? 'Speichern...'
             : initialData?.id
@@ -775,6 +813,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               : 'Veranstaltung speichern'}
         </Button>
       </div>
+      </fieldset>
     </form>
   )
 }
