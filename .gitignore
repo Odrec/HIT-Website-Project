@@ -63,5 +63,8 @@ CLAUDE.md
 docs/superpowers/
 .superpowers/
 
+# Git worktrees
+.worktrees/
+
 # Playwright MCP artifacts
 .playwright-mcp/
