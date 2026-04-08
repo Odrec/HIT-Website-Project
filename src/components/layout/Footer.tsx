@@ -41,6 +41,11 @@ export function Footer() {
                   Campusplan
                 </Link>
               </li>
+              <li>
+                <Link href="/hilfe" className="text-hit-gray-600 hover:text-hit-uni-500">
+                  Hilfe & Anleitung
+                </Link>
+              </li>
             </ul>
           </div>
 

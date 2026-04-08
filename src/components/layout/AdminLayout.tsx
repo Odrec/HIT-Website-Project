@@ -17,6 +17,7 @@ import {
   FileSpreadsheet,
   ArrowLeftRight,
   Settings,
+  HelpCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -78,6 +79,11 @@ const sidebarItems = [
     href: '/admin/users',
     icon: Users,
     adminOnly: true,
+  },
+  {
+    title: 'Hilfe',
+    href: '/hilfe/admin',
+    icon: HelpCircle,
   },
 ]
 

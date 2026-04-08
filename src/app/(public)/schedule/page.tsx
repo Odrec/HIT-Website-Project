@@ -20,6 +20,7 @@ import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import { TravelWarnings, RouteInfo } from '@/components/map'
 import type { Route, TravelTimeAnalysis } from '@/types/routes'
+import { HelpLink } from '@/components/help/HelpLink'
 import {
   Calendar,
   List,
@@ -345,10 +346,13 @@ function SchedulePageContent() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-primary" />
-            Mein Zeitplan
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <Calendar className="h-8 w-8 text-primary" />
+              Mein Zeitplan
+            </h1>
+            <HelpLink href="/hilfe/besucher#stundenplan" />
+          </div>
           <p className="text-muted-foreground mt-1">
             {state.items.length > 0
               ? `${state.items.length} Event${state.items.length !== 1 ? 's' : ''} geplant`

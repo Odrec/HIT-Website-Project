@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Calendar, User, LogOut, Settings, AlertTriangle } from 'lucide-react'
+import { Menu, X, Calendar, User, LogOut, Settings, AlertTriangle, HelpCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -79,6 +79,13 @@ export function Header() {
 
         {/* User Menu */}
         <div className="flex items-center gap-4">
+          <Link
+            href="/hilfe"
+            className="hidden md:flex items-center justify-center h-8 w-8 rounded-full text-hit-gray-400 transition-colors hover:bg-hit-gray-100 hover:text-hit-uni-500"
+            aria-label="Hilfe"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Link>
           {status === 'loading' ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-hit-gray-200" />
           ) : session ? (
@@ -173,6 +180,13 @@ export function Header() {
             onClick={() => setMobileMenuOpen(false)}
           >
             Studiennavigator
+          </Link>
+          <Link
+            href="/hilfe"
+            className="py-2 text-sm font-medium text-hit-gray-600"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Hilfe
           </Link>
           {session && isAdmin && (
             <Link
