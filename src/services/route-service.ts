@@ -56,10 +56,11 @@ export function adjustWalkingTime(baseDurationSeconds: number, speed: WalkingSpe
 }
 
 /**
- * Calculate the distance between two coordinates using Haversine formula
+ * Calculate the straight-line distance between two coordinates using Haversine formula.
+ * Used only as a fallback when no cached route is available.
  * @returns Distance in meters
  */
-export function calculateDistance(from: Coordinates, to: Coordinates): number {
+function haversineDistance(from: Coordinates, to: Coordinates): number {
   const R = 6371000 // Earth's radius in meters
   const lat1 = (from.latitude * Math.PI) / 180
   const lat2 = (to.latitude * Math.PI) / 180
@@ -438,7 +439,7 @@ async function calculateRouteLeg(
     }
   } else {
     // Fallback: straight-line distance with 1.4x detour factor
-    const straightLine = calculateDistance(from.coordinates, to.coordinates)
+    const straightLine = haversineDistance(from.coordinates, to.coordinates)
     distance = Math.round(straightLine * 1.4)
     const speeds: Record<WalkingSpeed, number> = { slow: 0.8, normal: 1.2, fast: 1.5 }
     duration = Math.ceil(distance / speeds[settings.walkingSpeed])
@@ -746,8 +747,26 @@ export async function analyzeTravelTimes(
 
     // Calculate times if we have both coordinates
     if (fromCoords && toCoords && eventFrom.timeEnd && eventTo.timeStart) {
-      const distance = calculateDistance(fromCoords, toCoords)
-      const walkingTime = calculateWalkingTime(distance, settings.walkingSpeed)
+      // Determine building IDs for cache lookup
+      const fromBuildingId =
+        (eventFrom.location?.buildingName && findBuildingByName(eventFrom.location.buildingName)?.id) ||
+        `coord:${fromCoords.latitude},${fromCoords.longitude}`
+      const toBuildingId =
+        (eventTo.location?.buildingName && findBuildingByName(eventTo.location.buildingName)?.id) ||
+        `coord:${toCoords.latitude},${toCoords.longitude}`
+
+      // Try cached route first, fall back to straight-line estimate
+      const cached = await getDirections(fromBuildingId, toBuildingId)
+      let distance: number
+      let walkingTime: number
+      if (cached) {
+        distance = cached.distanceMeters
+        walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
+      } else {
+        distance = Math.round(haversineDistance(fromCoords, toCoords) * 1.4)
+        walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
+      }
+
       const timeBetweenEvents = (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
       const timeMargin = timeBetweenEvents - walkingTime - settings.bufferMinutes * 60
 
@@ -872,8 +891,23 @@ export async function getSuggestedAlternatives(
       }
 
       if (prevCoords) {
-        const distance = calculateDistance(prevCoords, altCoords)
-        const walkingTime = calculateWalkingTime(distance, settings.walkingSpeed)
+        // Determine building IDs for cache lookup
+        const prevBuildingId =
+          (prevEvent.location.buildingName && findBuildingByName(prevEvent.location.buildingName)?.id) ||
+          `coord:${prevCoords.latitude},${prevCoords.longitude}`
+        const altBuildingId =
+          (alt.location?.buildingName && findBuildingByName(alt.location.buildingName)?.id) ||
+          `coord:${altCoords.latitude},${altCoords.longitude}`
+
+        // Try cached route first, fall back to straight-line estimate
+        const cached = await getDirections(prevBuildingId, altBuildingId)
+        let walkingTime: number
+        if (cached) {
+          walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
+        } else {
+          const distance = Math.round(haversineDistance(prevCoords, altCoords) * 1.4)
+          walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
+        }
 
         suggestions.push({
           eventId: alt.id,

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { decodePolyline } from '@/services/google-directions'
+import { adjustWalkingTime } from '@/services/route-service'
 
 describe('decodePolyline', () => {
   it('decodes a known encoded polyline to lat/lng pairs', () => {
@@ -15,5 +16,19 @@ describe('decodePolyline', () => {
 
   it('returns empty array for empty string', () => {
     expect(decodePolyline('')).toEqual([])
+  })
+})
+
+describe('adjustWalkingTime', () => {
+  it('returns base time for normal speed', () => {
+    expect(adjustWalkingTime(600, 'normal')).toBe(600)
+  })
+
+  it('increases time for slow speed (×1.5)', () => {
+    expect(adjustWalkingTime(600, 'slow')).toBe(900)
+  })
+
+  it('decreases time for fast speed (×0.8)', () => {
+    expect(adjustWalkingTime(600, 'fast')).toBe(480)
   })
 })
