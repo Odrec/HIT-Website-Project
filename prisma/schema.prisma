@@ -287,10 +287,12 @@ model SharedSchedule {
 
 /// Singleton for site-wide configuration
 model SiteSettings {
-  id        String    @id @default("default")
-  hitDate   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                  String   @id @default("default")
+  hitDate             DateTime?
+  submissionDeadline  DateTime?
+  deadlineEnabled     Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 /// Reporter/submitter profile linked to a User account
