@@ -36,8 +36,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ORGANIZER')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session) {
+      return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
+    }
+
+    const { role, id: userId } = session.user
+
+    if (role !== 'ADMIN' && role !== 'ORGANIZER') {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
     }
 
     const { id } = await params
@@ -47,6 +53,27 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const existing = await eventService.getById(id)
     if (!existing) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    // Ownership and deadline checks for non-admin users
+    if (role !== 'ADMIN') {
+      // Check deadline
+      const { isDeadlinePassed } = await import('@/services/settings-service')
+      if (await isDeadlinePassed()) {
+        return NextResponse.json(
+          { error: 'Anmeldefrist abgelaufen. Änderungen nur durch Administratoren möglich.' },
+          { status: 403 }
+        )
+      }
+
+      // Check ownership
+      const { isEventOwner } = await import('@/lib/auth/rbac')
+      if (!isEventOwner(userId, existing)) {
+        return NextResponse.json(
+          { error: 'Nur eigene Veranstaltungen bearbeitbar.' },
+          { status: 403 }
+        )
+      }
     }
 
     // Validate enum values if provided

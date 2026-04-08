@@ -73,6 +73,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Deadline check for non-admin users
+    if (session.user.role !== 'ADMIN') {
+      const { isDeadlinePassed } = await import('@/services/settings-service')
+      if (await isDeadlinePassed()) {
+        return NextResponse.json(
+          { error: 'Anmeldefrist abgelaufen. Neue Veranstaltungen können nicht mehr eingereicht werden.' },
+          { status: 403 }
+        )
+      }
+    }
+
     const body = await request.json()
 
     // Validate required fields
