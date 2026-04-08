@@ -667,33 +667,71 @@ function SchedulePageContent() {
       </div>
 
       {/* Print-only full schedule */}
-      <div className="hidden print:block mt-8">
-        <h2 className="text-xl font-bold mb-4">HIT 2026 - Mein Zeitplan</h2>
-        {state.items
-          .sort((a, b) => {
-            if (!a.event.timeStart) return 1
-            if (!b.event.timeStart) return -1
-            return new Date(a.event.timeStart).getTime() - new Date(b.event.timeStart).getTime()
-          })
-          .map((item) => (
-            <div key={item.id} className="mb-4 pb-4 border-b">
-              <div className="font-medium">{item.event.title}</div>
-              {item.event.timeStart && (
-                <div className="text-sm text-gray-600">
-                  {format(new Date(item.event.timeStart), 'EEEE, d. MMMM yyyy, HH:mm', {
-                    locale: de,
-                  })}
-                  {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
-                </div>
-              )}
-              {item.event.location && (
-                <div className="text-sm text-gray-600">
-                  {item.event.location.buildingName}
-                  {item.event.location.roomNumber && `, ${item.event.location.roomNumber}`}
-                </div>
-              )}
-            </div>
-          ))}
+      <div className="hidden print:block print-schedule">
+        <div className="text-center mb-6 pb-3 border-b-2 border-black">
+          <h2 className="text-xl font-bold m-0">Mein HIT 2026 Zeitplan</h2>
+          <p className="text-sm text-gray-600 m-0">
+            Hochschulinformationstag &mdash;{' '}
+            {selectedDate
+              ? format(selectedDate, 'd. MMMM yyyy', { locale: de })
+              : '19. November 2026'}
+          </p>
+        </div>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b-2 border-black">
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Zeit</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[35%]">Veranstaltung</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Typ</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[20%]">Ort</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Raum</th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.items
+              .sort((a, b) => {
+                if (!a.event.timeStart) return 1
+                if (!b.event.timeStart) return -1
+                return (
+                  new Date(a.event.timeStart).getTime() -
+                  new Date(b.event.timeStart).getTime()
+                )
+              })
+              .map((item, index) => (
+                <tr
+                  key={item.id}
+                  className={index % 2 === 1 ? 'bg-gray-50' : ''}
+                  style={{ borderBottom: '1px solid #ddd' }}
+                >
+                  <td className="py-2 px-2 whitespace-nowrap">
+                    {item.event.timeStart
+                      ? format(new Date(item.event.timeStart), 'HH:mm')
+                      : '—'}
+                    {item.event.timeEnd && (
+                      <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>
+                    )}
+                  </td>
+                  <td className="py-2 px-2 font-medium">{item.event.title}</td>
+                  <td className="py-2 px-2 text-gray-600">
+                    {item.event.eventType
+                      ?.replace('_', ' ')
+                      .toLowerCase()
+                      .replace(/^\w/, (c: string) => c.toUpperCase()) ?? '—'}
+                  </td>
+                  <td className="py-2 px-2">
+                    {item.event.location?.buildingName ?? '—'}
+                  </td>
+                  <td className="py-2 px-2">
+                    {item.event.location?.roomNumber ?? '—'}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        <div className="mt-5 pt-2.5 border-t border-gray-300 text-xs text-gray-500 flex justify-between">
+          <span>{state.items.length} Veranstaltungen</span>
+          <span>hit.zsb-os.de</span>
+        </div>
       </div>
     </div>
   )
