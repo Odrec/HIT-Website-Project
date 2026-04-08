@@ -1,10 +1,25 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, Download, FileSpreadsheet, AlertCircle, Check, Loader2 } from 'lucide-react'
+import {
+  Upload,
+  FileSpreadsheet,
+  AlertCircle,
+  Check,
+  Loader2,
+  FileText,
+  BookOpen,
+  Clock,
+  Building2,
+  DoorOpen,
+  Users,
+  GraduationCap,
+  ShoppingBag,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ExportCard } from '@/components/admin/ExportCard'
 
 interface ImportResult {
   success: boolean
@@ -14,17 +29,14 @@ interface ImportResult {
 
 export default function ImportExportPage() {
   const [importing, setImporting] = useState(false)
-  const [exporting, setExporting] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleExportEvents = async () => {
-    setExporting(true)
+  const handleExportCSV = async () => {
     try {
       const response = await fetch('/api/events?pageSize=1000')
       const data = await response.json()
 
-      // Convert to CSV
       const events = data.data || []
       if (events.length === 0) {
         alert('Keine Veranstaltungen zum Exportieren vorhanden.')
@@ -107,7 +119,6 @@ export default function ImportExportPage() {
         ),
       ].join('\n')
 
-      // Download file
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -120,8 +131,6 @@ export default function ImportExportPage() {
     } catch (error) {
       console.error('Export error:', error)
       alert('Fehler beim Exportieren der Veranstaltungen.')
-    } finally {
-      setExporting(false)
     }
   }
 
@@ -145,7 +154,6 @@ export default function ImportExportPage() {
         return
       }
 
-      // Parse CSV
       const headers = parseCSVLine(lines[0])
       const titleIndex = headers.findIndex(
         (h) => h.toLowerCase().includes('titel') || h.toLowerCase().includes('title')
@@ -234,7 +242,6 @@ export default function ImportExportPage() {
     }
   }
 
-  // Simple CSV line parser
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = []
     let current = ''
@@ -302,57 +309,112 @@ export default function ImportExportPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Import / Export</h1>
-        <p className="text-gray-500">Veranstaltungen als CSV importieren oder exportieren</p>
+        <p className="text-gray-500">
+          Veranstaltungsdaten importieren und in verschiedenen Formaten exportieren
+        </p>
       </div>
 
       <Tabs defaultValue="export" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="export">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </TabsTrigger>
+          <TabsTrigger value="export">Export</TabsTrigger>
           <TabsTrigger value="import">
             <Upload className="mr-2 h-4 w-4" />
             Import
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="export">
-          <Card>
-            <CardHeader>
-              <CardTitle>Veranstaltungen exportieren</CardTitle>
-              <CardDescription>
-                Exportieren Sie alle Veranstaltungen als CSV-Datei für Excel oder andere Programme.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center">
-                <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium">CSV-Export</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Alle Veranstaltungen werden mit vollständigen Details exportiert.
-                </p>
-                <Button
-                  onClick={handleExportEvents}
-                  disabled={exporting}
-                  className="mt-4"
-                  variant="uni"
-                >
-                  {exporting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Exportiere...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="mr-2 h-4 w-4" />
-                      Veranstaltungen exportieren
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="export" className="space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold">Excel-Exporte</h2>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ExportCard
+                title="Veranstaltungen A-Z"
+                description="Alle Veranstaltungen alphabetisch sortiert"
+                icon={FileSpreadsheet}
+                href="/api/export/excel?view=events-az"
+              />
+              <ExportCard
+                title="Nach Cluster"
+                description="Veranstaltungen gruppiert nach Studienfeld-Cluster"
+                icon={GraduationCap}
+                href="/api/export/excel?view=events-cluster"
+              />
+              <ExportCard
+                title="Nach Zeit"
+                description="Veranstaltungen chronologisch sortiert"
+                icon={Clock}
+                href="/api/export/excel?view=events-time"
+              />
+              <ExportCard
+                title="Nach Raum"
+                description="Veranstaltungen gruppiert nach Gebäude und Raum"
+                icon={DoorOpen}
+                href="/api/export/excel?view=events-room"
+              />
+              <ExportCard
+                title="Nach Gebäude"
+                description="Veranstaltungen gruppiert nach Gebäude"
+                icon={Building2}
+                href="/api/export/excel?view=events-building"
+              />
+              <ExportCard
+                title="Melder / Ansprechpartner"
+                description="Alle Melder mit Kontaktdaten"
+                icon={Users}
+                href="/api/export/excel?view=melders"
+              />
+              <ExportCard
+                title="Dozierende"
+                description="Alle Dozierenden mit Veranstaltungszuordnung"
+                icon={Users}
+                href="/api/export/excel?view=lecturers"
+              />
+              <ExportCard
+                title="Infomärkte"
+                description="Veranstaltungen an Infomärkten"
+                icon={ShoppingBag}
+                href="/api/export/excel?view=infomaerkte"
+              />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">Weitere Formate</h2>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ExportCard
+                title="Programm-Broschüre"
+                description="Druckfertiges PDF-Programm nach Cluster"
+                icon={BookOpen}
+                href="/api/export/pdf/booklet"
+              />
+              <Card className="flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-hit-gray-100 p-2">
+                      <FileText className="h-5 w-5 text-hit-gray-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm font-medium">CSV-Export</CardTitle>
+                      <CardDescription className="text-xs">
+                        Alle Veranstaltungen als CSV-Datei
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="mt-auto pt-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={handleExportCSV}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Herunterladen
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="import">
