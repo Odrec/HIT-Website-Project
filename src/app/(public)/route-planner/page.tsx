@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { TravelWarnings } from '@/components/map'
 import type { Route, TravelTimeAnalysis, BuildingInfo, WalkingSpeed } from '@/types/routes'
+import type { BusPositionResponse, ShuttleStop } from '@/types/shuttle'
 import {
   MapPin,
   Navigation,
@@ -61,6 +62,9 @@ export default function RoutePlannerPage() {
   const [travelAnalyses, setTravelAnalyses] = useState<TravelTimeAnalysis[]>([])
   const [isLoadingBuildings, setIsLoadingBuildings] = useState(true)
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
+  const [showBusLayer, setShowBusLayer] = useState(true)
+  const [busPositions, setBusPositions] = useState<BusPositionResponse[]>([])
+  const [shuttleStops, setShuttleStops] = useState<ShuttleStop[]>([])
 
   // Fetch buildings
   useEffect(() => {
@@ -144,6 +148,44 @@ export default function RoutePlannerPage() {
       fetchRouteData()
     }
   }, [state.items, state.isLoaded, walkingSpeed])
+
+  // Poll bus positions every 10 seconds when bus layer is visible
+  useEffect(() => {
+    if (!showBusLayer) return
+
+    let active = true
+
+    const fetchBusPositions = async () => {
+      try {
+        const res = await fetch('/api/bus-positions')
+        if (res.ok) {
+          const data = await res.json()
+          if (active) {
+            setBusPositions(data.buses)
+            setShuttleStops(data.stops)
+          }
+        }
+      } catch {
+        // Silently fail — bus positions are non-critical
+      }
+    }
+
+    fetchBusPositions()
+    const interval = setInterval(fetchBusPositions, 10_000)
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchBusPositions()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      active = false
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [showBusLayer])
 
   // Filter buildings by campus
   const filteredBuildings = useMemo(() => {
@@ -340,24 +382,39 @@ export default function RoutePlannerPage() {
           {view === 'map' ? (
             <Card className="h-full">
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <MapIcon className="h-5 w-5" />
                     Campus Karte
                   </CardTitle>
-                  {/* Campus filter */}
-                  <Select value={selectedCampus} onValueChange={setSelectedCampus}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Campus auswählen" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[1000]">
-                      {CAMPUS_AREAS.map((area) => (
-                        <SelectItem key={area.id} value={area.id}>
-                          {area.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={showBusLayer ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowBusLayer(!showBusLayer)}
+                      className={showBusLayer ? 'bg-amber-500 hover:bg-amber-600' : ''}
+                    >
+                      🚌 Shuttle-Busse
+                      {busPositions.length > 0 && showBusLayer && (
+                        <Badge variant="secondary" className="ml-1">
+                          {busPositions.length}
+                        </Badge>
+                      )}
+                    </Button>
+                    {/* Campus filter */}
+                    <Select value={selectedCampus} onValueChange={setSelectedCampus}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Campus auswählen" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[1000]">
+                        {CAMPUS_AREAS.map((area) => (
+                          <SelectItem key={area.id} value={area.id}>
+                            {area.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -374,6 +431,9 @@ export default function RoutePlannerPage() {
                     showRoute={state.items.length >= 2}
                     height="500px"
                     className="rounded-lg overflow-hidden"
+                    busPositions={showBusLayer ? busPositions : undefined}
+                    shuttleStops={showBusLayer ? shuttleStops : undefined}
+                    showBusLayer={showBusLayer}
                   />
                 )}
 
