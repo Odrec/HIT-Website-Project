@@ -36,8 +36,10 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Route Planner** | Navigate between campus locations with walking time estimates |
 | **Event Recommendations** | Smart suggestions based on interests and schedule |
 | **Admin Interface** | Manage events, programs, locations, users, and room assignments |
-| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet, iCal export |
-| **Legal Pages** | Impressum, Datenschutz, Barrierefreiheit (BITV 2.0) |
+| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet, HTML backup, iCal export |
+| **Email Notifications** | Automatic email to HIT team on event create/edit with change detection |
+| **Analytics** | Cookieless Matomo tracking with custom events (schedule, search, filters) |
+| **Legal Pages** | Impressum, Datenschutz (with Matomo disclosure), Barrierefreiheit (BITV 2.0) |
 
 ---
 
@@ -54,6 +56,8 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Maps** | Leaflet + React-Leaflet |
 | **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 |
 | **Exports** | ExcelJS, @react-pdf/renderer, iCal |
+| **Email** | Nodemailer (SMTP) |
+| **Analytics** | Matomo (cookieless) |
 | **Sharing** | nanoid (short links), qrcode.react (QR codes) |
 | **Testing** | Vitest + React Testing Library |
 | **Deployment** | Vercel + Docker |
@@ -157,11 +161,30 @@ The AI-powered Study Navigator requires one of these providers:
 
 > 💡 If both OpenAI and Google AI keys are set, OpenAI takes priority.
 
+### Email Notifications (SMTP)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SMTP_HOST` | SMTP server hostname | - |
+| `SMTP_PORT` | SMTP port | `587` |
+| `SMTP_USER` | SMTP username | - |
+| `SMTP_PASS` | SMTP password | - |
+| `EMAIL_FROM` | Sender email address | - |
+| `EMAIL_TO` | Notification recipient | `hit@zsb.os.de` |
+
+### Matomo Analytics
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_MATOMO_URL` | Matomo instance URL | - |
+| `NEXT_PUBLIC_MATOMO_SITE_ID` | Matomo site ID | - |
+
 ### Optional Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `development` |
+| `EXPORT_API_KEY` | API key for cron-triggered HTML export | - |
 
 ---
 
@@ -231,6 +254,8 @@ After running the seed script:
 | `/api/study-programs` | POST, PUT, DELETE | Manage study programs |
 | `/api/export/excel?view=<type>` | GET | Excel export (8 view types) |
 | `/api/export/pdf/booklet` | GET | PDF program booklet |
+| `/api/export/html` | GET | Static HTML backup (API key or admin auth) |
+| `/api/admin/export-schedule` | GET, POST | Manage scheduled HTML exports |
 
 ---
 
@@ -371,15 +396,7 @@ npx prisma migrate dev
 #### Slow performance
 - Ensure Redis is running (caching)
 - Check database indexes: `npx prisma migrate deploy`
-- Review [Testing Guide](docs/TESTING-GUIDE.md) for performance optimization
-
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Testing Guide](docs/TESTING-GUIDE.md) | Load testing, cross-browser testing, performance |
+- Review the [Testing Guide](docs/TESTING-GUIDE.md) for performance optimization
 
 ---
 
