@@ -111,11 +111,15 @@ export default function TravelWarnings({
                     <span>Verfügbar: {formatTime(analysis.timeBetweenEvents)}</span>
                   </div>
 
-                  {analysis.timeMargin < 0 && (
+                  {analysis.timeMargin < 0 ? (
                     <p className="text-red-600 font-medium">
                       {formatTime(Math.abs(analysis.timeMargin))} zu wenig
                     </p>
-                  )}
+                  ) : analysis.status === 'tight' ? (
+                    <p className="text-yellow-700 font-medium">
+                      {formatTime(analysis.timeMargin)} Puffer
+                    </p>
+                  ) : null}
                 </div>
               </div>
 

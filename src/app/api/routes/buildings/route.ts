@@ -6,7 +6,7 @@ import { getAllBuildings } from '@/services/route-service'
  * GET /api/routes/buildings
  * Get all campus buildings with event counts
  * Query params:
- * - campus: filter by campus (schloss, westerberg, caprivi, haste)
+ * - campus: filter by campus (schloss, westerberg, caprivi)
  * - search: search by name
  * - withEvents: only return buildings with events (boolean)
  */
@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
       schloss: buildings.filter((b) => b.campus === 'schloss'),
       westerberg: buildings.filter((b) => b.campus === 'westerberg'),
       caprivi: buildings.filter((b) => b.campus === 'caprivi'),
-      haste: buildings.filter((b) => b.campus === 'haste'),
       other: buildings.filter((b) => b.campus === 'other'),
     }
 

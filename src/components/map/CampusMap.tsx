@@ -110,10 +110,8 @@ export default function CampusMap({
     iconAnchor: [16, 32],
   })
 
-  // Get route polyline coordinates
-  const routeCoordinates: [number, number][] = route
-    ? route.waypoints.map((wp) => [wp.coordinates.latitude, wp.coordinates.longitude])
-    : []
+  // Get route leg geometries for polyline rendering
+  const routeLegs = route?.legs ?? []
 
   return (
     <>
@@ -176,7 +174,7 @@ export default function CampusMap({
                               ? 'bg-blue-100 text-blue-800'
                               : building.campus === 'caprivi'
                                 ? 'bg-green-100 text-green-800'
-                                : 'bg-orange-100 text-orange-800'
+                                : 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {building.campus === 'schloss'
@@ -185,7 +183,7 @@ export default function CampusMap({
                             ? 'Westerberg'
                             : building.campus === 'caprivi'
                               ? 'Caprivi (HS)'
-                              : 'Haste (HS)'}
+                              : 'Sonstige'}
                       </span>
                       {building.hasAccessibility && (
                         <span className="text-green-600" title="Barrierefrei">
@@ -240,20 +238,27 @@ export default function CampusMap({
               </Marker>
             ))}
 
-          {/* Route polylines - colored by travel analysis status */}
-          {showRoute && routeCoordinates.length >= 2 && (
+          {/* Route polylines - one per leg, colored by travel analysis status */}
+          {showRoute && routeLegs.length > 0 && (
             <>
-              {routeCoordinates.slice(0, -1).map((coord, index) => {
-                const nextCoord = routeCoordinates[index + 1]
-                // Check if this segment has a warning
+              {routeLegs.map((leg, index) => {
+                // Check if this leg has a warning
                 const analysis = travelAnalyses[index]
                 const hasWarning = analysis && analysis.status !== 'ok'
-                const segmentColor = hasWarning ? '#dc2626' : '#2563eb' // Red for warnings, blue for ok
+                const segmentColor = hasWarning ? '#dc2626' : '#2563eb'
+
+                // Use leg geometry if available (real walking path), otherwise fallback to endpoints
+                const positions: [number, number][] = leg.geometry?.coordinates?.length
+                  ? leg.geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng] as [number, number])
+                  : [
+                      [leg.startWaypoint.coordinates.latitude, leg.startWaypoint.coordinates.longitude],
+                      [leg.endWaypoint.coordinates.latitude, leg.endWaypoint.coordinates.longitude],
+                    ]
 
                 return (
                   <Polyline
                     key={`segment-${index}`}
-                    positions={[coord, nextCoord]}
+                    positions={positions}
                     pathOptions={{
                       color: segmentColor,
                       weight: hasWarning ? 5 : 4,

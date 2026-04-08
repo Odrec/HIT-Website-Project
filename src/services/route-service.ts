@@ -16,10 +16,51 @@ import type {
 import { prisma } from '@/lib/db/prisma'
 
 /**
- * Calculate the distance between two coordinates using Haversine formula
+ * Get walking directions between two buildings from cache.
+ * Returns null if no cached route exists.
+ */
+export async function getDirections(
+  fromBuildingId: string,
+  toBuildingId: string
+): Promise<{ distanceMeters: number; durationSeconds: number; waypoints: [number, number][] } | null> {
+  if (fromBuildingId === toBuildingId) {
+    return { distanceMeters: 0, durationSeconds: 0, waypoints: [] }
+  }
+
+  const cached = await prisma.cachedRoute.findUnique({
+    where: {
+      fromBuildingId_toBuildingId: { fromBuildingId, toBuildingId },
+    },
+  })
+
+  if (!cached) return null
+
+  return {
+    distanceMeters: cached.distanceMeters,
+    durationSeconds: cached.durationSeconds,
+    waypoints: (cached.waypoints as [number, number][]) ?? [],
+  }
+}
+
+/**
+ * Adjust a base walking duration by speed setting.
+ * Google returns time for ~5 km/h average walker (our "normal").
+ */
+export function adjustWalkingTime(baseDurationSeconds: number, speed: WalkingSpeed = 'normal'): number {
+  const multipliers: Record<WalkingSpeed, number> = {
+    slow: 1.5,
+    normal: 1.0,
+    fast: 0.8,
+  }
+  return Math.ceil(baseDurationSeconds * multipliers[speed])
+}
+
+/**
+ * Calculate the straight-line distance between two coordinates using Haversine formula.
+ * Used only as a fallback when no cached route is available.
  * @returns Distance in meters
  */
-export function calculateDistance(from: Coordinates, to: Coordinates): number {
+function haversineDistance(from: Coordinates, to: Coordinates): number {
   const R = 6371000 // Earth's radius in meters
   const lat1 = (from.latitude * Math.PI) / 180
   const lat2 = (to.latitude * Math.PI) / 180
@@ -32,36 +73,6 @@ export function calculateDistance(from: Coordinates, to: Coordinates): number {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
   return R * c
-}
-
-/**
- * Calculate walking time between two points
- * @returns Walking time in seconds
- */
-export function calculateWalkingTime(distance: number, speed: WalkingSpeed = 'normal'): number {
-  // Import the constant values directly since we can't use the const object
-  const speeds: Record<WalkingSpeed, number> = {
-    slow: 0.8,
-    normal: 1.2,
-    fast: 1.5,
-  }
-  const speedMps = speeds[speed]
-  // Add 20% overhead for non-straight paths, intersections, etc.
-  const adjustedDistance = distance * 1.2
-  return Math.ceil(adjustedDistance / speedMps)
-}
-
-/**
- * Generate a simple line geometry between two points
- */
-function generateLineGeometry(from: Coordinates, to: Coordinates): RouteGeometry {
-  return {
-    type: 'LineString',
-    coordinates: [
-      [from.longitude, from.latitude],
-      [to.longitude, to.latitude],
-    ],
-  }
 }
 
 /**
@@ -188,25 +199,6 @@ export function findBuilding(idOrName: string): BuildingInfo | undefined {
       coordinates: { latitude: 52.2751, longitude: 8.0141 },
       address: 'Caprivistraße 30, 49076 Osnabrück',
       campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    // Hochschule Haste Campus
-    {
-      id: 'haste-a',
-      name: 'Haste Gebäude A',
-      shortName: 'HA-A',
-      coordinates: { latitude: 52.3006, longitude: 7.9843 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
-    {
-      id: 'haste-b',
-      name: 'Haste Gebäude B',
-      shortName: 'HA-B',
-      coordinates: { latitude: 52.3011, longitude: 7.9851 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
       hasAccessibility: true,
     },
   ]
@@ -387,25 +379,6 @@ export async function getAllBuildings(): Promise<BuildingInfo[]> {
       campus: 'caprivi',
       hasAccessibility: true,
     },
-    // Hochschule Haste Campus
-    {
-      id: 'haste-a',
-      name: 'Haste Gebäude A',
-      shortName: 'HA-A',
-      coordinates: { latitude: 52.3006, longitude: 7.9843 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
-    {
-      id: 'haste-b',
-      name: 'Haste Gebäude B',
-      shortName: 'HA-B',
-      coordinates: { latitude: 52.3011, longitude: 7.9851 },
-      address: 'Am Krümpel 31, 49090 Osnabrück',
-      campus: 'haste',
-      hasAccessibility: true,
-    },
   ]
 
   // Get event counts from locations
@@ -433,22 +406,58 @@ export async function getAllBuildings(): Promise<BuildingInfo[]> {
 }
 
 /**
- * Calculate a route leg between two waypoints
+ * Calculate a route leg between two waypoints.
+ * Uses cached Google Directions data when available, falls back to straight-line estimate.
  */
-function calculateRouteLeg(
+async function calculateRouteLeg(
   from: RouteWaypoint,
   to: RouteWaypoint,
   settings: TravelTimeSettings
-): RouteLeg {
-  const distance = calculateDistance(from.coordinates, to.coordinates)
-  const duration = calculateWalkingTime(distance, settings.walkingSpeed)
+): Promise<RouteLeg> {
+  const directions = await getDirections(from.id, to.id)
+
+  let distance: number
+  let duration: number
+  let geometry: RouteGeometry
+
+  if (directions) {
+    distance = directions.distanceMeters
+    duration = adjustWalkingTime(directions.durationSeconds, settings.walkingSpeed)
+    if (directions.waypoints.length >= 2) {
+      geometry = {
+        type: 'LineString',
+        coordinates: directions.waypoints.map(([lat, lng]) => [lng, lat]),
+      }
+    } else {
+      geometry = {
+        type: 'LineString',
+        coordinates: [
+          [from.coordinates.longitude, from.coordinates.latitude],
+          [to.coordinates.longitude, to.coordinates.latitude],
+        ],
+      }
+    }
+  } else {
+    // Fallback: straight-line distance with 1.4x detour factor
+    const straightLine = haversineDistance(from.coordinates, to.coordinates)
+    distance = Math.round(straightLine * 1.4)
+    const speeds: Record<WalkingSpeed, number> = { slow: 0.8, normal: 1.2, fast: 1.5 }
+    duration = Math.ceil(distance / speeds[settings.walkingSpeed])
+    geometry = {
+      type: 'LineString',
+      coordinates: [
+        [from.coordinates.longitude, from.coordinates.latitude],
+        [to.coordinates.longitude, to.coordinates.latitude],
+      ],
+    }
+  }
 
   return {
     startWaypoint: from,
     endWaypoint: to,
     distance,
     duration,
-    geometry: generateLineGeometry(from.coordinates, to.coordinates),
+    geometry,
     instructions: [
       {
         type: 'depart',
@@ -533,14 +542,14 @@ function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): Ro
 /**
  * Calculate a complete route with multiple waypoints
  */
-export function calculateRoute(
+export async function calculateRoute(
   waypoints: RouteWaypoint[],
   settings: TravelTimeSettings = {
     walkingSpeed: 'normal',
     bufferMinutes: 5,
     minWarningMinutes: 3,
   }
-): Route {
+): Promise<Route> {
   if (waypoints.length < 2) {
     return {
       id: crypto.randomUUID(),
@@ -558,7 +567,7 @@ export function calculateRoute(
   let totalDuration = 0
 
   for (let i = 0; i < waypoints.length - 1; i++) {
-    const leg = calculateRouteLeg(waypoints[i], waypoints[i + 1], settings)
+    const leg = await calculateRouteLeg(waypoints[i], waypoints[i + 1], settings)
     legs.push(leg)
     totalDistance += leg.distance
     totalDuration += leg.duration
@@ -738,8 +747,26 @@ export async function analyzeTravelTimes(
 
     // Calculate times if we have both coordinates
     if (fromCoords && toCoords && eventFrom.timeEnd && eventTo.timeStart) {
-      const distance = calculateDistance(fromCoords, toCoords)
-      const walkingTime = calculateWalkingTime(distance, settings.walkingSpeed)
+      // Determine building IDs for cache lookup
+      const fromBuildingId =
+        (eventFrom.location?.buildingName && findBuildingByName(eventFrom.location.buildingName)?.id) ||
+        `coord:${fromCoords.latitude},${fromCoords.longitude}`
+      const toBuildingId =
+        (eventTo.location?.buildingName && findBuildingByName(eventTo.location.buildingName)?.id) ||
+        `coord:${toCoords.latitude},${toCoords.longitude}`
+
+      // Try cached route first, fall back to straight-line estimate
+      const cached = await getDirections(fromBuildingId, toBuildingId)
+      let distance: number
+      let walkingTime: number
+      if (cached) {
+        distance = cached.distanceMeters
+        walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
+      } else {
+        distance = Math.round(haversineDistance(fromCoords, toCoords) * 1.4)
+        walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
+      }
+
       const timeBetweenEvents = (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
       const timeMargin = timeBetweenEvents - walkingTime - settings.bufferMinutes * 60
 
@@ -864,8 +891,23 @@ export async function getSuggestedAlternatives(
       }
 
       if (prevCoords) {
-        const distance = calculateDistance(prevCoords, altCoords)
-        const walkingTime = calculateWalkingTime(distance, settings.walkingSpeed)
+        // Determine building IDs for cache lookup
+        const prevBuildingId =
+          (prevEvent.location.buildingName && findBuildingByName(prevEvent.location.buildingName)?.id) ||
+          `coord:${prevCoords.latitude},${prevCoords.longitude}`
+        const altBuildingId =
+          (alt.location?.buildingName && findBuildingByName(alt.location.buildingName)?.id) ||
+          `coord:${altCoords.latitude},${altCoords.longitude}`
+
+        // Try cached route first, fall back to straight-line estimate
+        const cached = await getDirections(prevBuildingId, altBuildingId)
+        let walkingTime: number
+        if (cached) {
+          walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
+        } else {
+          const distance = Math.round(haversineDistance(prevCoords, altCoords) * 1.4)
+          walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
+        }
 
         suggestions.push({
           eventId: alt.id,

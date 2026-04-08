@@ -45,7 +45,6 @@ const CAMPUS_AREAS: { id: string; name: string }[] = [
   { id: 'schloss', name: 'Schloss Campus' },
   { id: 'westerberg', name: 'Westerberg Campus' },
   { id: 'caprivi', name: 'Caprivi (Hochschule)' },
-  { id: 'haste', name: 'Haste (Hochschule)' },
 ]
 
 export default function RoutePlannerPage() {
@@ -324,6 +323,7 @@ export default function RoutePlannerPage() {
           {travelAnalyses.length > 0 && (
             <TravelWarnings
               analyses={travelAnalyses}
+              warnings={route?.warnings}
               onEventClick={(eventId: string) => {
                 router.push(`/events/${eventId}`)
               }}
@@ -558,11 +558,11 @@ export default function RoutePlannerPage() {
                   ein (mindestens 10-15 Minuten)
                 </li>
                 <li>
-                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 15-20
+                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 25-30
                   Minuten
                 </li>
                 <li>
-                  • Zwischen Caprivi und Haste Campus empfehlen wir den Bus zu nutzen (Linie X)
+                  • Zwischen den Standorten empfehlen wir den Bus zu nutzen (Linie X)
                 </li>
                 <li>
                   • Achten Sie auf orangene/rote Warnungen - diese zeigen kritische Zeitfenster an
