@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { ChevronLeft, Loader2 } from 'lucide-react'
+import { ChevronLeft, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
@@ -56,6 +56,7 @@ export default function EditEventPage() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     async function fetchEvent() {
@@ -103,7 +104,7 @@ export default function EditEventPage() {
         throw new Error(errorData.error || 'Failed to update event')
       }
 
-      router.push('/admin/events')
+      setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -190,6 +191,26 @@ export default function EditEventPage() {
           <p className="text-gray-500">{event.title}</p>
         </div>
       </div>
+
+      {/* Success message */}
+      {saved && (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-green-900">Änderungen erfolgreich gespeichert</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => router.push('/admin/events')}>
+                OK
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setSaved(false)}>
+                Weiter bearbeiten
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error message */}
       {error && (
