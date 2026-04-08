@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { format, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -28,7 +29,6 @@ import {
   Trash2,
   AlertTriangle,
   CalendarPlus,
-  Check,
   FileText,
   CalendarDays,
   Sparkles,
@@ -37,6 +37,9 @@ import {
   ChevronUp,
   MapPin,
   Navigation,
+  X,
+  Copy,
+  Loader2,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -52,7 +55,7 @@ const FALLBACK_HIT_DATE = new Date('2026-11-19')
 function SchedulePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { state, clearSchedule, getConflicts, getScheduleUrl, addEvent } = useSchedule()
+  const { state, clearSchedule, getConflicts, addEvent } = useSchedule()
   const { toast } = useToast()
 
   const [view, setView] = useState<'timeline' | 'list'>('timeline')
@@ -75,7 +78,8 @@ function SchedulePageContent() {
     }
     fetchHitDate()
   }, [])
-  const [copied, setCopied] = useState(false)
+  const [shareData, setShareData] = useState<{ code: string; url: string } | null>(null)
+  const [shareLoading, setShareLoading] = useState(false)
   const [isLoadingShared, setIsLoadingShared] = useState(false)
   const [showRecommendations, setShowRecommendations] = useState(true)
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -243,21 +247,26 @@ function SchedulePageContent() {
   }
 
   const handleShareSchedule = async () => {
-    const url = getScheduleUrl()
+    if (state.items.length === 0) return
+    setShareLoading(true)
     try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      toast({
-        title: 'Link kopiert',
-        description: 'Der Link zu deinem Zeitplan wurde kopiert.',
+      const eventIds = state.items.map((item) => item.eventId)
+      const response = await fetch('/api/schedule/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventIds }),
       })
-      setTimeout(() => setCopied(false), 2000)
+      if (!response.ok) throw new Error('Share failed')
+      const data = await response.json()
+      setShareData(data)
     } catch {
       toast({
         variant: 'destructive',
         title: 'Fehler',
-        description: 'Der Link konnte nicht kopiert werden.',
+        description: 'Fehler beim Erstellen des Links',
       })
+    } finally {
+      setShareLoading(false)
     }
   }
 
@@ -345,9 +354,18 @@ function SchedulePageContent() {
 
         {state.items.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleShareSchedule}>
-              {copied ? <Check className="h-4 w-4 mr-2" /> : <Share2 className="h-4 w-4 mr-2" />}
-              {copied ? 'Kopiert!' : 'Teilen'}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShareSchedule}
+              disabled={shareLoading}
+            >
+              {shareLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
+              Teilen
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportIcal}>
               <CalendarDays className="h-4 w-4 mr-2" />
@@ -666,34 +684,99 @@ function SchedulePageContent() {
         )}
       </div>
 
-      {/* Print-only full schedule */}
-      <div className="hidden print:block mt-8">
-        <h2 className="text-xl font-bold mb-4">HIT 2026 - Mein Zeitplan</h2>
-        {state.items
-          .sort((a, b) => {
-            if (!a.event.timeStart) return 1
-            if (!b.event.timeStart) return -1
-            return new Date(a.event.timeStart).getTime() - new Date(b.event.timeStart).getTime()
-          })
-          .map((item) => (
-            <div key={item.id} className="mb-4 pb-4 border-b">
-              <div className="font-medium">{item.event.title}</div>
-              {item.event.timeStart && (
-                <div className="text-sm text-gray-600">
-                  {format(new Date(item.event.timeStart), 'EEEE, d. MMMM yyyy, HH:mm', {
-                    locale: de,
-                  })}
-                  {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
-                </div>
-              )}
-              {item.event.location && (
-                <div className="text-sm text-gray-600">
-                  {item.event.location.buildingName}
-                  {item.event.location.roomNumber && `, ${item.event.location.roomNumber}`}
-                </div>
-              )}
+      {/* Share Modal */}
+      {shareData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:hidden">
+          <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Zeitplan teilen</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShareData(null)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          ))}
+            <div className="flex justify-center mb-4">
+              <QRCodeSVG value={shareData.url} size={200} level="M" marginSize={2} />
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="text"
+                readOnly
+                value={shareData.url}
+                className="flex-1 text-sm border rounded px-3 py-2 bg-gray-50"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(shareData.url)
+                  toast({
+                    title: 'Link kopiert!',
+                  })
+                }}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 text-center">QR-Code scannen oder Link teilen</p>
+          </div>
+        </div>
+      )}
+
+      {/* Print-only full schedule */}
+      <div className="hidden print:block print-schedule">
+        <div className="text-center mb-6 pb-3 border-b-2 border-black">
+          <h2 className="text-xl font-bold m-0">Mein HIT 2026 Zeitplan</h2>
+          <p className="text-sm text-gray-600 m-0">
+            Hochschulinformationstag &mdash;{' '}
+            {selectedDate
+              ? format(selectedDate, 'd. MMMM yyyy', { locale: de })
+              : '19. November 2026'}
+          </p>
+        </div>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b-2 border-black">
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Zeit</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[35%]">Veranstaltung</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Typ</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[20%]">Ort</th>
+              <th className="text-left py-1.5 px-2 font-semibold w-[15%]">Raum</th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.items
+              .sort((a, b) => {
+                if (!a.event.timeStart) return 1
+                if (!b.event.timeStart) return -1
+                return new Date(a.event.timeStart).getTime() - new Date(b.event.timeStart).getTime()
+              })
+              .map((item, index) => (
+                <tr
+                  key={item.id}
+                  className={index % 2 === 1 ? 'bg-gray-50' : ''}
+                  style={{ borderBottom: '1px solid #ddd' }}
+                >
+                  <td className="py-2 px-2 whitespace-nowrap">
+                    {item.event.timeStart ? format(new Date(item.event.timeStart), 'HH:mm') : '—'}
+                    {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
+                  </td>
+                  <td className="py-2 px-2 font-medium">{item.event.title}</td>
+                  <td className="py-2 px-2 text-gray-600">
+                    {item.event.eventType
+                      ?.replace('_', ' ')
+                      .toLowerCase()
+                      .replace(/^\w/, (c: string) => c.toUpperCase()) ?? '—'}
+                  </td>
+                  <td className="py-2 px-2">{item.event.location?.buildingName ?? '—'}</td>
+                  <td className="py-2 px-2">{item.event.location?.roomNumber ?? '—'}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        <div className="mt-5 pt-2.5 border-t border-gray-300 text-xs text-gray-500 flex justify-between">
+          <span>{state.items.length} Veranstaltungen</span>
+          <span>hit.zsb-os.de</span>
+        </div>
       </div>
     </div>
   )

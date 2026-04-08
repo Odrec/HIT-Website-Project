@@ -270,6 +270,17 @@ model ScheduleItem {
   @@map("schedule_items")
 }
 
+/// Shared schedule with short link code for anonymous schedule sharing
+model SharedSchedule {
+  id        String   @id @default(cuid())
+  code      String   @unique @db.VarChar(10)
+  eventIds  String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shared_schedules")
+}
+
 // =============================================================================
 // Site Config & Submission Tables
 // =============================================================================

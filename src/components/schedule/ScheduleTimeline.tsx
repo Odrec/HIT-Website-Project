@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { format, isSameDay } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
@@ -247,14 +248,19 @@ export function ScheduleTimeline({
                           >
                             {eventTypeLabels[item.scheduleEvent.event.eventType]}
                           </Badge>
-                          <h4
-                            className={cn(
-                              'font-medium line-clamp-2',
-                              compact ? 'text-xs' : 'text-sm'
-                            )}
+                          <Link
+                            href={`/events/${item.scheduleEvent.event.id}`}
+                            className="group/link"
                           >
-                            {item.scheduleEvent.event.title}
-                          </h4>
+                            <h4
+                              className={cn(
+                                'font-medium line-clamp-2 group-hover/link:underline',
+                                compact ? 'text-xs' : 'text-sm'
+                              )}
+                            >
+                              {item.scheduleEvent.event.title}
+                            </h4>
+                          </Link>
                         </div>
 
                         {/* Conflict warning */}
