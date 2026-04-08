@@ -213,7 +213,7 @@ export const eventService = {
     return prisma.event.create({
       data: {
         ...eventData,
-        isCrossProgram: (input.isCrossProgram) ?? false,
+        isCrossProgram: input.isCrossProgram ?? false,
         locationHint: input.locationHint || null,
         ...(locationDetails !== undefined && {
           locationDetails: locationDetails as Prisma.InputJsonValue,
@@ -274,7 +274,17 @@ export const eventService = {
    * Update an existing event
    */
   async update(input: UpdateEventInput) {
-    const { id, lecturers, organizers, studyProgramIds, infoMarketIds, melderId, buildingId, roomId, ...eventData } = input
+    const {
+      id,
+      lecturers,
+      organizers,
+      studyProgramIds,
+      infoMarketIds,
+      melderId,
+      buildingId,
+      roomId,
+      ...eventData
+    } = input
 
     // Build the update data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

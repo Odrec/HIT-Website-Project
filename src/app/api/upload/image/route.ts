@@ -20,7 +20,10 @@ export async function POST(request: Request) {
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: 'Nur JPEG, PNG und WebP Dateien sind erlaubt' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Nur JPEG, PNG und WebP Dateien sind erlaubt' },
+      { status: 400 }
+    )
   }
 
   if (file.size > MAX_SIZE) {

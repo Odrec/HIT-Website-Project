@@ -92,7 +92,7 @@ function sanitizeSheetName(name: string): string {
 function addTitleAndHeaders(
   sheet: ExcelJS.Worksheet,
   title: string,
-  columns: Partial<ExcelJS.Column>[],
+  columns: Partial<ExcelJS.Column>[]
 ) {
   // Set columns (this defines keys for addRow later)
   sheet.columns = columns
@@ -120,7 +120,7 @@ function addTitleAndHeaders(
 /** Add data rows to a worksheet starting after the header (row 3+). */
 function addDataRows(
   sheet: ExcelJS.Worksheet,
-  rows: (EventRow | MelderRow | LecturerRow | InfomarktRow)[],
+  rows: (EventRow | MelderRow | LecturerRow | InfomarktRow)[]
 ) {
   for (const row of rows) {
     sheet.addRow(row)
@@ -136,10 +136,7 @@ export async function GET(request: NextRequest) {
     // Auth check – admin only
     const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     // Validate view query param
@@ -149,7 +146,7 @@ export async function GET(request: NextRequest) {
     if (!view || !VALID_VIEWS.includes(view as ViewType)) {
       return NextResponse.json(
         { error: `Invalid or missing view parameter. Must be one of: ${VALID_VIEWS.join(', ')}` },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
@@ -250,8 +247,7 @@ export async function GET(request: NextRequest) {
 
     return new NextResponse(buffer, {
       headers: {
-        'Content-Type':
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     })

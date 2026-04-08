@@ -26,7 +26,11 @@ import {
   locationTypeLabels,
   institutionLabels,
 } from '@/lib/validations/event'
-import { MelderSection, defaultMelderData, type MelderData } from '@/components/events/MelderSection'
+import {
+  MelderSection,
+  defaultMelderData,
+  type MelderData,
+} from '@/components/events/MelderSection'
 import { TimeGridPicker } from '@/components/events/TimeGridPicker'
 import { BuildingRoomSelect } from '@/components/events/BuildingRoomSelect'
 import { ImageUpload } from '@/components/events/ImageUpload'
@@ -64,9 +68,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
   // Melder state (not part of form schema, display-only)
   const [melderData, setMelderData] = useState<MelderData>(defaultMelderData)
-  const [melderId, setMelderId] = useState<string | null>(
-    (initialData?.melderId as string) || null
-  )
+  const [melderId, setMelderId] = useState<string | null>((initialData?.melderId as string) || null)
 
   // Date/time separate state for combining on submit
   const [dateStr, setDateStr] = useState('')
@@ -161,7 +163,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
     }
 
     fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Clear studyProgramIds when isCrossProgram is checked
@@ -376,18 +378,8 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
               />
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <TimeGridPicker
-                value={startTime}
-                onChange={setStartTime}
-                label="Beginn"
-                required
-              />
-              <TimeGridPicker
-                value={endTime}
-                onChange={setEndTime}
-                label="Ende"
-                required
-              />
+              <TimeGridPicker value={startTime} onChange={setStartTime} label="Beginn" required />
+              <TimeGridPicker value={endTime} onChange={setEndTime} label="Ende" required />
             </div>
             {dateError && (
               <div className="rounded-lg bg-red-50 p-3 text-red-700">
@@ -775,12 +767,7 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false }: Event
 
       {/* Submit */}
       <div className="pt-2">
-        <Button
-          type="submit"
-          variant="uni"
-          disabled={isSubmitting}
-          className="w-full md:w-auto"
-        >
+        <Button type="submit" variant="uni" disabled={isSubmitting} className="w-full md:w-auto">
           {isSubmitting
             ? 'Speichern...'
             : initialData?.id

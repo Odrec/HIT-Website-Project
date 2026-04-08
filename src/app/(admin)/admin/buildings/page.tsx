@@ -662,7 +662,11 @@ export default function BuildingsPage() {
             >
               Abbrechen
             </Button>
-            <Button variant="destructive" onClick={handleDeleteBuilding} disabled={deletingBuilding}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteBuilding}
+              disabled={deletingBuilding}
+            >
               {deletingBuilding ? 'Löschen...' : 'Löschen'}
             </Button>
           </DialogFooter>
@@ -704,10 +708,7 @@ export default function BuildingsPage() {
             <Button variant="outline" onClick={() => setRoomDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button
-              onClick={handleSaveRoom}
-              disabled={savingRoom || !roomForm.name.trim()}
-            >
+            <Button onClick={handleSaveRoom} disabled={savingRoom || !roomForm.name.trim()}>
               {savingRoom ? 'Speichern...' : editingRoom ? 'Speichern' : 'Hinzufügen'}
             </Button>
           </DialogFooter>
@@ -720,8 +721,8 @@ export default function BuildingsPage() {
           <DialogHeader>
             <DialogTitle>Raum löschen</DialogTitle>
             <DialogDescription>
-              Sind Sie sicher, dass Sie den Raum &quot;{roomToDelete?.name}&quot; löschen
-              möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+              Sind Sie sicher, dass Sie den Raum &quot;{roomToDelete?.name}&quot; löschen möchten?
+              Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

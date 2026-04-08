@@ -402,12 +402,7 @@ export default function ImportExportPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-auto pt-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={handleExportCSV}
-                  >
+                  <Button variant="outline" size="sm" className="w-full" onClick={handleExportCSV}>
                     <FileText className="mr-2 h-4 w-4" />
                     Herunterladen
                   </Button>

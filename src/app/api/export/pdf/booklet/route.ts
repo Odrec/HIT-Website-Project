@@ -251,7 +251,9 @@ function renderEventEntry(event: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .map((l: any) => [l.title, l.firstName, l.lastName].filter(Boolean).join(' '))
     .join(', ')
-  const detailParts = [timeStr, [building, room].filter(Boolean).join(', '), lecturers].filter(Boolean)
+  const detailParts = [timeStr, [building, room].filter(Boolean).join(', '), lecturers].filter(
+    Boolean
+  )
   const detailsLine = detailParts.join(' | ')
 
   const programs = event.studyPrograms
@@ -266,15 +268,23 @@ function renderEventEntry(event: any) {
       : event.description
     : ''
 
-  return h(View, { style: styles.eventEntry, key: event.id },
+  return h(
+    View,
+    { style: styles.eventEntry, key: event.id },
     h(Text, { style: styles.eventTitle }, event.title),
-    h(View, { style: styles.badgesRow },
-      h(Text, { style: getInstitutionBadgeStyle(event.institution) }, formatInstitutionLabel(event.institution)),
-      h(Text, { style: styles.badgeType }, formatEventType(event.eventType)),
+    h(
+      View,
+      { style: styles.badgesRow },
+      h(
+        Text,
+        { style: getInstitutionBadgeStyle(event.institution) },
+        formatInstitutionLabel(event.institution)
+      ),
+      h(Text, { style: styles.badgeType }, formatEventType(event.eventType))
     ),
     detailsLine ? h(Text, { style: styles.eventDetails }, detailsLine) : null,
     programs ? h(Text, { style: styles.eventPrograms }, programs) : null,
-    description ? h(Text, { style: styles.eventDescription }, description) : null,
+    description ? h(Text, { style: styles.eventDescription }, description) : null
   )
 }
 
@@ -286,10 +296,7 @@ export async function GET() {
   try {
     const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
     const { clustered, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
@@ -304,23 +311,23 @@ export async function GET() {
       const rightEvents = events.filter((_, i) => i % 2 === 1)
 
       contentPages.push(
-        h(Page, { size: 'A4', style: styles.page, key: `cluster-${clusterName}` },
+        h(
+          Page,
+          { size: 'A4', style: styles.page, key: `cluster-${clusterName}` },
           h(Text, { style: styles.clusterHeader }, clusterName),
-          h(View, { style: styles.columnsContainer },
-            h(View, { style: styles.column },
-              ...leftEvents.map(renderEventEntry),
-            ),
-            h(View, { style: styles.column },
-              ...rightEvents.map(renderEventEntry),
-            ),
+          h(
+            View,
+            { style: styles.columnsContainer },
+            h(View, { style: styles.column }, ...leftEvents.map(renderEventEntry)),
+            h(View, { style: styles.column }, ...rightEvents.map(renderEventEntry))
           ),
           h(Text, {
             style: styles.pageFooter,
             render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
               `Seite ${pageNumber} / ${totalPages}`,
             fixed: true,
-          }),
-        ),
+          })
+        )
       )
     }
 
@@ -330,50 +337,60 @@ export async function GET() {
       const rightEvents = crossProgram.filter((_, i) => i % 2 === 1)
 
       contentPages.push(
-        h(Page, { size: 'A4', style: styles.page, key: 'cross-program' },
-          h(Text, { style: styles.sectionHeader }, 'Studiengangs\u00FCbergreifende Veranstaltungen'),
-          h(View, { style: styles.columnsContainer },
-            h(View, { style: styles.column },
-              ...leftEvents.map(renderEventEntry),
-            ),
-            h(View, { style: styles.column },
-              ...rightEvents.map(renderEventEntry),
-            ),
+        h(
+          Page,
+          { size: 'A4', style: styles.page, key: 'cross-program' },
+          h(
+            Text,
+            { style: styles.sectionHeader },
+            'Studiengangs\u00FCbergreifende Veranstaltungen'
+          ),
+          h(
+            View,
+            { style: styles.columnsContainer },
+            h(View, { style: styles.column }, ...leftEvents.map(renderEventEntry)),
+            h(View, { style: styles.column }, ...rightEvents.map(renderEventEntry))
           ),
           h(Text, {
             style: styles.pageFooter,
             render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
               `Seite ${pageNumber} / ${totalPages}`,
             fixed: true,
-          }),
-        ),
+          })
+        )
       )
     }
 
     // Info markets page
     if (infoMarkets.length > 0) {
       contentPages.push(
-        h(Page, { size: 'A4', style: styles.page, key: 'info-markets' },
+        h(
+          Page,
+          { size: 'A4', style: styles.page, key: 'info-markets' },
           h(Text, { style: styles.sectionHeader }, 'Infom\u00E4rkte'),
           ...infoMarkets.map((market) =>
-            h(View, { style: styles.infoMarketEntry, key: market.id },
+            h(
+              View,
+              { style: styles.infoMarketEntry, key: market.id },
               h(Text, { style: styles.infoMarketName }, market.name),
-              h(Text, { style: styles.infoMarketLocation }, market.location),
-            ),
+              h(Text, { style: styles.infoMarketLocation }, market.location)
+            )
           ),
           h(Text, {
             style: styles.pageFooter,
             render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
               `Seite ${pageNumber} / ${totalPages}`,
             fixed: true,
-          }),
-        ),
+          })
+        )
       )
     }
 
     // Links page
     contentPages.push(
-      h(Page, { size: 'A4', style: styles.page, key: 'links' },
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'links' },
         h(Text, { style: styles.sectionHeader }, 'N\u00FCtzliche Links'),
         h(Text, { style: styles.linkText }, 'www.zsb-os.de'),
         h(Text, { style: styles.linkText }, 'www.uni-osnabrueck.de'),
@@ -383,35 +400,43 @@ export async function GET() {
           render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
             `Seite ${pageNumber} / ${totalPages}`,
           fixed: true,
-        }),
-      ),
+        })
+      )
     )
 
     // -- Assemble document --
 
-    const doc = h(Document, null,
+    const doc = h(
+      Document,
+      null,
       // Cover page
-      h(Page, { size: 'A4', style: styles.page, key: 'cover' },
-        h(View, { style: styles.coverContainer },
-          h(View, { style: styles.logoRow },
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'cover' },
+        h(
+          View,
+          { style: styles.coverContainer },
+          h(
+            View,
+            { style: styles.logoRow },
             h(Text, { style: styles.logoUni }, 'UNIVERSIT\u00C4T OSNABR\u00DCCK'),
             h(Text, { style: styles.logoHS }, 'HOCHSCHULE OSNABR\u00DCCK'),
-            h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung'),
+            h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung')
           ),
           h(Text, { style: styles.coverTitle }, 'Hochschulinformationstag'),
           h(Text, { style: styles.coverSubtitle }, 'Programm'),
           h(Text, { style: styles.coverDate }, '19. November 2026'),
-          h(Text, { style: styles.coverFooter }, 'www.zsb-os.de'),
+          h(Text, { style: styles.coverFooter }, 'www.zsb-os.de')
         ),
         h(Text, {
           style: styles.pageFooter,
           render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
             `Seite ${pageNumber} / ${totalPages}`,
           fixed: true,
-        }),
+        })
       ),
       // Content pages
-      ...contentPages,
+      ...contentPages
     )
 
     // -- Render to buffer --

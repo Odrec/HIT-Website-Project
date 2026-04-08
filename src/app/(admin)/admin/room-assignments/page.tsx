@@ -154,10 +154,7 @@ export default function RoomAssignmentsPage() {
             {withTime.map((event) => renderEventRow(event))}
             {withoutTime.length > 0 && (
               <tr className="bg-gray-50">
-                <td
-                  colSpan={6}
-                  className="px-3 py-3 text-sm font-semibold text-gray-400"
-                >
+                <td colSpan={6} className="px-3 py-3 text-sm font-semibold text-gray-400">
                   Ohne Zeitangabe
                 </td>
               </tr>
@@ -173,17 +170,13 @@ export default function RoomAssignmentsPage() {
     const status = saveStatuses[event.id] || 'idle'
     const selectedBuilding = buildings.find((b) => b.id === event.buildingId)
     const rooms = selectedBuilding?.rooms || []
-    const studyProgramNames = event.studyPrograms
-      .map((sp) => sp.studyProgram.name)
-      .join(', ')
+    const studyProgramNames = event.studyPrograms.map((sp) => sp.studyProgram.name).join(', ')
 
     return (
       <tr key={event.id} className="border-b hover:bg-gray-50">
         <td className="px-3 py-2 text-sm">{formatTime(event.timeStart) || '—'}</td>
         <td className="px-3 py-2 text-sm font-medium">{event.title}</td>
-        <td className="px-3 py-2 text-sm">
-          {eventTypeLabels[event.eventType] || event.eventType}
-        </td>
+        <td className="px-3 py-2 text-sm">{eventTypeLabels[event.eventType] || event.eventType}</td>
         <td className="px-3 py-2 text-sm text-gray-500">{studyProgramNames || '—'}</td>
         <td className="px-3 py-2 text-sm">
           <Select
@@ -223,16 +216,12 @@ export default function RoomAssignmentsPage() {
                 ))}
               </SelectContent>
             </Select>
-            {status === 'saving' && (
-              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            )}
+            {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
             {status === 'saved' && <Check className="h-4 w-4 text-green-500" />}
             {status === 'error' && (
               <AlertCircle
                 className="h-4 w-4 cursor-pointer text-red-500"
-                onClick={() =>
-                  saveAssignment(event.id, event.buildingId, event.roomId)
-                }
+                onClick={() => saveAssignment(event.id, event.buildingId, event.roomId)}
               />
             )}
           </div>
@@ -253,9 +242,7 @@ export default function RoomAssignmentsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Raumzuordnung</h1>
-        <p className="text-muted-foreground">
-          Veranstaltungen Gebäuden und Räumen zuordnen
-        </p>
+        <p className="text-muted-foreground">Veranstaltungen Gebäuden und Räumen zuordnen</p>
       </div>
 
       <Tabs defaultValue="uni">

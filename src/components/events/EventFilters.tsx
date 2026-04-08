@@ -162,7 +162,8 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
             )}
             {filters.studyProgramId && (
               <span className="inline-flex items-center gap-1 rounded-full bg-hit-uni-100 px-2.5 py-0.5 text-xs font-medium text-hit-uni-700">
-                {studyPrograms.find((sp) => sp.id === filters.studyProgramId)?.name || 'Studiengang'}
+                {studyPrograms.find((sp) => sp.id === filters.studyProgramId)?.name ||
+                  'Studiengang'}
                 <button
                   onClick={() => handleChange('studyProgramId', '')}
                   className="ml-0.5 hover:text-hit-uni-900"
@@ -211,7 +212,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               value={filters.eventType || 'all'}
               onValueChange={(value) => handleChange('eventType', value === 'all' ? '' : value)}
             >
-              <SelectTrigger id="eventType" className={filters.eventType ? 'border-hit-uni-400' : ''}>
+              <SelectTrigger
+                id="eventType"
+                className={filters.eventType ? 'border-hit-uni-400' : ''}
+              >
                 <SelectValue placeholder="Alle Arten" />
               </SelectTrigger>
               <SelectContent>
@@ -232,7 +236,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               value={filters.institution || 'all'}
               onValueChange={(value) => handleChange('institution', value === 'all' ? '' : value)}
             >
-              <SelectTrigger id="institution" className={filters.institution ? 'border-hit-uni-400' : ''}>
+              <SelectTrigger
+                id="institution"
+                className={filters.institution ? 'border-hit-uni-400' : ''}
+              >
                 <SelectValue placeholder="Alle Institutionen" />
               </SelectTrigger>
               <SelectContent>
@@ -256,7 +263,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
               }
               disabled={loadingPrograms}
             >
-              <SelectTrigger id="studyProgram" className={filters.studyProgramId ? 'border-hit-uni-400' : ''}>
+              <SelectTrigger
+                id="studyProgram"
+                className={filters.studyProgramId ? 'border-hit-uni-400' : ''}
+              >
                 <SelectValue placeholder={loadingPrograms ? 'Laden...' : 'Alle Studiengänge'} />
               </SelectTrigger>
               <SelectContent className="max-h-80">

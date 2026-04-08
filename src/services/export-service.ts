@@ -98,8 +98,7 @@ function formatLecturers(event: EventWithRelations): string {
 
 function formatTimeRange(event: EventWithRelations): string {
   if (!event.timeStart) return ''
-  const fmt = (d: Date) =>
-    d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const fmt = (d: Date) => d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
   const start = fmt(event.timeStart)
   if (!event.timeEnd) return start
   return `${start} – ${fmt(event.timeEnd)}`
@@ -232,8 +231,7 @@ export const exportService = {
     const result: Record<string, EventRow[]> = {}
 
     for (const event of events) {
-      const buildingName =
-        event.building?.name ?? event.room?.building?.name ?? 'Ohne Gebäude'
+      const buildingName = event.building?.name ?? event.room?.building?.name ?? 'Ohne Gebäude'
       const row = eventToRow(event)
       if (!result[buildingName]) result[buildingName] = []
       result[buildingName].push(row)
@@ -259,8 +257,7 @@ export const exportService = {
     const result: Record<string, Record<string, EventRow[]>> = {}
 
     for (const event of events) {
-      const buildingName =
-        event.building?.name ?? event.room?.building?.name ?? 'Ohne Gebäude'
+      const buildingName = event.building?.name ?? event.room?.building?.name ?? 'Ohne Gebäude'
       const roomName = event.room?.name ?? 'Ohne Raum'
       const row = eventToRow(event)
 
@@ -280,9 +277,7 @@ export const exportService = {
     const sorted: Record<string, Record<string, EventRow[]>> = {}
     for (const bKey of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
       sorted[bKey] = {}
-      for (const rKey of Object.keys(result[bKey]).sort((a, b) =>
-        a.localeCompare(b, 'de'),
-      )) {
+      for (const rKey of Object.keys(result[bKey]).sort((a, b) => a.localeCompare(b, 'de'))) {
         sorted[bKey][rKey] = result[bKey][rKey]
       }
     }
@@ -333,8 +328,7 @@ export const exportService = {
       email: l.email ?? '',
       institution: l.affiliation ? formatInstitution(l.affiliation) : '',
       veranstaltung: l.event.title,
-      gebaeude:
-        l.event.building?.name ?? l.event.room?.building?.name ?? '',
+      gebaeude: l.event.building?.name ?? l.event.room?.building?.name ?? '',
       raum: l.event.room?.name ?? '',
     }))
   },
@@ -420,9 +414,7 @@ export const exportService = {
 
     // Sort cluster keys
     const sortedClustered: Record<string, typeof events> = {}
-    for (const key of Object.keys(clustered).sort((a, b) =>
-      a.localeCompare(b, 'de'),
-    )) {
+    for (const key of Object.keys(clustered).sort((a, b) => a.localeCompare(b, 'de'))) {
       sortedClustered[key] = clustered[key]
     }
 

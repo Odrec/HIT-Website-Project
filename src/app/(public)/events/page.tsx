@@ -2,7 +2,16 @@
 
 import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Calendar, Grid3X3, List, Search, Filter, Loader2, BookOpen, ArrowDownAZ } from 'lucide-react'
+import {
+  Calendar,
+  Grid3X3,
+  List,
+  Search,
+  Filter,
+  Loader2,
+  BookOpen,
+  ArrowDownAZ,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -295,7 +304,10 @@ function EventsContent() {
       {/* Browse Mode Tabs */}
       <Tabs
         value={browseMode}
-        onValueChange={(v) => { setBrowseMode(v as BrowseMode); setPage(1) }}
+        onValueChange={(v) => {
+          setBrowseMode(v as BrowseMode)
+          setPage(1)
+        }}
         className="mb-4"
       >
         <div className="flex items-center justify-between">
@@ -480,9 +492,7 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
             <CardTitle className="flex items-center gap-2 text-lg">
               <BookOpen className="h-5 w-5 text-hit-gray-400" />
               Weitere Veranstaltungen
-              <span className="text-sm font-normal text-hit-gray-500">
-                ({unclustered.size})
-              </span>
+              <span className="text-sm font-normal text-hit-gray-500">({unclustered.size})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -623,9 +633,7 @@ function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: 
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               Ohne Studiengangszuordnung
-              <span className="text-sm font-normal text-hit-gray-500">
-                ({noProgram.size})
-              </span>
+              <span className="text-sm font-normal text-hit-gray-500">({noProgram.size})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -649,9 +657,7 @@ function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: 
             <CardTitle className="flex items-center gap-2 text-lg">
               <ArrowDownAZ className="h-4 w-4 text-hit-uni-400" />
               Studiengangsübergreifend
-              <span className="text-sm font-normal text-hit-gray-500">
-                ({crossProgram.size})
-              </span>
+              <span className="text-sm font-normal text-hit-gray-500">({crossProgram.size})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
