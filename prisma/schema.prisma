@@ -348,3 +348,19 @@ model ExportSchedule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/// Cached walking route between two buildings from Google Directions API
+model CachedRoute {
+  id              String   @id @default(cuid())
+  fromBuildingId  String
+  toBuildingId    String
+  distanceMeters  Int
+  durationSeconds Int
+  polyline        String   @db.Text
+  waypoints       Json?    @db.JsonB
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([fromBuildingId, toBuildingId])
+  @@map("cached_routes")
+}
