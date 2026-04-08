@@ -183,6 +183,7 @@ export interface EventFilters {
   endDate?: Date
   search?: string
   isCrossProgram?: boolean
+  melderId?: string
 }
 
 export interface EventSortOptions {

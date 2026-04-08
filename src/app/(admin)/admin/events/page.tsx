@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import {
@@ -18,6 +19,7 @@ import {
   Calendar,
   MapPin,
   GraduationCap,
+  Lock,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -73,6 +75,10 @@ interface EventsResponse {
 function EventsListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
+
+  const isOrganizer = session?.user?.role === 'ORGANIZER'
+  const [deadlinePassed, setDeadlinePassed] = useState(false)
 
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
@@ -89,6 +95,17 @@ function EventsListContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Fetch deadline status for organizers
+  useEffect(() => {
+    if (!isOrganizer) return
+    fetch('/api/settings/deadline')
+      .then((r) => r.json())
+      .then((info) => {
+        setDeadlinePassed(info.passed)
+      })
+      .catch(() => {})
+  }, [isOrganizer])
 
   const fetchEvents = useCallback(async () => {
     setLoading(true)
@@ -355,34 +372,40 @@ function EventsListContent() {
                       )}
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => router.push(`/admin/events/${event.id}`)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Bearbeiten
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDuplicate(event.id)}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Duplizieren
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => {
-                          setEventToDelete(event)
-                          setDeleteDialogOpen(true)
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Löschen
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {isOrganizer && deadlinePassed ? (
+                    <div className="flex items-center gap-1 text-gray-400 px-2" title="Anmeldefrist abgelaufen">
+                      <Lock className="h-4 w-4" />
+                    </div>
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/admin/events/${event.id}`)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Bearbeiten
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicate(event.id)}>
+                          <Copy className="mr-2 h-4 w-4" />
+                          Duplizieren
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => {
+                            setEventToDelete(event)
+                            setDeleteDialogOpen(true)
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Löschen
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               ))}
             </div>

@@ -24,6 +24,23 @@ async function main() {
   await prisma.user.deleteMany()
 
   // ==========================================================================
+  // Seed Site Settings
+  // ==========================================================================
+  console.log('⚙️ Seeding site settings...')
+
+  await prisma.siteSettings.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      hitDate: new Date('2026-11-19T00:00:00Z'),
+      submissionDeadline: new Date('2026-10-15T00:00:00Z'),
+      deadlineEnabled: true,
+    },
+  })
+  console.log('  ✓ Site settings seeded')
+
+  // ==========================================================================
   // Create Study Program Clusters
   // ==========================================================================
   console.log('📚 Creating study program clusters...')

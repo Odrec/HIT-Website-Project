@@ -96,6 +96,10 @@ export const eventService = {
       where.isCrossProgram = filters.isCrossProgram
     }
 
+    if (filters.melderId !== undefined) {
+      where.melderId = filters.melderId
+    }
+
     if (filters.search) {
       where.OR = [
         { title: { contains: filters.search, mode: 'insensitive' } },

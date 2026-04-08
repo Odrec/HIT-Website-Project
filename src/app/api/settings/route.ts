@@ -1,19 +1,10 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/db/prisma'
+import { getSettings, updateSettings } from '@/services/settings-service'
 
-// GET: fetch site settings (public — event form needs the HIT date)
+// GET: fetch site settings (public — event form needs the HIT date and deadline)
 export async function GET() {
-  let settings = await prisma.siteSettings.findUnique({
-    where: { id: 'default' },
-  })
-
-  if (!settings) {
-    settings = await prisma.siteSettings.create({
-      data: { id: 'default' },
-    })
-  }
-
+  const settings = await getSettings()
   return NextResponse.json(settings)
 }
 
@@ -25,17 +16,10 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json()
-  const { hitDate } = body
-
-  const settings = await prisma.siteSettings.upsert({
-    where: { id: 'default' },
-    create: {
-      id: 'default',
-      hitDate: hitDate ? new Date(hitDate) : null,
-    },
-    update: {
-      hitDate: hitDate ? new Date(hitDate) : null,
-    },
+  const settings = await updateSettings({
+    hitDate: body.hitDate,
+    submissionDeadline: body.submissionDeadline,
+    deadlineEnabled: body.deadlineEnabled,
   })
 
   return NextResponse.json(settings)

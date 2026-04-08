@@ -39,6 +39,10 @@ export default function SettingsPage() {
   const [notifyOnNewEvent, setNotifyOnNewEvent] = useState(true)
   const [notifyOnEventChange, setNotifyOnEventChange] = useState(true)
 
+  // Deadline settings
+  const [submissionDeadline, setSubmissionDeadline] = useState('')
+  const [deadlineEnabled, setDeadlineEnabled] = useState(true)
+
   // System settings
   const [cacheEnabled, setCacheEnabled] = useState(true)
   const [cacheTtl, setCacheTtl] = useState('3600')
@@ -58,6 +62,12 @@ export default function SettingsPage() {
           if (data.hitDate) {
             setEventDate(data.hitDate.slice(0, 10))
           }
+          if (data.submissionDeadline) {
+            setSubmissionDeadline(data.submissionDeadline.slice(0, 10))
+          }
+          if (data.deadlineEnabled !== undefined) {
+            setDeadlineEnabled(data.deadlineEnabled)
+          }
         }
       } catch (error) {
         console.error('Failed to load settings:', error)
@@ -72,7 +82,11 @@ export default function SettingsPage() {
       const response = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hitDate: eventDate || null }),
+        body: JSON.stringify({
+          hitDate: eventDate || null,
+          submissionDeadline: submissionDeadline || null,
+          deadlineEnabled,
+        }),
       })
       if (!response.ok) {
         throw new Error('Save failed')
@@ -180,6 +194,46 @@ export default function SettingsPage() {
               Diese Dauer wird beim Erstellen neuer Veranstaltungen als Standard verwendet
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Deadline Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Anmeldefrist
+          </CardTitle>
+          <CardDescription>
+            Nach Ablauf der Frist können Veranstalter keine Veranstaltungen mehr erstellen oder bearbeiten
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="deadlineEnabled"
+              checked={deadlineEnabled}
+              onCheckedChange={(checked) => setDeadlineEnabled(checked === true)}
+            />
+            <Label htmlFor="deadlineEnabled" className="font-normal">
+              Anmeldefrist aktivieren
+            </Label>
+          </div>
+
+          {deadlineEnabled && (
+            <div className="space-y-2">
+              <Label htmlFor="submissionDeadline">Fristende</Label>
+              <Input
+                id="submissionDeadline"
+                type="date"
+                value={submissionDeadline}
+                onChange={(e) => setSubmissionDeadline(e.target.value)}
+              />
+              <p className="text-sm text-muted-foreground">
+                Veranstalter können bis zu diesem Datum Veranstaltungen einreichen und bearbeiten
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

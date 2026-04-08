@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import type { EventFormValues } from '@/lib/validations/event'
 
 export default function NewEventPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -75,7 +77,7 @@ export default function NewEventPage() {
       )}
 
       {/* Form */}
-      <EventForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <EventForm onSubmit={handleSubmit} isSubmitting={isSubmitting} isAdmin={session?.user?.role === 'ADMIN'} />
     </div>
   )
 }

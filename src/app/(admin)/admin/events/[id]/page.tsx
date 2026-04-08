@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { ChevronLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ export default function EditEventPage() {
   const params = useParams()
   const id = params.id as string
   const router = useRouter()
+  const { data: session } = useSession()
   const [event, setEvent] = useState<EventData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -198,7 +200,7 @@ export default function EditEventPage() {
       )}
 
       {/* Form */}
-      <EventForm initialData={initialData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <EventForm initialData={initialData} onSubmit={handleSubmit} isSubmitting={isSubmitting} isAdmin={session?.user?.role === 'ADMIN'} />
     </div>
   )
 }
