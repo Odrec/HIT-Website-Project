@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -86,7 +87,9 @@ export function RecommendationCard({
             </Badge>
           )}
         </div>
-        <CardTitle className="text-lg pr-16">{event.title}</CardTitle>
+        <Link href={`/events/${event.id}`} className="hover:underline">
+          <CardTitle className="text-lg pr-16">{event.title}</CardTitle>
+        </Link>
       </CardHeader>
 
       <CardContent className="space-y-3">
