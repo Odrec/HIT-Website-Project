@@ -558,7 +558,7 @@ export default function RoutePlannerPage() {
                   ein (mindestens 10-15 Minuten)
                 </li>
                 <li>
-                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 15-20
+                  • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 25-30
                   Minuten
                 </li>
                 <li>
