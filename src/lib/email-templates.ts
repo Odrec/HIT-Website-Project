@@ -104,8 +104,7 @@ function safe(value: unknown): string {
 // ─── Shared Email Partials ────────────────────────────────────────────────────
 
 function detailsTable(event: EmailEvent): string {
-  const lecturerNames =
-    (event.lecturers ?? []).map(formatLecturerName).join(', ') || '—'
+  const lecturerNames = (event.lecturers ?? []).map(formatLecturerName).join(', ') || '—'
 
   const studyProgramNames =
     (event.studyPrograms ?? [])
@@ -119,7 +118,10 @@ function detailsTable(event: EmailEvent): string {
     ['Beginn', formatTime(event.timeStart)],
     ['Ende', formatTime(event.timeEnd)],
     ['Ort', formatLocation(event)],
-    ['Meldende Person', event.melder ? `${safe(event.melder.name)} (${safe(event.melder.email)})` : '—'],
+    [
+      'Meldende Person',
+      event.melder ? `${safe(event.melder.name)} (${safe(event.melder.email)})` : '—',
+    ],
     ['Vortragende', lecturerNames],
     ['Studiengänge', studyProgramNames],
   ]
@@ -200,10 +202,7 @@ export function generateNewEventEmail(event: EmailEvent): EmailContent {
 }
 
 /** Generate a notification email for an edited event with highlighted changes. */
-export function generateEditEventEmail(
-  event: EmailEvent,
-  changes: Change[]
-): EmailContent {
+export function generateEditEventEmail(event: EmailEvent, changes: Change[]): EmailContent {
   const subject = `HIT — Veranstaltung bearbeitet: ${event.title}`
 
   const changesHtml =
@@ -298,12 +297,7 @@ export function detectChanges(oldEvent: EmailEvent, newEvent: EmailEvent): Chang
   const changes: Change[] = []
 
   // Simple string/enum fields
-  const stringFields: (keyof EmailEvent)[] = [
-    'title',
-    'description',
-    'eventType',
-    'institution',
-  ]
+  const stringFields: (keyof EmailEvent)[] = ['title', 'description', 'eventType', 'institution']
   for (const field of stringFields) {
     if (oldEvent[field] !== newEvent[field]) {
       changes.push({ field, oldValue: oldEvent[field], newValue: newEvent[field] })

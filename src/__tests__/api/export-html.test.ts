@@ -26,12 +26,8 @@ const mockEvents = [
     description: 'Eine spannende Einführung',
     building: { name: 'Gebäude 66' },
     room: { name: 'Raum 101', building: { name: 'Gebäude 66' } },
-    lecturers: [
-      { title: 'Prof. Dr.', firstName: 'Max', lastName: 'Mustermann' },
-    ],
-    studyPrograms: [
-      { studyProgram: { name: 'Informatik (B.Sc.)' } },
-    ],
+    lecturers: [{ title: 'Prof. Dr.', firstName: 'Max', lastName: 'Mustermann' }],
+    studyPrograms: [{ studyProgram: { name: 'Informatik (B.Sc.)' } }],
     location: null,
     organizers: [],
     melder: null,

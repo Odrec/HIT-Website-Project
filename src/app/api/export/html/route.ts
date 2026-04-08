@@ -69,7 +69,9 @@ function esc(str: string): string {
 // HTML generation
 // ---------------------------------------------------------------------------
 
-type EventWithRelations = Awaited<ReturnType<typeof prisma.event.findMany<{ include: typeof eventInclude }>>>[number]
+type EventWithRelations = Awaited<
+  ReturnType<typeof prisma.event.findMany<{ include: typeof eventInclude }>>
+>[number]
 
 function generateHtml(events: EventWithRelations[], generatedAt: Date): string {
   const dateStr = format(generatedAt, 'dd.MM.yyyy HH:mm', { locale: de })

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import {
-  generateNewEventEmail,
-  generateEditEventEmail,
-  detectChanges,
-} from '@/lib/email-templates'
+import { generateNewEventEmail, generateEditEventEmail, detectChanges } from '@/lib/email-templates'
 import { EventType, Institution, LocationType } from '@/types/events'
 import type { EmailEvent } from '@/lib/email-templates'
 
@@ -54,7 +50,11 @@ const baseEvent: EmailEvent = {
     },
     {
       studyProgramId: 'sp2',
-      studyProgram: { id: 'sp2', name: 'Wirtschaftsinformatik B.Sc.', institution: Institution.UNI },
+      studyProgram: {
+        id: 'sp2',
+        name: 'Wirtschaftsinformatik B.Sc.',
+        institution: Institution.UNI,
+      },
     },
   ],
   createdAt: new Date('2026-01-01'),
@@ -249,18 +249,14 @@ describe('detectChanges', () => {
     const newBuilding = { id: 'b2', name: 'Neues Gebäude', address: null, campus: null }
     const newEvent = { ...baseEvent, building: newBuilding, buildingId: 'b2' }
     const changes = detectChanges(baseEvent, newEvent)
-    expect(changes).toContainEqual(
-      expect.objectContaining({ field: 'building' })
-    )
+    expect(changes).toContainEqual(expect.objectContaining({ field: 'building' }))
   })
 
   it('detects room change', () => {
     const newRoom = { id: 'r2', name: 'Neuer Raum', floor: null, buildingId: 'b1' }
     const newEvent = { ...baseEvent, room: newRoom, roomId: 'r2' }
     const changes = detectChanges(baseEvent, newEvent)
-    expect(changes).toContainEqual(
-      expect.objectContaining({ field: 'room' })
-    )
+    expect(changes).toContainEqual(expect.objectContaining({ field: 'room' }))
   })
 
   it('detects lecturer changes', () => {
@@ -269,9 +265,7 @@ describe('detectChanges', () => {
       lecturers: [{ id: 'l3', eventId: 'evt-1', firstName: 'Klaus', lastName: 'Weber' }],
     }
     const changes = detectChanges(baseEvent, newEvent)
-    expect(changes).toContainEqual(
-      expect.objectContaining({ field: 'lecturers' })
-    )
+    expect(changes).toContainEqual(expect.objectContaining({ field: 'lecturers' }))
   })
 
   it('detects study program changes', () => {
@@ -285,9 +279,7 @@ describe('detectChanges', () => {
       ],
     }
     const changes = detectChanges(baseEvent, newEvent)
-    expect(changes).toContainEqual(
-      expect.objectContaining({ field: 'studyPrograms' })
-    )
+    expect(changes).toContainEqual(expect.objectContaining({ field: 'studyPrograms' }))
   })
 
   it('returns only changed fields', () => {

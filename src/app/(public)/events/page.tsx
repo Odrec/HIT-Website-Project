@@ -240,7 +240,10 @@ function EventsContent() {
           {/* View Mode Toggle */}
           <div className="flex rounded-lg border bg-white p-1">
             <button
-              onClick={() => { setViewMode('list'); trackEvent('navigation', 'view-switch', 'list') }}
+              onClick={() => {
+                setViewMode('list')
+                trackEvent('navigation', 'view-switch', 'list')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'list'
@@ -252,7 +255,10 @@ function EventsContent() {
               <List className="h-4 w-4" />
             </button>
             <button
-              onClick={() => { setViewMode('grid'); trackEvent('navigation', 'view-switch', 'grid') }}
+              onClick={() => {
+                setViewMode('grid')
+                trackEvent('navigation', 'view-switch', 'grid')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'grid'
@@ -264,7 +270,10 @@ function EventsContent() {
               <Grid3X3 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => { setViewMode('calendar'); trackEvent('navigation', 'view-switch', 'calendar') }}
+              onClick={() => {
+                setViewMode('calendar')
+                trackEvent('navigation', 'view-switch', 'calendar')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'calendar'

@@ -1,27 +1,32 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // Use vi.hoisted so mock variables are available in vi.mock factories
-const { mockSendMail, mockCreateTransport, mockGenerateNewEventEmail, mockGenerateEditEventEmail, mockDetectChanges } =
-  vi.hoisted(() => {
-    const mockSendMail = vi.fn().mockResolvedValue({ messageId: 'test-id' })
-    const mockCreateTransport = vi.fn().mockReturnValue({ sendMail: mockSendMail })
-    const mockGenerateNewEventEmail = vi.fn().mockReturnValue({
-      subject: 'HIT — Neue Veranstaltung: Test Event',
-      html: '<p>New event</p>',
-    })
-    const mockGenerateEditEventEmail = vi.fn().mockReturnValue({
-      subject: 'HIT — Veranstaltung bearbeitet: Test Event',
-      html: '<p>Edited event</p>',
-    })
-    const mockDetectChanges = vi.fn()
-    return {
-      mockSendMail,
-      mockCreateTransport,
-      mockGenerateNewEventEmail,
-      mockGenerateEditEventEmail,
-      mockDetectChanges,
-    }
+const {
+  mockSendMail,
+  mockCreateTransport,
+  mockGenerateNewEventEmail,
+  mockGenerateEditEventEmail,
+  mockDetectChanges,
+} = vi.hoisted(() => {
+  const mockSendMail = vi.fn().mockResolvedValue({ messageId: 'test-id' })
+  const mockCreateTransport = vi.fn().mockReturnValue({ sendMail: mockSendMail })
+  const mockGenerateNewEventEmail = vi.fn().mockReturnValue({
+    subject: 'HIT — Neue Veranstaltung: Test Event',
+    html: '<p>New event</p>',
   })
+  const mockGenerateEditEventEmail = vi.fn().mockReturnValue({
+    subject: 'HIT — Veranstaltung bearbeitet: Test Event',
+    html: '<p>Edited event</p>',
+  })
+  const mockDetectChanges = vi.fn()
+  return {
+    mockSendMail,
+    mockCreateTransport,
+    mockGenerateNewEventEmail,
+    mockGenerateEditEventEmail,
+    mockDetectChanges,
+  }
+})
 
 vi.mock('nodemailer', () => ({
   default: {
@@ -121,7 +126,9 @@ describe('sendEventUpdatedEmail', () => {
   })
 
   it('calls detectChanges with oldEvent and newEvent', async () => {
-    mockDetectChanges.mockReturnValue([{ field: 'title', oldValue: 'Test Event', newValue: 'Updated Event' }])
+    mockDetectChanges.mockReturnValue([
+      { field: 'title', oldValue: 'Test Event', newValue: 'Updated Event' },
+    ])
     await sendEventUpdatedEmail(baseEvent, updatedEvent)
     expect(mockDetectChanges).toHaveBeenCalledWith(baseEvent, updatedEvent)
   })
@@ -134,7 +141,9 @@ describe('sendEventUpdatedEmail', () => {
   })
 
   it('calls sendMail with correct from/to/subject/html when changes found', async () => {
-    mockDetectChanges.mockReturnValue([{ field: 'title', oldValue: 'Test Event', newValue: 'Updated Event' }])
+    mockDetectChanges.mockReturnValue([
+      { field: 'title', oldValue: 'Test Event', newValue: 'Updated Event' },
+    ])
     await sendEventUpdatedEmail(baseEvent, updatedEvent)
     expect(mockSendMail).toHaveBeenCalledWith(
       expect.objectContaining({
