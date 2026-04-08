@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import type { BuildingInfo, Route, Coordinates, TravelTimeAnalysis } from '@/types/routes'
+import type { BusPositionResponse, ShuttleStop } from '@/types/shuttle'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamic import for Leaflet (no SSR)
@@ -27,6 +28,9 @@ interface CampusMapProps {
   showAllBuildings?: boolean
   showRoute?: boolean
   height?: string
+  busPositions?: BusPositionResponse[]
+  shuttleStops?: ShuttleStop[]
+  showBusLayer?: boolean
 }
 
 // Default center (Osnabrück)
@@ -44,6 +48,9 @@ export default function CampusMap({
   showAllBuildings = true,
   showRoute = true,
   height = '500px',
+  busPositions = [],
+  shuttleStops = [],
+  showBusLayer = false,
 }: CampusMapProps) {
   const [isClient, setIsClient] = useState(false)
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
@@ -270,6 +277,70 @@ export default function CampusMap({
               })}
             </>
           )}
+
+          {/* Shuttle bus stop markers */}
+          {showBusLayer && shuttleStops.map((stop) => {
+            const stopIcon = leaflet.divIcon({
+              className: 'custom-marker',
+              html: `<div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white">🚏</div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+            })
+
+            return (
+              <Marker
+                key={`stop-${stop.id}`}
+                position={[stop.coordinates.latitude, stop.coordinates.longitude]}
+                icon={stopIcon}
+              >
+                <Popup>
+                  <div className="min-w-[200px]">
+                    <h3 className="font-bold">{stop.name}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{stop.directionsNote}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            )
+          })}
+
+          {/* Live bus position markers */}
+          {showBusLayer && busPositions.map((bus) => {
+            const colors = ['#dc2626', '#2563eb', '#16a34a']
+            const color = colors[(bus.number - 1) % colors.length]
+
+            const busIcon = leaflet.divIcon({
+              className: 'custom-marker',
+              html: `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white ${bus.stale ? 'opacity-50' : ''}" style="background-color: ${bus.stale ? '#9ca3af' : color}">🚌${bus.number}</div>`,
+              iconSize: [40, 40],
+              iconAnchor: [20, 20],
+            })
+
+            return (
+              <Marker
+                key={`bus-${bus.id}`}
+                position={[bus.latitude, bus.longitude]}
+                icon={busIcon}
+              >
+                <Popup>
+                  <div className="min-w-[150px]">
+                    <h3 className="font-bold">{bus.name}</h3>
+                    {bus.stale ? (
+                      <p className="text-sm text-red-600 mt-1">Keine aktuelle Position</p>
+                    ) : (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Zuletzt aktualisiert:{' '}
+                        {new Date(bus.updatedAt).toLocaleTimeString('de-DE', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            )
+          })}
         </MapContainer>
       </div>
     </>

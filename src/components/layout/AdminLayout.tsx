@@ -18,6 +18,7 @@ import {
   ArrowLeftRight,
   Settings,
   HelpCircle,
+  Bus,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -67,6 +68,12 @@ const sidebarItems = [
     title: 'Import / Export',
     href: '/admin/import-export',
     icon: FileSpreadsheet,
+  },
+  {
+    title: 'Shuttle-Busse',
+    href: '/admin/shuttle-buses',
+    icon: Bus,
+    adminOnly: true,
   },
   {
     title: 'Einstellungen',
