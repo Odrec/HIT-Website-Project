@@ -12,6 +12,7 @@ import {
   BookOpen,
   ArrowDownAZ,
 } from 'lucide-react'
+import { HelpLink } from '@/components/help/HelpLink'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -199,7 +200,10 @@ function EventsContent() {
     <>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
+          <HelpLink href="/hilfe/besucher#veranstaltungen" />
+        </div>
         <p className="mt-2 text-hit-gray-600">
           Entdecken Sie alle Veranstaltungen des Hochschulinformationstags 2026
         </p>

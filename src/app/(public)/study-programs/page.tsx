@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap, Search, Building2, Filter, BookOpen, ExternalLink } from 'lucide-react'
+import { GraduationCap, Search, Building2, Filter, BookOpen, ExternalLink, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -108,6 +108,13 @@ export default function StudyProgramsPage() {
           <div className="flex items-center gap-3 mb-4">
             <GraduationCap className="h-10 w-10" />
             <h1 className="text-3xl font-bold lg:text-4xl">Studiengänge</h1>
+            <Link
+              href="/hilfe/besucher#studiengaenge"
+              className="inline-flex items-center gap-1.5 rounded-md bg-white/20 px-2.5 py-1 text-xs text-white/90 transition-colors hover:bg-white/30"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Hilfe</span>
+            </Link>
           </div>
           <p className="text-lg text-white/90 max-w-2xl">
             Entdecken Sie über 200 Studiengänge an der Universität und Hochschule Osnabrück. Finden
