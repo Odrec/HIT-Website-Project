@@ -149,13 +149,14 @@ export function detectCrisis(message: string): CrisisDetection {
  * Priority: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
  */
 async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResponse> {
+  const openaiBaseUrl = process.env.OPENAI_API_BASE_URL
   const openaiApiKey = process.env.OPENAI_API_KEY
   const googleApiKey = process.env.GOOGLE_AI_API_KEY
   const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini'
 
-  // Try OpenAI first if available
-  if (openaiApiKey) {
-    return callOpenAI(request, openaiApiKey, openaiModel)
+  // Try OpenAI-compatible API first (works with OpenAI, vLLM, and other compatible servers)
+  if (openaiBaseUrl || openaiApiKey) {
+    return callOpenAI(request, openaiApiKey || '', openaiModel, openaiBaseUrl)
   }
 
   // Fall back to Google Gemini
@@ -164,7 +165,7 @@ async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResp
   }
 
   console.warn(
-    'No AI API key configured (OPENAI_API_KEY or GOOGLE_AI_API_KEY), using fallback responses'
+    'No AI API key configured (OPENAI_API_BASE_URL, OPENAI_API_KEY, or GOOGLE_AI_API_KEY), using fallback responses'
   )
   return getFallbackResponse(request)
 }
@@ -175,15 +176,22 @@ async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResp
 async function callOpenAI(
   request: LLMCompletionRequest,
   apiKey: string,
-  model: string
+  model: string,
+  baseUrl?: string
 ): Promise<LLMCompletionResponse> {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const url = baseUrl
+      ? `${baseUrl.replace(/\/+$/, '')}/chat/completions`
+      : 'https://api.openai.com/v1/chat/completions'
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model,
         messages: request.messages.map((m) => ({

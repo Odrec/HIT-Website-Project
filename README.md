@@ -32,7 +32,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 |---------|-------------|
 | **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views), study programs link to external Uni/HS pages |
 | **Schedule Builder** | Create personalized event schedules with conflict detection, QR code/short link sharing, Google Calendar integration |
-| **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini |
+| **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
 | **Admin Interface** | Manage events, programs, locations, users, room assignments, and site settings (HIT date, submission deadline) |
@@ -55,7 +55,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Cache** | Redis 7 (ioredis) |
 | **Auth** | NextAuth v5 (role-based: Admin, Organizer, Public) |
 | **Maps** | Leaflet + React-Leaflet |
-| **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 |
+| **AI/LLM** | OpenAI GPT-4o / Google Gemini 1.5 / vLLM (local) |
 | **Exports** | ExcelJS, @react-pdf/renderer, iCal |
 | **Email** | Nodemailer (SMTP) |
 | **Analytics** | Matomo (cookieless) |
@@ -151,16 +151,19 @@ Copy `.env.example` to `.env.local` and configure:
 
 ### AI Configuration (Study Navigator)
 
-The AI-powered Study Navigator requires one of these providers:
+The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-compatible server (vLLM, Ollama, etc.):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key ([get one](https://platform.openai.com/api-keys)) | - |
-| `OPENAI_MODEL` | OpenAI model to use | `gpt-4o-mini` |
+| `OPENAI_API_BASE_URL` | Base URL for OpenAI-compatible API (e.g., `http://localhost:8000/v1` for vLLM) | `https://api.openai.com/v1` |
+| `OPENAI_API_KEY` | API key for OpenAI or local server (optional for local servers without auth) | - |
+| `OPENAI_MODEL` | Model name (e.g., `gpt-4o-mini`, `meta-llama/Llama-3.1-8B-Instruct`) | `gpt-4o-mini` |
 | `GOOGLE_AI_API_KEY` | Google AI API key ([get one](https://makersuite.google.com/app/apikey)) | - |
 | `GOOGLE_AI_MODEL` | Gemini model to use | `gemini-1.5-flash` |
 
-> 💡 If both OpenAI and Google AI keys are set, OpenAI takes priority.
+> Priority: `OPENAI_API_BASE_URL` / `OPENAI_API_KEY` > `GOOGLE_AI_API_KEY` > fallback mode.
+>
+> **vLLM example:** Set `OPENAI_API_BASE_URL=http://localhost:8000/v1` and `OPENAI_MODEL=your-model-name`. Add `OPENAI_API_KEY` only if your vLLM server requires authentication.
 
 ### Email Notifications (SMTP)
 
@@ -395,8 +398,9 @@ npx prisma migrate dev
 ```
 
 #### AI Navigator not responding
-- Verify `OPENAI_API_KEY` or `GOOGLE_AI_API_KEY` is set in `.env.local`
-- Check API key has sufficient credits/quota
+- Verify `OPENAI_API_BASE_URL`, `OPENAI_API_KEY`, or `GOOGLE_AI_API_KEY` is set in `.env.local`
+- For local LLMs (vLLM): ensure the server is running and reachable at the configured URL
+- Check API key has sufficient credits/quota (cloud providers)
 - Try a different model (e.g., `gpt-4o-mini` is faster/cheaper)
 
 #### Slow performance

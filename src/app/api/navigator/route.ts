@@ -7,15 +7,17 @@ import { navigatorService } from '@/services/navigator-service'
  * Priority matches navigator-service.ts: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
  */
 function getModelDisplayName(): string {
+  const openaiBaseUrl = process.env.OPENAI_API_BASE_URL
   const openaiApiKey = process.env.OPENAI_API_KEY
   const googleApiKey = process.env.GOOGLE_AI_API_KEY
 
   let model: string
   let provider: string
 
-  if (openaiApiKey) {
+  if (openaiBaseUrl || openaiApiKey) {
     model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-    provider = 'OpenAI'
+    // Detect local/self-hosted setups (vLLM, Ollama, etc.)
+    provider = openaiBaseUrl && !openaiBaseUrl.includes('openai.com') ? 'Local' : 'OpenAI'
   } else if (googleApiKey) {
     model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
     provider = 'Google'
