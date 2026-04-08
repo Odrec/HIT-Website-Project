@@ -367,3 +367,31 @@ model CachedRoute {
   @@unique([fromBuildingId, toBuildingId])
   @@map("cached_routes")
 }
+
+// =============================================================================
+// Bus Tracking Tables
+// =============================================================================
+
+/// Shuttle bus for real-time GPS tracking
+model ShuttleBus {
+  id        String       @id @default(cuid())
+  name      String       // e.g. "Bus 1"
+  number    Int          @unique
+  token     String       @unique
+  active    Boolean      @default(true)
+  position  BusPosition?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+/// Latest GPS position for a shuttle bus (1:1 relation, overwritten on updates)
+model BusPosition {
+  id        String     @id @default(cuid())
+  busId     String     @unique
+  bus       ShuttleBus @relation(fields: [busId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  heading   Float?
+  speed     Float?
+  updatedAt DateTime   @updatedAt
+}
