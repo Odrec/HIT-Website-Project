@@ -20,7 +20,7 @@ The application includes a custom load testing script that simulates concurrent 
 
 ### Prerequisites
 
-- Node.js 18+ installed
+- Node.js 20+ installed
 - Application running locally or accessible at a test URL
 - Redis running (for caching tests)
 - PostgreSQL database running
@@ -277,10 +277,17 @@ lighthouse http://localhost:3000 --emulated-form-factor=mobile
 |----------|--------|------|------------|-------|
 | `/api/events/public` | GET | No | Lenient | Yes (5min) |
 | `/api/events` | GET/POST | Admin | Standard | No |
+| `/api/events/[id]` | GET/PUT/DELETE | Admin | Standard | No |
 | `/api/study-programs` | GET | No | Standard | Yes (15min) |
 | `/api/locations` | GET | No | Standard | Yes (1hr) |
 | `/api/routes` | POST | No | Standard | No |
 | `/api/recommendations` | POST | No | Standard | No |
+| `/api/schedule/share` | POST | No | Standard | No |
+| `/api/schedule/share/[code]` | GET | No | Standard | No |
+| `/api/export/excel` | GET | Admin | Standard | No |
+| `/api/export/pdf/booklet` | GET | Admin | Standard | No |
+| `/api/export/html` | GET | Admin/API key | Standard | No |
+| `/api/admin/export-schedule` | GET/POST | Admin | Standard | No |
 
 ### Testing with cURL
 
@@ -366,16 +373,16 @@ jobs:
           - 6379:6379
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
       
       - run: npm ci
       - run: npm run build
-      - run: npm run test
+      - run: npx vitest run
       
       - name: Lighthouse
         uses: foo-software/lighthouse-action@v1
