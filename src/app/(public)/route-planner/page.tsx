@@ -323,6 +323,7 @@ export default function RoutePlannerPage() {
           {travelAnalyses.length > 0 && (
             <TravelWarnings
               analyses={travelAnalyses}
+              warnings={route?.warnings}
               onEventClick={(eventId: string) => {
                 router.push(`/events/${eventId}`)
               }}
