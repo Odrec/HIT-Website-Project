@@ -1,16 +1,33 @@
 // src/app/(public)/bus-tracker/guide/page.tsx
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { Suspense, useEffect, useRef, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Bus, MapPin, Wifi, WifiOff, AlertTriangle } from 'lucide-react'
 
 type TrackingStatus = 'idle' | 'active' | 'paused' | 'error'
 
 export default function GuideTrackingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-hit-gray-50 p-4">
+          <div className="max-w-md mx-auto mt-8">
+            <Skeleton className="h-[400px] w-full rounded-lg" />
+          </div>
+        </div>
+      }
+    >
+      <GuideTrackingContent />
+    </Suspense>
+  )
+}
+
+function GuideTrackingContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
 
