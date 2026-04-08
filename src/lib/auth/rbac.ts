@@ -119,3 +119,14 @@ export function canManageEvents(role: UserRole): boolean {
 export function canManageUsers(role: UserRole): boolean {
   return hasPermission(role, 'admin:manage-users')
 }
+
+/**
+ * Check if a user owns an event via the Melder relationship.
+ * Events without a Melder (legacy/imported) return false — only admins can edit those.
+ */
+export function isEventOwner(
+  userId: string,
+  event: { melder?: { userId: string } | null }
+): boolean {
+  return event.melder?.userId === userId
+}
