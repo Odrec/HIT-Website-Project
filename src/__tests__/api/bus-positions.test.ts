@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { NextRequest } from 'next/server'
 
 vi.mock('@/services/shuttle-service', () => ({
   validateGuideToken: vi.fn(),
@@ -34,7 +35,7 @@ describe('Bus Positions API', () => {
         },
       ])
 
-      const request = new Request('http://localhost/api/bus-positions')
+      const request = new NextRequest('http://localhost/api/bus-positions')
       const response = await GET(request)
       const data = await response.json()
 
@@ -50,7 +51,7 @@ describe('Bus Positions API', () => {
       mockValidateGuideToken.mockResolvedValue({ id: 'bus1', number: 1, name: 'Bus 1', active: true })
       mockUpdateBusPosition.mockResolvedValue(undefined)
 
-      const request = new Request('http://localhost/api/bus-positions', {
+      const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ describe('Bus Positions API', () => {
     })
 
     it('returns 401 without auth header', async () => {
-      const request = new Request('http://localhost/api/bus-positions', {
+      const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ latitude: 52.27, longitude: 8.04 }),
@@ -83,7 +84,7 @@ describe('Bus Positions API', () => {
     it('returns 401 with invalid token', async () => {
       mockValidateGuideToken.mockResolvedValue(null)
 
-      const request = new Request('http://localhost/api/bus-positions', {
+      const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +100,7 @@ describe('Bus Positions API', () => {
     it('returns 400 with missing coordinates', async () => {
       mockValidateGuideToken.mockResolvedValue({ id: 'bus1', number: 1, name: 'Bus 1', active: true })
 
-      const request = new Request('http://localhost/api/bus-positions', {
+      const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
