@@ -4,11 +4,13 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import Link from 'next/link'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
+import { generateGoogleCalendarUrl } from '@/lib/calendar-utils'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+  Calendar,
   Clock,
   MapPin,
   AlertTriangle,
@@ -174,39 +176,65 @@ export function ScheduleEventCard({
 
         {/* Controls */}
         {showControls && (
-          <div className="mt-3 pt-3 border-t flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground mr-1">Priorität:</span>
+          <div className="mt-3 pt-3 border-t space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1">Priorität:</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={handlePriorityUp}
+                  disabled={priority <= 1}
+                  title="Priorität erhöhen"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium px-2">{priority}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={handlePriorityDown}
+                  title="Priorität verringern"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </div>
               <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                onClick={handlePriorityUp}
-                disabled={priority <= 1}
-                title="Priorität erhöhen"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={handleRemove}
               >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-medium px-2">{priority}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                onClick={handlePriorityDown}
-                title="Priorität verringern"
-              >
-                <ChevronDown className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-1" />
+                Entfernen
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={handleRemove}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Entfernen
-            </Button>
+            {event.timeStart && event.timeEnd && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs w-full justify-start"
+                asChild
+              >
+                <a
+                  href={generateGoogleCalendarUrl({
+                    title: event.title,
+                    description: event.description ?? null,
+                    timeStart: new Date(event.timeStart),
+                    timeEnd: new Date(event.timeEnd),
+                    location: event.location ?? null,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Zu Google Kalender hinzufügen"
+                >
+                  <Calendar className="h-3.5 w-3.5 mr-1" />
+                  Zu Google Kalender hinzufügen
+                </a>
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
