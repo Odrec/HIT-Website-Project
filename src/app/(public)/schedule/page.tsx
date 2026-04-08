@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { format, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -28,7 +29,6 @@ import {
   Trash2,
   AlertTriangle,
   CalendarPlus,
-  Check,
   FileText,
   CalendarDays,
   Sparkles,
@@ -37,6 +37,9 @@ import {
   ChevronUp,
   MapPin,
   Navigation,
+  X,
+  Copy,
+  Loader2,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -52,7 +55,7 @@ const FALLBACK_HIT_DATE = new Date('2026-11-19')
 function SchedulePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { state, clearSchedule, getConflicts, getScheduleUrl, addEvent } = useSchedule()
+  const { state, clearSchedule, getConflicts, addEvent } = useSchedule()
   const { toast } = useToast()
 
   const [view, setView] = useState<'timeline' | 'list'>('timeline')
@@ -75,7 +78,8 @@ function SchedulePageContent() {
     }
     fetchHitDate()
   }, [])
-  const [copied, setCopied] = useState(false)
+  const [shareData, setShareData] = useState<{ code: string; url: string } | null>(null)
+  const [shareLoading, setShareLoading] = useState(false)
   const [isLoadingShared, setIsLoadingShared] = useState(false)
   const [showRecommendations, setShowRecommendations] = useState(true)
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -243,21 +247,26 @@ function SchedulePageContent() {
   }
 
   const handleShareSchedule = async () => {
-    const url = getScheduleUrl()
+    if (state.items.length === 0) return
+    setShareLoading(true)
     try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      toast({
-        title: 'Link kopiert',
-        description: 'Der Link zu deinem Zeitplan wurde kopiert.',
+      const eventIds = state.items.map((item) => item.eventId)
+      const response = await fetch('/api/schedule/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventIds }),
       })
-      setTimeout(() => setCopied(false), 2000)
+      if (!response.ok) throw new Error('Share failed')
+      const data = await response.json()
+      setShareData(data)
     } catch {
       toast({
         variant: 'destructive',
         title: 'Fehler',
-        description: 'Der Link konnte nicht kopiert werden.',
+        description: 'Fehler beim Erstellen des Links',
       })
+    } finally {
+      setShareLoading(false)
     }
   }
 
@@ -345,9 +354,13 @@ function SchedulePageContent() {
 
         {state.items.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleShareSchedule}>
-              {copied ? <Check className="h-4 w-4 mr-2" /> : <Share2 className="h-4 w-4 mr-2" />}
-              {copied ? 'Kopiert!' : 'Teilen'}
+            <Button variant="outline" size="sm" onClick={handleShareSchedule} disabled={shareLoading}>
+              {shareLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
+              Teilen
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportIcal}>
               <CalendarDays className="h-4 w-4 mr-2" />
@@ -665,6 +678,55 @@ function SchedulePageContent() {
           <RecommendationList showFilters={true} showGroups={true} limit={12} />
         )}
       </div>
+
+      {/* Share Modal */}
+      {shareData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:hidden">
+          <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Zeitplan teilen</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShareData(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex justify-center mb-4">
+              <QRCodeSVG
+                value={shareData.url}
+                size={200}
+                level="M"
+                marginSize={2}
+              />
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="text"
+                readOnly
+                value={shareData.url}
+                className="flex-1 text-sm border rounded px-3 py-2 bg-gray-50"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(shareData.url)
+                  toast({
+                    title: 'Link kopiert!',
+                  })
+                }}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 text-center">
+              QR-Code scannen oder Link teilen
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Print-only full schedule */}
       <div className="hidden print:block print-schedule">
