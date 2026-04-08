@@ -20,6 +20,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
 import { EventCalendarView } from '@/components/events/EventCalendarView'
+import { trackEvent, trackSearch } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
 
 type ViewMode = 'list' | 'grid' | 'calendar'
@@ -108,6 +109,9 @@ function EventsContent() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery)
       setPage(1)
+      if (searchQuery) {
+        trackSearch(searchQuery, 'events')
+      }
     }, 300)
     return () => clearTimeout(timer)
   }, [searchQuery])
@@ -236,7 +240,10 @@ function EventsContent() {
           {/* View Mode Toggle */}
           <div className="flex rounded-lg border bg-white p-1">
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => {
+                setViewMode('list')
+                trackEvent('navigation', 'view-switch', 'list')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'list'
@@ -248,7 +255,10 @@ function EventsContent() {
               <List className="h-4 w-4" />
             </button>
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => {
+                setViewMode('grid')
+                trackEvent('navigation', 'view-switch', 'grid')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'grid'
@@ -260,7 +270,10 @@ function EventsContent() {
               <Grid3X3 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => setViewMode('calendar')}
+              onClick={() => {
+                setViewMode('calendar')
+                trackEvent('navigation', 'view-switch', 'calendar')
+              }}
               className={cn(
                 'rounded-md p-2 transition-colors',
                 viewMode === 'calendar'
@@ -307,6 +320,7 @@ function EventsContent() {
         onValueChange={(v) => {
           setBrowseMode(v as BrowseMode)
           setPage(1)
+          trackEvent('navigation', 'view-switch', v)
         }}
         className="mb-4"
       >

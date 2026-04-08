@@ -336,3 +336,15 @@ model Room {
 
   @@index([buildingId])
 }
+
+/// Admin-configured scheduled export
+model ExportSchedule {
+  id        String   @id @default(cuid())
+  type      String   // "html" (extensible for future export types)
+  startDate DateTime
+  frequency String   // "daily" | "weekly"
+  enabled   Boolean  @default(true)
+  lastRun   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

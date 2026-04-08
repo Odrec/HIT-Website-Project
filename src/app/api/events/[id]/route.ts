@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { eventService } from '@/services'
 import { auth } from '@/auth'
 import { EventType, Institution, LocationType } from '@/types/events'
+import { sendEventUpdatedEmail } from '@/lib/email'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -90,6 +91,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const event = await eventService.update(updateData)
+
+    // Fire-and-forget email notification with change detection
+    type EmailArg = Parameters<typeof sendEventUpdatedEmail>[0]
+    sendEventUpdatedEmail(existing as EmailArg, event as EmailArg).catch(() => {})
 
     return NextResponse.json(event)
   } catch (error) {

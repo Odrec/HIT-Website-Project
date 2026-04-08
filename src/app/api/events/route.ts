@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { eventService } from '@/services'
 import { auth } from '@/auth'
 import { EventType, Institution, LocationType } from '@/types/events'
+import { sendEventCreatedEmail } from '@/lib/email'
 
 /**
  * GET /api/events - List events with filtering, sorting, and pagination
@@ -123,6 +124,9 @@ export async function POST(request: NextRequest) {
     }
 
     const event = await eventService.create(eventData)
+
+    // Fire-and-forget email notification
+    sendEventCreatedEmail(event as Parameters<typeof sendEventCreatedEmail>[0]).catch(() => {})
 
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
