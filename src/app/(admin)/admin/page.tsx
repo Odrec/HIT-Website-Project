@@ -25,19 +25,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [eventsRes, programsRes, locationsRes] = await Promise.all([
+        const [eventsRes, upcomingRes, programsRes, locationsRes] = await Promise.all([
           fetch('/api/events?pageSize=1'),
+          fetch('/api/events?pageSize=1&startDate=' + new Date().toISOString()),
           fetch('/api/study-programs'),
           fetch('/api/locations'),
         ])
 
         const eventsData = await eventsRes.json()
+        const upcomingData = await upcomingRes.json()
         const programsData = await programsRes.json()
         const locationsData = await locationsRes.json()
 
         setStats({
           totalEvents: eventsData.total || 0,
-          upcomingEvents: eventsData.total || 0, // TODO: Filter by date
+          upcomingEvents: upcomingData.total || 0,
           totalStudyPrograms: Array.isArray(programsData) ? programsData.length : 0,
           totalLocations: Array.isArray(locationsData) ? locationsData.length : 0,
         })

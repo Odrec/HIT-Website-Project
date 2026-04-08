@@ -25,13 +25,15 @@ function createRedisClient(): Redis {
   })
 
   client.on('connect', () => {
-    // eslint-disable-next-line no-console -- intentional connection lifecycle log
-    console.log('[Redis] Connected successfully')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Redis] Connected successfully')
+    }
   })
 
   client.on('ready', () => {
-    // eslint-disable-next-line no-console -- intentional connection lifecycle log
-    console.log('[Redis] Ready to accept commands')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Redis] Ready to accept commands')
+    }
   })
 
   return client
