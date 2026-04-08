@@ -5,6 +5,7 @@ import { eventService } from '@/services'
 import { auth } from '@/auth'
 import { EventType, Institution, LocationType } from '@/types/events'
 import { sendEventCreatedEmail } from '@/lib/email'
+import { prisma } from '@/lib/db/prisma'
 
 /**
  * GET /api/events - List events with filtering, sorting, and pagination
@@ -36,6 +37,21 @@ export async function GET(request: NextRequest) {
       | 'createdAt'
     const sortDirection = (searchParams.get('sortDirection') || 'desc') as 'asc' | 'desc'
 
+    // Role-based filtering: ORGANIZERs only see their own events
+    let melderId: string | null | undefined = undefined
+    const session = await auth()
+    if (session?.user?.role === 'ORGANIZER') {
+      const melder = await prisma.melder.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      })
+      if (!melder) {
+        // No Melder record — return empty result
+        return NextResponse.json({ data: [], total: 0, page, pageSize, totalPages: 0 })
+      }
+      melderId = melder.id
+    }
+
     const result = await eventService.list({
       page,
       pageSize,
@@ -48,6 +64,7 @@ export async function GET(request: NextRequest) {
         locationId,
         startDate,
         endDate,
+        ...(melderId !== undefined ? { melderId } : {}),
       },
       sort: {
         field: sortField,
