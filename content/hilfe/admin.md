@@ -34,6 +34,10 @@ Unter **Benutzer** verwalten Sie die Zugänge. Es gibt drei Rollen: **Admin** (V
 
 Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei importieren oder exportieren. Unterstützte Formate: Excel (.xlsx), PDF und HTML.
 
+## Shuttle-Busse
+
+Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf der Campuskarte im Routenplaner. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
+
 ## Einstellungen
 
 Unter **Einstellungen** konfigurieren Sie globale Parameter wie das HIT-Datum, E-Mail-Benachrichtigungen und weitere Systemoptionen.

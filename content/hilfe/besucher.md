@@ -18,6 +18,10 @@ Der KI-gestützte **Studiennavigator** hilft Ihnen, passende Studiengänge zu fi
 
 Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf der Campuskarte. Die Anwendung zeigt Ihnen Gehzeiten zwischen den Veranstaltungsorten und warnt bei knappen Übergängen. Passen Sie die Gehgeschwindigkeit an Ihre Bedürfnisse an.
 
+## Shuttle-Busse
+
+Am HIT-Tag fahren **Shuttle-Busse** zwischen den Campusstandorten. Im Routenplaner können Sie über die Schaltfläche **„Shuttle-Busse"** die Live-Positionen der Busse auf der Karte anzeigen. Die Busstandorte werden automatisch alle 10 Sekunden aktualisiert. Die Haltestellen der Shuttle-Busse sind ebenfalls auf der Karte markiert.
+
 ## Studiengänge
 
 Durchsuchen Sie alle Studiengänge der Universität und Hochschule Osnabrück. Filtern Sie nach Institution oder Fachbereich. Jeder Studiengang verlinkt direkt auf die offizielle Seite der jeweiligen Hochschule.
