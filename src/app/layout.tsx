@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/components/providers/auth-provider'
 import { ScheduleProvider } from '@/contexts/schedule-context'
 import { Toaster } from '@/components/ui/toaster'
+import { MatomoScript } from '@/components/analytics/MatomoScript'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster />
           </ScheduleProvider>
         </AuthProvider>
+        <MatomoScript />
       </body>
     </html>
   )
