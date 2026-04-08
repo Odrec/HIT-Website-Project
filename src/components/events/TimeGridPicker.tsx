@@ -1,6 +1,12 @@
 'use client'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 
 interface TimeGridPickerProps {
@@ -24,7 +30,13 @@ function generateTimeSlots(): string[] {
 
 const TIME_SLOTS = generateTimeSlots()
 
-export function TimeGridPicker({ value, onChange, label, required, disabled }: TimeGridPickerProps) {
+export function TimeGridPicker({
+  value,
+  onChange,
+  label,
+  required,
+  disabled,
+}: TimeGridPickerProps) {
   return (
     <div className="space-y-1.5">
       <Label>

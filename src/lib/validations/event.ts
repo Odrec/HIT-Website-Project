@@ -27,7 +27,15 @@ export const eventFormSchema = z
       .max(5000, 'Description must be less than 5000 characters')
       .optional()
       .default(''),
-    eventType: z.enum(['VORTRAG', 'LABORFUEHRUNG', 'RUNDGANG', 'WORKSHOP', 'ONLINE', 'VIDEO', 'INFOSTAND']),
+    eventType: z.enum([
+      'VORTRAG',
+      'LABORFUEHRUNG',
+      'RUNDGANG',
+      'WORKSHOP',
+      'ONLINE',
+      'VIDEO',
+      'INFOSTAND',
+    ]),
     timeStart: z.date().optional().nullable(),
     timeEnd: z.date().optional().nullable(),
     locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),

@@ -14,6 +14,8 @@ import {
   X,
   ChevronLeft,
   Building2,
+  FileSpreadsheet,
+  ArrowLeftRight,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -53,6 +55,16 @@ const sidebarItems = [
     title: 'Melder',
     href: '/admin/melders',
     icon: Users,
+  },
+  {
+    title: 'Raumzuordnung',
+    href: '/admin/room-assignments',
+    icon: ArrowLeftRight,
+  },
+  {
+    title: 'Import / Export',
+    href: '/admin/import-export',
+    icon: FileSpreadsheet,
   },
   {
     title: 'Benutzer',

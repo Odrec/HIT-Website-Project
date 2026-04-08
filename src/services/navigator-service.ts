@@ -832,7 +832,7 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
         lastName: l.lastName,
         title: l.title || undefined,
         email: l.email || undefined,
-        affiliation: l.affiliation as unknown as Affiliation | undefined || undefined,
+        affiliation: (l.affiliation as unknown as Affiliation | undefined) || undefined,
       })),
       studyPrograms: e.studyPrograms.map((sp) => ({
         id: sp.studyProgram.id,

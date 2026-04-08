@@ -174,8 +174,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                           <span>
                             {format(parseISO(event.timeStart), 'HH:mm')}
-                            {event.timeEnd &&
-                              ` – ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                            {event.timeEnd && ` – ${format(parseISO(event.timeEnd), 'HH:mm')}`}
                           </span>
                         </div>
                         <h3 className="mt-1 text-sm font-medium text-hit-gray-900 line-clamp-2">
@@ -293,8 +292,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.timeStart), 'HH:mm')}
-                                {event.timeEnd &&
-                                  ` - ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                                {event.timeEnd && ` - ${format(parseISO(event.timeEnd), 'HH:mm')}`}
                               </span>
                               {event.location && (
                                 <span className="flex items-center gap-1">

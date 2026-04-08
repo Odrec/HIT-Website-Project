@@ -253,7 +253,8 @@ export function EventCard({ event, viewMode }: EventCardProps) {
                 <div className="flex flex-wrap gap-x-2 gap-y-0.5">
                   {event.studyPrograms.map((sp, i) => (
                     <span key={sp.id} className="text-base font-semibold text-hit-uni-700">
-                      {sp.name}{i < event.studyPrograms.length - 1 ? ',' : ''}
+                      {sp.name}
+                      {i < event.studyPrograms.length - 1 ? ',' : ''}
                     </span>
                   ))}
                 </div>
