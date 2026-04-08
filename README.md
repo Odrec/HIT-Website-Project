@@ -33,9 +33,10 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views) |
 | **Schedule Builder** | Create personalized event schedules with conflict detection, QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini |
-| **Route Planner** | Navigate between campus locations with walking time estimates |
+| **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance |
 | **Event Recommendations** | Smart suggestions based on interests and schedule |
-| **Admin Interface** | Manage events, programs, locations, users, and room assignments |
+| **Admin Interface** | Manage events, programs, locations, users, room assignments, and site settings (HIT date, submission deadline) |
+| **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
 | **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet, HTML backup, iCal export |
 | **Email Notifications** | Automatic email to HIT team on event create/edit with change detection |
 | **Analytics** | Cookieless Matomo tracking with custom events (schedule, search, filters) |
@@ -185,6 +186,7 @@ The AI-powered Study Navigator requires one of these providers:
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `development` |
 | `EXPORT_API_KEY` | API key for cron-triggered HTML export | - |
+| `GOOGLE_MAPS_API_KEY` | Google Maps Directions API key (server-side, for walking routes) | - |
 
 ---
 
@@ -238,6 +240,8 @@ After running the seed script:
 | `/api/study-programs` | GET | List all study programs | 15 min |
 | `/api/locations` | GET | List all locations | 1 hour |
 | `/api/routes` | POST | Calculate route between locations | No |
+| `/api/routes/directions` | GET | Walking directions with cache (Google API fallback) | DB |
+| `/api/settings/deadline` | GET | Public deadline info (date, passed, days remaining) | No |
 | `/api/recommendations` | POST | Get event recommendations | No |
 | `/api/navigator` | POST | AI navigator chat | No |
 | `/api/schedule/share` | POST | Create short link for schedule sharing | No |
@@ -256,6 +260,8 @@ After running the seed script:
 | `/api/export/pdf/booklet` | GET | PDF program booklet |
 | `/api/export/html` | GET | Static HTML backup (API key or admin auth) |
 | `/api/admin/export-schedule` | GET, POST | Manage scheduled HTML exports |
+| `/api/settings` | GET, PUT | Site settings (HIT date, deadline) |
+| `/api/routes/seed` | POST | Pre-compute walking routes via Google API |
 
 ---
 
