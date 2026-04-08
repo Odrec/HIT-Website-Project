@@ -13,9 +13,8 @@ export default function DatenschutzPage() {
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
           <div className="text-sm text-yellow-800">
-            <strong>Hinweis für Entwickler:</strong> Diese Datenschutzerklärung muss vor dem Go-Live
-            aktualisiert werden, um die tatsächliche Datenerfassung dieser Website widerzuspiegeln
-            (Cookies, localStorage, Analytics, etc.).
+            <strong>Hinweis für Entwickler:</strong> Matomo-Abschnitt hinzugefügt. Vor Go-Live:
+            Datenschutzerklärung mit ZSB-Vorlage abgleichen und ggf. weitere Dienste ergänzen.
           </div>
         </div>
       )}
@@ -109,6 +108,54 @@ export default function DatenschutzPage() {
               persönlichen Zeitplan zu speichern. Diese Daten werden ausschließlich lokal auf Ihrem
               Gerät gespeichert und nicht an unsere Server übermittelt.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Webanalyse mit Matomo</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm max-w-none">
+            <p>
+              Diese Website verwendet Matomo, eine Open-Source-Software zur statistischen Auswertung
+              der Besucherzugriffe. Matomo wird auf Servern der Universität Osnabrück betrieben —
+              Ihre Daten werden nicht an Dritte weitergegeben.
+            </p>
+            <h4 className="font-semibold">Was wird erfasst?</h4>
+            <ul>
+              <li>Aufgerufene Seiten und Zeitpunkt des Zugriffs</li>
+              <li>Gerätetyp (Desktop, Mobil, Tablet), Browser und Betriebssystem</li>
+              <li>Anonymisierte Nutzungsdaten (z.B. Filterverwendung, Zeitplanaktionen)</li>
+            </ul>
+            <h4 className="font-semibold">Keine Cookies</h4>
+            <p>
+              Matomo wird auf dieser Website im cookielosen Modus betrieben. Es werden keine Cookies
+              gesetzt und keine Daten im Browser gespeichert. Eine Wiedererkennung über mehrere
+              Sitzungen hinweg findet nicht statt.
+            </p>
+            <h4 className="font-semibold">Rechtsgrundlage</h4>
+            <p>
+              Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+              Interesse an der statistischen Analyse des Nutzerverhaltens zur Verbesserung des
+              Webangebots).
+            </p>
+            <h4 className="font-semibold">Widerspruch (Opt-Out)</h4>
+            <p>
+              Sie können die Erfassung durch Matomo jederzeit unterbinden. Nutzen Sie dafür die
+              folgende Option:
+            </p>
+            {process.env.NEXT_PUBLIC_MATOMO_URL && (
+              <iframe
+                title="Matomo Opt-Out"
+                style={{ border: 0, width: '100%', height: '200px' }}
+                src={`${process.env.NEXT_PUBLIC_MATOMO_URL}index.php?module=CoreAdminHome&action=optOut&language=de`}
+              />
+            )}
+            {!process.env.NEXT_PUBLIC_MATOMO_URL && (
+              <p className="text-sm text-gray-500 italic">
+                Die Opt-Out-Option wird verfügbar, sobald Matomo konfiguriert ist.
+              </p>
+            )}
           </CardContent>
         </Card>
 
