@@ -22,7 +22,9 @@ import { fetchWalkingDirections } from '@/services/google-directions'
  */
 export async function getDirections(
   fromBuildingId: string,
-  toBuildingId: string
+  toBuildingId: string,
+  fromCoords?: Coordinates,
+  toCoords?: Coordinates
 ): Promise<{ distanceMeters: number; durationSeconds: number; waypoints: [number, number][] } | null> {
   if (fromBuildingId === toBuildingId) {
     return { distanceMeters: 0, durationSeconds: 0, waypoints: [] }
@@ -42,17 +44,19 @@ export async function getDirections(
     }
   }
 
-  // No cache — fetch from Google Directions API and cache the result
+  // No cache — resolve coordinates from buildings or use provided coords
   const fromBuilding = findBuilding(fromBuildingId)
   const toBuilding = findBuilding(toBuildingId)
-  if (!fromBuilding || !toBuilding) return null
+  const from = fromBuilding?.coordinates ?? fromCoords
+  const to = toBuilding?.coordinates ?? toCoords
+  if (!from || !to) return null
 
   try {
     const result = await fetchWalkingDirections(
-      fromBuilding.coordinates.latitude,
-      fromBuilding.coordinates.longitude,
-      toBuilding.coordinates.latitude,
-      toBuilding.coordinates.longitude
+      from.latitude,
+      from.longitude,
+      to.latitude,
+      to.longitude
     )
 
     await prisma.cachedRoute.upsert({
@@ -458,7 +462,7 @@ async function calculateRouteLeg(
   to: RouteWaypoint,
   settings: TravelTimeSettings
 ): Promise<RouteLeg> {
-  const directions = await getDirections(from.id, to.id)
+  const directions = await getDirections(from.id, to.id, from.coordinates, to.coordinates)
 
   let distance: number
   let duration: number
@@ -799,8 +803,8 @@ export async function analyzeTravelTimes(
         (eventTo.location?.buildingName && findBuildingByName(eventTo.location.buildingName)?.id) ||
         `coord:${toCoords.latitude},${toCoords.longitude}`
 
-      // Try cached route first, fall back to straight-line estimate
-      const cached = await getDirections(fromBuildingId, toBuildingId)
+      // Try cached/API route first, fall back to straight-line estimate
+      const cached = await getDirections(fromBuildingId, toBuildingId, fromCoords, toCoords)
       let distance: number
       let walkingTime: number
       if (cached) {
@@ -943,8 +947,8 @@ export async function getSuggestedAlternatives(
           (alt.location?.buildingName && findBuildingByName(alt.location.buildingName)?.id) ||
           `coord:${altCoords.latitude},${altCoords.longitude}`
 
-        // Try cached route first, fall back to straight-line estimate
-        const cached = await getDirections(prevBuildingId, altBuildingId)
+        // Try cached/API route first, fall back to straight-line estimate
+        const cached = await getDirections(prevBuildingId, altBuildingId, prevCoords, altCoords)
         let walkingTime: number
         if (cached) {
           walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
