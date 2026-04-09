@@ -70,6 +70,14 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
       const event1 = items[i]
       const event2 = items[j]
 
+      // Skip INFOSTAND events — they're all-day and shouldn't create conflicts
+      if (
+        event1.event.eventType === 'INFOSTAND' ||
+        event2.event.eventType === 'INFOSTAND'
+      ) {
+        continue
+      }
+
       // Skip if either event doesn't have times
       if (
         !event1.event.timeStart ||
