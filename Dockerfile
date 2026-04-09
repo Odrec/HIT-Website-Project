@@ -26,6 +26,12 @@ RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
+# NEXT_PUBLIC_* vars must be present at build time to be inlined into the client bundle
+ARG NEXT_PUBLIC_MATOMO_URL
+ARG NEXT_PUBLIC_MATOMO_SITE_ID
+ENV NEXT_PUBLIC_MATOMO_URL=$NEXT_PUBLIC_MATOMO_URL
+ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
+
 RUN npm run build
 
 # Stage 3: Runner
