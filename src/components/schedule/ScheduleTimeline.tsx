@@ -105,11 +105,14 @@ export function ScheduleTimeline({
         const endSlot = Math.min(20, Math.ceil((endMinutes - 480) / 30))
         const duration = endSlot - startSlot
 
+        // Visual end slot accounts for minimum card height (2 slots = 96px)
+        const visualEndSlot = Math.max(endSlot, startSlot + 2)
+
         return {
           scheduleEvent,
           startSlot,
-          endSlot,
-          duration: Math.max(1, duration),
+          endSlot: visualEndSlot,
+          duration: Math.max(2, duration),
           hasConflict: conflictEventIds.has(scheduleEvent.eventId),
         } as TimeSlotEvent
       })
@@ -117,27 +120,54 @@ export function ScheduleTimeline({
       .sort((a, b) => a.startSlot - b.startSlot)
   }, [eventsForDate, getConflicts])
 
-  // Group overlapping events for layout
-  const layoutEvents = useMemo(() => {
-    const columns: TimeSlotEvent[][] = []
+  // Group overlapping events into clusters for layout
+  const layoutItems = useMemo(() => {
+    if (timeSlotEvents.length === 0) return []
 
-    timeSlotEvents.forEach((event) => {
-      // Find a column where this event doesn't overlap
-      let placed = false
-      for (const column of columns) {
-        const lastInColumn = column[column.length - 1]
-        if (lastInColumn.endSlot <= event.startSlot) {
-          column.push(event)
-          placed = true
-          break
+    // Build overlap clusters: groups of events that overlap with each other
+    const clusters: TimeSlotEvent[][] = []
+    let currentCluster: TimeSlotEvent[] = [timeSlotEvents[0]]
+    let clusterEnd = timeSlotEvents[0].endSlot
+
+    for (let i = 1; i < timeSlotEvents.length; i++) {
+      const event = timeSlotEvents[i]
+      if (event.startSlot < clusterEnd) {
+        // Overlaps with current cluster
+        currentCluster.push(event)
+        clusterEnd = Math.max(clusterEnd, event.endSlot)
+      } else {
+        // New cluster
+        clusters.push(currentCluster)
+        currentCluster = [event]
+        clusterEnd = event.endSlot
+      }
+    }
+    clusters.push(currentCluster)
+
+    // Assign column positions within each cluster
+    return clusters.flatMap((cluster) => {
+      // Place events into columns within this cluster
+      const columns: TimeSlotEvent[][] = []
+      cluster.forEach((event) => {
+        let placed = false
+        for (const column of columns) {
+          const lastInColumn = column[column.length - 1]
+          if (lastInColumn.endSlot <= event.startSlot) {
+            column.push(event)
+            placed = true
+            break
+          }
         }
-      }
-      if (!placed) {
-        columns.push([event])
-      }
-    })
+        if (!placed) {
+          columns.push([event])
+        }
+      })
 
-    return columns
+      const numCols = columns.length
+      return columns.flatMap((col, colIdx) =>
+        col.map((event) => ({ event, colIdx, numCols }))
+      )
+    })
   }, [timeSlotEvents])
 
   const handleRemoveEvent = (eventId: string) => {
@@ -167,8 +197,6 @@ export function ScheduleTimeline({
       </div>
     )
   }
-
-  const numColumns = layoutEvents.length
 
   return (
     <div className={cn('relative', className)}>
@@ -213,9 +241,8 @@ export function ScheduleTimeline({
 
           {/* Events */}
           <div className="relative" style={{ minHeight: `${TIME_SLOTS.length * 48}px` }}>
-            {layoutEvents.map((column, colIdx) =>
-              column.map((item) => {
-                const columnWidth = 100 / numColumns
+            {layoutItems.map(({ event: item, colIdx, numCols }) => {
+                const columnWidth = 100 / numCols
                 const left = colIdx * columnWidth
                 const top = item.startSlot * 48
                 const height = item.duration * 48
@@ -349,8 +376,7 @@ export function ScheduleTimeline({
                     </CardContent>
                   </Card>
                 )
-              })
-            )}
+            })}
           </div>
         </div>
       </div>
