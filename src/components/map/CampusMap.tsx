@@ -38,6 +38,19 @@ interface CampusMapProps {
 const DEFAULT_CENTER: [number, number] = [52.2799, 8.0472]
 const DEFAULT_ZOOM = 14
 
+// Corporate colors: Uni = burgundy, FH/HS = cyan blue
+function getBuildingColor(campus: string | null | undefined): string {
+  switch (campus) {
+    case 'schloss':
+    case 'westerberg':
+      return '#AC0634' // Uni burgundy
+    case 'caprivi':
+      return '#009EE3' // FH blue
+    default:
+      return '#6B7280' // Neutral gray for other/unknown
+  }
+}
+
 export default function CampusMap({
   buildings = [],
   route,
@@ -98,23 +111,16 @@ export default function CampusMap({
   }
 
   // Create custom icons
-  const buildingIcon = leaflet.divIcon({
-    className: 'custom-marker',
-    html: `<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white">🏛️</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  })
-
   const eventIcon = leaflet.divIcon({
     className: 'custom-marker',
-    html: `<div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white">📍</div>`,
+    html: `<div style="width:32px;height:32px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">📍</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 32],
   })
 
   const currentLocationIcon = leaflet.divIcon({
     className: 'custom-marker',
-    html: `<div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white animate-pulse">📍</div>`,
+    html: `<div class="animate-pulse" style="width:32px;height:32px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">📍</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 32],
   })
@@ -158,57 +164,60 @@ export default function CampusMap({
 
           {/* Building markers */}
           {showAllBuildings &&
-            buildings.map((building) => (
-              <Marker
-                key={building.id}
-                position={[building.coordinates.latitude, building.coordinates.longitude]}
-                icon={buildingIcon}
-                eventHandlers={{
-                  click: () => onBuildingClick?.(building),
-                }}
-              >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <h3 className="font-bold text-lg">{building.name}</h3>
-                    {building.shortName && (
-                      <p className="text-sm text-gray-500">({building.shortName})</p>
-                    )}
-                    <p className="text-sm mt-1">{building.address}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span
-                        className={`px-2 py-1 text-xs rounded ${
-                          building.campus === 'schloss'
-                            ? 'bg-purple-100 text-purple-800'
+            buildings.map((building) => {
+              const color = getBuildingColor(building.campus)
+              const icon = leaflet.divIcon({
+                className: 'custom-marker',
+                html: `<div style="width:32px;height:32px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">🏛️</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+              })
+
+              return (
+                <Marker
+                  key={building.id}
+                  position={[building.coordinates.latitude, building.coordinates.longitude]}
+                  icon={icon}
+                  eventHandlers={{
+                    click: () => onBuildingClick?.(building),
+                  }}
+                >
+                  <Popup>
+                    <div className="min-w-[200px]">
+                      <h3 className="font-bold text-lg">{building.name}</h3>
+                      {building.shortName && (
+                        <p className="text-sm text-gray-500">({building.shortName})</p>
+                      )}
+                      <p className="text-sm mt-1">{building.address}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className="px-2 py-1 text-xs rounded"
+                          style={{ backgroundColor: getBuildingColor(building.campus), color: 'white' }}
+                        >
+                          {building.campus === 'schloss'
+                            ? 'Schloss (Uni)'
                             : building.campus === 'westerberg'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'Westerberg (Uni)'
                               : building.campus === 'caprivi'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {building.campus === 'schloss'
-                          ? 'Schloss'
-                          : building.campus === 'westerberg'
-                            ? 'Westerberg'
-                            : building.campus === 'caprivi'
-                              ? 'Caprivi (HS)'
-                              : 'Sonstige'}
-                      </span>
-                      {building.hasAccessibility && (
-                        <span className="text-green-600" title="Barrierefrei">
-                          ♿
+                                ? 'Caprivi (HS)'
+                                : 'Sonstige'}
                         </span>
+                        {building.hasAccessibility && (
+                          <span className="text-green-600" title="Barrierefrei">
+                            ♿
+                          </span>
+                        )}
+                      </div>
+                      {building.eventCount !== undefined && building.eventCount > 0 && (
+                        <p className="mt-2 text-sm">
+                          <strong>{building.eventCount}</strong> Veranstaltung(en)
+                        </p>
                       )}
                     </div>
-                    {building.eventCount !== undefined && building.eventCount > 0 && (
-                      <p className="mt-2 text-sm">
-                        <strong>{building.eventCount}</strong> Veranstaltung(en)
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                  </Popup>
+                </Marker>
+              )
+            })}
 
           {/* Route waypoint markers */}
           {route &&
@@ -252,7 +261,12 @@ export default function CampusMap({
             <>
               {routeLegs.map((leg, index) => {
                 // Hide legs that don't match the filter
-                if (selectedLegIndex !== null && selectedLegIndex !== undefined && index !== selectedLegIndex) return null
+                if (
+                  selectedLegIndex !== null &&
+                  selectedLegIndex !== undefined &&
+                  index !== selectedLegIndex
+                )
+                  return null
 
                 // Check if this leg has a warning
                 const analysis = travelAnalyses[index]
@@ -261,9 +275,14 @@ export default function CampusMap({
 
                 // Use leg geometry if available (real walking path), otherwise fallback to endpoints
                 const positions: [number, number][] = leg.geometry?.coordinates?.length
-                  ? leg.geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng] as [number, number])
+                  ? leg.geometry.coordinates.map(
+                      ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+                    )
                   : [
-                      [leg.startWaypoint.coordinates.latitude, leg.startWaypoint.coordinates.longitude],
+                      [
+                        leg.startWaypoint.coordinates.latitude,
+                        leg.startWaypoint.coordinates.longitude,
+                      ],
                       [leg.endWaypoint.coordinates.latitude, leg.endWaypoint.coordinates.longitude],
                     ]
 
@@ -284,68 +303,70 @@ export default function CampusMap({
           )}
 
           {/* Shuttle bus stop markers */}
-          {showBusLayer && shuttleStops.map((stop) => {
-            const stopIcon = leaflet.divIcon({
-              className: 'custom-marker',
-              html: `<img src="/zeichen-224.svg" alt="Bushaltestelle" style="width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />`,
-              iconSize: [36, 36],
-              iconAnchor: [18, 36],
-            })
+          {showBusLayer &&
+            shuttleStops.map((stop) => {
+              const stopIcon = leaflet.divIcon({
+                className: 'custom-marker',
+                html: `<img src="/zeichen-224.svg" alt="Bushaltestelle" style="width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 36],
+              })
 
-            return (
-              <Marker
-                key={`stop-${stop.id}`}
-                position={[stop.coordinates.latitude, stop.coordinates.longitude]}
-                icon={stopIcon}
-              >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <h3 className="font-bold">{stop.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{stop.directionsNote}</p>
-                  </div>
-                </Popup>
-              </Marker>
-            )
-          })}
+              return (
+                <Marker
+                  key={`stop-${stop.id}`}
+                  position={[stop.coordinates.latitude, stop.coordinates.longitude]}
+                  icon={stopIcon}
+                >
+                  <Popup>
+                    <div className="min-w-[200px]">
+                      <h3 className="font-bold">{stop.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{stop.directionsNote}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
 
           {/* Live bus position markers */}
-          {showBusLayer && busPositions.map((bus) => {
-            const colors = ['#dc2626', '#2563eb', '#16a34a']
-            const color = colors[(bus.number - 1) % colors.length]
+          {showBusLayer &&
+            busPositions.map((bus) => {
+              const colors = ['#dc2626', '#2563eb', '#16a34a']
+              const color = colors[(bus.number - 1) % colors.length]
 
-            const busIcon = leaflet.divIcon({
-              className: 'custom-marker',
-              html: `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white ${bus.stale ? 'opacity-50' : ''}" style="background-color: ${bus.stale ? '#9ca3af' : color}">🚌${bus.number}</div>`,
-              iconSize: [40, 40],
-              iconAnchor: [20, 20],
-            })
+              const busIcon = leaflet.divIcon({
+                className: 'custom-marker',
+                html: `<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;background-color:${bus.stale ? '#9ca3af' : color};${bus.stale ? 'opacity:0.5;' : ''}">🚌${bus.number}</div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+              })
 
-            return (
-              <Marker
-                key={`bus-${bus.id}`}
-                position={[bus.latitude, bus.longitude]}
-                icon={busIcon}
-              >
-                <Popup>
-                  <div className="min-w-[150px]">
-                    <h3 className="font-bold">{bus.name}</h3>
-                    {bus.stale ? (
-                      <p className="text-sm text-red-600 mt-1">Keine aktuelle Position</p>
-                    ) : (
-                      <p className="text-sm text-gray-500 mt-1">
-                        Zuletzt aktualisiert:{' '}
-                        {new Date(bus.updatedAt).toLocaleTimeString('de-DE', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            )
-          })}
+              return (
+                <Marker
+                  key={`bus-${bus.id}`}
+                  position={[bus.latitude, bus.longitude]}
+                  icon={busIcon}
+                >
+                  <Popup>
+                    <div className="min-w-[150px]">
+                      <h3 className="font-bold">{bus.name}</h3>
+                      {bus.stale ? (
+                        <p className="text-sm text-red-600 mt-1">Keine aktuelle Position</p>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Zuletzt aktualisiert:{' '}
+                          {new Date(bus.updatedAt).toLocaleTimeString('de-DE', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
         </MapContainer>
       </div>
     </>
