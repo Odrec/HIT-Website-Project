@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { Fragment, useEffect, useState, useCallback } from 'react'
 import { Plus, Pencil, Trash2, Building2, ChevronDown, ChevronRight, DoorOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -322,8 +322,8 @@ export default function BuildingsPage() {
                     {buildings.map((building) => {
                       const isExpanded = expandedBuildings.has(building.id)
                       return (
-                        <>
-                          <TableRow key={building.id}>
+                        <Fragment key={building.id}>
+                          <TableRow>
                             <TableCell>
                               <button
                                 onClick={() => toggleExpanded(building.id)}
@@ -446,7 +446,7 @@ export default function BuildingsPage() {
                               </TableCell>
                             </TableRow>
                           )}
-                        </>
+                        </Fragment>
                       )
                     })}
                   </TableBody>
