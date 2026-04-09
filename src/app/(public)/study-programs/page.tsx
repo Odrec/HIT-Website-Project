@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap, Search, Building2, Filter, BookOpen, ExternalLink, HelpCircle } from 'lucide-react'
+import { GraduationCap, Search, Building2, Filter, ExternalLink, HelpCircle } from 'lucide-react'
+import { ClusterIcon } from '@/components/ui/cluster-icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -20,6 +21,7 @@ interface Cluster {
   id: string
   name: string
   description: string | null
+  icon: string | null
 }
 
 interface StudyProgram {
@@ -77,12 +79,12 @@ export default function StudyProgramsPage() {
     (acc, program) => {
       const clusterName = program.cluster?.name || 'Weitere Studiengänge'
       if (!acc[clusterName]) {
-        acc[clusterName] = []
+        acc[clusterName] = { programs: [], icon: program.cluster?.icon || null }
       }
-      acc[clusterName].push(program)
+      acc[clusterName].programs.push(program)
       return acc
     },
-    {} as Record<string, StudyProgram[]>
+    {} as Record<string, { programs: StudyProgram[]; icon: string | null }>
   )
 
   // Sort cluster names alphabetically, but put "Weitere Studiengänge" at the end
@@ -220,17 +222,21 @@ export default function StudyProgramsPage() {
                 <Card key={clusterName}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5 text-green-600" />
+                      <ClusterIcon
+                        icon={groupedPrograms[clusterName].icon}
+                        name={clusterName}
+                        size={24}
+                      />
                       <CardTitle className="text-xl">{clusterName}</CardTitle>
                     </div>
                     <CardDescription>
-                      {groupedPrograms[clusterName].length} Studiengang
-                      {groupedPrograms[clusterName].length !== 1 ? 'e' : ''}
+                      {groupedPrograms[clusterName].programs.length} Studiengang
+                      {groupedPrograms[clusterName].programs.length !== 1 ? 'e' : ''}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {groupedPrograms[clusterName]
+                      {groupedPrograms[clusterName].programs
                         .sort((a, b) => a.name.localeCompare(b.name, 'de'))
                         .map((program) => (
                           <div
