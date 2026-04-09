@@ -134,7 +134,11 @@ export const eventService = {
           room: { include: { building: true } },
           studyPrograms: {
             include: {
-              studyProgram: true,
+              studyProgram: {
+                include: {
+                  cluster: true,
+                },
+              },
             },
           },
           infoMarkets: {

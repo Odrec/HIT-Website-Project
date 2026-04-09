@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
 import { EventCalendarView } from '@/components/events/EventCalendarView'
+import { ClusterIcon } from '@/components/ui/cluster-icon'
 import { trackEvent, trackSearch } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
 
@@ -57,6 +58,11 @@ interface Event {
     id: string
     name: string
     institution: string
+    cluster?: {
+      id: string
+      name: string
+      icon: string | null
+    } | null
   }>
   isCrossProgram?: boolean
 }
@@ -438,7 +444,7 @@ function EventsContent() {
 function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: ViewMode }) {
   const viewMode = rawViewMode === 'calendar' ? 'list' : rawViewMode
   // Build cluster -> events map via study programs
-  const clusterMap = new Map<string, { name: string; events: Map<string, Event> }>()
+  const clusterMap = new Map<string, { name: string; icon: string | null; events: Map<string, Event> }>()
   const unclustered = new Map<string, Event>()
   const crossProgram = new Map<string, Event>()
 
@@ -451,20 +457,16 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
       unclustered.set(event.id, event)
       continue
     }
-    // An event can appear under multiple clusters via its study programs
-    // We deduplicate by event id within each cluster
     let addedToCluster = false
     for (const sp of event.studyPrograms) {
-      // We need cluster info - since we don't have it in the event data,
-      // group by the first letter of the study program as a proxy,
-      // or better: group by study program name directly
-      // For now, group events by their study programs
-      const key = sp.name
-      if (!clusterMap.has(key)) {
-        clusterMap.set(key, { name: sp.name, events: new Map() })
+      if (sp.cluster) {
+        const key = sp.cluster.id
+        if (!clusterMap.has(key)) {
+          clusterMap.set(key, { name: sp.cluster.name, icon: sp.cluster.icon ?? null, events: new Map() })
+        }
+        clusterMap.get(key)!.events.set(event.id, event)
+        addedToCluster = true
       }
-      clusterMap.get(key)!.events.set(event.id, event)
-      addedToCluster = true
     }
     if (!addedToCluster) {
       unclustered.set(event.id, event)
@@ -482,7 +484,7 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
         <Card key={key}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="h-5 w-5 text-hit-uni-500" />
+              <ClusterIcon icon={cluster.icon} name={cluster.name} size={24} />
               {cluster.name}
               <span className="text-sm font-normal text-hit-gray-500">
                 ({cluster.events.size} Veranstaltung{cluster.events.size !== 1 ? 'en' : ''})
