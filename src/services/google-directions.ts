@@ -3,6 +3,11 @@
  * Server-side only — API key never exposed to client.
  */
 
+import dns from 'node:dns'
+
+// Force IPv4 so requests match the API key's IP restriction (131.173.0.0/16)
+dns.setDefaultResultOrder('ipv4first')
+
 export interface DirectionsResult {
   distanceMeters: number
   durationSeconds: number

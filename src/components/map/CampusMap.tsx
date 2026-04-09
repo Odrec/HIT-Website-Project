@@ -282,9 +282,9 @@ export default function CampusMap({
           {showBusLayer && shuttleStops.map((stop) => {
             const stopIcon = leaflet.divIcon({
               className: 'custom-marker',
-              html: `<div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg border-2 border-white">🚏</div>`,
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
+              html: `<img src="/zeichen-224.svg" alt="Bushaltestelle" style="width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />`,
+              iconSize: [36, 36],
+              iconAnchor: [18, 36],
             })
 
             return (
