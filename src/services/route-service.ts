@@ -130,136 +130,137 @@ function haversineDistance(from: Coordinates, to: Coordinates): number {
   return R * c
 }
 
+// Single source of truth for all building data
+const BUILDINGS: BuildingInfo[] = [
+  // Schloss Campus (University)
+  {
+    id: 'schloss',
+    name: 'Schloss Osnabrück',
+    shortName: 'Schloss',
+    coordinates: { latitude: 52.27148, longitude: 8.04424 },
+    address: 'Neuer Graben 29, 49074 Osnabrück',
+    campus: 'schloss',
+    hasAccessibility: true,
+  },
+  {
+    id: 'uos-aula',
+    name: 'Aula der Universität',
+    shortName: 'Aula',
+    coordinates: { latitude: 52.27148, longitude: 8.04424 },
+    address: 'Neuer Graben 29, 49074 Osnabrück',
+    campus: 'schloss',
+    hasAccessibility: true,
+  },
+  {
+    id: 'seminarstrasse',
+    name: 'Seminarstraße Gebäude',
+    shortName: 'Seminar',
+    coordinates: { latitude: 52.27130, longitude: 8.04585 },
+    address: 'Seminarstraße 20, 49074 Osnabrück',
+    campus: 'schloss',
+    hasAccessibility: false,
+    accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang',
+  },
+  // Westerberg Campus (University)
+  {
+    id: 'avz',
+    name: 'AVZ (Allgemeines Verfügungszentrum)',
+    shortName: 'AVZ',
+    coordinates: { latitude: 52.28386, longitude: 8.02513 },
+    address: 'Albrechtstraße 28, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  {
+    id: 'biologie',
+    name: 'Biologiegebäude',
+    shortName: 'Bio',
+    coordinates: { latitude: 52.28272, longitude: 8.02173 },
+    address: 'Barbarastraße 11, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  {
+    id: 'physik',
+    name: 'Physikgebäude',
+    shortName: 'Physik',
+    coordinates: { latitude: 52.28482, longitude: 8.02508 },
+    address: 'Barbarastraße 7, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  {
+    id: 'chemie',
+    name: 'Chemiegebäude',
+    shortName: 'Chemie',
+    coordinates: { latitude: 52.28476, longitude: 8.02431 },
+    address: 'Barbarastraße 7, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  {
+    id: 'mathematik',
+    name: 'Mathematik/Informatik',
+    shortName: 'Mathe/Info',
+    coordinates: { latitude: 52.28439, longitude: 8.02605 },
+    address: 'Albrechtstraße 28a, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  {
+    id: 'eihu',
+    name: 'EIHU (Erweiterungsbau Informatik)',
+    shortName: 'EIHU',
+    coordinates: { latitude: 52.28371, longitude: 8.02531 },
+    address: 'Wachsbleiche 27, 49076 Osnabrück',
+    campus: 'westerberg',
+    hasAccessibility: true,
+  },
+  // Hochschule Caprivi Campus
+  {
+    id: 'caprivi-a',
+    name: 'Caprivistraße Gebäude A',
+    shortName: 'CN-A',
+    coordinates: { latitude: 52.2756, longitude: 8.0148 },
+    address: 'Caprivistraße 30a, 49076 Osnabrück',
+    campus: 'caprivi',
+    hasAccessibility: true,
+  },
+  {
+    id: 'caprivi-b',
+    name: 'Caprivistraße Gebäude B',
+    shortName: 'CN-B',
+    coordinates: { latitude: 52.2761, longitude: 8.0155 },
+    address: 'Caprivistraße 30b, 49076 Osnabrück',
+    campus: 'caprivi',
+    hasAccessibility: true,
+  },
+  {
+    id: 'caprivi-c',
+    name: 'Caprivistraße Gebäude C',
+    shortName: 'CN-C',
+    coordinates: { latitude: 52.2766, longitude: 8.0162 },
+    address: 'Caprivistraße 30c, 49076 Osnabrück',
+    campus: 'caprivi',
+    hasAccessibility: true,
+  },
+  {
+    id: 'caprivi-mensa',
+    name: 'Mensa Caprivi',
+    shortName: 'Mensa CN',
+    coordinates: { latitude: 52.2751, longitude: 8.0141 },
+    address: 'Caprivistraße 30, 49076 Osnabrück',
+    campus: 'caprivi',
+    hasAccessibility: true,
+  },
+]
+
 /**
  * Find a building by ID or name
  */
 export function findBuilding(idOrName: string): BuildingInfo | undefined {
-  const buildings: BuildingInfo[] = [
-    // Schloss Campus (University)
-    {
-      id: 'schloss',
-      name: 'Schloss Osnabrück',
-      shortName: 'Schloss',
-      coordinates: { latitude: 52.2728, longitude: 8.0432 },
-      address: 'Neuer Graben 29, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: true,
-    },
-    {
-      id: 'uos-aula',
-      name: 'Aula der Universität',
-      shortName: 'Aula',
-      coordinates: { latitude: 52.2725, longitude: 8.0438 },
-      address: 'Neuer Graben 29, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: true,
-    },
-    {
-      id: 'seminarstrasse',
-      name: 'Seminarstraße Gebäude',
-      shortName: 'Seminar',
-      coordinates: { latitude: 52.2718, longitude: 8.0445 },
-      address: 'Seminarstraße 20, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: false,
-      accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang',
-    },
-    // Westerberg Campus (University)
-    {
-      id: 'avz',
-      name: 'AVZ (Allgemeines Verfügungszentrum)',
-      shortName: 'AVZ',
-      coordinates: { latitude: 52.2816, longitude: 8.0234 },
-      address: 'Albrechtstraße 28, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'biologie',
-      name: 'Biologiegebäude',
-      shortName: 'Bio',
-      coordinates: { latitude: 52.2802, longitude: 8.0241 },
-      address: 'Barbarastraße 11, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'physik',
-      name: 'Physikgebäude',
-      shortName: 'Physik',
-      coordinates: { latitude: 52.2821, longitude: 8.0252 },
-      address: 'Barbarastraße 7, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'chemie',
-      name: 'Chemiegebäude',
-      shortName: 'Chemie',
-      coordinates: { latitude: 52.2809, longitude: 8.0263 },
-      address: 'Barbarastraße 7, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'mathematik',
-      name: 'Mathematik/Informatik',
-      shortName: 'Mathe/Info',
-      coordinates: { latitude: 52.2827, longitude: 8.0239 },
-      address: 'Albrechtstraße 28a, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'eihu',
-      name: 'EIHU (Erweiterungsbau Informatik)',
-      shortName: 'EIHU',
-      coordinates: { latitude: 52.2831, longitude: 8.0227 },
-      address: 'Wachsbleiche 27, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    // Hochschule Caprivi Campus
-    {
-      id: 'caprivi-a',
-      name: 'Caprivistraße Gebäude A',
-      shortName: 'CN-A',
-      coordinates: { latitude: 52.2756, longitude: 8.0148 },
-      address: 'Caprivistraße 30a, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-b',
-      name: 'Caprivistraße Gebäude B',
-      shortName: 'CN-B',
-      coordinates: { latitude: 52.2761, longitude: 8.0155 },
-      address: 'Caprivistraße 30b, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-c',
-      name: 'Caprivistraße Gebäude C',
-      shortName: 'CN-C',
-      coordinates: { latitude: 52.2766, longitude: 8.0162 },
-      address: 'Caprivistraße 30c, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-mensa',
-      name: 'Mensa Caprivi',
-      shortName: 'Mensa CN',
-      coordinates: { latitude: 52.2751, longitude: 8.0141 },
-      address: 'Caprivistraße 30, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-  ]
-
   const lowerId = idOrName.toLowerCase()
-  return buildings.find(
+  return BUILDINGS.find(
     (b) =>
       b.id.toLowerCase() === lowerId ||
       b.name.toLowerCase().includes(lowerId) ||
@@ -271,37 +272,8 @@ export function findBuilding(idOrName: string): BuildingInfo | undefined {
  * Find building by partial name match
  */
 export function findBuildingByName(name: string): BuildingInfo | undefined {
-  const buildings: BuildingInfo[] = [
-    {
-      id: 'schloss',
-      name: 'Schloss Osnabrück',
-      shortName: 'Schloss',
-      coordinates: { latitude: 52.2728, longitude: 8.0432 },
-      address: 'Neuer Graben 29, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: true,
-    },
-    {
-      id: 'avz',
-      name: 'AVZ (Allgemeines Verfügungszentrum)',
-      shortName: 'AVZ',
-      coordinates: { latitude: 52.2816, longitude: 8.0234 },
-      address: 'Albrechtstraße 28, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-a',
-      name: 'Caprivistraße Gebäude A',
-      shortName: 'CN-A',
-      coordinates: { latitude: 52.2756, longitude: 8.0148 },
-      address: 'Caprivistraße 30a, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-  ]
   const lowerName = name.toLowerCase()
-  return buildings.find(
+  return BUILDINGS.find(
     (b) =>
       b.name.toLowerCase().includes(lowerName) ||
       (b.shortName && b.shortName.toLowerCase().includes(lowerName))
@@ -312,130 +284,6 @@ export function findBuildingByName(name: string): BuildingInfo | undefined {
  * Get all buildings with optional event count
  */
 export async function getAllBuildings(): Promise<BuildingInfo[]> {
-  const buildings: BuildingInfo[] = [
-    // Schloss Campus (University)
-    {
-      id: 'schloss',
-      name: 'Schloss Osnabrück',
-      shortName: 'Schloss',
-      coordinates: { latitude: 52.2728, longitude: 8.0432 },
-      address: 'Neuer Graben 29, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: true,
-    },
-    {
-      id: 'uos-aula',
-      name: 'Aula der Universität',
-      shortName: 'Aula',
-      coordinates: { latitude: 52.2725, longitude: 8.0438 },
-      address: 'Neuer Graben 29, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: true,
-    },
-    {
-      id: 'seminarstrasse',
-      name: 'Seminarstraße Gebäude',
-      shortName: 'Seminar',
-      coordinates: { latitude: 52.2718, longitude: 8.0445 },
-      address: 'Seminarstraße 20, 49074 Osnabrück',
-      campus: 'schloss',
-      hasAccessibility: false,
-      accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang',
-    },
-    // Westerberg Campus (University)
-    {
-      id: 'avz',
-      name: 'AVZ (Allgemeines Verfügungszentrum)',
-      shortName: 'AVZ',
-      coordinates: { latitude: 52.2816, longitude: 8.0234 },
-      address: 'Albrechtstraße 28, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'biologie',
-      name: 'Biologiegebäude',
-      shortName: 'Bio',
-      coordinates: { latitude: 52.2802, longitude: 8.0241 },
-      address: 'Barbarastraße 11, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'physik',
-      name: 'Physikgebäude',
-      shortName: 'Physik',
-      coordinates: { latitude: 52.2821, longitude: 8.0252 },
-      address: 'Barbarastraße 7, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'chemie',
-      name: 'Chemiegebäude',
-      shortName: 'Chemie',
-      coordinates: { latitude: 52.2809, longitude: 8.0263 },
-      address: 'Barbarastraße 7, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'mathematik',
-      name: 'Mathematik/Informatik',
-      shortName: 'Mathe/Info',
-      coordinates: { latitude: 52.2827, longitude: 8.0239 },
-      address: 'Albrechtstraße 28a, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    {
-      id: 'eihu',
-      name: 'EIHU (Erweiterungsbau Informatik)',
-      shortName: 'EIHU',
-      coordinates: { latitude: 52.2831, longitude: 8.0227 },
-      address: 'Wachsbleiche 27, 49076 Osnabrück',
-      campus: 'westerberg',
-      hasAccessibility: true,
-    },
-    // Hochschule Caprivi Campus
-    {
-      id: 'caprivi-a',
-      name: 'Caprivistraße Gebäude A',
-      shortName: 'CN-A',
-      coordinates: { latitude: 52.2756, longitude: 8.0148 },
-      address: 'Caprivistraße 30a, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-b',
-      name: 'Caprivistraße Gebäude B',
-      shortName: 'CN-B',
-      coordinates: { latitude: 52.2761, longitude: 8.0155 },
-      address: 'Caprivistraße 30b, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-c',
-      name: 'Caprivistraße Gebäude C',
-      shortName: 'CN-C',
-      coordinates: { latitude: 52.2766, longitude: 8.0162 },
-      address: 'Caprivistraße 30c, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-    {
-      id: 'caprivi-mensa',
-      name: 'Mensa Caprivi',
-      shortName: 'Mensa CN',
-      coordinates: { latitude: 52.2751, longitude: 8.0141 },
-      address: 'Caprivistraße 30, 49076 Osnabrück',
-      campus: 'caprivi',
-      hasAccessibility: true,
-    },
-  ]
-
   // Get event counts from locations
   const locations = await prisma.location.findMany({
     include: {
@@ -446,7 +294,7 @@ export async function getAllBuildings(): Promise<BuildingInfo[]> {
   })
 
   // Match buildings with database locations
-  return buildings.map((building) => {
+  return BUILDINGS.map((building) => {
     const dbLocation = locations.find(
       (loc) =>
         loc.buildingName.toLowerCase().includes(building.name.toLowerCase()) ||

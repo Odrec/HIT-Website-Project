@@ -249,15 +249,30 @@ function SchedulePageContent() {
   }, [state.items])
 
   // Building IDs of scheduled events (for map highlighting)
+  // Match by building name since the schedule stores location.buildingName, not buildingId
+  // Uses contains-matching because event locations use short names like "Schloss" or "Caprivi Campus"
+  // while BuildingInfo uses full names like "Schloss Osnabrück" or "Caprivistraße Gebäude A"
   const scheduledBuildingIds = useMemo(() => {
-    const ids = new Set<string>()
-    state.items.forEach((item) => {
-      if (item.event.buildingId) {
-        ids.add(item.event.buildingId)
-      }
-    })
-    return Array.from(ids)
-  }, [state.items])
+    const eventBuildingNames = state.items
+      .map((item) => item.event.location?.buildingName?.toLowerCase())
+      .filter((n): n is string => !!n)
+
+    if (eventBuildingNames.length === 0) return []
+
+    return buildings
+      .filter((b) => {
+        const name = b.name.toLowerCase()
+        const shortName = b.shortName?.toLowerCase() ?? ''
+        return eventBuildingNames.some(
+          (eventName) =>
+            name.includes(eventName) ||
+            eventName.includes(name) ||
+            shortName === eventName ||
+            (shortName && eventName.includes(shortName))
+        )
+      })
+      .map((b) => b.id)
+  }, [state.items, buildings])
 
   // Conflict check
   const conflicts = getConflicts()
