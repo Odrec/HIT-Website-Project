@@ -16,11 +16,13 @@ Der KI-gestützte **Studiennavigator** hilft Ihnen, passende Studiengänge zu fi
 
 ## Routenplaner
 
-Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf der Campuskarte. Die Anwendung zeigt Ihnen Gehzeiten zwischen den Veranstaltungsorten und warnt bei knappen Übergängen. Passen Sie die Gehgeschwindigkeit an Ihre Bedürfnisse an.
+Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf der Campuskarte. Die Routen folgen echten Fußwegen (über Google Directions API). Die Anwendung zeigt Ihnen Gehzeiten zwischen den Veranstaltungsorten und warnt bei knappen Übergängen — rote Linien bedeuten zu wenig Zeit, blaue gestrichelte Linien sind unkritisch. Passen Sie die Gehgeschwindigkeit an Ihre Bedürfnisse an.
+
+**Einzelne Strecken anzeigen:** Klicken Sie auf eine Veranstaltung in der Liste links, um nur die Strecke von dieser zur nächsten Veranstaltung auf der Karte hervorzuheben. Ein Hinweis zeigt an, welche Strecke gefiltert wird. Klicken Sie erneut oder auf das **✕**, um alle Strecken wieder anzuzeigen.
 
 ## Shuttle-Busse
 
-Am HIT-Tag fahren **Shuttle-Busse** zwischen den Campusstandorten. Im Routenplaner können Sie über die Schaltfläche **„Shuttle-Busse"** die Live-Positionen der Busse auf der Karte anzeigen. Die Busstandorte werden automatisch alle 10 Sekunden aktualisiert. Die Haltestellen der Shuttle-Busse sind ebenfalls auf der Karte markiert.
+Am HIT-Tag fahren **Shuttle-Busse** zwischen den Campusstandorten. Im Routenplaner können Sie über die Schaltfläche **„Shuttle-Busse"** die Live-Positionen der Busse auf der Karte anzeigen. Die Busstandorte werden automatisch alle 10 Sekunden aktualisiert. Die Haltestellen sind mit dem offiziellen Haltestellenzeichen (grünes „H") auf der Karte markiert.
 
 ## Studiengänge
 

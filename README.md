@@ -33,8 +33,8 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views), study programs link to external Uni/HS pages |
 | **Schedule Builder** | Create personalized event schedules with conflict detection, QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
-| **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance |
-| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page, visitors see live markers on campus map |
+| **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map |
+| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page, visitors see live markers and official Zeichen 224 bus stop icons on campus map |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
 | **Admin Interface** | Manage events, programs, locations, users, room assignments, and site settings (HIT date, submission deadline) |
 | **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
