@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import React from 'react'
 import ReactPDF from '@react-pdf/renderer'
+import { readFileSync } from 'fs'
+import path from 'path'
 import { auth } from '@/auth'
 import { exportService } from '@/services/export-service'
 
-const { Document, Page, Text, View, StyleSheet } = ReactPDF
+const { Document, Page, Text, View, StyleSheet, Image: PDFImage } = ReactPDF
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -41,7 +43,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 40,
-    gap: 16,
+    gap: 24,
   },
   logoUni: {
     fontSize: 11,
@@ -299,6 +301,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
     }
 
+    const uosLogoPath = path.join(process.cwd(), 'public/logos/uos-logo.svg')
+    const hsLogoPath = path.join(process.cwd(), 'public/logos/hs-logo.svg')
+    const uosLogoBase64 = `data:image/svg+xml;base64,${readFileSync(uosLogoPath).toString('base64')}`
+    const hsLogoBase64 = `data:image/svg+xml;base64,${readFileSync(hsLogoPath).toString('base64')}`
+
     const { clustered, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
 
     // -- Build pages --
@@ -419,8 +426,8 @@ export async function GET() {
           h(
             View,
             { style: styles.logoRow },
-            h(Text, { style: styles.logoUni }, 'UNIVERSIT\u00C4T OSNABR\u00DCCK'),
-            h(Text, { style: styles.logoHS }, 'HOCHSCHULE OSNABR\u00DCCK'),
+            h(PDFImage, { src: uosLogoBase64, style: { height: 30 } }),
+            h(PDFImage, { src: hsLogoBase64, style: { height: 30 } }),
             h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung')
           ),
           h(Text, { style: styles.coverTitle }, 'Hochschulinformationstag'),
