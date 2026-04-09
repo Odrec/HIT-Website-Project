@@ -32,6 +32,8 @@ interface CampusMapProps {
   shuttleStops?: ShuttleStop[]
   showBusLayer?: boolean
   selectedLegIndex?: number | null
+  highlightBuildingIds?: string[]
+  dimUnselected?: boolean
 }
 
 // Default center (Osnabrück)
@@ -66,6 +68,8 @@ export default function CampusMap({
   shuttleStops = [],
   showBusLayer = false,
   selectedLegIndex = null,
+  highlightBuildingIds,
+  dimUnselected = false,
 }: CampusMapProps) {
   const [isClient, setIsClient] = useState(false)
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
@@ -165,10 +169,12 @@ export default function CampusMap({
           {/* Building markers */}
           {showAllBuildings &&
             buildings.map((building) => {
-              const color = getBuildingColor(building.campus)
+              const isDimmed = dimUnselected && highlightBuildingIds && !highlightBuildingIds.includes(building.id)
+              const color = isDimmed ? '#D1D5DB' : getBuildingColor(building.campus)
+              const opacity = isDimmed ? 'opacity:0.6;' : ''
               const icon = leaflet.divIcon({
                 className: 'custom-marker',
-                html: `<div style="width:32px;height:32px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">🏛️</div>`,
+                html: `<div style="width:32px;height:32px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;${opacity}">🏛️</div>`,
                 iconSize: [32, 32],
                 iconAnchor: [16, 32],
               })

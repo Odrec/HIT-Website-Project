@@ -19,7 +19,7 @@ import { ScheduleTimeline } from '@/components/schedule/ScheduleTimeline'
 import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import { TravelWarnings, RouteInfo } from '@/components/map'
-import type { Route, TravelTimeAnalysis } from '@/types/routes'
+import type { Route, TravelTimeAnalysis, BuildingInfo } from '@/types/routes'
 import { HelpLink } from '@/components/help/HelpLink'
 import {
   Calendar,
@@ -89,6 +89,8 @@ function SchedulePageContent() {
   const [route, setRoute] = useState<Route | null>(null)
   const [travelAnalyses, setTravelAnalyses] = useState<TravelTimeAnalysis[]>([])
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
+  const [mapLocationFilter, setMapLocationFilter] = useState<'all' | 'mine'>('all')
+  const [buildings, setBuildings] = useState<BuildingInfo[]>([])
 
   // Check for shared schedule in URL
   useEffect(() => {
@@ -203,6 +205,22 @@ function SchedulePageContent() {
     }
   }, [state.items, state.isLoaded])
 
+  // Fetch buildings for map
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        const response = await fetch('/api/routes/buildings?withEvents=false')
+        if (response.ok) {
+          const data = await response.json()
+          setBuildings(data.buildings || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch buildings:', error)
+      }
+    }
+    fetchBuildings()
+  }, [])
+
   // Get unique dates from schedule
   const scheduleDates = useMemo(() => {
     const dates = new Set<string>()
@@ -228,6 +246,17 @@ function SchedulePageContent() {
   // Events without time
   const eventsWithoutTime = useMemo(() => {
     return state.items.filter((item) => !item.event.timeStart)
+  }, [state.items])
+
+  // Building IDs of scheduled events (for map highlighting)
+  const scheduledBuildingIds = useMemo(() => {
+    const ids = new Set<string>()
+    state.items.forEach((item) => {
+      if (item.event.buildingId) {
+        ids.add(item.event.buildingId)
+      }
+    })
+    return Array.from(ids)
   }, [state.items])
 
   // Conflict check
@@ -644,13 +673,43 @@ function SchedulePageContent() {
                   <div className="grid lg:grid-cols-2 gap-6">
                     {/* Map */}
                     <div>
+                      {/* Location filter toggle */}
+                      <div className="flex justify-end mb-2">
+                        <div className="inline-flex rounded-lg border border-border overflow-hidden text-sm">
+                          <button
+                            className={cn(
+                              'px-3 py-1.5 font-medium transition-colors',
+                              mapLocationFilter === 'all'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-background text-muted-foreground hover:bg-muted'
+                            )}
+                            onClick={() => setMapLocationFilter('all')}
+                          >
+                            Alle Orte
+                          </button>
+                          <button
+                            className={cn(
+                              'px-3 py-1.5 font-medium transition-colors',
+                              mapLocationFilter === 'mine'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-background text-muted-foreground hover:bg-muted'
+                            )}
+                            onClick={() => setMapLocationFilter('mine')}
+                          >
+                            Meine Orte
+                          </button>
+                        </div>
+                      </div>
                       <CampusMap
+                        buildings={buildings}
                         route={route || undefined}
                         travelAnalyses={travelAnalyses}
-                        showAllBuildings={false}
+                        showAllBuildings={true}
                         showRoute={true}
                         height="400px"
                         className="rounded-lg overflow-hidden"
+                        highlightBuildingIds={scheduledBuildingIds}
+                        dimUnselected={mapLocationFilter === 'mine'}
                       />
                     </div>
                     {/* Route Info and Warnings */}
