@@ -48,38 +48,44 @@ async function main() {
   const clusters = await Promise.all([
     prisma.studyProgramCluster.create({
       data: {
-        name: 'Ingenieurwissenschaften',
-        description: 'Engineering and technical sciences',
+        name: 'Geistes- und Sozialwissenschaften, Sport',
+        description: 'Humanities, social sciences, and sports',
+        icon: 'geistes-sozial-sport.svg',
       },
     }),
     prisma.studyProgramCluster.create({
       data: {
-        name: 'Wirtschaftswissenschaften',
-        description: 'Business and economics',
+        name: 'Mathematik, Informatik, Naturwissenschaften',
+        description: 'Mathematics, computer science, and natural sciences',
+        icon: 'mathe-info-natur.svg',
       },
     }),
     prisma.studyProgramCluster.create({
       data: {
-        name: 'Naturwissenschaften',
-        description: 'Natural sciences',
+        name: 'Rechts- und Wirtschaftswissenschaften',
+        description: 'Law and economics',
+        icon: 'rechts-wirtschaft.svg',
       },
     }),
     prisma.studyProgramCluster.create({
       data: {
-        name: 'Sozialwissenschaften',
-        description: 'Social sciences',
+        name: 'Sprach-, Literatur- und Kulturwissenschaften',
+        description: 'Languages, literature, and cultural studies',
+        icon: 'sprach-literatur-kultur.svg',
+      },
+    }),
+    prisma.studyProgramCluster.create({
+      data: {
+        name: 'Theologie, Kunst, Musik, Textil',
+        description: 'Theology, art, music, and textile',
+        icon: 'theologie-kunst-musik.svg',
       },
     }),
     prisma.studyProgramCluster.create({
       data: {
         name: 'Lehramt',
         description: 'Teacher education programs',
-      },
-    }),
-    prisma.studyProgramCluster.create({
-      data: {
-        name: 'Informatik & Medien',
-        description: 'Computer science and media',
+        icon: 'lehramt.svg',
       },
     }),
   ])
@@ -95,35 +101,35 @@ async function main() {
       data: {
         name: 'Informatik (B.Sc.)',
         institution: Institution.UNI,
-        clusterId: clusters[5].id,
+        clusterId: clusters[1].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Mathematik (B.Sc.)',
         institution: Institution.UNI,
-        clusterId: clusters[2].id,
+        clusterId: clusters[1].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Psychologie (B.Sc.)',
         institution: Institution.UNI,
-        clusterId: clusters[3].id,
+        clusterId: clusters[0].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Betriebswirtschaftslehre (B.Sc.)',
         institution: Institution.UNI,
-        clusterId: clusters[1].id,
+        clusterId: clusters[2].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Lehramt Grundschule',
         institution: Institution.UNI,
-        clusterId: clusters[4].id,
+        clusterId: clusters[5].id,
       },
     }),
     // Hochschule programs
@@ -131,35 +137,35 @@ async function main() {
       data: {
         name: 'Elektrotechnik (B.Eng.)',
         institution: Institution.HOCHSCHULE,
-        clusterId: clusters[0].id,
+        clusterId: clusters[1].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Maschinenbau (B.Eng.)',
         institution: Institution.HOCHSCHULE,
-        clusterId: clusters[0].id,
+        clusterId: clusters[1].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Wirtschaftsingenieurwesen (B.Eng.)',
         institution: Institution.HOCHSCHULE,
-        clusterId: clusters[1].id,
+        clusterId: clusters[2].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Medieninformatik (B.Sc.)',
         institution: Institution.HOCHSCHULE,
-        clusterId: clusters[5].id,
+        clusterId: clusters[1].id,
       },
     }),
     prisma.studyProgram.create({
       data: {
         name: 'Soziale Arbeit (B.A.)',
         institution: Institution.HOCHSCHULE,
-        clusterId: clusters[3].id,
+        clusterId: clusters[0].id,
       },
     }),
   ])
