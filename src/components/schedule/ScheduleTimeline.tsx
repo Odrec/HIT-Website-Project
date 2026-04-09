@@ -67,16 +67,20 @@ export function ScheduleTimeline({
 }: ScheduleTimelineProps) {
   const { state, removeEvent, updatePriority, getConflicts } = useSchedule()
 
-  // Get events for the selected date
-  const eventsForDate = useMemo(() => {
-    if (!selectedDate) {
-      return state.items
+  // Get events for the selected date, split into timeline and Infostände
+  const { timelineEvents, infostands } = useMemo(() => {
+    const filtered = selectedDate
+      ? state.items.filter((item) => {
+          if (!item.event.timeStart) return false
+          const eventDate = new Date(item.event.timeStart)
+          return isSameDay(eventDate, selectedDate)
+        })
+      : state.items
+
+    return {
+      timelineEvents: filtered.filter((item) => item.event.eventType !== 'INFOSTAND'),
+      infostands: filtered.filter((item) => item.event.eventType === 'INFOSTAND'),
     }
-    return state.items.filter((item) => {
-      if (!item.event.timeStart) return false
-      const eventDate = new Date(item.event.timeStart)
-      return isSameDay(eventDate, selectedDate)
-    })
   }, [state.items, selectedDate])
 
   // Map events to time slots
@@ -88,7 +92,7 @@ export function ScheduleTimeline({
       conflictEventIds.add(c.event2.eventId)
     })
 
-    return eventsForDate
+    return timelineEvents
       .map((scheduleEvent) => {
         if (!scheduleEvent.event.timeStart) return null
 
@@ -118,7 +122,7 @@ export function ScheduleTimeline({
       })
       .filter((e): e is TimeSlotEvent => e !== null)
       .sort((a, b) => a.startSlot - b.startSlot)
-  }, [eventsForDate, getConflicts])
+  }, [timelineEvents, getConflicts])
 
   // Group overlapping events into clusters for layout
   const layoutItems = useMemo(() => {
@@ -164,9 +168,7 @@ export function ScheduleTimeline({
       })
 
       const numCols = columns.length
-      return columns.flatMap((col, colIdx) =>
-        col.map((event) => ({ event, colIdx, numCols }))
-      )
+      return columns.flatMap((col, colIdx) => col.map((event) => ({ event, colIdx, numCols })))
     })
   }, [timeSlotEvents])
 
@@ -182,7 +184,7 @@ export function ScheduleTimeline({
     updatePriority(eventId, currentPriority + 1)
   }
 
-  if (eventsForDate.length === 0) {
+  if (timelineEvents.length === 0 && infostands.length === 0) {
     return (
       <div className={cn('text-center py-12', className)}>
         <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -242,140 +244,140 @@ export function ScheduleTimeline({
           {/* Events */}
           <div className="relative" style={{ minHeight: `${TIME_SLOTS.length * 48}px` }}>
             {layoutItems.map(({ event: item, colIdx, numCols }) => {
-                const columnWidth = 100 / numCols
-                const left = colIdx * columnWidth
-                const top = item.startSlot * 48
-                const height = item.duration * 48
+              const columnWidth = 100 / numCols
+              const left = colIdx * columnWidth
+              const top = item.startSlot * 48
+              const height = item.duration * 48
 
-                return (
-                  <Card
-                    key={item.scheduleEvent.id}
-                    className={cn(
-                      'absolute overflow-hidden transition-all',
-                      item.hasConflict && 'ring-2 ring-yellow-500',
-                      compact ? 'p-1' : 'p-2'
-                    )}
-                    style={{
-                      top: `${top}px`,
-                      height: `${height - 4}px`,
-                      left: `${left}%`,
-                      width: `calc(${columnWidth}% - 4px)`,
-                    }}
-                  >
-                    <CardContent className="p-0 h-full flex flex-col">
-                      {/* Event header */}
-                      <div className="flex items-start justify-between gap-1">
-                        <div className="flex-grow min-w-0">
-                          <Badge
-                            variant="outline"
+              return (
+                <Card
+                  key={item.scheduleEvent.id}
+                  className={cn(
+                    'absolute overflow-hidden transition-all',
+                    item.hasConflict && 'ring-2 ring-yellow-500',
+                    compact ? 'p-1' : 'p-2'
+                  )}
+                  style={{
+                    top: `${top}px`,
+                    height: `${height - 4}px`,
+                    left: `${left}%`,
+                    width: `calc(${columnWidth}% - 4px)`,
+                  }}
+                >
+                  <CardContent className="p-0 h-full flex flex-col">
+                    {/* Event header */}
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="flex-grow min-w-0">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'text-xs mb-1',
+                            eventTypeColors[item.scheduleEvent.event.eventType]
+                          )}
+                        >
+                          {eventTypeLabels[item.scheduleEvent.event.eventType]}
+                        </Badge>
+                        <Link
+                          href={`/events/${item.scheduleEvent.event.id}`}
+                          className="group/link"
+                        >
+                          <h4
                             className={cn(
-                              'text-xs mb-1',
-                              eventTypeColors[item.scheduleEvent.event.eventType]
+                              'font-medium line-clamp-2 group-hover/link:underline',
+                              compact ? 'text-xs' : 'text-sm'
                             )}
                           >
-                            {eventTypeLabels[item.scheduleEvent.event.eventType]}
-                          </Badge>
-                          <Link
-                            href={`/events/${item.scheduleEvent.event.id}`}
-                            className="group/link"
-                          >
-                            <h4
-                              className={cn(
-                                'font-medium line-clamp-2 group-hover/link:underline',
-                                compact ? 'text-xs' : 'text-sm'
-                              )}
-                            >
-                              {item.scheduleEvent.event.title}
-                            </h4>
-                          </Link>
-                        </div>
-
-                        {/* Conflict warning */}
-                        {item.hasConflict && (
-                          <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                        )}
+                            {item.scheduleEvent.event.title}
+                          </h4>
+                        </Link>
                       </div>
 
-                      {/* Event details */}
-                      {!compact && height >= 96 && (
-                        <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
-                          {item.scheduleEvent.event.timeStart && (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>
-                                {format(new Date(item.scheduleEvent.event.timeStart), 'HH:mm')}
-                                {item.scheduleEvent.event.timeEnd && (
-                                  <>
-                                    {' '}
-                                    - {format(new Date(item.scheduleEvent.event.timeEnd), 'HH:mm')}
-                                  </>
-                                )}
-                              </span>
-                            </div>
-                          )}
-                          {item.scheduleEvent.event.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              <span className="truncate">
-                                {item.scheduleEvent.event.location.buildingName}
-                                {item.scheduleEvent.event.location.roomNumber &&
-                                  `, ${item.scheduleEvent.event.location.roomNumber}`}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                      {/* Conflict warning */}
+                      {item.hasConflict && (
+                        <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                       )}
+                    </div>
 
-                      {/* Controls */}
-                      {showControls && !compact && height >= 144 && (
-                        <div className="mt-auto pt-2 flex items-center justify-between">
+                    {/* Event details */}
+                    {!compact && height >= 96 && (
+                      <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
+                        {item.scheduleEvent.event.timeStart && (
                           <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() =>
-                                handlePriorityUp(
-                                  item.scheduleEvent.eventId,
-                                  item.scheduleEvent.priority
-                                )
-                              }
-                              title="Priorität erhöhen"
-                            >
-                              <ChevronUp className="h-3 w-3" />
-                            </Button>
-                            <span className="text-xs font-medium px-1">
-                              P{item.scheduleEvent.priority}
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {format(new Date(item.scheduleEvent.event.timeStart), 'HH:mm')}
+                              {item.scheduleEvent.event.timeEnd && (
+                                <>
+                                  {' '}
+                                  - {format(new Date(item.scheduleEvent.event.timeEnd), 'HH:mm')}
+                                </>
+                              )}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() =>
-                                handlePriorityDown(
-                                  item.scheduleEvent.eventId,
-                                  item.scheduleEvent.priority
-                                )
-                              }
-                              title="Priorität verringern"
-                            >
-                              <ChevronDown className="h-3 w-3" />
-                            </Button>
                           </div>
+                        )}
+                        {item.scheduleEvent.event.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate">
+                              {item.scheduleEvent.event.location.buildingName}
+                              {item.scheduleEvent.event.location.roomNumber &&
+                                `, ${item.scheduleEvent.event.location.roomNumber}`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Controls */}
+                    {showControls && !compact && height >= 144 && (
+                      <div className="mt-auto pt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-destructive hover:text-destructive"
-                            onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
-                            title="Entfernen"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              handlePriorityUp(
+                                item.scheduleEvent.eventId,
+                                item.scheduleEvent.priority
+                              )
+                            }
+                            title="Priorität erhöhen"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <ChevronUp className="h-3 w-3" />
+                          </Button>
+                          <span className="text-xs font-medium px-1">
+                            P{item.scheduleEvent.priority}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              handlePriorityDown(
+                                item.scheduleEvent.eventId,
+                                item.scheduleEvent.priority
+                              )
+                            }
+                            title="Priorität verringern"
+                          >
+                            <ChevronDown className="h-3 w-3" />
                           </Button>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-destructive hover:text-destructive"
+                          onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
+                          title="Entfernen"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
             })}
           </div>
         </div>
@@ -401,6 +403,59 @@ export function ScheduleTimeline({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Infostände section */}
+      {infostands.length > 0 && (
+        <div className="mt-6 border-t-2 border-dashed border-border pt-4">
+          <h4 className="text-sm font-semibold text-pink-800 dark:text-pink-300 mb-3 flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Infostände ({infostands.length})
+          </h4>
+          <div className="space-y-2">
+            {infostands.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-3 rounded-lg bg-pink-50 dark:bg-pink-950/30 px-3 py-2"
+              >
+                <div className="flex-grow min-w-0">
+                  <Link
+                    href={`/events/${item.event.id}`}
+                    className="font-medium text-sm hover:underline truncate block"
+                  >
+                    {item.event.title}
+                  </Link>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                    {item.event.timeStart && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(item.event.timeStart), 'HH:mm')}
+                        {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
+                      </span>
+                    )}
+                    {item.event.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {item.event.location.buildingName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {showControls && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive hover:text-destructive flex-shrink-0"
+                    onClick={() => handleRemoveEvent(item.eventId)}
+                    title="Entfernen"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
