@@ -14,6 +14,7 @@ import type {
   RouteGeometry,
 } from '@/types/routes'
 import { prisma } from '@/lib/db/prisma'
+import { fetchWalkingDirections } from '@/services/google-directions'
 
 /**
  * Get walking directions between two buildings from cache.
@@ -33,12 +34,55 @@ export async function getDirections(
     },
   })
 
-  if (!cached) return null
+  if (cached) {
+    return {
+      distanceMeters: cached.distanceMeters,
+      durationSeconds: cached.durationSeconds,
+      waypoints: (cached.waypoints as [number, number][]) ?? [],
+    }
+  }
 
-  return {
-    distanceMeters: cached.distanceMeters,
-    durationSeconds: cached.durationSeconds,
-    waypoints: (cached.waypoints as [number, number][]) ?? [],
+  // No cache — fetch from Google Directions API and cache the result
+  const fromBuilding = findBuilding(fromBuildingId)
+  const toBuilding = findBuilding(toBuildingId)
+  if (!fromBuilding || !toBuilding) return null
+
+  try {
+    const result = await fetchWalkingDirections(
+      fromBuilding.coordinates.latitude,
+      fromBuilding.coordinates.longitude,
+      toBuilding.coordinates.latitude,
+      toBuilding.coordinates.longitude
+    )
+
+    await prisma.cachedRoute.upsert({
+      where: {
+        fromBuildingId_toBuildingId: { fromBuildingId, toBuildingId },
+      },
+      create: {
+        fromBuildingId,
+        toBuildingId,
+        distanceMeters: result.distanceMeters,
+        durationSeconds: result.durationSeconds,
+        polyline: result.polyline,
+        waypoints: result.waypoints,
+      },
+      update: {
+        distanceMeters: result.distanceMeters,
+        durationSeconds: result.durationSeconds,
+        polyline: result.polyline,
+        waypoints: result.waypoints,
+      },
+    })
+
+    return {
+      distanceMeters: result.distanceMeters,
+      durationSeconds: result.durationSeconds,
+      waypoints: result.waypoints,
+    }
+  } catch (error) {
+    console.error('Google Directions API error, falling back to straight line:', error)
+    return null
   }
 }
 
