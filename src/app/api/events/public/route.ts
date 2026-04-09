@@ -222,6 +222,13 @@ export async function GET(request: NextRequest) {
                   name: true,
                   institution: true,
                   url: true,
+                  cluster: {
+                    select: {
+                      id: true,
+                      name: true,
+                      icon: true,
+                    },
+                  },
                 },
               },
             },
