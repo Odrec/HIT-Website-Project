@@ -17,7 +17,10 @@ vi.mock('@/services/google-directions', () => ({
     distanceMeters: 1850,
     durationSeconds: 1500,
     polyline: 'encoded_polyline',
-    waypoints: [[52.27, 8.04], [52.28, 8.02]],
+    waypoints: [
+      [52.27, 8.04],
+      [52.28, 8.02],
+    ],
   }),
 }))
 
@@ -43,7 +46,10 @@ describe('GET /api/routes/directions', () => {
     const cached = {
       distanceMeters: 1850,
       durationSeconds: 1500,
-      waypoints: [[52.27, 8.04], [52.28, 8.02]],
+      waypoints: [
+        [52.27, 8.04],
+        [52.28, 8.02],
+      ],
     }
     mockFindUnique.mockResolvedValue(cached)
 

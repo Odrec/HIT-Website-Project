@@ -53,14 +53,14 @@ export const SHUTTLE_STOPS: ShuttleStop[] = [
   {
     id: 'osnabrueckhalle',
     name: 'OsnabrückHalle / Schloss',
-    coordinates: { latitude: 52.2713, longitude: 8.0420 },
+    coordinates: { latitude: 52.2713, longitude: 8.042 },
     campus: 'schloss',
     directionsNote: 'Eine Haltestelle (Seite der OsnabrückHalle)',
   },
   {
     id: 'caprivistrasse',
     name: 'Caprivistraße / Sophie-Charlotte-Str.',
-    coordinates: { latitude: 52.2780, longitude: 8.0240 },
+    coordinates: { latitude: 52.278, longitude: 8.024 },
     campus: 'westerberg',
     directionsNote: 'Zwei Haltestellen (eine pro Fahrtrichtung)',
   },

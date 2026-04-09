@@ -11,12 +11,6 @@ export function ClusterIcon({ icon, name, size = 24, className }: ClusterIconPro
   if (!icon) return null
 
   return (
-    <Image
-      src={`/clusters/${icon}`}
-      alt={name}
-      width={size}
-      height={size}
-      className={className}
-    />
+    <Image src={`/clusters/${icon}`} alt={name} width={size} height={size} className={className} />
   )
 }

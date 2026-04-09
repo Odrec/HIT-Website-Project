@@ -61,7 +61,12 @@ interface EventFormProps {
   isAdmin?: boolean
 }
 
-export function EventForm({ initialData, onSubmit, isSubmitting = false, isAdmin }: EventFormProps) {
+export function EventForm({
+  initialData,
+  onSubmit,
+  isSubmitting = false,
+  isAdmin,
+}: EventFormProps) {
   const [locations, setLocations] = useState<Location[]>([])
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([])
   const [infoMarkets, setInfoMarkets] = useState<InfoMarket[]>([])
@@ -258,14 +263,19 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false, isAdmin
     <form onSubmit={handleFormSubmit} className="space-y-4">
       {/* Deadline banner */}
       {deadlineInfo && deadlineInfo.deadline && (
-        <div className={`p-3 rounded-lg mb-4 ${
-          deadlineInfo.passed
-            ? 'bg-red-50 border border-red-200 text-red-800'
-            : 'bg-blue-50 border border-blue-200 text-blue-800'
-        }`}>
+        <div
+          className={`p-3 rounded-lg mb-4 ${
+            deadlineInfo.passed
+              ? 'bg-red-50 border border-red-200 text-red-800'
+              : 'bg-blue-50 border border-blue-200 text-blue-800'
+          }`}
+        >
           {deadlineInfo.passed ? (
             <>
-              <p className="font-medium">🔒 Anmeldefrist abgelaufen ({new Date(deadlineInfo.deadline).toLocaleDateString('de-DE')})</p>
+              <p className="font-medium">
+                🔒 Anmeldefrist abgelaufen (
+                {new Date(deadlineInfo.deadline).toLocaleDateString('de-DE')})
+              </p>
               <p className="text-sm mt-1">Änderungen nur durch Administratoren möglich.</p>
             </>
           ) : (
@@ -277,380 +287,524 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false, isAdmin
         </div>
       )}
       <fieldset disabled={isLocked || false}>
-      {/* Row 1: Melder + Veranstaltungsinfo */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Section 1: Melder-Profil */}
-        <MelderSection
-          value={melderData}
-          onChange={setMelderData}
-          melderId={melderId}
-          onMelderIdChange={setMelderId}
-        />
+        {/* Row 1: Melder + Veranstaltungsinfo */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Section 1: Melder-Profil */}
+          <MelderSection
+            value={melderData}
+            onChange={setMelderData}
+            melderId={melderId}
+            onMelderIdChange={setMelderId}
+          />
 
-        {/* Section 2: Veranstaltungsinfo */}
-        <Card className="border-l-4 border-l-hit-hs-500">
+          {/* Section 2: Veranstaltungsinfo */}
+          <Card className="border-l-4 border-l-hit-hs-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Veranstaltungsinfo</CardTitle>
+              <CardDescription className="text-xs">
+                Titel, Typ und Beschreibung der Veranstaltung
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="title">
+                  Titel <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  {...register('title')}
+                  placeholder="Name der Veranstaltung"
+                  className={errors.title ? 'border-red-500' : ''}
+                />
+                {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
+                <p className="text-xs text-gray-500">{watch('title')?.length || 0}/200 Zeichen</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="description">Beschreibung</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Ausführliche Beschreibung der Veranstaltung..."
+                  rows={3}
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">{errors.description.message}</p>
+                )}
+                <p className="text-xs text-gray-500">
+                  {watch('description')?.length || 0}/5000 Zeichen
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="eventType">
+                    Veranstaltungstyp <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={watch('eventType')}
+                    onValueChange={(value) =>
+                      setValue('eventType', value as EventFormValues['eventType'])
+                    }
+                  >
+                    <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Typ auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(eventTypeLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.eventType && (
+                    <p className="text-sm text-red-500">{errors.eventType.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="institution">
+                    Institution <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={watch('institution')}
+                    onValueChange={(value) =>
+                      setValue('institution', value as EventFormValues['institution'])
+                    }
+                  >
+                    <SelectTrigger className={errors.institution ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Institution auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(institutionLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.institution && (
+                    <p className="text-sm text-red-500">{errors.institution.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isCrossProgram"
+                  checked={watch('isCrossProgram')}
+                  onCheckedChange={(checked) => setValue('isCrossProgram', checked as boolean)}
+                />
+                <Label htmlFor="isCrossProgram">Studiengangsübergreifend</Label>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 2: Datum & Uhrzeit + Ort */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Section 3: Datum & Uhrzeit */}
+          <Card className="border-l-4 border-l-[#FBB900]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Datum & Uhrzeit</CardTitle>
+              <CardDescription className="text-xs">
+                Wann findet die Veranstaltung statt?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="eventDate">
+                  Datum <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="eventDate"
+                  type="date"
+                  value={dateStr}
+                  onChange={(e) => setDateStr(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <TimeGridPicker value={startTime} onChange={setStartTime} label="Beginn" required />
+                <TimeGridPicker value={endTime} onChange={setEndTime} label="Ende" required />
+              </div>
+              {dateError && (
+                <div className="rounded-lg bg-red-50 p-3 text-red-700">
+                  <p className="text-sm font-medium">{dateError}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section 4: Ort */}
+          <Card className="border-l-4 border-l-[#465765]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Ort</CardTitle>
+              <CardDescription className="text-xs">
+                Wo findet die Veranstaltung statt?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <BuildingRoomSelect
+                buildingId={watch('buildingId') || ''}
+                roomId={watch('roomId') || ''}
+                onBuildingChange={(id) => setValue('buildingId', id)}
+                onRoomChange={(id) => setValue('roomId', id)}
+              />
+
+              <div className="space-y-1.5">
+                <Label htmlFor="locationHint">Ortshinweis</Label>
+                <Input
+                  id="locationHint"
+                  {...register('locationHint')}
+                  placeholder="z.B. Eingang unter der Treppe"
+                  className={errors.locationHint ? 'border-red-500' : ''}
+                />
+                {errors.locationHint && (
+                  <p className="text-sm text-red-500">{errors.locationHint.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="locationType">
+                  Ortstyp <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={watch('locationType')}
+                  onValueChange={(value) =>
+                    setValue('locationType', value as EventFormValues['locationType'])
+                  }
+                >
+                  <SelectTrigger className={errors.locationType ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Ortstyp auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(locationTypeLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.locationType && (
+                  <p className="text-sm text-red-500">{errors.locationType.message}</p>
+                )}
+              </div>
+
+              {watchLocationType === 'OTHER' && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="locationId">Standort</Label>
+                  <Select
+                    value={watch('locationId') || 'none'}
+                    onValueChange={(value) =>
+                      setValue('locationId', value === 'none' ? undefined : value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Standort auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Kein Standort</SelectItem>
+                      {locations.map((loc) => (
+                        <SelectItem key={loc.id} value={loc.id}>
+                          {loc.buildingName}
+                          {loc.roomNumber && ` - ${loc.roomNumber}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <Label htmlFor="meetingPoint">Treffpunkt</Label>
+                <Input
+                  id="meetingPoint"
+                  {...register('meetingPoint')}
+                  placeholder="z.B. Foyer des Hauptgebäudes"
+                />
+                {errors.meetingPoint && (
+                  <p className="text-sm text-red-500">{errors.meetingPoint.message}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 3: Studiengänge + Dozierende */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Section 5: Studiengänge */}
+          <Card className="border-l-4 border-l-[#9333ea]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Studiengänge</CardTitle>
+              <CardDescription className="text-xs">
+                Welche Studiengänge werden bei dieser Veranstaltung vorgestellt?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MultiSelect
+                options={studyProgramOptions}
+                value={watch('studyProgramIds') || []}
+                onChange={(value) => setValue('studyProgramIds', value)}
+                placeholder={
+                  watchIsCrossProgram
+                    ? 'Studiengangsübergreifend (alle)'
+                    : 'Studiengänge auswählen...'
+                }
+                searchPlaceholder="Studiengang suchen..."
+                emptyText="Keine Studiengänge gefunden"
+                disabled={watchIsCrossProgram}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Section 6: Dozierende */}
+          <Card className="border-l-4 border-l-[#22c55e]">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>Dozierende</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendLecturer({
+                      firstName: '',
+                      lastName: '',
+                      title: '',
+                      email: '',
+                    })
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Dozent hinzufügen
+                </Button>
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Wer hält die Veranstaltung oder führt durch das Programm?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {lecturerFields.length === 0 ? (
+                <p className="text-sm text-gray-500">Keine Dozenten hinzugefügt</p>
+              ) : (
+                lecturerFields.map((field, index) => (
+                  <div key={field.id} className="border rounded-lg p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">Dozent {index + 1}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeLecturer(index)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>
+                          Vorname <span className="text-red-500">*</span>
+                        </Label>
+                        <Input {...register(`lecturers.${index}.firstName`)} placeholder="Max" />
+                        {errors.lecturers?.[index]?.firstName && (
+                          <p className="text-sm text-red-500">
+                            {errors.lecturers[index].firstName?.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>
+                          Nachname <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          {...register(`lecturers.${index}.lastName`)}
+                          placeholder="Mustermann"
+                        />
+                        {errors.lecturers?.[index]?.lastName && (
+                          <p className="text-sm text-red-500">
+                            {errors.lecturers[index].lastName?.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>E-Mail</Label>
+                        <Input
+                          type="email"
+                          {...register(`lecturers.${index}.email`)}
+                          placeholder="max.mustermann@uni.de"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Zugehörigkeit</Label>
+                        <Select
+                          value={watch(`lecturers.${index}.affiliation`) || ''}
+                          onValueChange={(value) =>
+                            setValue(
+                              `lecturers.${index}.affiliation`,
+                              value as 'UNI' | 'HOCHSCHULE' | 'EXTERN'
+                            )
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Wählen..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="UNI">Universität</SelectItem>
+                            <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
+                            <SelectItem value="EXTERN">Extern</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 4: Foto & Zusätzliches (full width) */}
+        <Card className="border-l-4 border-l-[#f59e0b]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Veranstaltungsinfo</CardTitle>
-            <CardDescription className="text-xs">
-              Titel, Typ und Beschreibung der Veranstaltung
-            </CardDescription>
+            <CardTitle className="text-base">Foto & Zusätzliches</CardTitle>
+            <CardDescription className="text-xs">Weitere Details und Medien</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="title">
-                Titel <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="Name der Veranstaltung"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
-              <p className="text-xs text-gray-500">{watch('title')?.length || 0}/200 Zeichen</p>
-            </div>
+            <ImageUpload
+              value={watch('photoUrl') || ''}
+              onChange={(url) => setValue('photoUrl', url)}
+            />
 
             <div className="space-y-1.5">
-              <Label htmlFor="description">Beschreibung</Label>
+              <Label htmlFor="additionalInfo">Zusätzliche Hinweise</Label>
               <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="Ausführliche Beschreibung der Veranstaltung..."
+                id="additionalInfo"
+                {...register('additionalInfo')}
+                placeholder="Weitere wichtige Informationen für Besucher..."
                 rows={3}
-                className={errors.description ? 'border-red-500' : ''}
               />
-              {errors.description && (
-                <p className="text-sm text-red-500">{errors.description.message}</p>
+              {errors.additionalInfo && (
+                <p className="text-sm text-red-500">{errors.additionalInfo.message}</p>
               )}
               <p className="text-xs text-gray-500">
-                {watch('description')?.length || 0}/5000 Zeichen
+                {watch('additionalInfo')?.length || 0}/2000 Zeichen
               </p>
             </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="eventType">
-                  Veranstaltungstyp <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={watch('eventType')}
-                  onValueChange={(value) =>
-                    setValue('eventType', value as EventFormValues['eventType'])
-                  }
-                >
-                  <SelectTrigger className={errors.eventType ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Typ auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(eventTypeLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.eventType && (
-                  <p className="text-sm text-red-500">{errors.eventType.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="institution">
-                  Institution <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={watch('institution')}
-                  onValueChange={(value) =>
-                    setValue('institution', value as EventFormValues['institution'])
-                  }
-                >
-                  <SelectTrigger className={errors.institution ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Institution auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(institutionLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.institution && (
-                  <p className="text-sm text-red-500">{errors.institution.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isCrossProgram"
-                checked={watch('isCrossProgram')}
-                onCheckedChange={(checked) => setValue('isCrossProgram', checked as boolean)}
-              />
-              <Label htmlFor="isCrossProgram">Studiengangsübergreifend</Label>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 2: Datum & Uhrzeit + Ort */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Section 3: Datum & Uhrzeit */}
-        <Card className="border-l-4 border-l-[#FBB900]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Datum & Uhrzeit</CardTitle>
-            <CardDescription className="text-xs">
-              Wann findet die Veranstaltung statt?
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="eventDate">
-                Datum <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="eventDate"
-                type="date"
-                value={dateStr}
-                onChange={(e) => setDateStr(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <TimeGridPicker value={startTime} onChange={setStartTime} label="Beginn" required />
-              <TimeGridPicker value={endTime} onChange={setEndTime} label="Ende" required />
-            </div>
-            {dateError && (
-              <div className="rounded-lg bg-red-50 p-3 text-red-700">
-                <p className="text-sm font-medium">{dateError}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
 
-        {/* Section 4: Ort */}
-        <Card className="border-l-4 border-l-[#465765]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Ort</CardTitle>
-            <CardDescription className="text-xs">
-              Wo findet die Veranstaltung statt?
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <BuildingRoomSelect
-              buildingId={watch('buildingId') || ''}
-              roomId={watch('roomId') || ''}
-              onBuildingChange={(id) => setValue('buildingId', id)}
-              onRoomChange={(id) => setValue('roomId', id)}
-            />
-
-            <div className="space-y-1.5">
-              <Label htmlFor="locationHint">Ortshinweis</Label>
-              <Input
-                id="locationHint"
-                {...register('locationHint')}
-                placeholder="z.B. Eingang unter der Treppe"
-                className={errors.locationHint ? 'border-red-500' : ''}
+        {/* Info Markets (for INFOSTAND type) */}
+        {watchEventType === 'INFOSTAND' && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Infomärkte</CardTitle>
+              <CardDescription className="text-xs">
+                An welchen Infomärkten nimmt dieser Stand teil?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MultiSelect
+                options={infoMarketOptions}
+                value={watch('infoMarketIds') || []}
+                onChange={(value) => setValue('infoMarketIds', value)}
+                placeholder="Infomärkte auswählen..."
               />
-              {errors.locationHint && (
-                <p className="text-sm text-red-500">{errors.locationHint.message}</p>
-              )}
-            </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="locationType">
-                Ortstyp <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={watch('locationType')}
-                onValueChange={(value) =>
-                  setValue('locationType', value as EventFormValues['locationType'])
-                }
-              >
-                <SelectTrigger className={errors.locationType ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Ortstyp auswählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(locationTypeLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.locationType && (
-                <p className="text-sm text-red-500">{errors.locationType.message}</p>
-              )}
-            </div>
-
-            {watchLocationType === 'OTHER' && (
-              <div className="space-y-1.5">
-                <Label htmlFor="locationId">Standort</Label>
-                <Select
-                  value={watch('locationId') || 'none'}
-                  onValueChange={(value) =>
-                    setValue('locationId', value === 'none' ? undefined : value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Standort auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Kein Standort</SelectItem>
-                    {locations.map((loc) => (
-                      <SelectItem key={loc.id} value={loc.id}>
-                        {loc.buildingName}
-                        {loc.roomNumber && ` - ${loc.roomNumber}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="meetingPoint">Treffpunkt</Label>
-              <Input
-                id="meetingPoint"
-                {...register('meetingPoint')}
-                placeholder="z.B. Foyer des Hauptgebäudes"
-              />
-              {errors.meetingPoint && (
-                <p className="text-sm text-red-500">{errors.meetingPoint.message}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 3: Studiengänge + Dozierende */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Section 5: Studiengänge */}
-        <Card className="border-l-4 border-l-[#9333ea]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Studiengänge</CardTitle>
-            <CardDescription className="text-xs">
-              Welche Studiengänge werden bei dieser Veranstaltung vorgestellt?
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MultiSelect
-              options={studyProgramOptions}
-              value={watch('studyProgramIds') || []}
-              onChange={(value) => setValue('studyProgramIds', value)}
-              placeholder={
-                watchIsCrossProgram
-                  ? 'Studiengangsübergreifend (alle)'
-                  : 'Studiengänge auswählen...'
-              }
-              searchPlaceholder="Studiengang suchen..."
-              emptyText="Keine Studiengänge gefunden"
-              disabled={watchIsCrossProgram}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Section 6: Dozierende */}
-        <Card className="border-l-4 border-l-[#22c55e]">
+        {/* Organizers (kept as-is) */}
+        <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between text-base">
-              <span>Dozierende</span>
+              <span>Ansprechpartner (intern)</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  appendLecturer({
-                    firstName: '',
-                    lastName: '',
-                    title: '',
+                  appendOrganizer({
                     email: '',
+                    phone: '',
+                    internalOnly: true,
                   })
                 }
               >
                 <Plus className="mr-1 h-4 w-4" />
-                Dozent hinzufügen
+                Ansprechpartner hinzufügen
               </Button>
             </CardTitle>
             <CardDescription className="text-xs">
-              Wer hält die Veranstaltung oder führt durch das Programm?
+              Interne Kontaktpersonen für die Organisation
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {lecturerFields.length === 0 ? (
-              <p className="text-sm text-gray-500">Keine Dozenten hinzugefügt</p>
+            {organizerFields.length === 0 ? (
+              <p className="text-sm text-gray-500">Keine Ansprechpartner hinzugefügt</p>
             ) : (
-              lecturerFields.map((field, index) => (
+              organizerFields.map((field, index) => (
                 <div key={field.id} className="border rounded-lg p-3 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">Dozent {index + 1}</span>
+                      <Building className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm font-medium">Ansprechpartner {index + 1}</span>
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeLecturer(index)}
+                      onClick={() => removeOrganizer(index)}
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className="space-y-1.5">
-                      <Label>
-                        Vorname <span className="text-red-500">*</span>
+                      <Label className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        E-Mail <span className="text-red-500">*</span>
                       </Label>
-                      <Input {...register(`lecturers.${index}.firstName`)} placeholder="Max" />
-                      {errors.lecturers?.[index]?.firstName && (
-                        <p className="text-sm text-red-500">
-                          {errors.lecturers[index].firstName?.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>
-                        Nachname <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        {...register(`lecturers.${index}.lastName`)}
-                        placeholder="Mustermann"
-                      />
-                      {errors.lecturers?.[index]?.lastName && (
-                        <p className="text-sm text-red-500">
-                          {errors.lecturers[index].lastName?.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label>E-Mail</Label>
                       <Input
                         type="email"
-                        {...register(`lecturers.${index}.email`)}
-                        placeholder="max.mustermann@uni.de"
+                        {...register(`organizers.${index}.email`)}
+                        placeholder="kontakt@zsb.de"
                       />
+                      {errors.organizers?.[index]?.email && (
+                        <p className="text-sm text-red-500">
+                          {errors.organizers[index].email?.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Zugehörigkeit</Label>
-                      <Select
-                        value={watch(`lecturers.${index}.affiliation`) || ''}
-                        onValueChange={(value) =>
-                          setValue(
-                            `lecturers.${index}.affiliation`,
-                            value as 'UNI' | 'HOCHSCHULE' | 'EXTERN'
-                          )
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Wählen..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="UNI">Universität</SelectItem>
-                          <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
-                          <SelectItem value="EXTERN">Extern</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        Telefon
+                      </Label>
+                      <Input
+                        {...register(`organizers.${index}.phone`)}
+                        placeholder="+49 541 123456"
+                      />
+                    </div>
+                    <div className="space-y-1.5 flex items-end">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`organizers.${index}.internalOnly`}
+                          checked={watch(`organizers.${index}.internalOnly`)}
+                          onCheckedChange={(checked) =>
+                            setValue(`organizers.${index}.internalOnly`, checked as boolean)
+                          }
+                        />
+                        <Label htmlFor={`organizers.${index}.internalOnly`}>
+                          Nur intern sichtbar
+                        </Label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -658,161 +812,22 @@ export function EventForm({ initialData, onSubmit, isSubmitting = false, isAdmin
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Row 4: Foto & Zusätzliches (full width) */}
-      <Card className="border-l-4 border-l-[#f59e0b]">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Foto & Zusätzliches</CardTitle>
-          <CardDescription className="text-xs">Weitere Details und Medien</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <ImageUpload
-            value={watch('photoUrl') || ''}
-            onChange={(url) => setValue('photoUrl', url)}
-          />
-
-          <div className="space-y-1.5">
-            <Label htmlFor="additionalInfo">Zusätzliche Hinweise</Label>
-            <Textarea
-              id="additionalInfo"
-              {...register('additionalInfo')}
-              placeholder="Weitere wichtige Informationen für Besucher..."
-              rows={3}
-            />
-            {errors.additionalInfo && (
-              <p className="text-sm text-red-500">{errors.additionalInfo.message}</p>
-            )}
-            <p className="text-xs text-gray-500">
-              {watch('additionalInfo')?.length || 0}/2000 Zeichen
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Info Markets (for INFOSTAND type) */}
-      {watchEventType === 'INFOSTAND' && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Infomärkte</CardTitle>
-            <CardDescription className="text-xs">
-              An welchen Infomärkten nimmt dieser Stand teil?
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MultiSelect
-              options={infoMarketOptions}
-              value={watch('infoMarketIds') || []}
-              onChange={(value) => setValue('infoMarketIds', value)}
-              placeholder="Infomärkte auswählen..."
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Organizers (kept as-is) */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center justify-between text-base">
-            <span>Ansprechpartner (intern)</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                appendOrganizer({
-                  email: '',
-                  phone: '',
-                  internalOnly: true,
-                })
-              }
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Ansprechpartner hinzufügen
-            </Button>
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Interne Kontaktpersonen für die Organisation
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {organizerFields.length === 0 ? (
-            <p className="text-sm text-gray-500">Keine Ansprechpartner hinzugefügt</p>
-          ) : (
-            organizerFields.map((field, index) => (
-              <div key={field.id} className="border rounded-lg p-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium">Ansprechpartner {index + 1}</span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeOrganizer(index)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      E-Mail <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="email"
-                      {...register(`organizers.${index}.email`)}
-                      placeholder="kontakt@zsb.de"
-                    />
-                    {errors.organizers?.[index]?.email && (
-                      <p className="text-sm text-red-500">
-                        {errors.organizers[index].email?.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      Telefon
-                    </Label>
-                    <Input
-                      {...register(`organizers.${index}.phone`)}
-                      placeholder="+49 541 123456"
-                    />
-                  </div>
-                  <div className="space-y-1.5 flex items-end">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`organizers.${index}.internalOnly`}
-                        checked={watch(`organizers.${index}.internalOnly`)}
-                        onCheckedChange={(checked) =>
-                          setValue(`organizers.${index}.internalOnly`, checked as boolean)
-                        }
-                      />
-                      <Label htmlFor={`organizers.${index}.internalOnly`}>
-                        Nur intern sichtbar
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Submit */}
-      <div className="pt-2">
-        <Button type="submit" variant="uni" disabled={isSubmitting || isLocked} className="w-full md:w-auto">
-          {isSubmitting
-            ? 'Speichern...'
-            : initialData?.id
-              ? 'Veranstaltung aktualisieren'
-              : 'Veranstaltung speichern'}
-        </Button>
-      </div>
+        {/* Submit */}
+        <div className="pt-2">
+          <Button
+            type="submit"
+            variant="uni"
+            disabled={isSubmitting || isLocked}
+            className="w-full md:w-auto"
+          >
+            {isSubmitting
+              ? 'Speichern...'
+              : initialData?.id
+                ? 'Veranstaltung aktualisieren'
+                : 'Veranstaltung speichern'}
+          </Button>
+        </div>
       </fieldset>
     </form>
   )

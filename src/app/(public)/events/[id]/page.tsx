@@ -376,7 +376,11 @@ export default function EventDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {event.studyPrograms.map((program) => {
                     const badge = (
-                      <Badge key={program.id} variant="outline" className={cn("text-sm", program.url && "hover:bg-accent cursor-pointer")}>
+                      <Badge
+                        key={program.id}
+                        variant="outline"
+                        className={cn('text-sm', program.url && 'hover:bg-accent cursor-pointer')}
+                      >
                         {program.name}
                         <span
                           className={cn(
@@ -390,10 +394,17 @@ export default function EventDetailPage() {
                       </Badge>
                     )
                     return program.url ? (
-                      <a key={program.id} href={program.url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        key={program.id}
+                        href={program.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         {badge}
                       </a>
-                    ) : badge
+                    ) : (
+                      badge
+                    )
                   })}
                 </div>
               </CardContent>

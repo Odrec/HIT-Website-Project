@@ -78,9 +78,7 @@ export function HelpLayout({ children, title, tocEntries, currentRole }: HelpLay
           </div>
 
           {/* Rendered markdown content */}
-          <article className="max-w-none">
-            {children}
-          </article>
+          <article className="max-w-none">{children}</article>
         </div>
       </div>
     </div>

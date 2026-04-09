@@ -95,7 +95,10 @@ export async function POST(request: NextRequest) {
       const { isDeadlinePassed } = await import('@/services/settings-service')
       if (await isDeadlinePassed()) {
         return NextResponse.json(
-          { error: 'Anmeldefrist abgelaufen. Neue Veranstaltungen können nicht mehr eingereicht werden.' },
+          {
+            error:
+              'Anmeldefrist abgelaufen. Neue Veranstaltungen können nicht mehr eingereicht werden.',
+          },
           { status: 403 }
         )
       }

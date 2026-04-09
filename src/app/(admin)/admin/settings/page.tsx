@@ -205,7 +205,8 @@ export default function SettingsPage() {
             Anmeldefrist
           </CardTitle>
           <CardDescription>
-            Nach Ablauf der Frist können Veranstalter keine Veranstaltungen mehr erstellen oder bearbeiten
+            Nach Ablauf der Frist können Veranstalter keine Veranstaltungen mehr erstellen oder
+            bearbeiten
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

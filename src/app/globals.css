@@ -5,9 +5,9 @@
 @layer base {
   :root {
     /* HIT Brand Colors as CSS variables */
-    --hit-uni-primary: #AC0634;
-    --hit-hs-primary: #009EE3;
-    --hit-accent: #00A651;
+    --hit-uni-primary: #ac0634;
+    --hit-hs-primary: #009ee3;
+    --hit-accent: #00a651;
 
     /* Light theme */
     --background: 0 0% 100%;
@@ -61,7 +61,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 }
 
@@ -70,11 +72,11 @@
   .text-gradient-hit {
     @apply bg-gradient-to-r from-hit-uni-500 to-hit-hs-500 bg-clip-text text-transparent;
   }
-  
+
   .border-gradient-hit {
-    border-image: linear-gradient(135deg, #AC0634 0%, #009EE3 100%) 1;
+    border-image: linear-gradient(135deg, #ac0634 0%, #009ee3 100%) 1;
   }
-  
+
   .focus-ring-hit {
     @apply focus:outline-none focus:ring-2 focus:ring-hit-uni-500 focus:ring-offset-2;
   }

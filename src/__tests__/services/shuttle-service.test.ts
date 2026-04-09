@@ -122,9 +122,7 @@ describe('shuttle-service', () => {
     })
 
     it('filters out buses without positions', async () => {
-      mockFindMany.mockResolvedValue([
-        { id: 'bus1', number: 1, name: 'Bus 1', position: null },
-      ])
+      mockFindMany.mockResolvedValue([{ id: 'bus1', number: 1, name: 'Bus 1', position: null }])
 
       const result = await getAllBusPositions()
       expect(result).toHaveLength(0)

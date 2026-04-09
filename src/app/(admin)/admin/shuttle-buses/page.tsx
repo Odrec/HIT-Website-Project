@@ -165,7 +165,8 @@ export default function ShuttleBusesPage() {
 
               {bus.position && (
                 <p className="mt-3 text-sm text-hit-gray-500">
-                  Letzte Position: {bus.position.latitude.toFixed(5)}, {bus.position.longitude.toFixed(5)}
+                  Letzte Position: {bus.position.latitude.toFixed(5)},{' '}
+                  {bus.position.longitude.toFixed(5)}
                   {' — '}
                   {new Date(bus.position.updatedAt).toLocaleTimeString('de-DE')}
                 </p>
@@ -195,11 +196,7 @@ export default function ShuttleBusesPage() {
                   Neuer Token
                 </Button>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleBus(bus.id, !bus.active)}
-                >
+                <Button variant="outline" size="sm" onClick={() => toggleBus(bus.id, !bus.active)}>
                   {bus.active ? (
                     <>
                       <PowerOff className="h-4 w-4 mr-1" />

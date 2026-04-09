@@ -314,7 +314,8 @@ export async function GET() {
       if (clusterData.icon) {
         try {
           const iconPath = path.join(clusterIconDir, clusterData.icon)
-          clusterIconMap[clusterName] = `data:image/svg+xml;base64,${readFileSync(iconPath).toString('base64')}`
+          clusterIconMap[clusterName] =
+            `data:image/svg+xml;base64,${readFileSync(iconPath).toString('base64')}`
         } catch {
           // Icon file not found — skip
         }

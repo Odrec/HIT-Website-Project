@@ -42,9 +42,13 @@ export default function HilfePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {roles.map((role) => (
           <Link key={role.slug} href={`/hilfe/${role.slug}`}>
-            <Card className={`h-full text-center transition-colors border-2 border-transparent ${role.hoverColor}`}>
+            <Card
+              className={`h-full text-center transition-colors border-2 border-transparent ${role.hoverColor}`}
+            >
               <CardContent className="pt-8 pb-6 flex flex-col items-center gap-4">
-                <div className={`flex h-14 w-14 items-center justify-center rounded-full ${role.color} text-white`}>
+                <div
+                  className={`flex h-14 w-14 items-center justify-center rounded-full ${role.color} text-white`}
+                >
                   <role.icon className="h-7 w-7" />
                 </div>
                 <div>

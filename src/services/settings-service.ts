@@ -41,10 +41,14 @@ export async function updateSettings(data: {
       deadlineEnabled: data.deadlineEnabled ?? true,
     },
     update: {
-      hitDate: data.hitDate !== undefined ? (data.hitDate ? new Date(data.hitDate) : null) : undefined,
-      submissionDeadline: data.submissionDeadline !== undefined
-        ? (data.submissionDeadline ? new Date(data.submissionDeadline) : null)
-        : undefined,
+      hitDate:
+        data.hitDate !== undefined ? (data.hitDate ? new Date(data.hitDate) : null) : undefined,
+      submissionDeadline:
+        data.submissionDeadline !== undefined
+          ? data.submissionDeadline
+            ? new Date(data.submissionDeadline)
+            : null
+          : undefined,
       deadlineEnabled: data.deadlineEnabled !== undefined ? data.deadlineEnabled : undefined,
     },
   })

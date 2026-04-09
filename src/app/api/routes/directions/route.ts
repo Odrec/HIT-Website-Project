@@ -9,20 +9,14 @@ export async function GET(request: Request) {
   const to = searchParams.get('to')
 
   if (!from || !to) {
-    return NextResponse.json(
-      { error: 'Missing required params: from, to' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Missing required params: from, to' }, { status: 400 })
   }
 
   const fromBuilding = findBuilding(from)
   const toBuilding = findBuilding(to)
 
   if (!fromBuilding || !toBuilding) {
-    return NextResponse.json(
-      { error: 'Building not found' },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'Building not found' }, { status: 404 })
   }
 
   // Check cache first
@@ -76,9 +70,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Google Directions API error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch directions' },
-      { status: 502 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch directions' }, { status: 502 })
   }
 }

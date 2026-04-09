@@ -444,7 +444,10 @@ function EventsContent() {
 function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: ViewMode }) {
   const viewMode = rawViewMode === 'calendar' ? 'list' : rawViewMode
   // Build cluster -> events map via study programs
-  const clusterMap = new Map<string, { name: string; icon: string | null; events: Map<string, Event> }>()
+  const clusterMap = new Map<
+    string,
+    { name: string; icon: string | null; events: Map<string, Event> }
+  >()
   const unclustered = new Map<string, Event>()
   const crossProgram = new Map<string, Event>()
 
@@ -462,7 +465,11 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
       if (sp.cluster) {
         const key = sp.cluster.id
         if (!clusterMap.has(key)) {
-          clusterMap.set(key, { name: sp.cluster.name, icon: sp.cluster.icon ?? null, events: new Map() })
+          clusterMap.set(key, {
+            name: sp.cluster.name,
+            icon: sp.cluster.icon ?? null,
+            events: new Map(),
+          })
         }
         clusterMap.get(key)!.events.set(event.id, event)
         addedToCluster = true

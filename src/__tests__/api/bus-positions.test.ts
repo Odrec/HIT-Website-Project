@@ -8,7 +8,11 @@ vi.mock('@/services/shuttle-service', () => ({
 }))
 
 import { GET, POST } from '@/app/api/bus-positions/route'
-import { validateGuideToken, updateBusPosition, getAllBusPositions } from '@/services/shuttle-service'
+import {
+  validateGuideToken,
+  updateBusPosition,
+  getAllBusPositions,
+} from '@/services/shuttle-service'
 
 const mockValidateGuideToken = vi.mocked(validateGuideToken)
 const mockUpdateBusPosition = vi.mocked(updateBusPosition)
@@ -48,14 +52,19 @@ describe('Bus Positions API', () => {
 
   describe('POST /api/bus-positions', () => {
     it('updates position with valid token', async () => {
-      mockValidateGuideToken.mockResolvedValue({ id: 'bus1', number: 1, name: 'Bus 1', active: true })
+      mockValidateGuideToken.mockResolvedValue({
+        id: 'bus1',
+        number: 1,
+        name: 'Bus 1',
+        active: true,
+      })
       mockUpdateBusPosition.mockResolvedValue(undefined)
 
       const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer valid-token',
+          Authorization: 'Bearer valid-token',
         },
         body: JSON.stringify({ latitude: 52.27, longitude: 8.04 }),
       })
@@ -88,7 +97,7 @@ describe('Bus Positions API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer bad-token',
+          Authorization: 'Bearer bad-token',
         },
         body: JSON.stringify({ latitude: 52.27, longitude: 8.04 }),
       })
@@ -98,13 +107,18 @@ describe('Bus Positions API', () => {
     })
 
     it('returns 400 with missing coordinates', async () => {
-      mockValidateGuideToken.mockResolvedValue({ id: 'bus1', number: 1, name: 'Bus 1', active: true })
+      mockValidateGuideToken.mockResolvedValue({
+        id: 'bus1',
+        number: 1,
+        name: 'Bus 1',
+        active: true,
+      })
 
       const request = new NextRequest('http://localhost/api/bus-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer valid-token',
+          Authorization: 'Bearer valid-token',
         },
         body: JSON.stringify({ latitude: 52.27 }),
       })

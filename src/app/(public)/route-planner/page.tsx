@@ -319,7 +319,9 @@ export default function RoutePlannerPage() {
                   {/* Route filter info */}
                   {selectedLegIndex !== null && (
                     <div className="flex items-center justify-between bg-blue-50 text-blue-800 text-sm px-3 py-2 rounded-lg">
-                      <span>Nur Strecke {selectedLegIndex + 1} → {selectedLegIndex + 2} wird angezeigt</span>
+                      <span>
+                        Nur Strecke {selectedLegIndex + 1} → {selectedLegIndex + 2} wird angezeigt
+                      </span>
                       <button
                         onClick={() => setSelectedLegIndex(null)}
                         className="ml-2 p-0.5 rounded hover:bg-blue-200"
@@ -661,9 +663,7 @@ export default function RoutePlannerPage() {
                   • Der Weg zwischen Schloss Campus und Westerberg/Caprivi dauert zu Fuß ca. 25-30
                   Minuten
                 </li>
-                <li>
-                  • Zwischen den Standorten empfehlen wir den Bus zu nutzen (Linie X)
-                </li>
+                <li>• Zwischen den Standorten empfehlen wir den Bus zu nutzen (Linie X)</li>
                 <li>
                   • Achten Sie auf orangene/rote Warnungen - diese zeigen kritische Zeitfenster an
                 </li>

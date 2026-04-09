@@ -115,7 +115,9 @@ export default function NewEventPage() {
                   <dt className="font-medium">Typ:</dt>
                   <dd>{EVENT_TYPE_LABELS[createdEvent.eventType] ?? createdEvent.eventType}</dd>
                   <dt className="font-medium">Institution:</dt>
-                  <dd>{INSTITUTION_LABELS[createdEvent.institution] ?? createdEvent.institution}</dd>
+                  <dd>
+                    {INSTITUTION_LABELS[createdEvent.institution] ?? createdEvent.institution}
+                  </dd>
                   <dt className="font-medium">Beginn:</dt>
                   <dd>{formatTime(createdEvent.timeStart)}</dd>
                   <dt className="font-medium">Ende:</dt>
@@ -124,9 +126,7 @@ export default function NewEventPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button onClick={() => router.push('/admin/events')}>
-                  OK
-                </Button>
+                <Button onClick={() => router.push('/admin/events')}>OK</Button>
                 <Button
                   variant="outline"
                   onClick={() => router.push(`/admin/events/${createdEvent.id}`)}
@@ -168,7 +168,11 @@ export default function NewEventPage() {
       )}
 
       {/* Form */}
-      <EventForm onSubmit={handleSubmit} isSubmitting={isSubmitting} isAdmin={session?.user?.role === 'ADMIN'} />
+      <EventForm
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        isAdmin={session?.user?.role === 'ADMIN'}
+      />
     </div>
   )
 }

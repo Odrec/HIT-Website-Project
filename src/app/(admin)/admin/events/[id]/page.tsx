@@ -221,7 +221,12 @@ export default function EditEventPage() {
       )}
 
       {/* Form */}
-      <EventForm initialData={initialData} onSubmit={handleSubmit} isSubmitting={isSubmitting} isAdmin={session?.user?.role === 'ADMIN'} />
+      <EventForm
+        initialData={initialData}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        isAdmin={session?.user?.role === 'ADMIN'}
+      />
     </div>
   )
 }

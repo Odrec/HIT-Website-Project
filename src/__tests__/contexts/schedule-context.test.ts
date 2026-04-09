@@ -21,10 +21,7 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
       const event2 = items[j]
 
       // Skip INFOSTAND events — they're all-day and shouldn't create conflicts
-      if (
-        event1.event.eventType === 'INFOSTAND' ||
-        event2.event.eventType === 'INFOSTAND'
-      ) {
+      if (event1.event.eventType === 'INFOSTAND' || event2.event.eventType === 'INFOSTAND') {
         continue
       }
 
@@ -60,11 +57,7 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
 
 // Helper to create a minimal mock ScheduleEvent
 let idCounter = 0
-function makeEvent(
-  eventType: EventType,
-  timeStart: string,
-  timeEnd: string
-): ScheduleEvent {
+function makeEvent(eventType: EventType, timeStart: string, timeEnd: string): ScheduleEvent {
   const id = `event-${++idCounter}`
   const event: Event = {
     id,

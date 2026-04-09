@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateGuideToken, updateBusPosition, getAllBusPositions } from '@/services/shuttle-service'
+import {
+  validateGuideToken,
+  updateBusPosition,
+  getAllBusPositions,
+} from '@/services/shuttle-service'
 import { SHUTTLE_STOPS } from '@/types/shuttle'
 
 export async function GET(_request: NextRequest) {

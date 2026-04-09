@@ -297,7 +297,12 @@ export function detectChanges(oldEvent: EmailEvent, newEvent: EmailEvent): Chang
   const changes: Change[] = []
 
   // Simple string/enum fields
-  const stringFields: (keyof EmailEvent & string)[] = ['title', 'description', 'eventType', 'institution']
+  const stringFields: (keyof EmailEvent & string)[] = [
+    'title',
+    'description',
+    'eventType',
+    'institution',
+  ]
   for (const field of stringFields) {
     if (oldEvent[field] !== newEvent[field]) {
       changes.push({ field, oldValue: oldEvent[field], newValue: newEvent[field] })

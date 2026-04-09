@@ -71,10 +71,7 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
       const event2 = items[j]
 
       // Skip INFOSTAND events — they're all-day and shouldn't create conflicts
-      if (
-        event1.event.eventType === 'INFOSTAND' ||
-        event2.event.eventType === 'INFOSTAND'
-      ) {
+      if (event1.event.eventType === 'INFOSTAND' || event2.event.eventType === 'INFOSTAND') {
         continue
       }
 

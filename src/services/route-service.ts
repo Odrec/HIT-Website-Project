@@ -25,7 +25,11 @@ export async function getDirections(
   toBuildingId: string,
   fromCoords?: Coordinates,
   toCoords?: Coordinates
-): Promise<{ distanceMeters: number; durationSeconds: number; waypoints: [number, number][] } | null> {
+): Promise<{
+  distanceMeters: number
+  durationSeconds: number
+  waypoints: [number, number][]
+} | null> {
   if (fromBuildingId === toBuildingId) {
     return { distanceMeters: 0, durationSeconds: 0, waypoints: [] }
   }
@@ -94,7 +98,10 @@ export async function getDirections(
  * Adjust a base walking duration by speed setting.
  * Google returns time for ~5 km/h average walker (our "normal").
  */
-export function adjustWalkingTime(baseDurationSeconds: number, speed: WalkingSpeed = 'normal'): number {
+export function adjustWalkingTime(
+  baseDurationSeconds: number,
+  speed: WalkingSpeed = 'normal'
+): number {
   const multipliers: Record<WalkingSpeed, number> = {
     slow: 1.5,
     normal: 1.0,
@@ -797,7 +804,8 @@ export async function analyzeTravelTimes(
     if (fromCoords && toCoords && eventFrom.timeEnd && eventTo.timeStart) {
       // Determine building IDs for cache lookup
       const fromBuildingId =
-        (eventFrom.location?.buildingName && findBuildingByName(eventFrom.location.buildingName)?.id) ||
+        (eventFrom.location?.buildingName &&
+          findBuildingByName(eventFrom.location.buildingName)?.id) ||
         `coord:${fromCoords.latitude},${fromCoords.longitude}`
       const toBuildingId =
         (eventTo.location?.buildingName && findBuildingByName(eventTo.location.buildingName)?.id) ||
@@ -941,7 +949,8 @@ export async function getSuggestedAlternatives(
       if (prevCoords) {
         // Determine building IDs for cache lookup
         const prevBuildingId =
-          (prevEvent.location.buildingName && findBuildingByName(prevEvent.location.buildingName)?.id) ||
+          (prevEvent.location.buildingName &&
+            findBuildingByName(prevEvent.location.buildingName)?.id) ||
           `coord:${prevCoords.latitude},${prevCoords.longitude}`
         const altBuildingId =
           (alt.location?.buildingName && findBuildingByName(alt.location.buildingName)?.id) ||

@@ -154,7 +154,9 @@ function GuideTrackingContent() {
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-          setError('Standortzugriff verweigert. Bitte erlauben Sie den Zugriff in den Browser-Einstellungen.')
+          setError(
+            'Standortzugriff verweigert. Bitte erlauben Sie den Zugriff in den Browser-Einstellungen.'
+          )
           setStatus('error')
         } else {
           setStatus('paused')
@@ -189,9 +191,12 @@ function GuideTrackingContent() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && status === 'active') {
         if ('wakeLock' in navigator) {
-          navigator.wakeLock.request('screen').then((lock) => {
-            wakeLockRef.current = lock
-          }).catch(() => {})
+          navigator.wakeLock
+            .request('screen')
+            .then((lock) => {
+              wakeLockRef.current = lock
+            })
+            .catch(() => {})
         }
         resetHeartbeat()
       }
@@ -281,11 +286,7 @@ function GuideTrackingContent() {
                 Tracking starten
               </Button>
             ) : (
-              <Button
-                onClick={stopTracking}
-                variant="destructive"
-                className="w-full h-16 text-lg"
-              >
+              <Button onClick={stopTracking} variant="destructive" className="w-full h-16 text-lg">
                 Tracking stoppen
               </Button>
             )}

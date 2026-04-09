@@ -373,7 +373,10 @@ function EventsListContent() {
                     </div>
                   </div>
                   {isOrganizer && deadlinePassed ? (
-                    <div className="flex items-center gap-1 text-gray-400 px-2" title="Anmeldefrist abgelaufen">
+                    <div
+                      className="flex items-center gap-1 text-gray-400 px-2"
+                      title="Anmeldefrist abgelaufen"
+                    >
                       <Lock className="h-4 w-4" />
                     </div>
                   ) : (
