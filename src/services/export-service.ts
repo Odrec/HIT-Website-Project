@@ -384,7 +384,7 @@ export const exportService = {
     ])
 
     const crossProgram: typeof events = []
-    const clustered: Record<string, typeof events> = {}
+    const clustered: Record<string, { icon: string | null; events: typeof events }> = {}
 
     for (const event of events) {
       if (event.isCrossProgram) {
@@ -392,28 +392,31 @@ export const exportService = {
         continue
       }
 
-      const clusterNames = new Set<string>()
+      const clusterEntries = new Map<string, string | null>()
       for (const esp of event.studyPrograms) {
-        const clusterName = esp.studyProgram.cluster?.name
-        clusterNames.add(clusterName ?? 'Ohne Cluster')
+        const cluster = esp.studyProgram.cluster
+        const clusterName = cluster?.name ?? 'Ohne Cluster'
+        if (!clusterEntries.has(clusterName)) {
+          clusterEntries.set(clusterName, cluster?.icon ?? null)
+        }
       }
-      if (clusterNames.size === 0) {
-        clusterNames.add('Ohne Cluster')
+      if (clusterEntries.size === 0) {
+        clusterEntries.set('Ohne Cluster', null)
       }
 
-      for (const name of clusterNames) {
-        if (!clustered[name]) clustered[name] = []
-        clustered[name].push(event)
+      for (const [name, icon] of clusterEntries) {
+        if (!clustered[name]) clustered[name] = { icon, events: [] }
+        clustered[name].events.push(event)
       }
     }
 
     // Sort within clusters
     for (const key of Object.keys(clustered)) {
-      clustered[key].sort((a, b) => a.title.localeCompare(b.title, 'de'))
+      clustered[key].events.sort((a, b) => a.title.localeCompare(b.title, 'de'))
     }
 
     // Sort cluster keys
-    const sortedClustered: Record<string, typeof events> = {}
+    const sortedClustered: Record<string, { icon: string | null; events: typeof events }> = {}
     for (const key of Object.keys(clustered).sort((a, b) => a.localeCompare(b, 'de'))) {
       sortedClustered[key] = clustered[key]
     }
