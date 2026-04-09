@@ -32,6 +32,7 @@ import {
   List,
   Map as MapIcon,
   ChevronRight,
+  X,
 } from 'lucide-react'
 import { HelpLink } from '@/components/help/HelpLink'
 
@@ -65,6 +66,7 @@ export default function RoutePlannerPage() {
   const [showBusLayer, setShowBusLayer] = useState(true)
   const [busPositions, setBusPositions] = useState<BusPositionResponse[]>([])
   const [shuttleStops, setShuttleStops] = useState<ShuttleStop[]>([])
+  const [selectedLegIndex, setSelectedLegIndex] = useState<number | null>(null)
 
   // Fetch buildings
   useEffect(() => {
@@ -314,6 +316,20 @@ export default function RoutePlannerPage() {
                     </div>
                   ) : null}
 
+                  {/* Route filter info */}
+                  {selectedLegIndex !== null && (
+                    <div className="flex items-center justify-between bg-blue-50 text-blue-800 text-sm px-3 py-2 rounded-lg">
+                      <span>Nur Strecke {selectedLegIndex + 1} → {selectedLegIndex + 2} wird angezeigt</span>
+                      <button
+                        onClick={() => setSelectedLegIndex(null)}
+                        className="ml-2 p-0.5 rounded hover:bg-blue-200"
+                        aria-label="Filter zurücksetzen"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Schedule events list */}
                   <div className="space-y-2">
                     {state.items
@@ -323,33 +339,52 @@ export default function RoutePlannerPage() {
                           new Date(a.event.timeStart!).getTime() -
                           new Date(b.event.timeStart!).getTime()
                       )
-                      .map((item, index) => (
-                        <div
-                          key={item.id}
-                          className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50"
-                        >
-                          <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{item.event.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                              {item.event.location && (
-                                <>
-                                  <span>•</span>
-                                  <MapPin className="h-3 w-3" />
-                                  {item.event.location.buildingName}
-                                </>
-                              )}
+                      .map((item, index, arr) => {
+                        const isLegStart = selectedLegIndex === index
+                        const isLegEnd = selectedLegIndex === index - 1
+                        const isSelected = isLegStart || isLegEnd
+                        // Clicking an event selects the leg departing from it (not available for last event)
+                        const canSelectLeg = index < arr.length - 1
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={`flex items-start gap-3 p-2 rounded-lg transition-colors ${
+                              isSelected
+                                ? 'bg-blue-100 ring-2 ring-blue-400'
+                                : canSelectLeg
+                                  ? 'hover:bg-muted/50 cursor-pointer'
+                                  : 'hover:bg-muted/50'
+                            }`}
+                            onClick={() => {
+                              if (!canSelectLeg) return
+                              setSelectedLegIndex(selectedLegIndex === index ? null : index)
+                            }}
+                            title={canSelectLeg ? 'Klicken um Strecke anzuzeigen' : undefined}
+                          >
+                            <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{item.event.title}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                                {item.event.location && (
+                                  <>
+                                    <span>•</span>
+                                    <MapPin className="h-3 w-3" />
+                                    {item.event.location.buildingName}
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                   </div>
 
                   <Separator />
@@ -434,6 +469,7 @@ export default function RoutePlannerPage() {
                     busPositions={showBusLayer ? busPositions : undefined}
                     shuttleStops={showBusLayer ? shuttleStops : undefined}
                     showBusLayer={showBusLayer}
+                    selectedLegIndex={selectedLegIndex}
                   />
                 )}
 

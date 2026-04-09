@@ -31,6 +31,7 @@ interface CampusMapProps {
   busPositions?: BusPositionResponse[]
   shuttleStops?: ShuttleStop[]
   showBusLayer?: boolean
+  selectedLegIndex?: number | null
 }
 
 // Default center (Osnabrück)
@@ -51,6 +52,7 @@ export default function CampusMap({
   busPositions = [],
   shuttleStops = [],
   showBusLayer = false,
+  selectedLegIndex = null,
 }: CampusMapProps) {
   const [isClient, setIsClient] = useState(false)
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
@@ -249,6 +251,9 @@ export default function CampusMap({
           {showRoute && routeLegs.length > 0 && (
             <>
               {routeLegs.map((leg, index) => {
+                // Hide legs that don't match the filter
+                if (selectedLegIndex !== null && selectedLegIndex !== undefined && index !== selectedLegIndex) return null
+
                 // Check if this leg has a warning
                 const analysis = travelAnalyses[index]
                 const hasWarning = analysis && analysis.status !== 'ok'
