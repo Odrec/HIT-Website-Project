@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { formatEventICalLocal } from '@/lib/event-time'
 
 interface CalendarEvent {
   title: string
@@ -14,14 +14,16 @@ interface CalendarEvent {
 }
 
 export function generateGoogleCalendarUrl(event: CalendarEvent): string {
-  const startStr = format(event.timeStart, "yyyyMMdd'T'HHmmss")
-  const endStr = format(event.timeEnd, "yyyyMMdd'T'HHmmss")
+  const startStr = formatEventICalLocal(event.timeStart)
+  const endStr = formatEventICalLocal(event.timeEnd)
 
   // Build most params via URLSearchParams for correct encoding, but inject the
   // dates value manually so the slash separator is NOT percent-encoded (%2F).
   const params = new URLSearchParams()
   params.set('action', 'TEMPLATE')
   params.set('text', event.title)
+  // Interpret the wall-clock dates in Europe/Berlin.
+  params.set('ctz', 'Europe/Berlin')
 
   if (event.building) {
     const locationParts = [event.building.name]

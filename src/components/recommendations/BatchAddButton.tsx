@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label'
 import { Plus, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import type { EventRecommendation, BatchAddResult } from '@/types/recommendations'
+import { formatEventTime } from '@/lib/event-time'
 
 interface BatchAddButtonProps {
   recommendations: EventRecommendation[]
@@ -154,11 +155,7 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{rec.event.title}</p>
                     <p className="text-xs text-gray-500">
-                      {rec.event.timeStart &&
-                        new Date(rec.event.timeStart).toLocaleTimeString('de-DE', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                      {rec.event.timeStart && formatEventTime(rec.event.timeStart)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

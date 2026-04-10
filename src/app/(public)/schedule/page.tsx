@@ -2,8 +2,16 @@
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { format, isSameDay, parseISO } from 'date-fns'
-import { de } from 'date-fns/locale'
+import {
+  formatEventTimeRange,
+  formatEventDateLong,
+  formatEventDateShort,
+  formatEventDateShortYear,
+  formatEventDateDMY,
+  formatEventDateKey,
+  formatEventICalLocal,
+  isSameEventDay,
+} from '@/lib/event-time'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -52,7 +60,9 @@ const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
 })
 
 // Fallback HIT date used until the settings fetch resolves
-const FALLBACK_HIT_DATE = new Date(2026, 10, 19) // Nov 19, 2026 in local time
+// Nov 19, 2026 as a wall-clock Date (00:00 UTC components represent the
+// Berlin day, for consistency with event times which are stored as wall-clock).
+const FALLBACK_HIT_DATE = new Date(Date.UTC(2026, 10, 19))
 
 function SchedulePageContent() {
   const searchParams = useSearchParams()
@@ -71,9 +81,10 @@ function SchedulePageContent() {
         if (response.ok) {
           const data = await response.json()
           if (data.hitDate) {
-            // Parse as local date to avoid timezone offset showing previous day
+            // Convert to wall-clock Date (UTC components) so it compares
+            // correctly against event times which are stored as wall-clock.
             const d = new Date(data.hitDate)
-            setSelectedDate(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+            setSelectedDate(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())))
           }
         }
       } catch (error) {
@@ -223,18 +234,21 @@ function SchedulePageContent() {
     fetchBuildings()
   }, [])
 
-  // Get unique dates from schedule
+  // Get unique dates from schedule (Berlin wall-clock days, represented as
+  // UTC-midnight Dates)
   const scheduleDates = useMemo(() => {
     const dates = new Set<string>()
     state.items.forEach((item) => {
       if (item.event.timeStart) {
-        const dateStr = format(new Date(item.event.timeStart), 'yyyy-MM-dd')
-        dates.add(dateStr)
+        dates.add(formatEventDateKey(item.event.timeStart))
       }
     })
     return Array.from(dates)
-      .map((d) => parseISO(d))
-      .sort((a, b) => a.getTime() - b.getTime())
+      .sort()
+      .map((key) => {
+        const [y, m, d] = key.split('-').map(Number)
+        return new Date(Date.UTC(y, m - 1, d))
+      })
   }, [state.items])
 
   // Auto-select the first date that has events
@@ -248,7 +262,7 @@ function SchedulePageContent() {
   const eventsForDate = useMemo(() => {
     return state.items.filter((item) => {
       if (!item.event.timeStart) return false
-      return isSameDay(new Date(item.event.timeStart), selectedDate)
+      return isSameEventDay(item.event.timeStart, selectedDate)
     })
   }, [state.items, selectedDate])
 
@@ -342,14 +356,22 @@ function SchedulePageContent() {
 
     state.items.forEach((item) => {
       if (item.event.timeStart && item.event.timeEnd) {
-        const startDate = new Date(item.event.timeStart)
-        const endDate = new Date(item.event.timeEnd)
+        const now = new Date()
+        const dtstamp =
+          now.getUTCFullYear().toString() +
+          (now.getUTCMonth() + 1).toString().padStart(2, '0') +
+          now.getUTCDate().toString().padStart(2, '0') +
+          'T' +
+          now.getUTCHours().toString().padStart(2, '0') +
+          now.getUTCMinutes().toString().padStart(2, '0') +
+          now.getUTCSeconds().toString().padStart(2, '0') +
+          'Z'
 
         ical += 'BEGIN:VEVENT\r\n'
         ical += `UID:${item.event.id}@hit-osnabrueck.de\r\n`
-        ical += `DTSTAMP:${format(new Date(), "yyyyMMdd'T'HHmmss'Z'")}\r\n`
-        ical += `DTSTART:${format(startDate, "yyyyMMdd'T'HHmmss")}\r\n`
-        ical += `DTEND:${format(endDate, "yyyyMMdd'T'HHmmss")}\r\n`
+        ical += `DTSTAMP:${dtstamp}\r\n`
+        ical += `DTSTART;TZID=Europe/Berlin:${formatEventICalLocal(item.event.timeStart)}\r\n`
+        ical += `DTEND;TZID=Europe/Berlin:${formatEventICalLocal(item.event.timeEnd)}\r\n`
         ical += `SUMMARY:${item.event.title}\r\n`
         if (item.event.description) {
           ical += `DESCRIPTION:${item.event.description.replace(/\n/g, '\\n')}\r\n`
@@ -487,18 +509,18 @@ function SchedulePageContent() {
                     scheduleDates.map((date) => {
                       const dateEvents = state.items.filter(
                         (item) =>
-                          item.event.timeStart && isSameDay(new Date(item.event.timeStart), date)
+                          item.event.timeStart && isSameEventDay(item.event.timeStart, date)
                       )
                       const hasConflicts = dateEvents.some((e) => conflictEventIds.has(e.eventId))
 
                       return (
                         <Button
                           key={date.toISOString()}
-                          variant={isSameDay(date, selectedDate) ? 'default' : 'outline'}
+                          variant={isSameEventDay(date, selectedDate) ? 'default' : 'outline'}
                           className="w-full justify-between"
                           onClick={() => setSelectedDate(date)}
                         >
-                          <span>{format(date, 'EEE, d. MMM', { locale: de })}</span>
+                          <span>{formatEventDateShort(date)}</span>
                           <div className="flex items-center gap-1">
                             <Badge variant="secondary" className="text-xs">
                               {dateEvents.length}
@@ -514,7 +536,7 @@ function SchedulePageContent() {
                       className="w-full"
                       onClick={() => setSelectedDate(selectedDate)}
                     >
-                      {format(selectedDate, 'EEE, d. MMM yyyy', { locale: de })}
+                      {formatEventDateShortYear(selectedDate)}
                     </Button>
                   )}
                 </div>
@@ -563,7 +585,7 @@ function SchedulePageContent() {
             {/* View toggle */}
             <div className="flex items-center justify-between mb-4 print:hidden">
               <h2 className="text-xl font-semibold">
-                {format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de })}
+                {formatEventDateLong(selectedDate)}
               </h2>
               <Tabs value={view} onValueChange={(v) => setView(v as 'timeline' | 'list')}>
                 <TabsList>
@@ -819,9 +841,7 @@ function SchedulePageContent() {
           <h2 className="text-xl font-bold m-0">Mein HIT 2026 Zeitplan</h2>
           <p className="text-sm text-gray-600 m-0">
             Hochschulinformationstag &mdash;{' '}
-            {selectedDate
-              ? format(selectedDate, 'd. MMMM yyyy', { locale: de })
-              : '19. November 2026'}
+            {selectedDate ? formatEventDateDMY(selectedDate) : '19. November 2026'}
           </p>
         </div>
         <table className="w-full border-collapse text-sm">
@@ -848,8 +868,9 @@ function SchedulePageContent() {
                   style={{ borderBottom: '1px solid #ddd' }}
                 >
                   <td className="py-2 px-2 whitespace-nowrap">
-                    {item.event.timeStart ? format(new Date(item.event.timeStart), 'HH:mm') : '—'}
-                    {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
+                    {item.event.timeStart
+                      ? formatEventTimeRange(item.event.timeStart, item.event.timeEnd)
+                      : '—'}
                   </td>
                   <td className="py-2 px-2 font-medium">{item.event.title}</td>
                   <td className="py-2 px-2 text-gray-600">

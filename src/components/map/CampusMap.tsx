@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import type { BuildingInfo, Route, Coordinates, TravelTimeAnalysis } from '@/types/routes'
 import type { BusPositionResponse, ShuttleStop } from '@/types/shuttle'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatEventTimeRange } from '@/lib/event-time'
 
 // Dynamic import for Leaflet (no SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
@@ -246,15 +247,7 @@ export default function CampusMap({
                     )}
                     {waypoint.timeStart && (
                       <p className="text-sm mt-1">
-                        {new Date(waypoint.timeStart).toLocaleTimeString('de-DE', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                        {waypoint.timeEnd &&
-                          ` - ${new Date(waypoint.timeEnd).toLocaleTimeString('de-DE', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}`}
+                        {formatEventTimeRange(waypoint.timeStart, waypoint.timeEnd)}
                       </p>
                     )}
                   </div>

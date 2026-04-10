@@ -4,6 +4,7 @@ import { MapPin, Clock, Footprints, Navigation } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import type { Route } from '@/types/routes'
+import { formatEventTimeRange } from '@/lib/event-time'
 
 interface RouteInfoProps {
   route?: Route | null
@@ -97,15 +98,7 @@ export default function RouteInfo({ route, className = '' }: RouteInfoProps) {
                   )}
                   {waypoint.timeStart && (
                     <p className="text-sm text-gray-500">
-                      {new Date(waypoint.timeStart).toLocaleTimeString('de-DE', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                      {waypoint.timeEnd &&
-                        ` - ${new Date(waypoint.timeEnd).toLocaleTimeString('de-DE', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}`}
+                      {formatEventTimeRange(waypoint.timeStart, waypoint.timeEnd)}
                     </p>
                   )}
                 </div>

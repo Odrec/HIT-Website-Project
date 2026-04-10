@@ -1,9 +1,8 @@
 'use client'
 
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
 import Link from 'next/link'
 import { useSchedule } from '@/contexts/schedule-context'
+import { formatEventTimeRange } from '@/lib/event-time'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -133,16 +132,9 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
                             <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               <span>
-                                {format(new Date(item.event.timeStart), 'HH:mm', {
-                                  locale: de,
-                                })}
-                                {item.event.timeEnd && (
-                                  <>
-                                    {' - '}
-                                    {format(new Date(item.event.timeEnd), 'HH:mm', {
-                                      locale: de,
-                                    })}
-                                  </>
+                                {formatEventTimeRange(
+                                  item.event.timeStart,
+                                  item.event.timeEnd
                                 )}
                               </span>
                             </div>

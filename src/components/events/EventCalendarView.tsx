@@ -2,8 +2,11 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { format, parseISO } from 'date-fns'
-import { de } from 'date-fns/locale'
+import {
+  formatEventTimeRange,
+  formatEventDateKey,
+  formatEventDateLong,
+} from '@/lib/event-time'
 import { Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -96,7 +99,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
     const grouped: Record<string, Event[]> = {}
 
     events.forEach((event) => {
-      const dateKey = format(parseISO(event.timeStart), 'yyyy-MM-dd')
+      const dateKey = formatEventDateKey(event.timeStart)
       if (!grouped[dateKey]) {
         grouped[dateKey] = []
       }
@@ -113,13 +116,14 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
 
   const dates = Object.keys(eventsByDate).sort()
 
-  // Get the position and height for an event based on its time
+  // Get the position and height for an event based on its time.
+  // Uses UTC components to read the Berlin wall-clock time.
   const getEventPosition = (event: Event) => {
-    const startTime = parseISO(event.timeStart)
-    const endTime = event.timeEnd ? parseISO(event.timeEnd) : null
+    const startTime = new Date(event.timeStart)
+    const endTime = event.timeEnd ? new Date(event.timeEnd) : null
 
-    const startHour = startTime.getHours()
-    const startMinute = startTime.getMinutes()
+    const startHour = startTime.getUTCHours()
+    const startMinute = startTime.getUTCMinutes()
 
     // Calculate position from 8:00 (0%)
     const startSlot = (startHour - 8) * 2 + (startMinute >= 30 ? 1 : 0)
@@ -128,8 +132,8 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
     // Calculate height based on duration
     let height = 100 / timeSlots.length // Default 30min
     if (endTime) {
-      const endHour = endTime.getHours()
-      const endMinute = endTime.getMinutes()
+      const endHour = endTime.getUTCHours()
+      const endMinute = endTime.getUTCMinutes()
       const endSlot = (endHour - 8) * 2 + (endMinute >= 30 ? 1 : 0)
       const durationSlots = Math.max(1, endSlot - startSlot)
       height = durationSlots * (100 / timeSlots.length)
@@ -150,7 +154,9 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
     <div className="space-y-8">
       {dates.map((date) => {
         const dayEvents = eventsByDate[date]
-        const displayDate = format(parseISO(date), 'EEEE, dd. MMMM yyyy', { locale: de })
+        // `date` is a yyyy-MM-dd key; use the first event's time for display
+        // (it has the same Berlin wall-clock day).
+        const displayDate = formatEventDateLong(dayEvents[0].timeStart)
 
         return (
           <div key={date}>
@@ -173,8 +179,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                         <div className="flex items-center gap-2 text-sm text-hit-gray-600">
                           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                           <span>
-                            {format(parseISO(event.timeStart), 'HH:mm')}
-                            {event.timeEnd && ` – ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                            {formatEventTimeRange(event.timeStart, event.timeEnd)}
                           </span>
                         </div>
                         <h3 className="mt-1 text-sm font-medium text-hit-gray-900 line-clamp-2">
@@ -291,8 +296,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                             <div className="mt-1 flex flex-wrap gap-2 text-xs text-hit-gray-600">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {format(parseISO(event.timeStart), 'HH:mm')}
-                                {event.timeEnd && ` - ${format(parseISO(event.timeEnd), 'HH:mm')}`}
+                                {formatEventTimeRange(event.timeStart, event.timeEnd)}
                               </span>
                               {event.location && (
                                 <span className="flex items-center gap-1">

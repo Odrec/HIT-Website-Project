@@ -1,8 +1,10 @@
 'use client'
 
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
 import Link from 'next/link'
+import {
+  formatEventTimeRange,
+  formatEventDateWeekday,
+} from '@/lib/event-time'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
 import { generateGoogleCalendarUrl } from '@/lib/calendar-utils'
 import { cn } from '@/lib/utils'
@@ -135,10 +137,9 @@ export function ScheduleEventCard({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {format(new Date(event.timeStart), 'EEEE, d. MMMM', { locale: de })}
+                  {formatEventDateWeekday(event.timeStart)}
                   {' • '}
-                  {format(new Date(event.timeStart), 'HH:mm')}
-                  {event.timeEnd && <> - {format(new Date(event.timeEnd), 'HH:mm')}</>}
+                  {formatEventTimeRange(event.timeStart, event.timeEnd)}
                 </span>
               </div>
             )}

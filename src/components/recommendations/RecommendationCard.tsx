@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Clock, MapPin, TrendingUp, AlertTriangle, CheckCircle, Plus, Star } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import type { EventRecommendation } from '@/types/recommendations'
+import { formatEventTime, formatEventDateShort } from '@/lib/event-time'
 
 interface RecommendationCardProps {
   recommendation: EventRecommendation
@@ -29,22 +30,9 @@ export function RecommendationCard({
     addEvent(event)
   }
 
-  const formatTime = (date: Date | undefined) => {
-    if (!date) return ''
-    return new Date(date).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+  const formatTime = (date: Date | undefined) => (date ? formatEventTime(date) : '')
 
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return ''
-    return new Date(date).toLocaleDateString('de-DE', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-    })
-  }
+  const formatDate = (date: Date | undefined) => (date ? formatEventDateShort(date) : '')
 
   const getScoreColor = (s: number) => {
     if (s >= 80) return 'text-green-600 bg-green-100'

@@ -8,6 +8,7 @@ import { ChevronLeft, CheckCircle2, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
+import { formatEventTime } from '@/lib/event-time'
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   VORTRAG: 'Vortrag',
@@ -36,7 +37,7 @@ interface CreatedEvent {
 
 function formatTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return formatEventTime(iso)
 }
 
 export default function NewEventPage() {

@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/db/prisma'
 import type { EventType, Institution, Affiliation } from '@/generated/prisma/client/enums'
+import { formatEventTime } from '@/lib/event-time'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -98,10 +99,9 @@ function formatLecturers(event: EventWithRelations): string {
 
 function formatTimeRange(event: EventWithRelations): string {
   if (!event.timeStart) return ''
-  const fmt = (d: Date) => d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  const start = fmt(event.timeStart)
+  const start = formatEventTime(event.timeStart)
   if (!event.timeEnd) return start
-  return `${start} – ${fmt(event.timeEnd)}`
+  return `${start} – ${formatEventTime(event.timeEnd)}`
 }
 
 function formatInstitution(institution: Institution | Affiliation): string {

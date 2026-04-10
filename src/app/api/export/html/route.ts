@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import type { EventType, Institution } from '@/generated/prisma/client/enums'
+import { formatEventTime } from '@/lib/event-time'
 
 // ---------------------------------------------------------------------------
 // Event include shape
@@ -51,7 +52,7 @@ function labelInstitution(institution: Institution): string {
 
 function formatTime(date: Date | null): string {
   if (!date) return ''
-  return format(date, 'HH:mm', { locale: de })
+  return formatEventTime(date)
 }
 
 function esc(str: string): string {

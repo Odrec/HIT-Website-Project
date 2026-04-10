@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import type { ScheduleOptimization, ScheduleOptimizationResult } from '@/types/recommendations'
+import { formatEventTime, formatEventDateShort } from '@/lib/event-time'
 
 interface ScheduleAnalysisProps {
   onOptimizationSelect?: (optimization: ScheduleOptimizationResult['optimizations'][0]) => void
@@ -260,23 +261,9 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
               {analysis.gaps.map((gap, idx) => (
                 <li key={idx} className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">
-                    <span className="font-medium">
-                      {new Date(gap.start).toLocaleDateString('de-DE', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                    </span>
+                    <span className="font-medium">{formatEventDateShort(gap.start)}</span>
                     {': '}
-                    {new Date(gap.start).toLocaleTimeString('de-DE', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}{' '}
-                    -
-                    {new Date(gap.end).toLocaleTimeString('de-DE', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatEventTime(gap.start)} - {formatEventTime(gap.end)}
                   </span>
                   <Badge variant="secondary">{gap.durationMinutes} Min.</Badge>
                 </li>

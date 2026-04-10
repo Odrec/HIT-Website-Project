@@ -35,6 +35,7 @@ import {
   X,
 } from 'lucide-react'
 import { HelpLink } from '@/components/help/HelpLink'
+import { formatEventTimeRange } from '@/lib/event-time'
 
 // Dynamic import for map component (no SSR)
 const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
@@ -383,18 +384,9 @@ export default function RoutePlannerPage() {
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3 shrink-0" />
                                 <span>
-                                  {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                  {item.event.timeEnd && (
-                                    <>
-                                      {' – '}
-                                      {new Date(item.event.timeEnd).toLocaleTimeString('de-DE', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })}
-                                    </>
+                                  {formatEventTimeRange(
+                                    item.event.timeStart,
+                                    item.event.timeEnd
                                   )}
                                 </span>
                               </div>

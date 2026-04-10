@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/db/prisma'
 import { EventType, LocationType, Institution } from '@/types/events'
+import { formatEventTime } from '@/lib/event-time'
 import type { Event } from '@/types/events'
 import type {
   RecommendationContext,
@@ -726,7 +727,7 @@ export const recommendationService = {
           suggestedAction: {
             action: 'add',
             eventIds: [],
-            reason: `Veranstaltung zwischen ${gap.start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} und ${gap.end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} hinzufügen`,
+            reason: `Veranstaltung zwischen ${formatEventTime(gap.start)} und ${formatEventTime(gap.end)} hinzufügen`,
           },
           benefitScore: 15,
         })

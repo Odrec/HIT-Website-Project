@@ -5,6 +5,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { auth } from '@/auth'
 import { exportService } from '@/services/export-service'
+import { formatEventTime } from '@/lib/event-time'
 
 const { Document, Page, Text, View, StyleSheet, Image: PDFImage } = ReactPDF
 
@@ -201,7 +202,7 @@ const h = React.createElement
 
 function formatTime(date: Date | null): string {
   if (!date) return ''
-  return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return formatEventTime(date)
 }
 
 function formatInstitutionLabel(institution: string): string {

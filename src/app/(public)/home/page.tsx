@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { formatEventTime } from '@/lib/event-time'
 
 interface FeaturedEvent {
   id: string
@@ -75,12 +76,7 @@ export default function HomePage() {
     fetchFeaturedEvents()
   }, [])
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+  const formatTime = (dateString: string) => formatEventTime(dateString)
 
   return (
     <div className="flex flex-col">

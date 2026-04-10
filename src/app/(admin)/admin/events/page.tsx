@@ -4,8 +4,7 @@ import { Suspense, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { formatEventDateTime } from '@/lib/event-time'
 import {
   Plus,
   Search,
@@ -355,7 +354,7 @@ function EventsListContent() {
                       {event.timeStart && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(event.timeStart), 'PPp', { locale: de })}
+                          {formatEventDateTime(event.timeStart)}
                         </span>
                       )}
                       {event.building && (

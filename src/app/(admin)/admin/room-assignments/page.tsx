@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { eventTypeLabels } from '@/lib/validations/event'
+import { formatEventTime } from '@/lib/event-time'
 
 interface EventRow {
   id: string
@@ -114,8 +115,7 @@ export default function RoomAssignmentsPage() {
 
   const formatTime = (timeStart: string | null) => {
     if (!timeStart) return null
-    const date = new Date(timeStart)
-    return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    return formatEventTime(timeStart)
   }
 
   const sortEvents = (eventList: EventRow[]) => {

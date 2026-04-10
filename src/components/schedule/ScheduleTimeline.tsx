@@ -2,9 +2,9 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { format, isSameDay } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { isSameDay } from 'date-fns'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
+import { formatEventTimeRange, formatEventDateLong } from '@/lib/event-time'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -190,7 +190,7 @@ export function ScheduleTimeline({
         <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <p className="text-muted-foreground">
           {selectedDate
-            ? `Keine Events für ${format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de })}`
+            ? `Keine Events für ${formatEventDateLong(selectedDate)}`
             : 'Noch keine Events in deinem Zeitplan'}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
@@ -205,7 +205,7 @@ export function ScheduleTimeline({
       {/* Date header */}
       {selectedDate && (
         <h3 className="text-lg font-semibold mb-4">
-          {format(selectedDate, 'EEEE, d. MMMM yyyy', { locale: de })}
+          {formatEventDateLong(selectedDate)}
         </h3>
       )}
 
@@ -305,12 +305,9 @@ export function ScheduleTimeline({
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             <span>
-                              {format(new Date(item.scheduleEvent.event.timeStart), 'HH:mm')}
-                              {item.scheduleEvent.event.timeEnd && (
-                                <>
-                                  {' '}
-                                  - {format(new Date(item.scheduleEvent.event.timeEnd), 'HH:mm')}
-                                </>
+                              {formatEventTimeRange(
+                                item.scheduleEvent.event.timeStart,
+                                item.scheduleEvent.event.timeEnd
                               )}
                             </span>
                           </div>
@@ -430,8 +427,7 @@ export function ScheduleTimeline({
                     {item.event.timeStart && (
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {format(new Date(item.event.timeStart), 'HH:mm')}
-                        {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
+                        {formatEventTimeRange(item.event.timeStart, item.event.timeEnd)}
                       </span>
                     )}
                     {item.event.building && (
