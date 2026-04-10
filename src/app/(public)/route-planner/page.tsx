@@ -67,6 +67,7 @@ export default function RoutePlannerPage() {
   const [busPositions, setBusPositions] = useState<BusPositionResponse[]>([])
   const [shuttleStops, setShuttleStops] = useState<ShuttleStop[]>([])
   const [selectedLegIndex, setSelectedLegIndex] = useState<number | null>(null)
+  const [mapLocationFilter, setMapLocationFilter] = useState<'all' | 'mine'>('all')
 
   // Fetch buildings
   useEffect(() => {
@@ -150,6 +151,16 @@ export default function RoutePlannerPage() {
       fetchRouteData()
     }
   }, [state.items, state.isLoaded, walkingSpeed])
+
+  // Compute building slugs from scheduled events for "Meine Orte" filter
+  const scheduledBuildingSlugs = useMemo(() => {
+    const names = state.items
+      .map((item) => item.event.building?.name?.toLowerCase())
+      .filter(Boolean) as string[]
+    return buildings
+      .filter((b) => names.some((n) => b.name.toLowerCase().includes(n) || n.includes(b.name.toLowerCase())))
+      .map((b) => b.id)
+  }, [state.items, buildings])
 
   // Poll bus positions every 10 seconds when bus layer is visible
   useEffect(() => {
@@ -451,6 +462,15 @@ export default function RoutePlannerPage() {
                         </Badge>
                       )}
                     </Button>
+                    {/* Meine Orte filter */}
+                    <Button
+                      variant={mapLocationFilter === 'mine' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setMapLocationFilter(mapLocationFilter === 'mine' ? 'all' : 'mine')}
+                    >
+                      <MapPin className="h-4 w-4 mr-1" />
+                      Meine Orte
+                    </Button>
                     {/* Campus filter */}
                     <Select value={selectedCampus} onValueChange={setSelectedCampus}>
                       <SelectTrigger className="w-[140px] sm:w-[180px]">
@@ -485,6 +505,8 @@ export default function RoutePlannerPage() {
                     shuttleStops={showBusLayer ? shuttleStops : undefined}
                     showBusLayer={showBusLayer}
                     selectedLegIndex={selectedLegIndex}
+                    highlightBuildingIds={scheduledBuildingSlugs}
+                    dimUnselected={mapLocationFilter === 'mine'}
                   />
                 )}
 
