@@ -20,6 +20,8 @@ Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf der Campus
 
 **Einzelne Strecken anzeigen:** Klicken Sie auf eine Veranstaltung in der Liste links, um nur die Strecke von dieser zur nächsten Veranstaltung auf der Karte hervorzuheben. Ein Hinweis zeigt an, welche Strecke gefiltert wird. Klicken Sie erneut oder auf das **✕**, um alle Strecken wieder anzuzeigen.
 
+**Infostände im Routenplaner:** Infostände erscheinen nicht in der Routenplaner-Liste — sie sind den ganzen Tag geöffnet und haben keinen festen Platz in Ihrem Laufweg. Bleiben Veranstaltungen Ihres Zeitplans im Routenplaner unsichtbar, sehen Sie unterhalb der Liste einen Hinweis „N Veranstaltungen ohne Standort ausgeblendet".
+
 ## Shuttle-Busse
 
 Am HIT-Tag fahren **Shuttle-Busse** zwischen den Campusstandorten. Im Routenplaner können Sie über die Schaltfläche **„Shuttle-Busse"** die Live-Positionen der Busse auf der Karte anzeigen. Die Busstandorte werden automatisch alle 10 Sekunden aktualisiert. Die Haltestellen sind mit dem offiziellen Haltestellenzeichen (grünes „H") auf der Karte markiert.

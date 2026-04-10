@@ -14,6 +14,8 @@ Unter **Veranstaltungen** sehen und verwalten Sie alle gemeldeten Events. Sie k�
 
 Unter **Gebäude** verwalten Sie alle Campus-Gebäude mit Räumen, Adressen und Koordinaten. Diese Daten werden im Routenplaner, in der Kartenansicht und bei der Raumzuordnung verwendet. Jedes Gebäude kann Kurzname, Campus-Zuordnung, GPS-Koordinaten und Barrierefreiheit-Infos enthalten.
 
+**Wichtig:** GPS-Koordinaten (Breitengrad und Längengrad) sind **erforderlich**, damit Veranstaltungen in diesem Gebäude im Routenplaner und auf der Campuskarte angezeigt werden. Fehlen die Koordinaten, werden die zugehörigen Veranstaltungen stillschweigend aus der Routenberechnung entfernt — sie bleiben im persönlichen Zeitplan der Besucher sichtbar, erscheinen aber nicht in der Routenplaner-Liste. Prüfen Sie die Koordinaten nach dem Anlegen eines neuen Gebäudes.
+
 ## Raumzuordnungen
 
 Unter **Raumzuordnung** weisen Sie Veranstaltungen bestimmten Räumen und Zeitslots zu. Das System warnt bei Doppelbelegungen.

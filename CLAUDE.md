@@ -30,6 +30,8 @@ All core features are **fully implemented**: event form (with Building/Room mode
 - **Routing API:** Google Maps Directions API (included in university cloud contract)
 - **Analytics:** UOS Matomo instance, request tenant from Andrea Tschentscher (RZ)
 - **No social login:** Anonymous profiles only, shared via QR/short link (avoids Datenschutz issues)
+- **Event times are Berlin wall-clock:** DB columns are `timestamp without time zone` holding Berlin values, and JS Dates carry those values in their UTC components. Always format event timestamps via `src/lib/event-time.ts` helpers (`formatEventTime`, `formatEventDateLong`, `isSameEventDay`, etc.) — never `date-fns format()`, `toLocaleTimeString()`, or local `getHours()/getMinutes()` on event timestamps. The `EventForm` save path appends `Z` to the typed time so writes interpret it as Berlin wall-clock too. Real-time data (bus positions, chat messages) keeps user-local formatting.
+- **Conflict detection is centralized:** All schedule conflict checks go through `src/lib/schedule-conflicts.ts` (`eventPairOverlapMinutes`, `detectConflicts`). Both the client `ScheduleContext` and server `recommendation-service` delegate to it. Infostände never participate in conflicts (all-day walk-in events). Do not re-implement overlap math or Infostand-skip logic elsewhere — a previous regression was caused exactly by that duplication.
 
 ## Git Conventions
 - Never add "Co-Authored-By" lines to commit messages
