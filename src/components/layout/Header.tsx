@@ -19,7 +19,7 @@ export function Header() {
 
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'ORGANIZER'
   const scheduleCount = state.items.length
-  const hasConflicts = getConflicts().length > 0
+  const conflictCount = getConflicts().length
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -51,16 +51,24 @@ export function Header() {
           >
             Mein Stundenplan
             {scheduleCount > 0 && (
-              <Badge
-                variant={hasConflicts ? 'destructive' : 'default'}
-                className={cn(
-                  'ml-1 text-xs h-5 min-w-5 flex items-center justify-center',
-                  !hasConflicts && 'bg-hit-uni-500'
+              <div className="ml-1 flex items-center gap-1">
+                <Badge
+                  variant="default"
+                  className="text-xs h-5 min-w-5 flex items-center justify-center bg-hit-uni-500"
+                >
+                  {scheduleCount}
+                </Badge>
+                {conflictCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="text-xs h-5 min-w-5 flex items-center justify-center gap-0.5"
+                    title={`${conflictCount} Zeitkonflikt${conflictCount > 1 ? 'e' : ''}`}
+                  >
+                    <AlertTriangle className="h-3 w-3" />
+                    {conflictCount}
+                  </Badge>
                 )}
-              >
-                {scheduleCount}
-                {hasConflicts && <AlertTriangle className="h-3 w-3 ml-0.5" />}
-              </Badge>
+              </div>
             )}
           </Link>
           <Link
@@ -155,16 +163,24 @@ export function Header() {
           >
             Mein Stundenplan
             {scheduleCount > 0 && (
-              <Badge
-                variant={hasConflicts ? 'destructive' : 'default'}
-                className={cn(
-                  'text-xs h-5 min-w-5 flex items-center justify-center',
-                  !hasConflicts && 'bg-hit-uni-500'
+              <div className="flex items-center gap-1">
+                <Badge
+                  variant="default"
+                  className="text-xs h-5 min-w-5 flex items-center justify-center bg-hit-uni-500"
+                >
+                  {scheduleCount}
+                </Badge>
+                {conflictCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="text-xs h-5 min-w-5 flex items-center justify-center gap-0.5"
+                    title={`${conflictCount} Zeitkonflikt${conflictCount > 1 ? 'e' : ''}`}
+                  >
+                    <AlertTriangle className="h-3 w-3" />
+                    {conflictCount}
+                  </Badge>
                 )}
-              >
-                {scheduleCount}
-                {hasConflicts && <AlertTriangle className="h-3 w-3 ml-0.5" />}
-              </Badge>
+              </div>
             )}
           </Link>
           <Link

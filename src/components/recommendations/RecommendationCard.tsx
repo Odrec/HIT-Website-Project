@@ -21,10 +21,23 @@ export function RecommendationCard({
   onViewDetails,
   onDismiss,
 }: RecommendationCardProps) {
-  const { addEvent, isInSchedule } = useSchedule()
-  const { event, score, reasons, conflictsWithSchedule, isHighDemand, travelTimeFromPrevious } =
-    recommendation
+  const { state, addEvent, isInSchedule } = useSchedule()
+  const {
+    event,
+    score,
+    reasons,
+    conflictsWithSchedule,
+    conflictingEventIds,
+    isHighDemand,
+    travelTimeFromPrevious,
+  } = recommendation
   const isScheduled = isInSchedule(event.id)
+
+  // Resolve conflicting event IDs to their titles using the schedule context.
+  // Lets us show "Überschneidung mit Fremdsprachen …" instead of a bare badge.
+  const conflictingEventTitles = conflictingEventIds
+    .map((id) => state.items.find((item) => item.eventId === id)?.event.title)
+    .filter((title): title is string => Boolean(title))
 
   const handleAddToSchedule = () => {
     addEvent(event)
@@ -106,6 +119,17 @@ export function RecommendationCard({
         {travelTimeFromPrevious !== undefined && travelTimeFromPrevious > 0 && (
           <div className="text-sm text-blue-600">
             🚶 {travelTimeFromPrevious} Min. Fußweg vom vorherigen Event
+          </div>
+        )}
+
+        {/* Conflict detail — which scheduled event(s) this overlaps with */}
+        {conflictsWithSchedule && conflictingEventTitles.length > 0 && (
+          <div className="flex items-start gap-2 text-sm text-yellow-800">
+            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0 text-yellow-600" />
+            <div>
+              <span className="font-medium">Kollidiert mit:</span>{' '}
+              {conflictingEventTitles.join(', ')}
+            </div>
           </div>
         )}
 
