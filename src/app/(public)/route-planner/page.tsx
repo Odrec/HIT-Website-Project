@@ -89,33 +89,42 @@ export default function RoutePlannerPage() {
     fetchBuildings()
   }, [])
 
-  // Events that can actually be routed — must have a timeStart AND a building
-  // with resolvable coordinates. calculateScheduleRoute silently drops events
-  // that fail this check, so keep the client-side filter in lockstep with the
-  // server-side one and drive the list UI from the same predicate.
-  const routableItems = useMemo(() => {
+  // All scheduled events with a time, sorted chronologically. These are sent
+  // to /api/routes; the server decides which can actually be routed.
+  const timedItems = useMemo(() => {
     return state.items
-      .filter(
-        (item) =>
-          item.event.timeStart &&
-          item.event.building?.latitude != null &&
-          item.event.building?.longitude != null
-      )
+      .filter((item) => item.event.timeStart)
       .sort(
         (a, b) => new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
       )
   }, [state.items])
 
-  // How many of the user's scheduled events had to be hidden because they
-  // can't be placed on the map (no coordinates — typically Infostände).
+  // Events that actually became waypoints in the server-computed route.
+  // Using the server's verdict instead of a client-side coordinate check
+  // is more robust: localStorage may hold events whose building shape
+  // lacks lat/lng fields (older fetches / partial API payloads), and a
+  // client-side filter would wrongly hide them. Before the route loads,
+  // fall back to showing every timed item so the list isn't briefly empty.
+  const routableItems = useMemo(() => {
+    if (!route) return timedItems
+    const waypointEventIds = new Set(
+      route.waypoints.map((w) => w.eventId).filter((id): id is string => typeof id === 'string')
+    )
+    return timedItems.filter((item) => waypointEventIds.has(item.eventId))
+  }, [timedItems, route])
+
+  // How many of the user's scheduled events the server couldn't route
+  // (typically Infostände and any event whose building lacks coordinates).
+  // Only meaningful once the route has loaded.
   const hiddenEventCount = useMemo(() => {
-    return state.items.filter((item) => item.event.timeStart).length - routableItems.length
-  }, [state.items, routableItems])
+    if (!route) return 0
+    return timedItems.length - routableItems.length
+  }, [route, timedItems, routableItems])
 
   // Fetch route when schedule changes
   useEffect(() => {
     const fetchRouteData = async () => {
-      if (routableItems.length < 2) {
+      if (timedItems.length < 2) {
         setRoute(null)
         setTravelAnalyses([])
         return
@@ -123,7 +132,7 @@ export default function RoutePlannerPage() {
 
       setIsLoadingRoute(true)
       try {
-        const eventIds = routableItems.map((item) => item.eventId)
+        const eventIds = timedItems.map((item) => item.eventId)
 
         if (eventIds.length < 2) {
           setRoute(null)
@@ -168,7 +177,7 @@ export default function RoutePlannerPage() {
     if (state.isLoaded) {
       fetchRouteData()
     }
-  }, [routableItems, state.isLoaded, walkingSpeed])
+  }, [timedItems, state.isLoaded, walkingSpeed])
 
   // Compute building slugs from scheduled events for "Meine Orte" filter
   const scheduledBuildingSlugs = useMemo(() => {
