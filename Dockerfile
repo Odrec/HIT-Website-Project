@@ -18,8 +18,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client (dummy URL for generation, actual URL provided at runtime)
-ENV DATABASE_URL="postgresql://user:password@localhost:5432/db"
+# Generate Prisma client
 RUN npx prisma generate
 
 # Build the application
@@ -53,8 +52,9 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy Prisma files for migrations
+# Copy Prisma files for migrations and generated client
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src/generated ./src/generated
 
 USER nextjs
 

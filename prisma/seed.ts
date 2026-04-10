@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { PrismaClient, $Enums } from '.prisma/client'
+import { PrismaClient, $Enums } from '@prisma/client'
 import * as bcrypt from 'bcryptjs'
 
 const { Institution, EventType, LocationType, UserRole, Affiliation } = $Enums
