@@ -57,9 +57,11 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
 
-# Copy prisma packages needed by prisma.config.ts at runtime (for `prisma migrate deploy`)
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Copy full node_modules for prisma migrate deploy (needs prisma CLI + all
+# transitive deps like effect, @prisma/config, etc.). The standalone build's
+# trimmed node_modules is at .next/standalone/node_modules/ which was copied
+# to /app/ above; this overlay adds the full tree for CLI usage.
+COPY --from=builder /app/node_modules ./node_modules
 
 USER nextjs
 
