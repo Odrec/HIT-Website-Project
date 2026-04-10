@@ -760,6 +760,7 @@ function SchedulePageContent() {
                       <RouteInfo route={route} />
                       <TravelWarnings
                         analyses={travelAnalyses}
+                        warnings={route?.warnings}
                         onEventClick={(eventId: string) => {
                           router.push(`/events/${eventId}`)
                         }}

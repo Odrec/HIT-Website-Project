@@ -24,7 +24,25 @@ export default function TravelWarnings({
   // Filter to only show issues
   const issues = analyses.filter((a) => a.status !== 'ok')
 
-  if (issues.length === 0 && warnings.length === 0) {
+  // Dedupe route warnings against analysis issues. analyzeTravelTimes and
+  // checkTravelWarnings both detect insufficient time for the same pairs, so
+  // rendering both without dedup produces two cards for the same problem.
+  // Keep the rich analysis card and drop the matching route warning; keep
+  // long_distance and other types that the analyses don't cover.
+  const issuePairs = new Set(issues.map((i) => `${i.eventFromId}|${i.eventToId}`))
+  const dedupedWarnings = warnings.filter((w) => {
+    if (
+      w.type === 'insufficient_time' &&
+      w.eventFromId &&
+      w.eventToId &&
+      issuePairs.has(`${w.eventFromId}|${w.eventToId}`)
+    ) {
+      return false
+    }
+    return true
+  })
+
+  if (issues.length === 0 && dedupedWarnings.length === 0) {
     return (
       <Card className={`bg-green-50 border-green-200 ${className}`}>
         <CardContent className="pt-4">
@@ -137,7 +155,7 @@ export default function TravelWarnings({
           </div>
         ))}
 
-        {warnings.map((warning, index) => (
+        {dedupedWarnings.map((warning, index) => (
           <div
             key={`warning-${index}`}
             className={`p-3 rounded-lg border ${

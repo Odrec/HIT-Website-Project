@@ -89,10 +89,33 @@ export default function RoutePlannerPage() {
     fetchBuildings()
   }, [])
 
+  // Events that can actually be routed — must have a timeStart AND a building
+  // with resolvable coordinates. calculateScheduleRoute silently drops events
+  // that fail this check, so keep the client-side filter in lockstep with the
+  // server-side one and drive the list UI from the same predicate.
+  const routableItems = useMemo(() => {
+    return state.items
+      .filter(
+        (item) =>
+          item.event.timeStart &&
+          item.event.building?.latitude != null &&
+          item.event.building?.longitude != null
+      )
+      .sort(
+        (a, b) => new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
+      )
+  }, [state.items])
+
+  // How many of the user's scheduled events had to be hidden because they
+  // can't be placed on the map (no coordinates — typically Infostände).
+  const hiddenEventCount = useMemo(() => {
+    return state.items.filter((item) => item.event.timeStart).length - routableItems.length
+  }, [state.items, routableItems])
+
   // Fetch route when schedule changes
   useEffect(() => {
     const fetchRouteData = async () => {
-      if (state.items.length < 2) {
+      if (routableItems.length < 2) {
         setRoute(null)
         setTravelAnalyses([])
         return
@@ -100,13 +123,7 @@ export default function RoutePlannerPage() {
 
       setIsLoadingRoute(true)
       try {
-        const eventIds = state.items
-          .filter((item) => item.event.timeStart)
-          .sort(
-            (a, b) =>
-              new Date(a.event.timeStart!).getTime() - new Date(b.event.timeStart!).getTime()
-          )
-          .map((item) => item.eventId)
+        const eventIds = routableItems.map((item) => item.eventId)
 
         if (eventIds.length < 2) {
           setRoute(null)
@@ -151,7 +168,7 @@ export default function RoutePlannerPage() {
     if (state.isLoaded) {
       fetchRouteData()
     }
-  }, [state.items, state.isLoaded, walkingSpeed])
+  }, [routableItems, state.isLoaded, walkingSpeed])
 
   // Compute building slugs from scheduled events for "Meine Orte" filter
   const scheduledBuildingSlugs = useMemo(() => {
@@ -370,77 +387,71 @@ export default function RoutePlannerPage() {
                     </div>
                   )}
 
-                  {/* Schedule events list */}
+                  {/* Schedule events list — only events that can actually
+                      be routed (i.e. have resolvable building coordinates).
+                      Infostände and other events without a place are hidden
+                      entirely, with a notice below. */}
                   <div className="space-y-2">
-                    {state.items
-                      .filter((item) => item.event.timeStart)
-                      .sort(
-                        (a, b) =>
-                          new Date(a.event.timeStart!).getTime() -
-                          new Date(b.event.timeStart!).getTime()
-                      )
-                      .map((item, index) => {
-                        // Map this event to its index in route.waypoints (if any).
-                        // Events whose building has no coordinates are dropped
-                        // from the route and cannot select a leg.
-                        const wpIdx = waypointIndexByEventId.get(item.eventId)
-                        const inRoute = wpIdx !== undefined
-                        const waypointCount = route?.waypoints.length ?? 0
-                        // A leg departs from every waypoint except the last.
-                        const canSelectLeg = inRoute && wpIdx! < waypointCount - 1
-                        const isLegStart = inRoute && selectedLegIndex === wpIdx
-                        const isLegEnd = inRoute && selectedLegIndex === wpIdx! - 1
-                        const isSelected = isLegStart || isLegEnd
+                    {routableItems.map((item, index) => {
+                      // Map this event to its index in route.waypoints.
+                      const wpIdx = waypointIndexByEventId.get(item.eventId)
+                      const inRoute = wpIdx !== undefined
+                      const waypointCount = route?.waypoints.length ?? 0
+                      // A leg departs from every waypoint except the last.
+                      const canSelectLeg = inRoute && wpIdx! < waypointCount - 1
+                      const isLegStart = inRoute && selectedLegIndex === wpIdx
+                      const isLegEnd = inRoute && selectedLegIndex === wpIdx! - 1
+                      const isSelected = isLegStart || isLegEnd
 
-                        return (
-                          <div
-                            key={item.id}
-                            className={`flex items-start gap-3 p-2 rounded-lg transition-colors ${
-                              isSelected
-                                ? 'bg-blue-100 ring-2 ring-blue-400'
-                                : !inRoute
-                                  ? 'opacity-60'
-                                  : canSelectLeg
-                                    ? 'hover:bg-muted/50 cursor-pointer'
-                                    : 'hover:bg-muted/50'
-                            }`}
-                            onClick={() => {
-                              if (!canSelectLeg) return
-                              setSelectedLegIndex(selectedLegIndex === wpIdx ? null : wpIdx!)
-                            }}
-                            title={
-                              !inRoute
-                                ? 'Kein Gebäudestandort — wird in der Routenberechnung übersprungen'
-                                : canSelectLeg
-                                  ? 'Klicken um Strecke anzuzeigen'
-                                  : undefined
-                            }
-                          >
-                            <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">
-                              {index + 1}
+                      return (
+                        <div
+                          key={item.id}
+                          className={`flex items-start gap-3 p-2 rounded-lg transition-colors ${
+                            isSelected
+                              ? 'bg-blue-100 ring-2 ring-blue-400'
+                              : canSelectLeg
+                                ? 'hover:bg-muted/50 cursor-pointer'
+                                : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => {
+                            if (!canSelectLeg) return
+                            setSelectedLegIndex(selectedLegIndex === wpIdx ? null : wpIdx!)
+                          }}
+                          title={canSelectLeg ? 'Klicken um Strecke anzuzeigen' : undefined}
+                        >
+                          <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{item.event.title}</p>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3 shrink-0" />
+                              <span>
+                                {formatEventTimeRange(item.event.timeStart, item.event.timeEnd)}
+                              </span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">{item.event.title}</p>
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3 shrink-0" />
-                                <span>
-                                  {formatEventTimeRange(item.event.timeStart, item.event.timeEnd)}
+                            {item.event.building && (
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                                <MapPin className="h-3 w-3 shrink-0" />
+                                <span className="truncate">
+                                  {item.event.building.shortName || item.event.building.name}
+                                  {item.event.room && `, ${item.event.room.name}`}
                                 </span>
                               </div>
-                              {item.event.building && (
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                                  <MapPin className="h-3 w-3 shrink-0" />
-                                  <span className="truncate">
-                                    {item.event.building.shortName || item.event.building.name}
-                                    {item.event.room && `, ${item.event.room.name}`}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </div>
-                        )
-                      })}
+                        </div>
+                      )
+                    })}
                   </div>
+
+                  {hiddenEventCount > 0 && (
+                    <p className="text-xs text-muted-foreground italic px-1">
+                      {hiddenEventCount === 1
+                        ? '1 Veranstaltung ohne Standort ausgeblendet'
+                        : `${hiddenEventCount} Veranstaltungen ohne Standort ausgeblendet`}
+                    </p>
+                  )}
 
                   <Separator />
 
