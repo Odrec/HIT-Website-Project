@@ -279,7 +279,7 @@ lighthouse http://localhost:3000 --emulated-form-factor=mobile
 | `/api/events` | GET/POST | Admin | Standard | No |
 | `/api/events/[id]` | GET/PUT/DELETE | Admin | Standard | No |
 | `/api/study-programs` | GET | No | Standard | Yes (15min) |
-| `/api/locations` | GET | No | Standard | Yes (1hr) |
+| `/api/buildings` | GET | No | Standard | Yes (1hr) |
 | `/api/routes` | POST | No | Standard | No |
 | `/api/recommendations` | POST | No | Standard | No |
 | `/api/schedule/share` | POST | No | Standard | No |

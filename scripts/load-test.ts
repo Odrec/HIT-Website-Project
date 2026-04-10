@@ -69,7 +69,7 @@ const endpoints = [
   { path: '/api/events/public?page=1&pageSize=4&sortBy=timeStart&sortOrder=asc', weight: 20 },
   { path: '/api/study-programs', weight: 15 },
   { path: '/api/study-programs?grouped=true', weight: 10 },
-  { path: '/api/locations', weight: 10 },
+  { path: '/api/buildings', weight: 10 },
   { path: '/api/routes/buildings?withEvents=false', weight: 10 },
   { path: '/api/events/public?search=workshop', weight: 5 },
 ]

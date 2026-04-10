@@ -4,15 +4,15 @@ Als Admin haben Sie Zugriff auf alle Verwaltungsfunktionen der HIT-Website.
 
 ## Dashboard
 
-Das Dashboard zeigt eine Übersicht: Anzahl der Veranstaltungen, Standorte, Studiengänge und Benutzer. Nutzen Sie es als Einstiegspunkt in die Verwaltung.
+Das Dashboard zeigt eine Übersicht: Anzahl der Veranstaltungen, Gebäude, Studiengänge und Benutzer. Nutzen Sie es als Einstiegspunkt in die Verwaltung.
 
 ## Veranstaltungen verwalten
 
 Unter **Veranstaltungen** sehen und verwalten Sie alle gemeldeten Events. Sie können Veranstaltungen erstellen, bearbeiten und löschen. Nutzen Sie die Suche und Filter, um schnell bestimmte Einträge zu finden.
 
-## Standorte & Gebäude
+## Gebäude & Räume
 
-Verwalten Sie unter **Standorte** die Veranstaltungsorte und unter **Gebäude** die Gebäudeinformationen mit Koordinaten für die Campuskarte. Diese Daten werden im Routenplaner und in der Kartenansicht verwendet.
+Unter **Gebäude** verwalten Sie alle Campus-Gebäude mit Räumen, Adressen und Koordinaten. Diese Daten werden im Routenplaner, in der Kartenansicht und bei der Raumzuordnung verwendet. Jedes Gebäude kann Kurzname, Campus-Zuordnung, GPS-Koordinaten und Barrierefreiheit-Infos enthalten.
 
 ## Raumzuordnungen
 

@@ -242,7 +242,7 @@ After running the seed script:
 | `/api/events/public` | GET | List all public events (paginated) | 5 min |
 | `/api/events/public/[id]` | GET | Get single event details | 5 min |
 | `/api/study-programs` | GET | List all study programs | 15 min |
-| `/api/locations` | GET | List all locations | 1 hour |
+| `/api/buildings` | GET | List all buildings with rooms | 1 hour |
 | `/api/routes` | POST | Calculate route between locations | No |
 | `/api/routes/directions` | GET | Walking directions with cache (Google API fallback) | DB |
 | `/api/settings/deadline` | GET | Public deadline info (date, passed, days remaining) | No |
@@ -260,7 +260,8 @@ After running the seed script:
 | `/api/events` | GET, POST | List/create events |
 | `/api/events/[id]` | GET, PUT, DELETE | Manage single event |
 | `/api/users` | GET, POST | Manage users |
-| `/api/locations` | POST, PUT, DELETE | Manage locations |
+| `/api/buildings` | POST | Create building |
+| `/api/buildings/[id]` | GET, PUT, DELETE | Manage single building |
 | `/api/study-programs` | POST, PUT, DELETE | Manage study programs |
 | `/api/export/excel?view=<type>` | GET | Excel export (8 view types) |
 | `/api/export/pdf/booklet` | GET | PDF program booklet |
