@@ -165,6 +165,20 @@ export default function RoutePlannerPage() {
       .map((b) => b.id)
   }, [state.items, buildings])
 
+  // Map each scheduled event id to its index in route.waypoints. Events whose
+  // building has no coordinates are silently dropped by calculateScheduleRoute,
+  // so route.waypoints can have fewer entries than the events list. Without
+  // this mapping, the click handler would set selectedLegIndex to the event
+  // list index, which no longer matches the leg array index, and the filter
+  // would hide every leg.
+  const waypointIndexByEventId = useMemo(() => {
+    const m = new Map<string, number>()
+    route?.waypoints.forEach((wp, i) => {
+      if (wp.eventId) m.set(wp.eventId, i)
+    })
+    return m
+  }, [route])
+
   // Poll bus positions every 10 seconds when bus layer is visible
   useEffect(() => {
     if (!showBusLayer) return
@@ -331,14 +345,24 @@ export default function RoutePlannerPage() {
                   ) : null}
 
                   {/* Route filter info */}
-                  {selectedLegIndex !== null && (
-                    <div className="flex items-center justify-between bg-blue-50 text-blue-800 text-sm px-3 py-2 rounded-lg">
-                      <span>
-                        Nur Strecke {selectedLegIndex + 1} → {selectedLegIndex + 2} wird angezeigt
+                  {selectedLegIndex !== null && route && (
+                    <div className="flex items-start justify-between bg-blue-50 text-blue-800 text-sm px-3 py-2 rounded-lg gap-2">
+                      <span className="min-w-0">
+                        Nur Strecke{' '}
+                        <span className="font-medium">
+                          {route.waypoints[selectedLegIndex]?.eventTitle ??
+                            route.waypoints[selectedLegIndex]?.name}
+                        </span>{' '}
+                        →{' '}
+                        <span className="font-medium">
+                          {route.waypoints[selectedLegIndex + 1]?.eventTitle ??
+                            route.waypoints[selectedLegIndex + 1]?.name}
+                        </span>{' '}
+                        wird angezeigt
                       </span>
                       <button
                         onClick={() => setSelectedLegIndex(null)}
-                        className="ml-2 p-0.5 rounded hover:bg-blue-200"
+                        className="p-0.5 rounded hover:bg-blue-200 shrink-0"
                         aria-label="Filter zurücksetzen"
                       >
                         <X className="h-4 w-4" />
@@ -355,12 +379,18 @@ export default function RoutePlannerPage() {
                           new Date(a.event.timeStart!).getTime() -
                           new Date(b.event.timeStart!).getTime()
                       )
-                      .map((item, index, arr) => {
-                        const isLegStart = selectedLegIndex === index
-                        const isLegEnd = selectedLegIndex === index - 1
+                      .map((item, index) => {
+                        // Map this event to its index in route.waypoints (if any).
+                        // Events whose building has no coordinates are dropped
+                        // from the route and cannot select a leg.
+                        const wpIdx = waypointIndexByEventId.get(item.eventId)
+                        const inRoute = wpIdx !== undefined
+                        const waypointCount = route?.waypoints.length ?? 0
+                        // A leg departs from every waypoint except the last.
+                        const canSelectLeg = inRoute && wpIdx! < waypointCount - 1
+                        const isLegStart = inRoute && selectedLegIndex === wpIdx
+                        const isLegEnd = inRoute && selectedLegIndex === wpIdx! - 1
                         const isSelected = isLegStart || isLegEnd
-                        // Clicking an event selects the leg departing from it (not available for last event)
-                        const canSelectLeg = index < arr.length - 1
 
                         return (
                           <div
@@ -368,15 +398,23 @@ export default function RoutePlannerPage() {
                             className={`flex items-start gap-3 p-2 rounded-lg transition-colors ${
                               isSelected
                                 ? 'bg-blue-100 ring-2 ring-blue-400'
-                                : canSelectLeg
-                                  ? 'hover:bg-muted/50 cursor-pointer'
-                                  : 'hover:bg-muted/50'
+                                : !inRoute
+                                  ? 'opacity-60'
+                                  : canSelectLeg
+                                    ? 'hover:bg-muted/50 cursor-pointer'
+                                    : 'hover:bg-muted/50'
                             }`}
                             onClick={() => {
                               if (!canSelectLeg) return
-                              setSelectedLegIndex(selectedLegIndex === index ? null : index)
+                              setSelectedLegIndex(selectedLegIndex === wpIdx ? null : wpIdx!)
                             }}
-                            title={canSelectLeg ? 'Klicken um Strecke anzuzeigen' : undefined}
+                            title={
+                              !inRoute
+                                ? 'Kein Gebäudestandort — wird in der Routenberechnung übersprungen'
+                                : canSelectLeg
+                                  ? 'Klicken um Strecke anzuzeigen'
+                                  : undefined
+                            }
                           >
                             <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">
                               {index + 1}

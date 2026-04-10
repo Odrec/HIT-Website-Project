@@ -17,6 +17,9 @@ const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLa
 const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), { ssr: false })
 const Polyline = dynamic(() => import('react-leaflet').then((mod) => mod.Polyline), { ssr: false })
+const CircleMarker = dynamic(() => import('react-leaflet').then((mod) => mod.CircleMarker), {
+  ssr: false,
+})
 
 interface CampusMapProps {
   buildings?: BuildingInfo[]
@@ -275,6 +278,42 @@ export default function CampusMap({
                 const analysis = travelAnalyses[index]
                 const hasWarning = analysis && analysis.status !== 'ok'
                 const segmentColor = hasWarning ? '#dc2626' : '#2563eb'
+
+                // Same-building legs render as a CircleMarker instead of a
+                // polyline — a zero-length Polyline draws nothing visible, so
+                // clicks on the filter list would produce no feedback. Detect
+                // this case before building positions.
+                const sameBuilding =
+                  leg.startWaypoint.coordinates.latitude === leg.endWaypoint.coordinates.latitude &&
+                  leg.startWaypoint.coordinates.longitude === leg.endWaypoint.coordinates.longitude
+
+                if (sameBuilding) {
+                  return (
+                    <CircleMarker
+                      key={`segment-${index}`}
+                      center={[
+                        leg.startWaypoint.coordinates.latitude,
+                        leg.startWaypoint.coordinates.longitude,
+                      ]}
+                      radius={14}
+                      pathOptions={{
+                        color: segmentColor,
+                        fillColor: segmentColor,
+                        fillOpacity: 0.3,
+                        weight: 3,
+                      }}
+                    >
+                      <Popup>
+                        <div className="text-sm">
+                          <div className="font-medium">{leg.startWaypoint.name}</div>
+                          <div className="text-muted-foreground">
+                            Beide Veranstaltungen am selben Ort
+                          </div>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  )
+                }
 
                 // Use leg geometry if available (real walking path), otherwise fallback to endpoints
                 const positions: [number, number][] = leg.geometry?.coordinates?.length
