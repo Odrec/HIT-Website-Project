@@ -1,39 +1,30 @@
-import { PrismaClient } from '@prisma/client'
-
-/**
- * Prisma Client singleton for database access
- *
- * This prevents multiple instances of Prisma Client in development
- * which can happen due to hot-reloading.
- *
- * @see https://www.prisma.io/docs/guides/performance-and-optimization/connection-management
- */
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../../generated/prisma/client/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createPrismaClient() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg(pool)
+  return new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
 
-/**
- * Disconnect from the database
- * Use this in scripts or serverless functions that need to cleanup
- */
 export async function disconnect() {
   await prisma.$disconnect()
 }
 
-/**
- * Health check for database connection
- */
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`

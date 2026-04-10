@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
-import type { EventType, Institution } from '@prisma/client'
+import type { EventType, Institution } from '@/generated/prisma/client/enums'
 
 // ---------------------------------------------------------------------------
 // Event include shape

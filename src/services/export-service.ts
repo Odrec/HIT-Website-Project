@@ -1,7 +1,7 @@
 // Export Data Service - Fetches and formats data for Excel/PDF export views
 
 import { prisma } from '@/lib/db/prisma'
-import type { EventType, Institution, Affiliation } from '@prisma/client'
+import type { EventType, Institution, Affiliation } from '@/generated/prisma/client/enums'
 
 // ---------------------------------------------------------------------------
 // Types

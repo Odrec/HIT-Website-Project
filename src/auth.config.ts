@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from 'next-auth'
 import { NextResponse } from 'next/server'
-import type { UserRole } from '@prisma/client'
+import type { UserRole } from '@/generated/prisma/client/enums'
 import { canAccessAdmin } from '@/lib/auth/rbac'
 
 /**

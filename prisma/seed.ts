@@ -1,10 +1,15 @@
 /// <reference types="node" />
-import { PrismaClient, $Enums } from '@prisma/client'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../src/generated/prisma/client/client'
+import * as $Enums from '../src/generated/prisma/client/enums'
 import * as bcrypt from 'bcryptjs'
 
 const { Institution, EventType, LocationType, UserRole, Affiliation } = $Enums
 
-const prisma = new PrismaClient()
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('🌱 Starting database seeding...')

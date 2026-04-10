@@ -1,6 +1,6 @@
 // Event Service - Business logic for event management
 
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma/client/client'
 import { prisma } from '@/lib/db/prisma'
 import type {
   CreateEventInput,

@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import prisma from '@/lib/db/prisma'
-import type { UserRole } from '@prisma/client'
+import type { UserRole } from '@/generated/prisma/client/enums'
 import authConfig from './auth.config'
 
 /**
