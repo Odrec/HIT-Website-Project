@@ -52,7 +52,7 @@ const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
 })
 
 // Fallback HIT date used until the settings fetch resolves
-const FALLBACK_HIT_DATE = new Date('2026-11-19')
+const FALLBACK_HIT_DATE = new Date(2026, 10, 19) // Nov 19, 2026 in local time
 
 function SchedulePageContent() {
   const searchParams = useSearchParams()
@@ -71,7 +71,9 @@ function SchedulePageContent() {
         if (response.ok) {
           const data = await response.json()
           if (data.hitDate) {
-            setSelectedDate(new Date(data.hitDate))
+            // Parse as local date to avoid timezone offset showing previous day
+            const d = new Date(data.hitDate)
+            setSelectedDate(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
           }
         }
       } catch (error) {
@@ -234,6 +236,13 @@ function SchedulePageContent() {
       .map((d) => parseISO(d))
       .sort((a, b) => a.getTime() - b.getTime())
   }, [state.items])
+
+  // Auto-select the first date that has events
+  useEffect(() => {
+    if (scheduleDates.length > 0) {
+      setSelectedDate(scheduleDates[0])
+    }
+  }, [scheduleDates])
 
   // Events for selected date
   const eventsForDate = useMemo(() => {
