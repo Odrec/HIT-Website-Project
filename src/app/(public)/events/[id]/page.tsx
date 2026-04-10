@@ -541,11 +541,19 @@ export default function EventDetailPage() {
                 <p className="text-hit-gray-500 italic">Ort wird noch bekannt gegeben</p>
               )}
 
-              {/* Map Link (placeholder for Phase 7) */}
-              <Button variant="outline" size="sm" className="w-full" disabled>
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Auf Karte anzeigen
-              </Button>
+              {/* Open location in Google Maps — only when we have real coordinates */}
+              {event.building?.latitude != null && event.building?.longitude != null && (
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${event.building.latitude},${event.building.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Auf Karte anzeigen
+                  </a>
+                </Button>
+              )}
             </CardContent>
           </Card>
 

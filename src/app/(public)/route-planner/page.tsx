@@ -32,6 +32,7 @@ import {
   List,
   Map as MapIcon,
   ChevronRight,
+  ExternalLink,
   X,
 } from 'lucide-react'
 import { HelpLink } from '@/components/help/HelpLink'
@@ -252,6 +253,31 @@ export default function RoutePlannerPage() {
   // Count warnings
   const warningCount = travelAnalyses.filter((a) => a.status !== 'ok').length
 
+  // Build a Google Maps directions URL from the current route so users can
+  // open it in the native maps app. The URL API allows origin + destination
+  // + up to 9 intermediate waypoints (11 stops max); longer routes are
+  // truncated and a hint is shown below the button.
+  const GOOGLE_MAPS_MAX_STOPS = 11
+  const googleMapsUrl = useMemo(() => {
+    if (!route || route.waypoints.length < 2) return null
+    const stops = route.waypoints.slice(0, GOOGLE_MAPS_MAX_STOPS)
+    const toParam = (wp: (typeof stops)[number]) =>
+      `${wp.coordinates.latitude},${wp.coordinates.longitude}`
+    const origin = toParam(stops[0])
+    const destination = toParam(stops[stops.length - 1])
+    const intermediate = stops.slice(1, -1).map(toParam).join('|')
+    const params = new URLSearchParams({
+      api: '1',
+      origin,
+      destination,
+      travelmode: 'walking',
+    })
+    if (intermediate) params.set('waypoints', intermediate)
+    return `https://www.google.com/maps/dir/?${params.toString()}`
+  }, [route])
+  const googleMapsTruncated =
+    !!route && route.waypoints.length > GOOGLE_MAPS_MAX_STOPS
+
   const handleBuildingClick = (building: BuildingInfo) => {
     setSelectedBuilding(building)
   }
@@ -464,12 +490,36 @@ export default function RoutePlannerPage() {
 
                   <Separator />
 
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/schedule">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Zeitplan bearbeiten
-                    </Link>
-                  </Button>
+                  <div className="space-y-2">
+                    {googleMapsUrl && (
+                      <>
+                        <Button asChild variant="outline" className="w-full">
+                          <a
+                            href={googleMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            In Google Maps öffnen
+                          </a>
+                        </Button>
+                        {googleMapsTruncated && (
+                          <p className="text-xs text-muted-foreground italic px-1">
+                            Google Maps unterstützt nur bis zu {GOOGLE_MAPS_MAX_STOPS}{' '}
+                            Stationen — nur die ersten {GOOGLE_MAPS_MAX_STOPS} Ihres Zeitplans
+                            werden übernommen.
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/schedule">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Zeitplan bearbeiten
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
