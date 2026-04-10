@@ -12,15 +12,10 @@
 
 ## 📸 Screenshots
 
-<p align="center">
-  <img src="docs/screenshots/homepage.png" alt="Homepage" width="400" />
-  <img src="docs/screenshots/events.png" alt="Events Listing" width="400" />
-</p>
-
-<p align="center">
-  <img src="docs/screenshots/navigator.png" alt="Study Navigator" width="400" />
-  <img src="docs/screenshots/route-planner.png" alt="Route Planner with Campus Map" width="400" />
-</p>
+| | |
+|---|---|
+| ![Homepage](docs/screenshots/homepage.png) | ![Events Listing](docs/screenshots/events.png) |
+| ![Study Navigator](docs/screenshots/navigator.png) | ![Route Planner with Campus Map](docs/screenshots/route-planner.png) |
 
 ---
 
