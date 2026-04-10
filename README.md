@@ -14,8 +14,8 @@
 
 | | |
 |---|---|
-| ![Homepage](docs/screenshots/homepage.png) | ![Events Listing](docs/screenshots/events.png) |
-| ![Study Navigator](docs/screenshots/navigator.png) | ![Route Planner with Campus Map](docs/screenshots/route-planner.png) |
+| ![Homepage](https://raw.githubusercontent.com/Odrec/HIT-Website-Project/main/docs/screenshots/homepage.png) | ![Events Listing](https://raw.githubusercontent.com/Odrec/HIT-Website-Project/main/docs/screenshots/events.png) |
+| ![Study Navigator](https://raw.githubusercontent.com/Odrec/HIT-Website-Project/main/docs/screenshots/navigator.png) | ![Route Planner with Campus Map](https://raw.githubusercontent.com/Odrec/HIT-Website-Project/main/docs/screenshots/route-planner.png) |
 
 ---
 
