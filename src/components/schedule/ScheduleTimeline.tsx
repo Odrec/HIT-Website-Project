@@ -2,9 +2,8 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { isSameDay } from 'date-fns'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
-import { formatEventTimeRange, formatEventDateLong } from '@/lib/event-time'
+import { formatEventTimeRange, formatEventDateLong, isSameEventDay } from '@/lib/event-time'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -72,8 +71,7 @@ export function ScheduleTimeline({
     const filtered = selectedDate
       ? state.items.filter((item) => {
           if (!item.event.timeStart) return false
-          const eventDate = new Date(item.event.timeStart)
-          return isSameDay(eventDate, selectedDate)
+          return isSameEventDay(item.event.timeStart, selectedDate)
         })
       : state.items
 
@@ -96,13 +94,16 @@ export function ScheduleTimeline({
       .map((scheduleEvent) => {
         if (!scheduleEvent.event.timeStart) return null
 
+        // Event timestamps are stored as Berlin wall-clock values whose UTC
+        // components carry the hour/minute — see src/lib/event-time.ts. Read
+        // UTC parts so slot positions are independent of the viewer's TZ.
         const startTime = new Date(scheduleEvent.event.timeStart)
         const endTime = scheduleEvent.event.timeEnd
           ? new Date(scheduleEvent.event.timeEnd)
           : new Date(startTime.getTime() + 60 * 60 * 1000) // Default 1 hour
 
-        const startMinutes = startTime.getHours() * 60 + startTime.getMinutes()
-        const endMinutes = endTime.getHours() * 60 + endTime.getMinutes()
+        const startMinutes = startTime.getUTCHours() * 60 + startTime.getUTCMinutes()
+        const endMinutes = endTime.getUTCHours() * 60 + endTime.getUTCMinutes()
 
         // Calculate slot positions (30-min slots starting at 8:00)
         const startSlot = Math.max(0, Math.floor((startMinutes - 480) / 30))
@@ -204,9 +205,7 @@ export function ScheduleTimeline({
     <div className={cn('relative', className)}>
       {/* Date header */}
       {selectedDate && (
-        <h3 className="text-lg font-semibold mb-4">
-          {formatEventDateLong(selectedDate)}
-        </h3>
+        <h3 className="text-lg font-semibold mb-4">{formatEventDateLong(selectedDate)}</h3>
       )}
 
       {/* Timeline container */}

@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db/prisma'
 import { EventType, LocationType, Institution } from '@/types/events'
 import { formatEventTime } from '@/lib/event-time'
+import { eventPairOverlapMinutes } from '@/lib/schedule-conflicts'
 import type { Event } from '@/types/events'
 import type {
   RecommendationContext,
@@ -21,16 +22,6 @@ import type {
 
 // In-memory store for event popularity (would be Redis in production)
 const eventPopularityStore: Map<string, EventPopularity> = new Map()
-
-/**
- * Calculate time overlap between two events in minutes
- */
-function calculateOverlap(start1: Date, end1: Date, start2: Date, end2: Date): number {
-  const overlapStart = Math.max(start1.getTime(), start2.getTime())
-  const overlapEnd = Math.min(end1.getTime(), end2.getTime())
-  const overlapMs = Math.max(0, overlapEnd - overlapStart)
-  return Math.floor(overlapMs / (1000 * 60))
-}
 
 /**
  * Check if an event fits within a time slot
@@ -294,20 +285,10 @@ export const recommendationService = {
       let conflictsWithSchedule = false
       const conflictingEventIds: string[] = []
 
-      if (event.timeStart && event.timeEnd) {
-        for (const scheduled of scheduledEvents) {
-          if (scheduled.timeStart && scheduled.timeEnd) {
-            const overlap = calculateOverlap(
-              new Date(event.timeStart),
-              new Date(event.timeEnd),
-              scheduled.timeStart,
-              scheduled.timeEnd
-            )
-            if (overlap > 0) {
-              conflictsWithSchedule = true
-              conflictingEventIds.push(scheduled.id)
-            }
-          }
+      for (const scheduled of scheduledEvents) {
+        if (eventPairOverlapMinutes(event, scheduled) > 0) {
+          conflictsWithSchedule = true
+          conflictingEventIds.push(scheduled.id)
         }
       }
 
@@ -516,24 +497,15 @@ export const recommendationService = {
       // Check for conflicts with existing schedule
       let hasConflict = false
 
-      if (event.timeStart && event.timeEnd) {
-        for (const scheduled of [
-          ...scheduledEvents,
-          ...events.filter((e) => addedEventIds.includes(e.id)),
-        ]) {
-          if (scheduled.id === event.id) continue
-          if (scheduled.timeStart && scheduled.timeEnd) {
-            const overlap = calculateOverlap(
-              event.timeStart,
-              event.timeEnd,
-              scheduled.timeStart,
-              scheduled.timeEnd
-            )
-            if (overlap > 0) {
-              hasConflict = true
-              break
-            }
-          }
+      const comparisonSet = [
+        ...scheduledEvents,
+        ...events.filter((e) => addedEventIds.includes(e.id)),
+      ]
+      for (const scheduled of comparisonSet) {
+        if (scheduled.id === event.id) continue
+        if (eventPairOverlapMinutes(event, scheduled) > 0) {
+          hasConflict = true
+          break
         }
       }
 
@@ -601,18 +573,15 @@ export const recommendationService = {
       for (let j = i + 1; j < events.length; j++) {
         const e1 = events[i]
         const e2 = events[j]
-
-        if (e1.timeStart && e1.timeEnd && e2.timeStart && e2.timeEnd) {
-          const overlap = calculateOverlap(e1.timeStart, e1.timeEnd, e2.timeStart, e2.timeEnd)
-          if (overlap > 0) {
-            conflicts.push({
-              event1Id: e1.id,
-              event1Title: e1.title,
-              event2Id: e2.id,
-              event2Title: e2.title,
-              overlapMinutes: overlap,
-            })
-          }
+        const overlap = eventPairOverlapMinutes(e1, e2)
+        if (overlap > 0) {
+          conflicts.push({
+            event1Id: e1.id,
+            event1Title: e1.title,
+            event2Id: e2.id,
+            event2Title: e2.title,
+            overlapMinutes: overlap,
+          })
         }
       }
     }

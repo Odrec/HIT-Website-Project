@@ -9,6 +9,7 @@ import React, {
   useMemo,
 } from 'react'
 import type { Event } from '@/types/events'
+import { detectConflicts as detectConflictsGeneric } from '@/lib/schedule-conflicts'
 
 // Types for client-side schedule management
 export interface ScheduleEvent {
@@ -53,56 +54,16 @@ interface ScheduleContextType {
 
 const STORAGE_KEY = 'hit-schedule'
 
-// Calculate overlap between two time ranges in minutes
-function calculateOverlap(start1: Date, end1: Date, start2: Date, end2: Date): number {
-  const overlapStart = Math.max(start1.getTime(), start2.getTime())
-  const overlapEnd = Math.min(end1.getTime(), end2.getTime())
-  const overlapMs = Math.max(0, overlapEnd - overlapStart)
-  return Math.floor(overlapMs / (1000 * 60))
-}
-
-// Detect conflicts between schedule items
+// Detect conflicts between schedule items. Delegates to the shared detector
+// in src/lib/schedule-conflicts.ts so every caller in the app — context,
+// recommendation service, tests — applies the same rules (e.g. Infostände
+// never conflict).
 function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
-  const conflicts: TimeConflict[] = []
-
-  for (let i = 0; i < items.length; i++) {
-    for (let j = i + 1; j < items.length; j++) {
-      const event1 = items[i]
-      const event2 = items[j]
-
-      // Skip INFOSTAND events — they're all-day and shouldn't create conflicts
-      if (event1.event.eventType === 'INFOSTAND' || event2.event.eventType === 'INFOSTAND') {
-        continue
-      }
-
-      // Skip if either event doesn't have times
-      if (
-        !event1.event.timeStart ||
-        !event1.event.timeEnd ||
-        !event2.event.timeStart ||
-        !event2.event.timeEnd
-      ) {
-        continue
-      }
-
-      const start1 = new Date(event1.event.timeStart)
-      const end1 = new Date(event1.event.timeEnd)
-      const start2 = new Date(event2.event.timeStart)
-      const end2 = new Date(event2.event.timeEnd)
-
-      const overlapMinutes = calculateOverlap(start1, end1, start2, end2)
-
-      if (overlapMinutes > 0) {
-        conflicts.push({
-          event1,
-          event2,
-          overlapMinutes,
-        })
-      }
-    }
-  }
-
-  return conflicts
+  return detectConflictsGeneric(items, (item) => item.event).map((c) => ({
+    event1: c.item1,
+    event2: c.item2,
+    overlapMinutes: c.overlapMinutes,
+  }))
 }
 
 function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
