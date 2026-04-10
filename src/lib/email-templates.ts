@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { formatEventTime, formatEventDateTime } from '@/lib/event-time'
 import type { Building, Room, Melder, Lecturer, StudyProgram } from '@/types/events'
 import { EventType, Institution } from '@/types/events'
 
@@ -66,7 +66,7 @@ const INSTITUTION_LABELS: Record<string, string> = {
 
 function formatTime(date: Date | undefined): string {
   if (!date) return '—'
-  return format(date, 'HH:mm')
+  return formatEventTime(date)
 }
 
 function formatLecturerName(lecturer: Lecturer): string {
@@ -263,7 +263,7 @@ const FIELD_LABELS: Record<string, string> = {
 function formatChangeValue(field: string, value: unknown): string {
   if (value === null || value === undefined) return '—'
   if (field === 'timeStart' || field === 'timeEnd') {
-    if (value instanceof Date) return format(value, 'dd.MM.yyyy HH:mm')
+    if (value instanceof Date) return formatEventDateTime(value)
     return String(value)
   }
   if (field === 'eventType' && typeof value === 'string') {

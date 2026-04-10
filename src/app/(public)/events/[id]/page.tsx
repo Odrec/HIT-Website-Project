@@ -20,8 +20,7 @@ import {
   ExternalLink,
   Info,
 } from 'lucide-react'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { formatEventDateLong, formatEventTime } from '@/lib/event-time'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -260,13 +259,9 @@ export default function EventDetailPage() {
     )
   }
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'EEEE, dd. MMMM yyyy', { locale: de })
-  }
+  const formatDate = (dateString: string) => formatEventDateLong(dateString)
 
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), 'HH:mm', { locale: de })
-  }
+  const formatTime = (dateString: string) => formatEventTime(dateString)
 
   return (
     <div className="container mx-auto px-4 py-8">

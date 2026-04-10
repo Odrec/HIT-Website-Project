@@ -4,8 +4,7 @@ import { trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, MapPin, User, GraduationCap, Info } from 'lucide-react'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { formatEventTime } from '@/lib/event-time'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -120,9 +119,7 @@ function convertToEvent(event: EventCardProps['event']): Event {
  * Event card component for displaying events in list or grid view
  */
 export function EventCard({ event, viewMode }: EventCardProps) {
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), 'HH:mm', { locale: de })
-  }
+  const formatTime = (dateString: string) => formatEventTime(dateString)
 
   const getLocationDisplay = () => {
     if (event.building) {

@@ -3,15 +3,18 @@ import { generateNewEventEmail, generateEditEventEmail, detectChanges } from '@/
 import { EventType, Institution, LocationType } from '@/types/events'
 import type { EmailEvent } from '@/lib/email-templates'
 
-// Minimal valid EmailEvent fixture
+// Minimal valid EmailEvent fixture.
+// Event times are stored as "wall-clock" Berlin times: the Date's UTC
+// components match the Berlin wall-clock. Use Date.UTC() so the fixture is
+// independent of the test runner's local timezone.
 const baseEvent: EmailEvent = {
   id: 'evt-1',
   title: 'Studiengang Informatik',
   description: 'Ein spannender Studiengang',
   eventType: EventType.VORTRAG,
   institution: Institution.UNI,
-  timeStart: new Date('2026-11-19T09:00:00'),
-  timeEnd: new Date('2026-11-19T09:45:00'),
+  timeStart: new Date(Date.UTC(2026, 10, 19, 9, 0, 0)),
+  timeEnd: new Date(Date.UTC(2026, 10, 19, 9, 45, 0)),
   locationType: LocationType.OTHER,
   building: { id: 'b1', slug: 'schloss', name: 'Schloss', shortName: null, address: null, campus: null, latitude: 52.272, longitude: 8.043, hasAccessibility: false, accessibilityNotes: null },
   room: { id: 'r1', name: '11/E12', floor: null, buildingId: 'b1' },
@@ -217,7 +220,7 @@ describe('detectChanges', () => {
   })
 
   it('detects timeStart change', () => {
-    const newEvent = { ...baseEvent, timeStart: new Date('2026-11-19T10:00:00') }
+    const newEvent = { ...baseEvent, timeStart: new Date(Date.UTC(2026, 10, 19, 10, 0, 0)) }
     const changes = detectChanges(baseEvent, newEvent)
     expect(changes).toContainEqual({
       field: 'timeStart',
@@ -227,7 +230,7 @@ describe('detectChanges', () => {
   })
 
   it('detects timeEnd change', () => {
-    const newEvent = { ...baseEvent, timeEnd: new Date('2026-11-19T11:00:00') }
+    const newEvent = { ...baseEvent, timeEnd: new Date(Date.UTC(2026, 10, 19, 11, 0, 0)) }
     const changes = detectChanges(baseEvent, newEvent)
     expect(changes).toContainEqual({
       field: 'timeEnd',

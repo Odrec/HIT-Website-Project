@@ -15,6 +15,7 @@ import {
   Star,
 } from 'lucide-react'
 import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
+import { formatEventDateShort, formatEventTime } from '@/lib/event-time'
 import type { ProgramRecommendation, ClusterRecommendation } from '@/types/navigator'
 import type { Event } from '@/types/events'
 
@@ -149,13 +150,8 @@ export function NavigatorRecommendations({
                             <div className="font-medium text-sm">{event.title}</div>
                             {event.timeStart && (
                               <div className="text-xs text-muted-foreground">
-                                {new Date(event.timeStart).toLocaleDateString('de-DE', {
-                                  weekday: 'short',
-                                  day: 'numeric',
-                                  month: 'short',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                                {formatEventDateShort(event.timeStart)},{' '}
+                                {formatEventTime(event.timeStart)}
                               </div>
                             )}
                           </Link>

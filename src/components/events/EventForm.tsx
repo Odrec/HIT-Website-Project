@@ -163,18 +163,21 @@ export function EventForm({
           setDateStr(formatted)
         }
 
-        // If editing, extract date/time from initialData
+        // If editing, extract date/time from initialData. Event timestamps
+        // are stored as Berlin wall-clock values whose UTC components carry
+        // the Y/M/D/H/M — read UTC parts so the form prefill is independent
+        // of the admin's browser timezone. See src/lib/event-time.ts.
         if (initialData?.timeStart) {
           const start = new Date(initialData.timeStart)
           setDateStr(start.toISOString().split('T')[0])
           setStartTime(
-            `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`
+            `${start.getUTCHours().toString().padStart(2, '0')}:${start.getUTCMinutes().toString().padStart(2, '0')}`
           )
         }
         if (initialData?.timeEnd) {
           const end = new Date(initialData.timeEnd)
           setEndTime(
-            `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`
+            `${end.getUTCHours().toString().padStart(2, '0')}:${end.getUTCMinutes().toString().padStart(2, '0')}`
           )
         }
       } catch (error) {
@@ -230,12 +233,15 @@ export function EventForm({
 
     const formData = form.getValues()
 
-    // Combine date + time into ISO strings
+    // Combine date + time into Dates whose UTC components carry the Berlin
+    // wall-clock value. Appending "Z" makes the parser treat the typed time
+    // as UTC rather than the admin's local TZ — this matches how event
+    // timestamps are stored and read elsewhere in the app (event-time.ts).
     if (dateStr && startTime) {
-      formData.timeStart = new Date(`${dateStr}T${startTime}:00`)
+      formData.timeStart = new Date(`${dateStr}T${startTime}:00Z`)
     }
     if (dateStr && endTime) {
-      formData.timeEnd = new Date(`${dateStr}T${endTime}:00`)
+      formData.timeEnd = new Date(`${dateStr}T${endTime}:00Z`)
     }
 
     // Validate that end time is after start time
