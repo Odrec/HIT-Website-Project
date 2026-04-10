@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
     const body = await request.json()
-    const { name, address, campus } = body
+    const { name, slug, shortName, address, campus, latitude, longitude, hasAccessibility, accessibilityNotes } = body
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'Name ist erforderlich' }, { status: 400 })
@@ -57,8 +57,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         name: name.trim(),
+        ...(slug !== undefined && { slug: slug.trim() }),
+        shortName: shortName?.trim() || null,
         address: address?.trim() || null,
         campus: campus?.trim() || null,
+        latitude: latitude != null ? parseFloat(latitude) : null,
+        longitude: longitude != null ? parseFloat(longitude) : null,
+        hasAccessibility: hasAccessibility ?? existing.hasAccessibility,
+        accessibilityNotes: accessibilityNotes?.trim() || null,
       },
       include: { rooms: { orderBy: { name: 'asc' } } },
     })

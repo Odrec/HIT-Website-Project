@@ -130,10 +130,10 @@ export async function invalidateProgramCaches(): Promise<void> {
 }
 
 /**
- * Invalidate all location caches
+ * Invalidate all building caches
  */
-export async function invalidateLocationCaches(): Promise<void> {
-  await cacheDeletePattern('hit:locations:*')
+export async function invalidateBuildingCaches(): Promise<void> {
+  await cacheDeletePattern('hit:buildings:*')
 }
 
 /**

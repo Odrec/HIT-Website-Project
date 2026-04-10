@@ -59,7 +59,8 @@ interface Event {
   timeEnd: string | null
   institution: string
   locationType: string
-  location: { buildingName: string; roomNumber: string | null } | null
+  building: { name: string } | null
+  room: { name: string } | null
   studyPrograms: { studyProgram: { name: string } }[]
   createdAt: string
 }
@@ -357,11 +358,11 @@ function EventsListContent() {
                           {format(new Date(event.timeStart), 'PPp', { locale: de })}
                         </span>
                       )}
-                      {event.location && (
+                      {event.building && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          {event.location.buildingName}
-                          {event.location.roomNumber && `, ${event.location.roomNumber}`}
+                          {event.building.name}
+                          {event.room?.name && `, ${event.room.name}`}
                         </span>
                       )}
                       {event.studyPrograms.length > 0 && (

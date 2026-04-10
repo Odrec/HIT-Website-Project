@@ -36,11 +36,12 @@ export const CacheKeys = {
     byId: (id: string) => `${CACHE_PREFIX}clusters:${id}`,
   },
 
-  // Location keys
-  locations: {
-    all: () => `${CACHE_PREFIX}locations:all`,
-    byId: (id: string) => `${CACHE_PREFIX}locations:${id}`,
-    byBuilding: (building: string) => `${CACHE_PREFIX}locations:building:${building}`,
+  // Building keys
+  buildings: {
+    all: () => `${CACHE_PREFIX}buildings:all`,
+    byId: (id: string) => `${CACHE_PREFIX}buildings:${id}`,
+    bySlug: (slug: string) => `${CACHE_PREFIX}buildings:slug:${slug}`,
+    byCampus: (campus: string) => `${CACHE_PREFIX}buildings:campus:${campus}`,
   },
 
   // Information market keys
@@ -78,7 +79,7 @@ export const CacheTTL = {
   // Default TTL for events and programs
   EVENTS: 300, // 5 minutes
   PROGRAMS: 900, // 15 minutes
-  LOCATIONS: 3600, // 1 hour (rarely changes)
+  BUILDINGS: 3600, // 1 hour (rarely changes)
   CLUSTERS: 3600, // 1 hour
 } as const
 
@@ -89,7 +90,7 @@ export const CachePatterns = {
   allEvents: () => `${CACHE_PREFIX}events:*`,
   allPrograms: () => `${CACHE_PREFIX}programs:*`,
   allClusters: () => `${CACHE_PREFIX}clusters:*`,
-  allLocations: () => `${CACHE_PREFIX}locations:*`,
+  allBuildings: () => `${CACHE_PREFIX}buildings:*`,
   allInfoMarkets: () => `${CACHE_PREFIX}infomarkets:*`,
   allSchedules: () => `${CACHE_PREFIX}schedules:*`,
 } as const

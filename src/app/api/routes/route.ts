@@ -7,8 +7,8 @@ import type { RouteWaypoint, TravelTimeSettings, WalkingSpeed } from '@/types/ro
  * GET /api/routes
  * Calculate route between waypoints (simple version)
  * Query params:
- * - from: building ID or name
- * - to: building ID or name
+ * - from: building slug or name
+ * - to: building slug or name
  * - walkingSpeed: slow | normal | fast (default: normal)
  */
 export async function GET(request: NextRequest) {
@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const fromBuilding = findBuilding(from)
-    const toBuilding = findBuilding(to)
+    const fromBuilding = await findBuilding(from)
+    const toBuilding = await findBuilding(to)
 
     if (!fromBuilding) {
       return NextResponse.json({ error: `Building not found: ${from}` }, { status: 404 })

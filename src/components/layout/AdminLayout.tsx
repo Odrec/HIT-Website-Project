@@ -6,7 +6,6 @@ import { useSession, signOut } from 'next-auth/react'
 import {
   Calendar,
   Users,
-  MapPin,
   GraduationCap,
   LayoutDashboard,
   LogOut,
@@ -43,11 +42,6 @@ const sidebarItems = [
     title: 'Studiengänge',
     href: '/admin/study-programs',
     icon: GraduationCap,
-  },
-  {
-    title: 'Standorte',
-    href: '/admin/locations',
-    icon: MapPin,
   },
   {
     title: 'Gebäude',

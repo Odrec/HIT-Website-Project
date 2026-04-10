@@ -254,7 +254,7 @@ function SchedulePageContent() {
   // while BuildingInfo uses full names like "Schloss Osnabrück" or "Caprivistraße Gebäude A"
   const scheduledBuildingIds = useMemo(() => {
     const eventBuildingNames = state.items
-      .map((item) => item.event.location?.buildingName?.toLowerCase())
+      .map((item) => item.event.building?.name?.toLowerCase())
       .filter((n): n is string => !!n)
 
     if (eventBuildingNames.length === 0) return []
@@ -345,8 +345,8 @@ function SchedulePageContent() {
         if (item.event.description) {
           ical += `DESCRIPTION:${item.event.description.replace(/\n/g, '\\n')}\r\n`
         }
-        if (item.event.location) {
-          ical += `LOCATION:${item.event.location.buildingName}${item.event.location.roomNumber ? `, ${item.event.location.roomNumber}` : ''}\r\n`
+        if (item.event.building) {
+          ical += `LOCATION:${item.event.building.name}${item.event.room?.name ? `, ${item.event.room.name}` : ''}\r\n`
         }
         ical += 'END:VEVENT\r\n'
       }
@@ -849,8 +849,8 @@ function SchedulePageContent() {
                       .toLowerCase()
                       .replace(/^\w/, (c: string) => c.toUpperCase()) ?? '—'}
                   </td>
-                  <td className="py-2 px-2">{item.event.location?.buildingName ?? '—'}</td>
-                  <td className="py-2 px-2">{item.event.location?.roomNumber ?? '—'}</td>
+                  <td className="py-2 px-2">{item.event.building?.name ?? '—'}</td>
+                  <td className="py-2 px-2">{item.event.room?.name ?? '—'}</td>
                 </tr>
               ))}
           </tbody>

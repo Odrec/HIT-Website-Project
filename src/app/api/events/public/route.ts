@@ -202,7 +202,6 @@ export async function GET(request: NextRequest) {
         skip,
         take: pageSize,
         include: {
-          location: true,
           melder: true,
           building: true,
           room: { include: { building: true } },
@@ -272,14 +271,6 @@ export async function GET(request: NextRequest) {
       institution: mapInstitutionToFrontend(event.institution),
       isCrossProgram: event.isCrossProgram,
       locationHint: event.locationHint,
-      location: event.location
-        ? {
-            id: event.location.id,
-            buildingName: event.location.buildingName,
-            roomNumber: event.location.roomNumber,
-            address: event.location.address,
-          }
-        : null,
       melder: event.melder,
       building: event.building,
       room: event.room,

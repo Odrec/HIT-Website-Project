@@ -315,13 +315,13 @@ export function ScheduleTimeline({
                             </span>
                           </div>
                         )}
-                        {item.scheduleEvent.event.location && (
+                        {item.scheduleEvent.event.building && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             <span className="truncate">
-                              {item.scheduleEvent.event.location.buildingName}
-                              {item.scheduleEvent.event.location.roomNumber &&
-                                `, ${item.scheduleEvent.event.location.roomNumber}`}
+                              {item.scheduleEvent.event.building.name}
+                              {item.scheduleEvent.event.room?.name &&
+                                `, ${item.scheduleEvent.event.room.name}`}
                             </span>
                           </div>
                         )}
@@ -434,10 +434,10 @@ export function ScheduleTimeline({
                         {item.event.timeEnd && <> - {format(new Date(item.event.timeEnd), 'HH:mm')}</>}
                       </span>
                     )}
-                    {item.event.location && (
+                    {item.event.building && (
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {item.event.location.buildingName}
+                        {item.event.building.name}
                       </span>
                     )}
                   </div>

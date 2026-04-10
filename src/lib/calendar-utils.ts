@@ -5,9 +5,11 @@ interface CalendarEvent {
   description: string | null
   timeStart: Date
   timeEnd: Date
-  location: {
-    buildingName: string
-    roomNumber?: string | null
+  building?: {
+    name: string
+  } | null
+  room?: {
+    name: string
   } | null
 }
 
@@ -21,10 +23,10 @@ export function generateGoogleCalendarUrl(event: CalendarEvent): string {
   params.set('action', 'TEMPLATE')
   params.set('text', event.title)
 
-  if (event.location) {
-    const locationParts = [event.location.buildingName]
-    if (event.location.roomNumber) {
-      locationParts.push(event.location.roomNumber)
+  if (event.building) {
+    const locationParts = [event.building.name]
+    if (event.room?.name) {
+      locationParts.push(event.room.name)
     }
     params.set('location', locationParts.join(', '))
   }

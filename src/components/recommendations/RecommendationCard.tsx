@@ -106,11 +106,11 @@ export function RecommendationCard({
         )}
 
         {/* Location */}
-        {event.location && (
+        {event.building && (
           <div className="flex items-center text-sm text-gray-600">
             <MapPin className="h-4 w-4 mr-2" />
-            {event.location.buildingName}
-            {event.location.roomNumber && `, ${event.location.roomNumber}`}
+            {event.building.name}
+            {event.room?.name && `, ${event.room.name}`}
           </div>
         )}
 

@@ -10,7 +10,6 @@ import type { EventType, Institution } from '@prisma/client'
 // ---------------------------------------------------------------------------
 
 const eventInclude = {
-  location: true,
   lecturers: true,
   organizers: true,
   melder: true,

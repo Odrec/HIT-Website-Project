@@ -12,8 +12,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing required params: from, to' }, { status: 400 })
   }
 
-  const fromBuilding = findBuilding(from)
-  const toBuilding = findBuilding(to)
+  const fromBuilding = await findBuilding(from)
+  const toBuilding = await findBuilding(to)
 
   if (!fromBuilding || !toBuilding) {
     return NextResponse.json({ error: 'Building not found' }, { status: 404 })
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   // Check cache first
   const cached = await prisma.cachedRoute.findUnique({
     where: {
-      fromBuildingId_toBuildingId: { fromBuildingId: from, toBuildingId: to },
+      fromBuildingSlug_toBuildingSlug: { fromBuildingSlug: from, toBuildingSlug: to },
     },
   })
 
@@ -45,11 +45,11 @@ export async function GET(request: Request) {
 
     await prisma.cachedRoute.upsert({
       where: {
-        fromBuildingId_toBuildingId: { fromBuildingId: from, toBuildingId: to },
+        fromBuildingSlug_toBuildingSlug: { fromBuildingSlug: from, toBuildingSlug: to },
       },
       create: {
-        fromBuildingId: from,
-        toBuildingId: to,
+        fromBuildingSlug: from,
+        toBuildingSlug: to,
         distanceMeters: result.distanceMeters,
         durationSeconds: result.durationSeconds,
         polyline: result.polyline,

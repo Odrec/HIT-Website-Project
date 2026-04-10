@@ -111,9 +111,9 @@ export default function RouteInfo({ route, className = '' }: RouteInfoProps) {
                 </div>
               </div>
 
-              {/* Leg info */}
+              {/* Leg info between stops */}
               {index < route.legs.length && (
-                <div className="ml-11 mb-2 -mt-10 text-xs text-gray-500 flex items-center gap-2">
+                <div className="ml-11 -mt-1 mb-1 text-xs text-gray-500 flex items-center gap-2">
                   <Footprints className="h-3 w-3" />
                   <span>
                     {formatDistance(route.legs[index].distance)} •{' '}

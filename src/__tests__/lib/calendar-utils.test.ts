@@ -8,9 +8,11 @@ describe('generateGoogleCalendarUrl', () => {
       description: 'Einführung in den Studiengang',
       timeStart: new Date('2026-11-19T09:00:00'),
       timeEnd: new Date('2026-11-19T09:45:00'),
-      location: {
-        buildingName: 'Schloss',
-        roomNumber: '11/E12',
+      building: {
+        name: 'Schloss',
+      },
+      room: {
+        name: '11/E12',
       },
     }
 

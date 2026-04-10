@@ -43,9 +43,15 @@ export interface Melder {
 
 export interface Building {
   id: string
+  slug: string
   name: string
+  shortName: string | null
   address: string | null
   campus: string | null
+  latitude: number | null
+  longitude: number | null
+  hasAccessibility: boolean
+  accessibilityNotes: string | null
   rooms?: Room[]
 }
 
@@ -95,15 +101,6 @@ export interface StudyProgramCluster {
   programs?: StudyProgram[]
 }
 
-export interface Location {
-  id: string
-  buildingName: string
-  roomNumber?: string
-  address?: string
-  latitude?: number
-  longitude?: number
-}
-
 export interface InformationMarket {
   id: string
   name: string
@@ -126,8 +123,6 @@ export interface Event {
   institution: Institution
   isCrossProgram?: boolean
   locationHint?: string | null
-  locationId?: string
-  location?: Location
   melderId?: string | null
   melder?: Melder | null
   buildingId?: string | null
@@ -158,7 +153,6 @@ export interface CreateEventInput {
   institution: Institution
   isCrossProgram?: boolean
   locationHint?: string
-  locationId?: string
   melderId?: string
   buildingId?: string
   roomId?: string
@@ -178,7 +172,7 @@ export interface EventFilters {
   eventType?: EventType
   studyProgramId?: string
   clusterId?: string
-  locationId?: string
+  buildingId?: string
   startDate?: Date
   endDate?: Date
   search?: string

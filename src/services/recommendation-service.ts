@@ -78,16 +78,25 @@ function mapPrismaEvent(prismaEvent: {
   additionalInfo: string | null
   photoUrl: string | null
   institution: string
-  locationId: string | null
   createdAt: Date
   updatedAt: Date
-  location?: {
+  building?: {
     id: string
-    buildingName: string
-    roomNumber: string | null
+    slug: string
+    name: string
+    shortName: string | null
     address: string | null
+    campus: string | null
     latitude: number | null
     longitude: number | null
+    hasAccessibility: boolean
+    accessibilityNotes: string | null
+  } | null
+  room?: {
+    id: string
+    name: string
+    floor: string | null
+    buildingId: string
   } | null
   lecturers?: Array<{
     id: string
@@ -119,17 +128,8 @@ function mapPrismaEvent(prismaEvent: {
     additionalInfo: prismaEvent.additionalInfo ?? undefined,
     photoUrl: prismaEvent.photoUrl ?? undefined,
     institution: Institution[prismaEvent.institution as keyof typeof Institution],
-    locationId: prismaEvent.locationId ?? undefined,
-    location: prismaEvent.location
-      ? {
-          id: prismaEvent.location.id,
-          buildingName: prismaEvent.location.buildingName,
-          roomNumber: prismaEvent.location.roomNumber ?? undefined,
-          address: prismaEvent.location.address ?? undefined,
-          latitude: prismaEvent.location.latitude ?? undefined,
-          longitude: prismaEvent.location.longitude ?? undefined,
-        }
-      : undefined,
+    building: prismaEvent.building ?? undefined,
+    room: prismaEvent.room ?? undefined,
     lecturers: prismaEvent.lecturers?.map((l) => ({
       id: l.id,
       eventId: l.eventId,
@@ -223,7 +223,8 @@ export const recommendationService = {
     const events = await prisma.event.findMany({
       where,
       include: {
-        location: true,
+        building: true,
+        room: true,
         lecturers: true,
         studyPrograms: {
           include: {
@@ -239,7 +240,7 @@ export const recommendationService = {
       scheduledEventIds.length > 0
         ? await prisma.event.findMany({
             where: { id: { in: scheduledEventIds } },
-            include: { location: true },
+            include: { building: true, room: true },
           })
         : []
 
@@ -352,8 +353,8 @@ export const recommendationService = {
 
         if (previousEvent) {
           travelTimeFromPrevious = estimateTravelTime(
-            previousEvent.location?.buildingName,
-            event.location?.buildingName
+            previousEvent.building?.name,
+            event.building?.name
           )
 
           const timeBetween = previousEvent.timeEnd
@@ -577,7 +578,8 @@ export const recommendationService = {
     const events = await prisma.event.findMany({
       where: { id: { in: scheduledEventIds } },
       include: {
-        location: true,
+        building: true,
+        room: true,
         studyPrograms: {
           include: { studyProgram: true },
         },
@@ -691,9 +693,9 @@ export const recommendationService = {
       }
 
       // Locations
-      if (event.location) {
-        locationDistribution[event.location.buildingName] =
-          (locationDistribution[event.location.buildingName] || 0) + 1
+      if (event.building) {
+        locationDistribution[event.building.name] =
+          (locationDistribution[event.building.name] || 0) + 1
       }
     }
 
@@ -846,7 +848,8 @@ export const recommendationService = {
     const events = await prisma.event.findMany({
       where: { id: { in: eventIds } },
       include: {
-        location: true,
+        building: true,
+        room: true,
         lecturers: true,
         studyPrograms: {
           include: { studyProgram: true },
@@ -895,7 +898,8 @@ export const recommendationService = {
         timeEnd: { lte: maxEnd },
       },
       include: {
-        location: true,
+        building: true,
+        room: true,
         lecturers: true,
         studyPrograms: {
           include: { studyProgram: true },

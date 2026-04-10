@@ -14,7 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const event = await prisma.event.findUnique({
       where: { id },
       include: {
-        location: true,
+        building: true,
+        room: true,
         lecturers: {
           select: {
             id: true,
@@ -77,7 +78,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         take: 6,
         orderBy: { timeStart: 'asc' },
         include: {
-          location: true,
+          building: true,
+          room: true,
           lecturers: {
             select: {
               id: true,
@@ -124,7 +126,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         take: 3 - relatedEvents.length,
         orderBy: { timeStart: 'asc' },
         include: {
-          location: true,
+          building: true,
+          room: true,
           lecturers: {
             select: {
               id: true,
@@ -182,14 +185,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       additionalInfo: e.additionalInfo,
       photoUrl: e.photoUrl,
       institution: mapInstitutionToFrontend(e.institution),
-      location: e.location
-        ? {
-            id: e.location.id,
-            buildingName: e.location.buildingName,
-            roomNumber: e.location.roomNumber,
-            address: e.location.address,
-          }
-        : null,
+      building: e.building || null,
+      room: e.room || null,
       lecturers: e.lecturers,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       studyPrograms: e.studyPrograms.map((esp: any) => esp.studyProgram),

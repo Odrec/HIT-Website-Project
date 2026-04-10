@@ -6,7 +6,7 @@ import {
   flushAllCaches,
   invalidateEventCaches,
   invalidateProgramCaches,
-  invalidateLocationCaches,
+  invalidateBuildingCaches,
 } from '@/lib/cache/cache-utils'
 import { isRedisConnected } from '@/lib/cache/redis'
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     let cacheType = 'all'
     try {
       const body = await request.json()
-      if (body.type && ['all', 'events', 'programs', 'locations'].includes(body.type)) {
+      if (body.type && ['all', 'events', 'programs', 'buildings'].includes(body.type)) {
         cacheType = body.type
       }
     } catch {
@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
       case 'programs':
         await invalidateProgramCaches()
         break
-      case 'locations':
-        await invalidateLocationCaches()
+      case 'buildings':
+        await invalidateBuildingCaches()
         break
       case 'all':
       default:

@@ -57,7 +57,6 @@ export const eventFormSchema = z
       .default(''),
     photoUrl: z.string().url('Invalid URL').optional().or(z.literal('')).default(''),
     institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
-    locationId: z.string().optional().default(''),
     lecturers: z.array(lecturerSchema).default([]),
     organizers: z.array(organizerSchema).default([]),
     studyProgramIds: z.array(z.string()).default([]),

@@ -369,20 +369,33 @@ export default function RoutePlannerPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium truncate">{item.event.title}</p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                                {item.event.location && (
-                                  <>
-                                    <span>•</span>
-                                    <MapPin className="h-3 w-3" />
-                                    {item.event.location.buildingName}
-                                  </>
-                                )}
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3 shrink-0" />
+                                <span>
+                                  {new Date(item.event.timeStart!).toLocaleTimeString('de-DE', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                  {item.event.timeEnd && (
+                                    <>
+                                      {' – '}
+                                      {new Date(item.event.timeEnd).toLocaleTimeString('de-DE', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </>
+                                  )}
+                                </span>
                               </div>
+                              {item.event.building && (
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                                  <MapPin className="h-3 w-3 shrink-0" />
+                                  <span className="truncate">
+                                    {item.event.building.shortName || item.event.building.name}
+                                    {item.event.room && `, ${item.event.room.name}`}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )

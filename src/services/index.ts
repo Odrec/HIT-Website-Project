@@ -2,7 +2,6 @@
 
 export { eventService } from './event-service'
 export { studyProgramService } from './study-program-service'
-export { locationService } from './location-service'
 export { navigatorService } from './navigator-service'
 export { recommendationService } from './recommendation-service'
 export * as routeService from './route-service'

@@ -53,11 +53,23 @@ interface Event {
   additionalInfo: string | null
   photoUrl: string | null
   institution: string
-  location: {
+  building: {
     id: string
-    buildingName: string
-    roomNumber: string | null
+    slug: string
+    name: string
+    shortName: string | null
     address: string | null
+    campus: string | null
+    latitude: number | null
+    longitude: number | null
+    hasAccessibility: boolean
+    accessibilityNotes: string | null
+  } | null
+  room: {
+    id: string
+    name: string
+    floor: string | null
+    buildingId: string
   } | null
   lecturers: Array<{
     id: string
@@ -169,14 +181,8 @@ export default function EventDetailPage() {
     timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
     locationType: e.locationType as ScheduleEvent['locationType'],
     institution: e.institution as ScheduleEvent['institution'],
-    location: e.location
-      ? {
-          id: e.location.id,
-          buildingName: e.location.buildingName,
-          roomNumber: e.location.roomNumber ?? undefined,
-          address: e.location.address ?? undefined,
-        }
-      : undefined,
+    building: e.building ?? undefined,
+    room: e.room ?? undefined,
     lecturers: e.lecturers.map((l) => ({
       id: l.id,
       eventId: e.id,
@@ -515,16 +521,16 @@ export default function EventDetailPage() {
               <CardTitle>Ort</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {event.location ? (
+              {event.building ? (
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-5 w-5 text-hit-uni-500" />
                   <div>
-                    <p className="font-medium text-hit-gray-900">{event.location.buildingName}</p>
-                    {event.location.roomNumber && (
-                      <p className="text-hit-gray-600">Raum {event.location.roomNumber}</p>
+                    <p className="font-medium text-hit-gray-900">{event.building.name}</p>
+                    {event.room?.name && (
+                      <p className="text-hit-gray-600">Raum {event.room.name}</p>
                     )}
-                    {event.location.address && (
-                      <p className="text-sm text-hit-gray-500 mt-1">{event.location.address}</p>
+                    {event.building.address && (
+                      <p className="text-sm text-hit-gray-500 mt-1">{event.building.address}</p>
                     )}
                   </div>
                 </div>

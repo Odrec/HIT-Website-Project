@@ -142,12 +142,12 @@ export function ScheduleEventCard({
                 </span>
               </div>
             )}
-            {event.location && (
+            {event.building && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
                 <span>
-                  {event.location.buildingName}
-                  {event.location.roomNumber && `, ${event.location.roomNumber}`}
+                  {event.building.name}
+                  {event.room?.name && `, ${event.room.name}`}
                 </span>
               </div>
             )}
@@ -224,7 +224,8 @@ export function ScheduleEventCard({
                     description: event.description ?? null,
                     timeStart: new Date(event.timeStart),
                     timeEnd: new Date(event.timeEnd),
-                    location: event.location ?? null,
+                    building: event.building ?? null,
+                    room: event.room ?? null,
                   })}
                   target="_blank"
                   rel="noopener noreferrer"

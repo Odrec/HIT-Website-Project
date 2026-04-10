@@ -13,7 +13,7 @@ const baseEvent: EmailEvent = {
   timeStart: new Date('2026-11-19T09:00:00'),
   timeEnd: new Date('2026-11-19T09:45:00'),
   locationType: LocationType.OTHER,
-  building: { id: 'b1', name: 'Schloss', address: null, campus: null },
+  building: { id: 'b1', slug: 'schloss', name: 'Schloss', shortName: null, address: null, campus: null, latitude: 52.272, longitude: 8.043, hasAccessibility: false, accessibilityNotes: null },
   room: { id: 'r1', name: '11/E12', floor: null, buildingId: 'b1' },
   melder: {
     id: 'm1',
@@ -246,7 +246,7 @@ describe('detectChanges', () => {
   })
 
   it('detects building change', () => {
-    const newBuilding = { id: 'b2', name: 'Neues Gebäude', address: null, campus: null }
+    const newBuilding = { id: 'b2', slug: 'neues-gebaeude', name: 'Neues Gebäude', shortName: null, address: null, campus: null, latitude: 52.273, longitude: 8.044, hasAccessibility: false, accessibilityNotes: null }
     const newEvent = { ...baseEvent, building: newBuilding, buildingId: 'b2' }
     const changes = detectChanges(baseEvent, newEvent)
     expect(changes).toContainEqual(expect.objectContaining({ field: 'building' }))

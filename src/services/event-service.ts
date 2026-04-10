@@ -60,8 +60,8 @@ export const eventService = {
       where.eventType = filters.eventType
     }
 
-    if (filters.locationId) {
-      where.locationId = filters.locationId
+    if (filters.buildingId) {
+      where.buildingId = filters.buildingId
     }
 
     if (filters.startDate || filters.endDate) {
@@ -126,7 +126,6 @@ export const eventService = {
     // Include relations
     const include = includeRelations
       ? {
-          location: true,
           lecturers: true,
           organizers: true,
           melder: true,
@@ -177,7 +176,6 @@ export const eventService = {
     return prisma.event.findUnique({
       where: { id },
       include: {
-        location: true,
         lecturers: true,
         organizers: true,
         melder: true,
@@ -210,7 +208,6 @@ export const eventService = {
       organizers = [],
       studyProgramIds = [],
       infoMarketIds = [],
-      locationId,
       locationDetails,
       melderId,
       buildingId,
@@ -226,7 +223,6 @@ export const eventService = {
         ...(locationDetails !== undefined && {
           locationDetails: locationDetails as Prisma.InputJsonValue,
         }),
-        ...(locationId && { location: { connect: { id: locationId } } }),
         ...(melderId && { melder: { connect: { id: melderId } } }),
         ...(buildingId && { building: { connect: { id: buildingId } } }),
         ...(roomId && { room: { connect: { id: roomId } } }),
@@ -258,7 +254,6 @@ export const eventService = {
         },
       },
       include: {
-        location: true,
         lecturers: true,
         organizers: true,
         melder: true,
@@ -355,7 +350,6 @@ export const eventService = {
       where: { id },
       data: updateData,
       include: {
-        location: true,
         lecturers: true,
         organizers: true,
         melder: true,
@@ -420,7 +414,6 @@ export const eventService = {
         institution: original.institution,
         isCrossProgram: original.isCrossProgram,
         locationHint: original.locationHint,
-        locationId: original.locationId,
         melderId: original.melderId,
         buildingId: original.buildingId,
         roomId: original.roomId,
@@ -452,7 +445,6 @@ export const eventService = {
         },
       },
       include: {
-        location: true,
         lecturers: true,
         organizers: true,
         melder: true,

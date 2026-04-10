@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   Calendar,
-  MapPin,
   GraduationCap,
   Users,
   Settings,
@@ -28,11 +27,6 @@ const navItems = [
     title: 'Studiengänge',
     href: '/admin/study-programs',
     icon: GraduationCap,
-  },
-  {
-    title: 'Orte',
-    href: '/admin/locations',
-    icon: MapPin,
   },
   {
     title: 'Benutzer',

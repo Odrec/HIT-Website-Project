@@ -23,7 +23,7 @@ interface EventData {
   additionalInfo: string | null
   photoUrl: string | null
   institution: string
-  locationId: string | null
+  locationId: string | null // legacy, kept for backward compat
   isCrossProgram: boolean
   locationHint: string | null
   melderId: string | null
@@ -155,7 +155,6 @@ export default function EditEventPage() {
     additionalInfo: event.additionalInfo || '',
     photoUrl: event.photoUrl || '',
     institution: event.institution as EventFormValues['institution'],
-    locationId: event.locationId || '',
     lecturers: event.lecturers.map((l) => ({
       firstName: l.firstName,
       lastName: l.lastName,

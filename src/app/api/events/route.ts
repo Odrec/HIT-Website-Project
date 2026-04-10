@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const eventType = searchParams.get('eventType') as EventType | undefined
     const studyProgramId = searchParams.get('studyProgramId') || undefined
     const clusterId = searchParams.get('clusterId') || undefined
-    const locationId = searchParams.get('locationId') || undefined
+    const buildingId = searchParams.get('buildingId') || undefined
     const startDate = searchParams.get('startDate')
       ? new Date(searchParams.get('startDate')!)
       : undefined
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         eventType,
         studyProgramId,
         clusterId,
-        locationId,
+        buildingId,
         startDate,
         endDate,
         ...(melderId !== undefined ? { melderId } : {}),
@@ -139,12 +139,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse dates if provided
-    // Convert 'none' locationId to null (placeholder value from form)
-    const locationId = body.locationId === 'none' || body.locationId === '' ? null : body.locationId
-
     const eventData = {
       ...body,
-      locationId,
       isCrossProgram: body.isCrossProgram ?? false,
       locationHint: body.locationHint || null,
       melderId: body.melderId || null,

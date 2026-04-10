@@ -83,22 +83,6 @@ model StudyProgram {
   @@map("study_programs")
 }
 
-/// Physical location (building/room) for events
-model Location {
-  id           String   @id @default(cuid())
-  buildingName String   @db.VarChar(200)
-  roomNumber   String?  @db.VarChar(50)
-  address      String?  @db.Text
-  latitude     Float?
-  longitude    Float?
-  events       Event[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([buildingName])
-  @@map("locations")
-}
-
 /// Information market (Infomarkt) locations
 model InformationMarket {
   id       String                    @id @default(cuid())
@@ -130,8 +114,6 @@ model Event {
   institution     Institution
   isCrossProgram  Boolean                   @default(false)
   locationHint    String?
-  locationId      String?
-  location        Location?                 @relation(fields: [locationId], references: [id], onDelete: SetNull)
   melderId        String?
   melder          Melder?                   @relation(fields: [melderId], references: [id])
   buildingId      String?
@@ -150,7 +132,6 @@ model Event {
   @@index([eventType])
   @@index([institution])
   @@index([timeStart])
-  @@index([locationId])
   @@index([createdAt])
   @@index([melderId])
   @@index([buildingId])
@@ -315,16 +296,25 @@ model Melder {
   events      Event[]
 }
 
-/// Campus building
+/// Campus building — single source of truth for locations, coordinates, and routing
 model Building {
-  id        String   @id @default(cuid())
-  name      String
-  address   String?
-  campus    String?
-  rooms     Room[]
-  events    Event[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  slug               String   @unique @db.VarChar(50)
+  name               String   @db.VarChar(200)
+  shortName          String?  @db.VarChar(50)
+  address            String?  @db.Text
+  campus             String?  @db.VarChar(50)
+  latitude           Float?
+  longitude          Float?
+  hasAccessibility   Boolean  @default(false)
+  accessibilityNotes String?  @db.Text
+  rooms              Room[]
+  events             Event[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([campus])
+  @@map("buildings")
 }
 
 /// Room within a building
@@ -354,18 +344,19 @@ model ExportSchedule {
 }
 
 /// Cached walking route between two buildings from Google Directions API
+/// fromBuildingSlug/toBuildingSlug reference Building.slug for stable cache keys
 model CachedRoute {
-  id              String   @id @default(cuid())
-  fromBuildingId  String
-  toBuildingId    String
-  distanceMeters  Int
-  durationSeconds Int
-  polyline        String   @db.Text
-  waypoints       Json?    @db.JsonB
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(cuid())
+  fromBuildingSlug String   @db.VarChar(50)
+  toBuildingSlug   String   @db.VarChar(50)
+  distanceMeters   Int
+  durationSeconds  Int
+  polyline         String   @db.Text
+  waypoints        Json?    @db.JsonB
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  @@unique([fromBuildingId, toBuildingId])
+  @@unique([fromBuildingSlug, toBuildingSlug])
   @@map("cached_routes")
 }
 

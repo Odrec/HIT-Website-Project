@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState, useCallback } from 'react'
 import { Plus, Pencil, Trash2, Building2, ChevronDown, ChevronRight, DoorOpen } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,9 +37,15 @@ interface Room {
 
 interface Building {
   id: string
+  slug: string
   name: string
+  shortName: string | null
   campus: string | null
   address: string | null
+  latitude: number | null
+  longitude: number | null
+  hasAccessibility: boolean
+  accessibilityNotes: string | null
   rooms: Room[]
   createdAt: string
   updatedAt: string
@@ -55,8 +62,14 @@ export default function BuildingsPage() {
   const [savingBuilding, setSavingBuilding] = useState(false)
   const [buildingForm, setBuildingForm] = useState({
     name: '',
+    shortName: '',
+    slug: '',
     address: '',
     campus: '',
+    latitude: '',
+    longitude: '',
+    hasAccessibility: false,
+    accessibilityNotes: '',
   })
 
   // Building delete dialog
@@ -114,7 +127,7 @@ export default function BuildingsPage() {
 
   const openCreateBuildingDialog = () => {
     setEditingBuilding(null)
-    setBuildingForm({ name: '', address: '', campus: '' })
+    setBuildingForm({ name: '', shortName: '', slug: '', address: '', campus: '', latitude: '', longitude: '', hasAccessibility: false, accessibilityNotes: '' })
     setBuildingDialogOpen(true)
   }
 
@@ -122,8 +135,14 @@ export default function BuildingsPage() {
     setEditingBuilding(building)
     setBuildingForm({
       name: building.name,
+      shortName: building.shortName || '',
+      slug: building.slug,
       address: building.address || '',
       campus: building.campus || '',
+      latitude: building.latitude?.toString() || '',
+      longitude: building.longitude?.toString() || '',
+      hasAccessibility: building.hasAccessibility,
+      accessibilityNotes: building.accessibilityNotes || '',
     })
     setBuildingDialogOpen(true)
   }
@@ -135,8 +154,14 @@ export default function BuildingsPage() {
     try {
       const body = {
         name: buildingForm.name.trim(),
+        shortName: buildingForm.shortName.trim() || null,
+        slug: buildingForm.slug.trim() || undefined,
         address: buildingForm.address.trim() || null,
         campus: buildingForm.campus.trim() || null,
+        latitude: buildingForm.latitude ? parseFloat(buildingForm.latitude) : null,
+        longitude: buildingForm.longitude ? parseFloat(buildingForm.longitude) : null,
+        hasAccessibility: buildingForm.hasAccessibility,
+        accessibilityNotes: buildingForm.accessibilityNotes.trim() || null,
       }
 
       const url = editingBuilding ? `/api/buildings/${editingBuilding.id}` : '/api/buildings'
@@ -340,7 +365,12 @@ export default function BuildingsPage() {
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                                {building.name}
+                                <div>
+                                  {building.name}
+                                  {building.shortName && (
+                                    <span className="text-xs text-muted-foreground ml-1">({building.shortName})</span>
+                                  )}
+                                </div>
                               </div>
                             </TableCell>
                             <TableCell>{building.campus || '-'}</TableCell>
@@ -598,15 +628,46 @@ export default function BuildingsPage() {
                 : 'Fügen Sie ein neues Gebäude hinzu'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="building-name">Name *</Label>
-              <Input
-                id="building-name"
-                value={buildingForm.name}
-                onChange={(e) => setBuildingForm({ ...buildingForm, name: e.target.value })}
-                placeholder="z.B. AVZ, Hauptgebäude"
-              />
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="building-name">Name *</Label>
+                <Input
+                  id="building-name"
+                  value={buildingForm.name}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, name: e.target.value })}
+                  placeholder="z.B. AVZ, Schloss Osnabrück"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="building-shortName">Kurzname</Label>
+                <Input
+                  id="building-shortName"
+                  value={buildingForm.shortName}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, shortName: e.target.value })}
+                  placeholder="z.B. AVZ, Schloss"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="building-slug">Slug (URL-ID)</Label>
+                <Input
+                  id="building-slug"
+                  value={buildingForm.slug}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, slug: e.target.value })}
+                  placeholder="z.B. avz, schloss"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="building-campus">Campus</Label>
+                <Input
+                  id="building-campus"
+                  value={buildingForm.campus}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, campus: e.target.value })}
+                  placeholder="z.B. schloss, westerberg, caprivi"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="building-address">Adresse</Label>
@@ -614,18 +675,52 @@ export default function BuildingsPage() {
                 id="building-address"
                 value={buildingForm.address}
                 onChange={(e) => setBuildingForm({ ...buildingForm, address: e.target.value })}
-                placeholder="z.B. Barbarastrasse 22"
+                placeholder="z.B. Albrechtstraße 28, 49076 Osnabrück"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="building-campus">Campus</Label>
-              <Input
-                id="building-campus"
-                value={buildingForm.campus}
-                onChange={(e) => setBuildingForm({ ...buildingForm, campus: e.target.value })}
-                placeholder="z.B. Campus Hauptbahnhof"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="building-latitude">Breitengrad</Label>
+                <Input
+                  id="building-latitude"
+                  type="number"
+                  step="any"
+                  value={buildingForm.latitude}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, latitude: e.target.value })}
+                  placeholder="52.2815"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="building-longitude">Längengrad</Label>
+                <Input
+                  id="building-longitude"
+                  type="number"
+                  step="any"
+                  value={buildingForm.longitude}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, longitude: e.target.value })}
+                  placeholder="8.0231"
+                />
+              </div>
             </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="building-accessibility"
+                checked={buildingForm.hasAccessibility}
+                onCheckedChange={(checked) => setBuildingForm({ ...buildingForm, hasAccessibility: checked === true })}
+              />
+              <Label htmlFor="building-accessibility">Barrierefrei</Label>
+            </div>
+            {!buildingForm.hasAccessibility && (
+              <div className="space-y-2">
+                <Label htmlFor="building-accessibilityNotes">Barrierefreiheit Hinweise</Label>
+                <Input
+                  id="building-accessibilityNotes"
+                  value={buildingForm.accessibilityNotes}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, accessibilityNotes: e.target.value })}
+                  placeholder="z.B. Historisches Gebäude, eingeschränkter Zugang"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBuildingDialogOpen(false)}>

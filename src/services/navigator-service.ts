@@ -13,7 +13,7 @@ import type {
   EndSessionResource,
 } from '@/types/navigator'
 import { Institution, EventType, LocationType, Affiliation } from '@/types/events'
-import type { StudyProgram, Event } from '@/types/events'
+import type { StudyProgram, Event, Building, Room } from '@/types/events'
 
 // In-memory session store (in production, use Redis)
 // Use globalThis to persist sessions across Next.js hot-reloads in development
@@ -509,7 +509,8 @@ export async function getRecommendations(
         include: {
           event: {
             include: {
-              location: true,
+              building: true,
+              room: true,
               lecturers: true,
             },
           },
@@ -667,17 +668,8 @@ export async function getRecommendations(
       institution: ep.event.institution as unknown as Institution,
       isCrossProgram: ep.event.isCrossProgram ?? false,
       locationHint: ep.event.locationHint ?? null,
-      locationId: ep.event.locationId || undefined,
-      location: ep.event.location
-        ? {
-            id: ep.event.location.id,
-            buildingName: ep.event.location.buildingName,
-            roomNumber: ep.event.location.roomNumber || undefined,
-            address: ep.event.location.address || undefined,
-            latitude: ep.event.location.latitude || undefined,
-            longitude: ep.event.location.longitude || undefined,
-          }
-        : undefined,
+      building: ep.event.building ?? undefined,
+      room: ep.event.room ?? undefined,
       melderId: ep.event.melderId ?? null,
       buildingId: ep.event.buildingId ?? null,
       roomId: ep.event.roomId ?? null,
@@ -789,7 +781,8 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       },
     },
     include: {
-      location: true,
+      building: true,
+      room: true,
       lecturers: true,
       studyPrograms: {
         include: {
@@ -819,17 +812,8 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       institution: e.institution as unknown as Institution,
       isCrossProgram: e.isCrossProgram ?? false,
       locationHint: e.locationHint ?? null,
-      locationId: e.locationId || undefined,
-      location: e.location
-        ? {
-            id: e.location.id,
-            buildingName: e.location.buildingName,
-            roomNumber: e.location.roomNumber || undefined,
-            address: e.location.address || undefined,
-            latitude: e.location.latitude || undefined,
-            longitude: e.location.longitude || undefined,
-          }
-        : undefined,
+      building: (e.building as unknown as Building) ?? undefined,
+      room: (e.room as unknown as Room) ?? undefined,
       melderId: e.melderId ?? null,
       buildingId: e.buildingId ?? null,
       roomId: e.roomId ?? null,

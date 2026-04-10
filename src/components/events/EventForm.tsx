@@ -35,10 +35,12 @@ import { TimeGridPicker } from '@/components/events/TimeGridPicker'
 import { BuildingRoomSelect } from '@/components/events/BuildingRoomSelect'
 import { ImageUpload } from '@/components/events/ImageUpload'
 
-interface Location {
+interface BuildingOption {
   id: string
-  buildingName: string
-  roomNumber: string | null
+  name: string
+  shortName: string | null
+  address: string | null
+  campus: string | null
 }
 
 interface StudyProgram {
@@ -67,7 +69,7 @@ export function EventForm({
   isSubmitting = false,
   isAdmin,
 }: EventFormProps) {
-  const [locations, setLocations] = useState<Location[]>([])
+  const [buildings, setBuildings] = useState<BuildingOption[]>([])
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([])
   const [infoMarkets, setInfoMarkets] = useState<InfoMarket[]>([])
   const [loading, setLoading] = useState(true)
@@ -138,19 +140,19 @@ export function EventForm({
   useEffect(() => {
     async function fetchData() {
       try {
-        const [locationsRes, programsRes, marketsRes, settingsRes] = await Promise.all([
-          fetch('/api/locations'),
+        const [buildingsRes, programsRes, marketsRes, settingsRes] = await Promise.all([
+          fetch('/api/buildings'),
           fetch('/api/study-programs'),
           fetch('/api/locations/info-markets'),
           fetch('/api/settings'),
         ])
 
-        const locationsData = await locationsRes.json()
+        const buildingsData = await buildingsRes.json()
         const programsData = await programsRes.json()
         const marketsData = await marketsRes.json()
         const settingsData = await settingsRes.json()
 
-        setLocations(Array.isArray(locationsData) ? locationsData : [])
+        setBuildings(Array.isArray(buildingsData) ? buildingsData : [])
         setStudyPrograms(Array.isArray(programsData) ? programsData : [])
         setInfoMarkets(Array.isArray(marketsData) ? marketsData : [])
 
@@ -494,11 +496,11 @@ export function EventForm({
 
               {watchLocationType === 'OTHER' && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="locationId">Standort</Label>
+                  <Label htmlFor="buildingId">Standort</Label>
                   <Select
-                    value={watch('locationId') || 'none'}
+                    value={watch('buildingId') || 'none'}
                     onValueChange={(value) =>
-                      setValue('locationId', value === 'none' ? undefined : value)
+                      setValue('buildingId', value === 'none' ? undefined : value)
                     }
                   >
                     <SelectTrigger>
@@ -506,10 +508,10 @@ export function EventForm({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Kein Standort</SelectItem>
-                      {locations.map((loc) => (
-                        <SelectItem key={loc.id} value={loc.id}>
-                          {loc.buildingName}
-                          {loc.roomNumber && ` - ${loc.roomNumber}`}
+                      {buildings.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                          {b.campus && ` (${b.campus})`}
                         </SelectItem>
                       ))}
                     </SelectContent>

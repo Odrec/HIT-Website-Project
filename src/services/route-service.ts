@@ -17,12 +17,46 @@ import { prisma } from '@/lib/db/prisma'
 import { fetchWalkingDirections } from '@/services/google-directions'
 
 /**
+ * Convert a DB Building record to the BuildingInfo type used by the frontend.
+ */
+function toBuildingInfo(
+  b: {
+    id: string
+    slug: string
+    name: string
+    shortName: string | null
+    address: string | null
+    campus: string | null
+    latitude: number | null
+    longitude: number | null
+    hasAccessibility: boolean
+    accessibilityNotes: string | null
+  },
+  eventCount?: number
+): BuildingInfo {
+  return {
+    id: b.slug,
+    name: b.name,
+    shortName: b.shortName ?? undefined,
+    coordinates: {
+      latitude: b.latitude ?? 0,
+      longitude: b.longitude ?? 0,
+    },
+    address: b.address ?? '',
+    campus: (b.campus as BuildingInfo['campus']) ?? 'other',
+    hasAccessibility: b.hasAccessibility,
+    accessibilityNotes: b.accessibilityNotes ?? undefined,
+    eventCount,
+  }
+}
+
+/**
  * Get walking directions between two buildings from cache.
  * Returns null if no cached route exists.
  */
 export async function getDirections(
-  fromBuildingId: string,
-  toBuildingId: string,
+  fromBuildingSlug: string,
+  toBuildingSlug: string,
   fromCoords?: Coordinates,
   toCoords?: Coordinates
 ): Promise<{
@@ -30,13 +64,13 @@ export async function getDirections(
   durationSeconds: number
   waypoints: [number, number][]
 } | null> {
-  if (fromBuildingId === toBuildingId) {
+  if (fromBuildingSlug === toBuildingSlug) {
     return { distanceMeters: 0, durationSeconds: 0, waypoints: [] }
   }
 
   const cached = await prisma.cachedRoute.findUnique({
     where: {
-      fromBuildingId_toBuildingId: { fromBuildingId, toBuildingId },
+      fromBuildingSlug_toBuildingSlug: { fromBuildingSlug, toBuildingSlug },
     },
   })
 
@@ -49,8 +83,8 @@ export async function getDirections(
   }
 
   // No cache — resolve coordinates from buildings or use provided coords
-  const fromBuilding = findBuilding(fromBuildingId)
-  const toBuilding = findBuilding(toBuildingId)
+  const fromBuilding = await findBuilding(fromBuildingSlug)
+  const toBuilding = await findBuilding(toBuildingSlug)
   const from = fromBuilding?.coordinates ?? fromCoords
   const to = toBuilding?.coordinates ?? toCoords
   if (!from || !to) return null
@@ -65,11 +99,11 @@ export async function getDirections(
 
     await prisma.cachedRoute.upsert({
       where: {
-        fromBuildingId_toBuildingId: { fromBuildingId, toBuildingId },
+        fromBuildingSlug_toBuildingSlug: { fromBuildingSlug, toBuildingSlug },
       },
       create: {
-        fromBuildingId,
-        toBuildingId,
+        fromBuildingSlug,
+        toBuildingSlug,
         distanceMeters: result.distanceMeters,
         durationSeconds: result.durationSeconds,
         polyline: result.polyline,
@@ -130,182 +164,56 @@ function haversineDistance(from: Coordinates, to: Coordinates): number {
   return R * c
 }
 
-// Single source of truth for all building data
-const BUILDINGS: BuildingInfo[] = [
-  // Schloss Campus (University)
-  {
-    id: 'schloss',
-    name: 'Schloss Osnabrück',
-    shortName: 'Schloss',
-    coordinates: { latitude: 52.27148, longitude: 8.04424 },
-    address: 'Neuer Graben 29, 49074 Osnabrück',
-    campus: 'schloss',
-    hasAccessibility: true,
-  },
-  {
-    id: 'uos-aula',
-    name: 'Aula der Universität',
-    shortName: 'Aula',
-    coordinates: { latitude: 52.27148, longitude: 8.04424 },
-    address: 'Neuer Graben 29, 49074 Osnabrück',
-    campus: 'schloss',
-    hasAccessibility: true,
-  },
-  {
-    id: 'seminarstrasse',
-    name: 'Seminarstraße Gebäude',
-    shortName: 'Seminar',
-    coordinates: { latitude: 52.27130, longitude: 8.04585 },
-    address: 'Seminarstraße 20, 49074 Osnabrück',
-    campus: 'schloss',
-    hasAccessibility: false,
-    accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang',
-  },
-  // Westerberg Campus (University)
-  {
-    id: 'avz',
-    name: 'AVZ (Allgemeines Verfügungszentrum)',
-    shortName: 'AVZ',
-    coordinates: { latitude: 52.28386, longitude: 8.02513 },
-    address: 'Albrechtstraße 28, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  {
-    id: 'biologie',
-    name: 'Biologiegebäude',
-    shortName: 'Bio',
-    coordinates: { latitude: 52.28272, longitude: 8.02173 },
-    address: 'Barbarastraße 11, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  {
-    id: 'physik',
-    name: 'Physikgebäude',
-    shortName: 'Physik',
-    coordinates: { latitude: 52.28482, longitude: 8.02508 },
-    address: 'Barbarastraße 7, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  {
-    id: 'chemie',
-    name: 'Chemiegebäude',
-    shortName: 'Chemie',
-    coordinates: { latitude: 52.28476, longitude: 8.02431 },
-    address: 'Barbarastraße 7, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  {
-    id: 'mathematik',
-    name: 'Mathematik/Informatik',
-    shortName: 'Mathe/Info',
-    coordinates: { latitude: 52.28439, longitude: 8.02605 },
-    address: 'Albrechtstraße 28a, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  {
-    id: 'eihu',
-    name: 'EIHU (Erweiterungsbau Informatik)',
-    shortName: 'EIHU',
-    coordinates: { latitude: 52.28371, longitude: 8.02531 },
-    address: 'Wachsbleiche 27, 49076 Osnabrück',
-    campus: 'westerberg',
-    hasAccessibility: true,
-  },
-  // Hochschule Caprivi Campus
-  {
-    id: 'caprivi-a',
-    name: 'Caprivistraße Gebäude A',
-    shortName: 'CN-A',
-    coordinates: { latitude: 52.2756, longitude: 8.0148 },
-    address: 'Caprivistraße 30a, 49076 Osnabrück',
-    campus: 'caprivi',
-    hasAccessibility: true,
-  },
-  {
-    id: 'caprivi-b',
-    name: 'Caprivistraße Gebäude B',
-    shortName: 'CN-B',
-    coordinates: { latitude: 52.2761, longitude: 8.0155 },
-    address: 'Caprivistraße 30b, 49076 Osnabrück',
-    campus: 'caprivi',
-    hasAccessibility: true,
-  },
-  {
-    id: 'caprivi-c',
-    name: 'Caprivistraße Gebäude C',
-    shortName: 'CN-C',
-    coordinates: { latitude: 52.2766, longitude: 8.0162 },
-    address: 'Caprivistraße 30c, 49076 Osnabrück',
-    campus: 'caprivi',
-    hasAccessibility: true,
-  },
-  {
-    id: 'caprivi-mensa',
-    name: 'Mensa Caprivi',
-    shortName: 'Mensa CN',
-    coordinates: { latitude: 52.2751, longitude: 8.0141 },
-    address: 'Caprivistraße 30, 49076 Osnabrück',
-    campus: 'caprivi',
-    hasAccessibility: true,
-  },
-]
-
 /**
- * Find a building by ID or name
+ * Find a building by slug or name (queries the database)
  */
-export function findBuilding(idOrName: string): BuildingInfo | undefined {
-  const lowerId = idOrName.toLowerCase()
-  return BUILDINGS.find(
+export async function findBuilding(slugOrName: string): Promise<BuildingInfo | undefined> {
+  const lowerQuery = slugOrName.toLowerCase()
+
+  // Try exact slug match first
+  const bySlug = await prisma.building.findUnique({
+    where: { slug: lowerQuery },
+  })
+  if (bySlug) return toBuildingInfo(bySlug)
+
+  // Fallback: search by name
+  const all = await prisma.building.findMany()
+  const match = all.find(
     (b) =>
-      b.id.toLowerCase() === lowerId ||
-      b.name.toLowerCase().includes(lowerId) ||
-      (b.shortName && b.shortName.toLowerCase() === lowerId)
+      b.name.toLowerCase().includes(lowerQuery) ||
+      (b.shortName && b.shortName.toLowerCase() === lowerQuery)
   )
+  return match ? toBuildingInfo(match) : undefined
 }
 
 /**
  * Find building by partial name match
  */
-export function findBuildingByName(name: string): BuildingInfo | undefined {
+export async function findBuildingByName(name: string): Promise<BuildingInfo | undefined> {
   const lowerName = name.toLowerCase()
-  return BUILDINGS.find(
+  const all = await prisma.building.findMany()
+  const match = all.find(
     (b) =>
       b.name.toLowerCase().includes(lowerName) ||
       (b.shortName && b.shortName.toLowerCase().includes(lowerName))
   )
+  return match ? toBuildingInfo(match) : undefined
 }
 
 /**
  * Get all buildings with optional event count
  */
 export async function getAllBuildings(): Promise<BuildingInfo[]> {
-  // Get event counts from locations
-  const locations = await prisma.location.findMany({
+  const buildings = await prisma.building.findMany({
     include: {
       _count: {
         select: { events: true },
       },
     },
+    orderBy: [{ campus: 'asc' }, { name: 'asc' }],
   })
 
-  // Match buildings with database locations
-  return BUILDINGS.map((building) => {
-    const dbLocation = locations.find(
-      (loc) =>
-        loc.buildingName.toLowerCase().includes(building.name.toLowerCase()) ||
-        (building.shortName &&
-          loc.buildingName.toLowerCase().includes(building.shortName.toLowerCase()))
-    )
-    return {
-      ...building,
-      eventCount: dbLocation?._count?.events || 0,
-    }
-  })
+  return buildings.map((b) => toBuildingInfo(b, b._count.events))
 }
 
 /**
@@ -490,34 +398,39 @@ export async function calculateRoute(
 }
 
 /**
- * Get coordinates for an event from its location
+ * Get coordinates for an event from its building
  */
 export async function getEventCoordinates(eventId: string): Promise<Coordinates | null> {
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    include: { location: true },
+    include: { building: true },
   })
 
   if (!event) return null
 
-  // Check if location has coordinates
-  if (event.location?.latitude && event.location?.longitude) {
+  if (event.building?.latitude && event.building?.longitude) {
     return {
-      latitude: event.location.latitude,
-      longitude: event.location.longitude,
+      latitude: event.building.latitude,
+      longitude: event.building.longitude,
     }
   }
 
-  // Try to match by building name
-  if (event.location?.buildingName) {
-    const building = findBuildingByName(event.location.buildingName)
-    if (building) {
-      return building.coordinates
+  return null
+}
+
+/**
+ * Resolve coordinates for an event from its building
+ */
+async function resolveEventCoordinates(event: {
+  building?: { slug: string; latitude: number | null; longitude: number | null } | null
+}): Promise<{ coordinates: Coordinates; buildingSlug: string } | null> {
+  if (event.building?.latitude && event.building?.longitude) {
+    return {
+      coordinates: { latitude: event.building.latitude, longitude: event.building.longitude },
+      buildingSlug: event.building.slug,
     }
   }
 
-  // Fallback: use meeting point or location details
-  // This would need more sophisticated parsing in production
   return null
 }
 
@@ -540,7 +453,7 @@ export async function calculateScheduleRoute(
       id: { in: scheduledEventIds },
     },
     include: {
-      location: true,
+      building: true,
     },
     orderBy: {
       timeStart: 'asc',
@@ -562,25 +475,13 @@ export async function calculateScheduleRoute(
 
   // Add event waypoints
   for (const event of events) {
-    let coordinates: Coordinates | null = null
+    const resolved = await resolveEventCoordinates(event)
 
-    if (event.location?.latitude && event.location?.longitude) {
-      coordinates = {
-        latitude: event.location.latitude,
-        longitude: event.location.longitude,
-      }
-    } else if (event.location?.buildingName) {
-      const building = findBuildingByName(event.location.buildingName)
-      if (building) {
-        coordinates = building.coordinates
-      }
-    }
-
-    if (coordinates) {
+    if (resolved) {
       waypoints.push({
-        id: event.id,
-        name: event.location?.buildingName || 'Unbekannter Ort',
-        coordinates,
+        id: resolved.buildingSlug,
+        name: event.building?.name ?? 'Unbekannter Ort',
+        coordinates: resolved.coordinates,
         type: 'event',
         eventId: event.id,
         eventTitle: event.title,
@@ -611,7 +512,7 @@ export async function analyzeTravelTimes(
       timeStart: { not: null },
     },
     include: {
-      location: true,
+      building: true,
     },
     orderBy: {
       timeStart: 'asc',
@@ -624,50 +525,24 @@ export async function analyzeTravelTimes(
     const eventFrom = events[i]
     const eventTo = events[i + 1]
 
-    // Get coordinates for both events
-    let fromCoords: Coordinates | null = null
-    let toCoords: Coordinates | null = null
+    const fromResolved = await resolveEventCoordinates(eventFrom)
+    const toResolved = await resolveEventCoordinates(eventTo)
 
-    if (eventFrom.location?.latitude && eventFrom.location?.longitude) {
-      fromCoords = {
-        latitude: eventFrom.location.latitude,
-        longitude: eventFrom.location.longitude,
-      }
-    } else if (eventFrom.location?.buildingName) {
-      const building = findBuildingByName(eventFrom.location.buildingName)
-      if (building) fromCoords = building.coordinates
-    }
-
-    if (eventTo.location?.latitude && eventTo.location?.longitude) {
-      toCoords = {
-        latitude: eventTo.location.latitude,
-        longitude: eventTo.location.longitude,
-      }
-    } else if (eventTo.location?.buildingName) {
-      const building = findBuildingByName(eventTo.location.buildingName)
-      if (building) toCoords = building.coordinates
-    }
-
-    // Calculate times if we have both coordinates
-    if (fromCoords && toCoords && eventFrom.timeEnd && eventTo.timeStart) {
-      // Determine building IDs for cache lookup
-      const fromBuildingId =
-        (eventFrom.location?.buildingName &&
-          findBuildingByName(eventFrom.location.buildingName)?.id) ||
-        `coord:${fromCoords.latitude},${fromCoords.longitude}`
-      const toBuildingId =
-        (eventTo.location?.buildingName && findBuildingByName(eventTo.location.buildingName)?.id) ||
-        `coord:${toCoords.latitude},${toCoords.longitude}`
-
+    if (fromResolved && toResolved && eventFrom.timeEnd && eventTo.timeStart) {
       // Try cached/API route first, fall back to straight-line estimate
-      const cached = await getDirections(fromBuildingId, toBuildingId, fromCoords, toCoords)
+      const cached = await getDirections(
+        fromResolved.buildingSlug,
+        toResolved.buildingSlug,
+        fromResolved.coordinates,
+        toResolved.coordinates
+      )
       let distance: number
       let walkingTime: number
       if (cached) {
         distance = cached.distanceMeters
         walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
       } else {
-        distance = Math.round(haversineDistance(fromCoords, toCoords) * 1.4)
+        distance = Math.round(haversineDistance(fromResolved.coordinates, toResolved.coordinates) * 1.4)
         walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
       }
 
@@ -724,7 +599,7 @@ export async function getSuggestedAlternatives(
   const conflictingEvent = await prisma.event.findUnique({
     where: { id: conflictingEventId },
     include: {
-      location: true,
+      building: true,
       studyPrograms: {
         include: { studyProgram: true },
       },
@@ -736,7 +611,7 @@ export async function getSuggestedAlternatives(
   // Get all scheduled events
   const scheduledEvents = await prisma.event.findMany({
     where: { id: { in: scheduledEventIds } },
-    include: { location: true },
+    include: { building: true },
     orderBy: { timeStart: 'asc' },
   })
 
@@ -759,7 +634,7 @@ export async function getSuggestedAlternatives(
         },
       },
     },
-    include: { location: true },
+    include: { building: true },
     take: 10,
   })
 
@@ -771,46 +646,25 @@ export async function getSuggestedAlternatives(
   }[] = []
 
   for (const alt of alternatives) {
-    let altCoords: Coordinates | null = null
-    if (alt.location?.latitude && alt.location?.longitude) {
-      altCoords = {
-        latitude: alt.location.latitude,
-        longitude: alt.location.longitude,
-      }
-    } else if (alt.location?.buildingName) {
-      const building = findBuildingByName(alt.location.buildingName)
-      if (building) altCoords = building.coordinates
-    }
+    const altResolved = await resolveEventCoordinates(alt)
 
-    if (altCoords && prevEvent?.location) {
-      let prevCoords: Coordinates | null = null
-      if (prevEvent.location.latitude && prevEvent.location.longitude) {
-        prevCoords = {
-          latitude: prevEvent.location.latitude,
-          longitude: prevEvent.location.longitude,
-        }
-      } else if (prevEvent.location.buildingName) {
-        const building = findBuildingByName(prevEvent.location.buildingName)
-        if (building) prevCoords = building.coordinates
-      }
+    if (altResolved && prevEvent) {
+      const prevResolved = await resolveEventCoordinates(prevEvent)
 
-      if (prevCoords) {
-        // Determine building IDs for cache lookup
-        const prevBuildingId =
-          (prevEvent.location.buildingName &&
-            findBuildingByName(prevEvent.location.buildingName)?.id) ||
-          `coord:${prevCoords.latitude},${prevCoords.longitude}`
-        const altBuildingId =
-          (alt.location?.buildingName && findBuildingByName(alt.location.buildingName)?.id) ||
-          `coord:${altCoords.latitude},${altCoords.longitude}`
-
-        // Try cached/API route first, fall back to straight-line estimate
-        const cached = await getDirections(prevBuildingId, altBuildingId, prevCoords, altCoords)
+      if (prevResolved) {
+        const cached = await getDirections(
+          prevResolved.buildingSlug,
+          altResolved.buildingSlug,
+          prevResolved.coordinates,
+          altResolved.coordinates
+        )
         let walkingTime: number
         if (cached) {
           walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
         } else {
-          const distance = Math.round(haversineDistance(prevCoords, altCoords) * 1.4)
+          const distance = Math.round(
+            haversineDistance(prevResolved.coordinates, altResolved.coordinates) * 1.4
+          )
           walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
         }
 

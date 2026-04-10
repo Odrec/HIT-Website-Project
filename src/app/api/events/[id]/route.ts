@@ -101,13 +101,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Parse dates if provided
-    // Convert 'none' locationId to null (placeholder value from form)
-    const locationId = body.locationId === 'none' || body.locationId === '' ? null : body.locationId
-
     const updateData = {
       id,
       ...body,
-      locationId,
       isCrossProgram: body.isCrossProgram ?? false,
       locationHint: body.locationHint || null,
       melderId: body.melderId || null,

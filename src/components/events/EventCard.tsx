@@ -22,7 +22,7 @@ interface EventCardProps {
     timeEnd: string | null
     locationType: string
     institution: string
-    location: {
+    location?: {
       id: string
       buildingName: string
       roomNumber: string | null
@@ -91,13 +91,11 @@ function convertToEvent(event: EventCardProps['event']): Event {
     timeEnd: event.timeEnd ? new Date(event.timeEnd) : undefined,
     locationType: event.locationType as Event['locationType'],
     institution: event.institution as Event['institution'],
-    location: event.location
-      ? {
-          id: event.location.id,
-          buildingName: event.location.buildingName,
-          roomNumber: event.location.roomNumber ?? undefined,
-          address: event.location.address ?? undefined,
-        }
+    building: event.building
+      ? { id: event.building.id, slug: '', name: event.building.name, shortName: null, address: null, campus: null, latitude: null, longitude: null, hasAccessibility: false, accessibilityNotes: null }
+      : undefined,
+    room: event.room
+      ? { id: event.room.id, name: event.room.name, floor: null, buildingId: '' }
       : undefined,
     lecturers: event.lecturers.map((l) => ({
       id: l.id,
@@ -127,6 +125,9 @@ export function EventCard({ event, viewMode }: EventCardProps) {
   }
 
   const getLocationDisplay = () => {
+    if (event.building) {
+      return `${event.building.name}${event.room?.name ? `, Raum ${event.room.name}` : ''}`
+    }
     if (event.location) {
       return `${event.location.buildingName}${event.location.roomNumber ? `, Raum ${event.location.roomNumber}` : ''}`
     }
