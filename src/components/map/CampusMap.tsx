@@ -170,7 +170,8 @@ export default function CampusMap({
           {/* Building markers */}
           {showAllBuildings &&
             buildings.map((building) => {
-              const isDimmed = dimUnselected && highlightBuildingIds && !highlightBuildingIds.includes(building.id)
+              const isDimmed =
+                dimUnselected && highlightBuildingIds && !highlightBuildingIds.includes(building.id)
               const color = isDimmed ? '#D1D5DB' : getBuildingColor(building.campus)
               const opacity = isDimmed ? 'opacity:0.6;' : ''
               const icon = leaflet.divIcon({
@@ -199,7 +200,10 @@ export default function CampusMap({
                       <div className="mt-2 flex items-center gap-2">
                         <span
                           className="px-2 py-1 text-xs rounded"
-                          style={{ backgroundColor: getBuildingColor(building.campus), color: 'white' }}
+                          style={{
+                            backgroundColor: getBuildingColor(building.campus),
+                            color: 'white',
+                          }}
                         >
                           {building.campus === 'schloss'
                             ? 'Schloss (Uni)'

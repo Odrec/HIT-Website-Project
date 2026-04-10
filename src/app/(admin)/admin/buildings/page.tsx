@@ -127,7 +127,17 @@ export default function BuildingsPage() {
 
   const openCreateBuildingDialog = () => {
     setEditingBuilding(null)
-    setBuildingForm({ name: '', shortName: '', slug: '', address: '', campus: '', latitude: '', longitude: '', hasAccessibility: false, accessibilityNotes: '' })
+    setBuildingForm({
+      name: '',
+      shortName: '',
+      slug: '',
+      address: '',
+      campus: '',
+      latitude: '',
+      longitude: '',
+      hasAccessibility: false,
+      accessibilityNotes: '',
+    })
     setBuildingDialogOpen(true)
   }
 
@@ -368,7 +378,9 @@ export default function BuildingsPage() {
                                 <div>
                                   {building.name}
                                   {building.shortName && (
-                                    <span className="text-xs text-muted-foreground ml-1">({building.shortName})</span>
+                                    <span className="text-xs text-muted-foreground ml-1">
+                                      ({building.shortName})
+                                    </span>
                                   )}
                                 </div>
                               </div>
@@ -706,7 +718,9 @@ export default function BuildingsPage() {
               <Checkbox
                 id="building-accessibility"
                 checked={buildingForm.hasAccessibility}
-                onCheckedChange={(checked) => setBuildingForm({ ...buildingForm, hasAccessibility: checked === true })}
+                onCheckedChange={(checked) =>
+                  setBuildingForm({ ...buildingForm, hasAccessibility: checked === true })
+                }
               />
               <Label htmlFor="building-accessibility">Barrierefrei</Label>
             </div>
@@ -716,7 +730,9 @@ export default function BuildingsPage() {
                 <Input
                   id="building-accessibilityNotes"
                   value={buildingForm.accessibilityNotes}
-                  onChange={(e) => setBuildingForm({ ...buildingForm, accessibilityNotes: e.target.value })}
+                  onChange={(e) =>
+                    setBuildingForm({ ...buildingForm, accessibilityNotes: e.target.value })
+                  }
                   placeholder="z.B. Historisches Gebäude, eingeschränkter Zugang"
                 />
               </div>

@@ -508,8 +508,7 @@ function SchedulePageContent() {
                   {scheduleDates.length > 0 ? (
                     scheduleDates.map((date) => {
                       const dateEvents = state.items.filter(
-                        (item) =>
-                          item.event.timeStart && isSameEventDay(item.event.timeStart, date)
+                        (item) => item.event.timeStart && isSameEventDay(item.event.timeStart, date)
                       )
                       const hasConflicts = dateEvents.some((e) => conflictEventIds.has(e.eventId))
 
@@ -584,9 +583,7 @@ function SchedulePageContent() {
           <div className="lg:col-span-3">
             {/* View toggle */}
             <div className="flex items-center justify-between mb-4 print:hidden">
-              <h2 className="text-xl font-semibold">
-                {formatEventDateLong(selectedDate)}
-              </h2>
+              <h2 className="text-xl font-semibold">{formatEventDateLong(selectedDate)}</h2>
               <Tabs value={view} onValueChange={(v) => setView(v as 'timeline' | 'list')}>
                 <TabsList>
                   <TabsTrigger value="timeline">

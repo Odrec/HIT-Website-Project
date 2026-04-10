@@ -1,10 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  formatEventTimeRange,
-  formatEventDateWeekday,
-} from '@/lib/event-time'
+import { formatEventTimeRange, formatEventDateWeekday } from '@/lib/event-time'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
 import { generateGoogleCalendarUrl } from '@/lib/calendar-utils'
 import { cn } from '@/lib/utils'

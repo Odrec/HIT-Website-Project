@@ -2,11 +2,7 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import {
-  formatEventTimeRange,
-  formatEventDateKey,
-  formatEventDateLong,
-} from '@/lib/event-time'
+import { formatEventTimeRange, formatEventDateKey, formatEventDateLong } from '@/lib/event-time'
 import { Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -178,9 +174,7 @@ export function EventCalendarView({ events }: EventCalendarViewProps) {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 text-sm text-hit-gray-600">
                           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span>
-                            {formatEventTimeRange(event.timeStart, event.timeEnd)}
-                          </span>
+                          <span>{formatEventTimeRange(event.timeStart, event.timeEnd)}</span>
                         </div>
                         <h3 className="mt-1 text-sm font-medium text-hit-gray-900 line-clamp-2">
                           {event.title}

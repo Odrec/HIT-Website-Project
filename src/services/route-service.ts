@@ -542,7 +542,9 @@ export async function analyzeTravelTimes(
         distance = cached.distanceMeters
         walkingTime = adjustWalkingTime(cached.durationSeconds, settings.walkingSpeed)
       } else {
-        distance = Math.round(haversineDistance(fromResolved.coordinates, toResolved.coordinates) * 1.4)
+        distance = Math.round(
+          haversineDistance(fromResolved.coordinates, toResolved.coordinates) * 1.4
+        )
         walkingTime = adjustWalkingTime(Math.ceil(distance / 1.2), settings.walkingSpeed)
       }
 

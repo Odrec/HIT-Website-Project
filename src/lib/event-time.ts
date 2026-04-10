@@ -16,19 +16,45 @@
  */
 
 const MONTHS_DE = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
 ]
 
 const WEEKDAYS_DE_LONG = [
-  'Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag',
+  'Sonntag',
+  'Montag',
+  'Dienstag',
+  'Mittwoch',
+  'Donnerstag',
+  'Freitag',
+  'Samstag',
 ]
 
 const WEEKDAYS_DE_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 
 const MONTHS_DE_SHORT = [
-  'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
+  'Jan',
+  'Feb',
+  'Mär',
+  'Apr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Dez',
 ]
 
 type DateInput = Date | string | number | null | undefined

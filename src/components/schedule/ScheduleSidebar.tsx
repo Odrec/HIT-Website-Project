@@ -132,10 +132,7 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
                             <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               <span>
-                                {formatEventTimeRange(
-                                  item.event.timeStart,
-                                  item.event.timeEnd
-                                )}
+                                {formatEventTimeRange(item.event.timeStart, item.event.timeEnd)}
                               </span>
                             </div>
                           )}

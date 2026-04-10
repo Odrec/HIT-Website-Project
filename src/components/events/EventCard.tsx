@@ -91,7 +91,18 @@ function convertToEvent(event: EventCardProps['event']): Event {
     locationType: event.locationType as Event['locationType'],
     institution: event.institution as Event['institution'],
     building: event.building
-      ? { id: event.building.id, slug: '', name: event.building.name, shortName: null, address: null, campus: null, latitude: null, longitude: null, hasAccessibility: false, accessibilityNotes: null }
+      ? {
+          id: event.building.id,
+          slug: '',
+          name: event.building.name,
+          shortName: null,
+          address: null,
+          campus: null,
+          latitude: null,
+          longitude: null,
+          hasAccessibility: false,
+          accessibilityNotes: null,
+        }
       : undefined,
     room: event.room
       ? { id: event.room.id, name: event.room.name, floor: null, buildingId: '' }

@@ -42,7 +42,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
     const body = await request.json()
-    const { name, slug, shortName, address, campus, latitude, longitude, hasAccessibility, accessibilityNotes } = body
+    const {
+      name,
+      slug,
+      shortName,
+      address,
+      campus,
+      latitude,
+      longitude,
+      hasAccessibility,
+      accessibilityNotes,
+    } = body
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'Name ist erforderlich' }, { status: 400 })

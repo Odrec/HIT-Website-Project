@@ -159,7 +159,9 @@ export default function RoutePlannerPage() {
       .map((item) => item.event.building?.name?.toLowerCase())
       .filter(Boolean) as string[]
     return buildings
-      .filter((b) => names.some((n) => b.name.toLowerCase().includes(n) || n.includes(b.name.toLowerCase())))
+      .filter((b) =>
+        names.some((n) => b.name.toLowerCase().includes(n) || n.includes(b.name.toLowerCase()))
+      )
       .map((b) => b.id)
   }, [state.items, buildings])
 
@@ -384,10 +386,7 @@ export default function RoutePlannerPage() {
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3 shrink-0" />
                                 <span>
-                                  {formatEventTimeRange(
-                                    item.event.timeStart,
-                                    item.event.timeEnd
-                                  )}
+                                  {formatEventTimeRange(item.event.timeStart, item.event.timeEnd)}
                                 </span>
                               </div>
                               {item.event.building && (
@@ -458,7 +457,9 @@ export default function RoutePlannerPage() {
                     <Button
                       variant={mapLocationFilter === 'mine' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setMapLocationFilter(mapLocationFilter === 'mine' ? 'all' : 'mine')}
+                      onClick={() =>
+                        setMapLocationFilter(mapLocationFilter === 'mine' ? 'all' : 'mine')
+                      }
                     >
                       <MapPin className="h-4 w-4 mr-1" />
                       Meine Orte
