@@ -72,6 +72,56 @@ describe('POST /api/schedule/share', () => {
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
+  it('uses NEXTAUTH_URL for the share origin instead of request host', async () => {
+    vi.stubEnv('NEXTAUTH_URL', 'https://hit.zsb.os.de')
+    mockFindFirst.mockResolvedValue(null)
+    mockCreate.mockResolvedValue({
+      id: 'clx1',
+      code: 'abc123',
+      eventIds: ['event1'],
+    })
+
+    const request = new Request('http://0.0.0.0:3000/api/schedule/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventIds: ['event1'] }),
+    })
+
+    const response = await POST(request as unknown as NextRequest)
+    const data = await response.json()
+
+    expect(data.url).toBe('https://hit.zsb.os.de/s/abc123')
+    vi.unstubAllEnvs()
+  })
+
+  it('falls back to x-forwarded-host when NEXTAUTH_URL is unset', async () => {
+    vi.stubEnv('NEXTAUTH_URL', '')
+    mockFindFirst.mockResolvedValue(null)
+    mockCreate.mockResolvedValue({
+      id: 'clx1',
+      code: 'abc123',
+      eventIds: ['event1'],
+    })
+
+    const request = new Request('http://0.0.0.0:3000/api/schedule/share', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-host': 'hit-website-virtuos-openstack.uni-osnabrueck.de',
+        'x-forwarded-proto': 'https',
+      },
+      body: JSON.stringify({ eventIds: ['event1'] }),
+    })
+
+    const response = await POST(request as unknown as NextRequest)
+    const data = await response.json()
+
+    expect(data.url).toBe(
+      'https://hit-website-virtuos-openstack.uni-osnabrueck.de/s/abc123'
+    )
+    vi.unstubAllEnvs()
+  })
+
   it('returns 400 for missing eventIds', async () => {
     const request = new Request('http://localhost/api/schedule/share', {
       method: 'POST',

@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { nanoid } from 'nanoid'
 
+function getPublicOrigin(request: NextRequest): string {
+  const configured = process.env.NEXTAUTH_URL
+  if (configured) return configured.replace(/\/$/, '')
+
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  if (forwardedHost) {
+    const proto = request.headers.get('x-forwarded-proto') ?? 'https'
+    return `${proto}://${forwardedHost}`
+  }
+
+  return new URL(request.url).origin
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -11,27 +24,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'eventIds array is required' }, { status: 400 })
     }
 
-    // Sort for consistent dedup
     const sortedIds = [...eventIds].sort()
+    const origin = getPublicOrigin(request)
 
-    // Check for existing shared schedule with same events
     const existing = await prisma.sharedSchedule.findFirst({
       where: { eventIds: { equals: sortedIds } },
     })
 
     if (existing) {
-      const url = `${new URL(request.url).origin}/s/${existing.code}`
-      return NextResponse.json({ code: existing.code, url })
+      return NextResponse.json({ code: existing.code, url: `${origin}/s/${existing.code}` })
     }
 
-    // Create new shared schedule
     const code = nanoid(6)
     const shared = await prisma.sharedSchedule.create({
       data: { code, eventIds: sortedIds },
     })
 
-    const url = `${new URL(request.url).origin}/s/${shared.code}`
-    return NextResponse.json({ code: shared.code, url })
+    return NextResponse.json({ code: shared.code, url: `${origin}/s/${shared.code}` })
   } catch {
     return NextResponse.json({ error: 'Failed to create shared schedule' }, { status: 500 })
   }
