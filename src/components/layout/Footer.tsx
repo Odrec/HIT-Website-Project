@@ -5,6 +5,7 @@ import Link from 'next/link'
  * Footer component with institutional links and information
  */
 export function Footer() {
+  const contactEmail = process.env.EMAIL_TO || 'hit@zsb.os.de'
   return (
     <footer className="border-t bg-hit-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -104,8 +105,8 @@ export function Footer() {
               <p>Neuer Graben 27</p>
               <p>49074 Osnabrück</p>
               <p className="pt-2">
-                <a href="mailto:zsb@uni-osnabrueck.de" className="hover:text-hit-uni-500">
-                  zsb@uni-osnabrueck.de
+                <a href={`mailto:${contactEmail}`} className="hover:text-hit-uni-500">
+                  {contactEmail}
                 </a>
               </p>
             </address>
