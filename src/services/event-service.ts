@@ -1,6 +1,7 @@
 // Event Service - Business logic for event management
 
 import { Prisma } from '@/generated/prisma/client/client'
+import { getActiveEditionId } from '@/lib/active-edition'
 import { prisma } from '@/lib/db/prisma'
 import type {
   CreateEventInput,
@@ -27,6 +28,8 @@ export interface ListEventsOptions {
   page?: number
   pageSize?: number
   includeRelations?: boolean
+  /** editionId scoping: undefined = active, string = that edition, null = cross-edition (admin only). */
+  editionId?: string | null
 }
 
 /**
@@ -148,6 +151,11 @@ export const eventService = {
         }
       : undefined
 
+    // Edition scoping: default to active unless caller explicitly passes an id or null.
+    if (options.editionId !== null) {
+      where.editionId = options.editionId ?? (await getActiveEditionId())
+    }
+
     // Execute queries in parallel
     const [data, total] = await Promise.all([
       prisma.event.findMany({
@@ -170,11 +178,17 @@ export const eventService = {
   },
 
   /**
-   * Get a single event by ID
+   * Get a single event by ID.
+   *
+   * Uses findFirst (not findUnique) so we can compound id + editionId in the where clause.
    */
-  async getById(id: string) {
-    return prisma.event.findUnique({
-      where: { id },
+  async getById(id: string, options: { editionId?: string | null } = {}) {
+    const where: { id: string; editionId?: string } = { id }
+    if (options.editionId !== null) {
+      where.editionId = options.editionId ?? (await getActiveEditionId())
+    }
+    return prisma.event.findFirst({
+      where,
       include: {
         lecturers: true,
         organizers: true,
@@ -203,6 +217,7 @@ export const eventService = {
    * Create a new event
    */
   async create(input: CreateEventInput) {
+    const activeEditionId = await getActiveEditionId()
     const {
       lecturers = [],
       organizers = [],
@@ -219,6 +234,7 @@ export const eventService = {
     return prisma.event.create({
       data: {
         ...eventData,
+        edition: { connect: { id: activeEditionId } },
         isCrossProgram: input.isCrossProgram ?? false,
         locationHint: input.locationHint || null,
         locationWishArea: locationWishArea || null,
@@ -397,10 +413,11 @@ export const eventService = {
    * Duplicate an event
    */
   async duplicate(id: string) {
-    const original = await this.getById(id)
+    const original = await this.getById(id, { editionId: null })
     if (!original) {
       throw new Error('Event not found')
     }
+    const activeEditionId = await getActiveEditionId()
 
     return prisma.event.create({
       data: {
@@ -420,9 +437,10 @@ export const eventService = {
         institution: original.institution,
         isCrossProgram: original.isCrossProgram,
         locationHint: original.locationHint,
-        melderId: original.melderId,
-        buildingId: original.buildingId,
-        roomId: original.roomId,
+        edition: { connect: { id: activeEditionId } },
+        ...(original.melderId && { melder: { connect: { id: original.melderId } } }),
+        ...(original.buildingId && { building: { connect: { id: original.buildingId } } }),
+        ...(original.roomId && { room: { connect: { id: original.roomId } } }),
         lecturers: {
           create: original.lecturers.map((lecturer) => ({
             firstName: lecturer.firstName,
