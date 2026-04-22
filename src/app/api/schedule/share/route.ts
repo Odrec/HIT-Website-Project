@@ -27,9 +27,10 @@ export async function POST(request: NextRequest) {
 
     const sortedIds = [...eventIds].sort()
     const origin = getPublicOrigin(request)
+    const editionId = await getActiveEditionId()
 
     const existing = await prisma.sharedSchedule.findFirst({
-      where: { eventIds: { equals: sortedIds } },
+      where: { eventIds: { equals: sortedIds }, editionId },
     })
 
     if (existing) {
@@ -37,7 +38,6 @@ export async function POST(request: NextRequest) {
     }
 
     const code = nanoid(6)
-    const editionId = await getActiveEditionId()
     const shared = await prisma.sharedSchedule.create({
       data: { code, eventIds: sortedIds, editionId },
     })

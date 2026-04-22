@@ -65,11 +65,6 @@ export interface Room {
   building?: Building
 }
 
-export interface SiteSettings {
-  id: string
-  hitDate: string | null
-}
-
 export interface Lecturer {
   id: string
   eventId: string
