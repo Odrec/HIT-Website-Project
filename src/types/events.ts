@@ -139,6 +139,12 @@ export interface Event {
 }
 
 // Form types for creating/editing events
+export type LocationMode = 'CONFIRMED' | 'WISH'
+/** String literal codes for the three HIT campus areas used in the event
+ *  form's Wunsch flow. Named with a Code suffix to avoid colliding with
+ *  the geographic CampusArea interface in types/routes.ts. */
+export type CampusAreaCode = 'WESTERBERG' | 'CAPRIVI' | 'INNENSTADT'
+
 export interface CreateEventInput {
   title: string
   description?: string
@@ -147,6 +153,8 @@ export interface CreateEventInput {
   timeEnd?: Date
   locationType: LocationType
   locationDetails?: Record<string, unknown>
+  locationMode?: LocationMode
+  locationWishArea?: CampusAreaCode | null
   roomRequest?: string
   meetingPoint?: string
   additionalInfo?: string

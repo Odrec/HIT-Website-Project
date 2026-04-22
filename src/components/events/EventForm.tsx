@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Trash2, User, Mail, Phone, Building } from 'lucide-react'
+import { Plus, Trash2, User, Mail, Phone, Building, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -137,6 +137,8 @@ export function EventForm({
 
   const watchEventType = watch('eventType')
   const watchLocationType = watch('locationType')
+  const watchLocationMode = watch('locationMode') ?? 'CONFIRMED'
+  const watchLocationWishArea = watch('locationWishArea') || ''
   const watchInstitution = watch('institution')
   const watchIsCrossProgram = watch('isCrossProgram')
 
@@ -486,13 +488,79 @@ export function EventForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <BuildingRoomSelect
-                buildingId={watch('buildingId') || ''}
-                roomId={watch('roomId') || ''}
-                onBuildingChange={(id) => setValue('buildingId', id)}
-                onRoomChange={(id) => setValue('roomId', id)}
-                institution={watchInstitution}
-              />
+              {/* Wunsch vs. steht fest */}
+              <div className="space-y-1.5">
+                <Label>Gebäude</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={watchLocationMode === 'CONFIRMED' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setValue('locationMode', 'CONFIRMED')
+                      setValue('locationWishArea', '')
+                    }}
+                  >
+                    Steht fest
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={watchLocationMode === 'WISH' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setValue('locationMode', 'WISH')
+                      setValue('buildingId', '')
+                      setValue('roomId', '')
+                    }}
+                  >
+                    Wunsch
+                  </Button>
+                </div>
+              </div>
+
+              {watchLocationMode === 'CONFIRMED' ? (
+                <BuildingRoomSelect
+                  buildingId={watch('buildingId') || ''}
+                  roomId={watch('roomId') || ''}
+                  onBuildingChange={(id) => setValue('buildingId', id)}
+                  onRoomChange={(id) => setValue('roomId', id)}
+                  institution={watchInstitution}
+                />
+              ) : (
+                <>
+                  <div className="space-y-1.5">
+                    <Label>Campusbereich</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {(['WESTERBERG', 'CAPRIVI', 'INNENSTADT'] as const).map((area) => (
+                        <Button
+                          key={area}
+                          type="button"
+                          size="sm"
+                          variant={watchLocationWishArea === area ? 'default' : 'outline'}
+                          onClick={() =>
+                            setValue('locationWishArea', watchLocationWishArea === area ? '' : area)
+                          }
+                        >
+                          {area === 'WESTERBERG'
+                            ? 'Westerberg'
+                            : area === 'CAPRIVI'
+                              ? 'Caprivi'
+                              : 'Innenstadt'}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="roomRequest">Wünsche zum Raum</Label>
+                    <Textarea
+                      id="roomRequest"
+                      {...register('roomRequest')}
+                      placeholder="z.B. mittelgroßer Seminarraum, barrierefrei"
+                      rows={2}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="space-y-1.5">
                 <Label htmlFor="locationHint">Ortshinweis</Label>
@@ -508,8 +576,15 @@ export function EventForm({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="locationType">
+                <Label htmlFor="locationType" className="flex items-center gap-1.5">
                   Ortstyp <span className="text-red-500">*</span>
+                  <span
+                    title="Wird für die Gruppierung in den Broschüren- und Excel-Exports verwendet. 'Infomarkt Schloss' / 'Infomarkt CN' erscheinen in der jeweiligen Infomarkt-Übersicht, alles andere unter 'Anderer Ort'."
+                    className="cursor-help text-muted-foreground"
+                    aria-label="Hilfe zum Ortstyp"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </span>
                 </Label>
                 <Select
                   value={watch('locationType')}

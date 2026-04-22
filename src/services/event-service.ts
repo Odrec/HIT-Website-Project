@@ -209,6 +209,7 @@ export const eventService = {
       studyProgramIds = [],
       infoMarketIds = [],
       locationDetails,
+      locationWishArea,
       melderId,
       buildingId,
       roomId,
@@ -220,6 +221,7 @@ export const eventService = {
         ...eventData,
         isCrossProgram: input.isCrossProgram ?? false,
         locationHint: input.locationHint || null,
+        locationWishArea: locationWishArea || null,
         ...(locationDetails !== undefined && {
           locationDetails: locationDetails as Prisma.InputJsonValue,
         }),
@@ -286,6 +288,7 @@ export const eventService = {
       melderId,
       buildingId,
       roomId,
+      locationWishArea,
       ...eventData
     } = input
 
@@ -298,6 +301,7 @@ export const eventService = {
       ...(melderId !== undefined && { melderId: melderId || null }),
       ...(buildingId !== undefined && { buildingId: buildingId || null }),
       ...(roomId !== undefined && { roomId: roomId || null }),
+      ...(locationWishArea !== undefined && { locationWishArea: locationWishArea || null }),
     }
 
     // Handle lecturers update (delete and recreate)
@@ -407,6 +411,8 @@ export const eventService = {
         timeEnd: original.timeEnd,
         locationType: original.locationType,
         locationDetails: original.locationDetails ?? undefined,
+        locationMode: original.locationMode,
+        locationWishArea: original.locationWishArea,
         roomRequest: original.roomRequest,
         meetingPoint: original.meetingPoint,
         additionalInfo: original.additionalInfo,
