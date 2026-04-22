@@ -28,7 +28,7 @@ DO $$
 DECLARE
   seed_id TEXT;
 BEGIN
-  seed_id := gen_random_uuid()::text;
+  seed_id := 'edition-2026';
 
   IF EXISTS (SELECT 1 FROM "SiteSettings" WHERE id = 'default') THEN
     INSERT INTO "hit_editions" (id, year, "hitDate", "submissionDeadline", "deadlineEnabled", status, "createdAt", "updatedAt")
@@ -38,7 +38,8 @@ BEGIN
            s."deadlineEnabled",
            'ACTIVE',
            now(), now()
-    FROM "SiteSettings" s WHERE s.id = 'default';
+    FROM "SiteSettings" s WHERE s.id = 'default'
+    ON CONFLICT (year) DO NOTHING;
   ELSE
     INSERT INTO "hit_editions" (id, year, "hitDate", "submissionDeadline", "deadlineEnabled", status, "createdAt", "updatedAt")
     VALUES (seed_id, 2026, '2026-11-19 00:00:00'::timestamp, NULL, true, 'ACTIVE', now(), now())
@@ -73,6 +74,7 @@ ALTER TABLE "events" ADD CONSTRAINT "events_sourceEventId_fkey"
   FOREIGN KEY ("sourceEventId") REFERENCES "events"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 CREATE INDEX "events_editionId_idx" ON "events"("editionId");
 CREATE INDEX "events_editionId_reviewStatus_idx" ON "events"("editionId", "reviewStatus");
+CREATE INDEX "events_sourceEventId_idx" ON "events"("sourceEventId");
 
 -- Same dance for user_schedules
 ALTER TABLE "user_schedules" ADD COLUMN "editionId" TEXT;
