@@ -57,6 +57,8 @@ export const eventFormSchema = z
     timeEnd: z.date().optional().nullable(),
     locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),
     locationDetails: z.record(z.string(), z.unknown()).optional(),
+    locationMode: z.enum(['CONFIRMED', 'WISH']).default('CONFIRMED'),
+    locationWishArea: z.enum(['WESTERBERG', 'CAPRIVI', 'INNENSTADT']).optional().or(z.literal('')),
     roomRequest: z
       .string()
       .max(500, 'Room request must be less than 500 characters')
@@ -108,6 +110,7 @@ export const defaultEventValues: Partial<EventFormValues> = {
   timeStart: null,
   timeEnd: null,
   locationType: 'OTHER',
+  locationMode: 'CONFIRMED',
   institution: 'BOTH',
   lecturers: [],
   organizers: [],

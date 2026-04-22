@@ -36,6 +36,22 @@ enum LocationType {
   OTHER
 }
 
+/// How the building/room for an event is captured on the form.
+/// CONFIRMED -> Gebäude + Raum picked from the managed list.
+/// WISH      -> Melder didn't know yet: they pick a campus area and
+///              describe their room preferences in roomRequest.
+enum LocationMode {
+  CONFIRMED
+  WISH
+}
+
+/// Wish-mode campus area when LocationMode = WISH.
+enum CampusArea {
+  WESTERBERG
+  CAPRIVI
+  INNENSTADT
+}
+
 enum UserRole {
   ADMIN
   ORGANIZER
@@ -120,6 +136,10 @@ model Event {
   timeEnd         DateTime?
   locationType    LocationType
   locationDetails Json?                     @db.JsonB
+  /// CONFIRMED = building/room chosen; WISH = area + free-text preferences.
+  locationMode    LocationMode              @default(CONFIRMED)
+  /// Campus area when locationMode = WISH.
+  locationWishArea CampusArea?
   roomRequest     String?                   @db.Text
   meetingPoint    String?                   @db.VarChar(500)
   additionalInfo  String?                   @db.Text
