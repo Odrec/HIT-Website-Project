@@ -219,7 +219,8 @@ async function main() {
   const melder = await prisma.melder.create({
     data: {
       userId: orgUser.id,
-      name: 'Prof. Dr. Thomas Müller',
+      firstName: 'Thomas',
+      lastName: 'Müller',
       title: 'Prof. Dr.',
       email: 'thomas.mueller@uni-osnabrueck.de',
       phone: '+49 541 969-2480',

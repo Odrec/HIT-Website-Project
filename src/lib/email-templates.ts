@@ -120,7 +120,9 @@ function detailsTable(event: EmailEvent): string {
     ['Ort', formatLocation(event)],
     [
       'Meldende Person',
-      event.melder ? `${safe(event.melder.name)} (${safe(event.melder.email)})` : '—',
+      event.melder
+        ? `${safe([event.melder.firstName, event.melder.lastName].filter(Boolean).join(' '))} (${safe(event.melder.email)})`
+        : '—',
     ],
     ['Vortragende', lecturerNames],
     ['Studiengänge', studyProgramNames],

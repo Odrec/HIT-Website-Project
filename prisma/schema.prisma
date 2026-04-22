@@ -283,7 +283,8 @@ model Melder {
   id          String      @id @default(cuid())
   userId      String      @unique
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
+  firstName   String
+  lastName    String
   title       String?
   email       String
   phone       String?

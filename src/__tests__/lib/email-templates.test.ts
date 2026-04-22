@@ -32,7 +32,8 @@ const baseEvent: EmailEvent = {
   melder: {
     id: 'm1',
     userId: 'u1',
-    name: 'Prof. Müller',
+    firstName: 'Thomas',
+    lastName: 'Müller',
     title: 'Prof. Dr.',
     email: 'mueller@uos.de',
     phone: null,
@@ -125,7 +126,7 @@ describe('generateNewEventEmail', () => {
 
   it('HTML contains melder name', () => {
     const { html } = generateNewEventEmail(baseEvent)
-    expect(html).toContain('Prof. Müller')
+    expect(html).toContain('Thomas Müller')
   })
 
   it('HTML contains melder email', () => {

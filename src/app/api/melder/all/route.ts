@@ -12,7 +12,7 @@ export async function GET() {
       user: { select: { id: true, email: true, name: true, role: true } },
       _count: { select: { events: true } },
     },
-    orderBy: { name: 'asc' },
+    orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
   })
   return NextResponse.json(melders)
 }

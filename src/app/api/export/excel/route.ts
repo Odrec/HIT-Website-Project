@@ -49,7 +49,8 @@ const EVENT_COLUMNS: Partial<ExcelJS.Column>[] = [
 ]
 
 const MELDER_COLUMNS: Partial<ExcelJS.Column>[] = [
-  { header: 'Name', key: 'name', width: 25 },
+  { header: 'Vorname', key: 'vorname', width: 20 },
+  { header: 'Nachname', key: 'nachname', width: 20 },
   { header: 'Titel', key: 'titel', width: 15 },
   { header: 'E-Mail', key: 'email', width: 30 },
   { header: 'Telefon', key: 'telefon', width: 20 },

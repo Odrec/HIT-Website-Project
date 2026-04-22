@@ -18,11 +18,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
   }
   const body = await request.json()
-  const { name, title, email, phone, affiliation, fakultaet, fachbereich, room } = body
+  const { firstName, lastName, title, email, phone, affiliation, fakultaet, fachbereich, room } =
+    body
 
-  if (!name || !email || !affiliation) {
+  if (!firstName || !lastName || !email || !affiliation) {
     return NextResponse.json(
-      { error: 'Name, E-Mail und Zugehörigkeit sind erforderlich' },
+      { error: 'Vorname, Nachname, E-Mail und Zugehörigkeit sind erforderlich' },
       { status: 400 }
     )
   }
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
     where: { userId: session.user.id },
     create: {
       userId: session.user.id,
-      name: name.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       title: title?.trim() || null,
       email: email.trim(),
       phone: phone?.trim() || null,
@@ -44,7 +46,8 @@ export async function POST(request: Request) {
       room: room?.trim() || null,
     },
     update: {
-      name: name.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       title: title?.trim() || null,
       email: email.trim(),
       phone: phone?.trim() || null,
