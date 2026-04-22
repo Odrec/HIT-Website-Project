@@ -71,7 +71,9 @@ describe('GET /api/editions/[id]', () => {
   it('returns 404 when edition missing', async () => {
     mockGetEdition.mockResolvedValue(null)
     const { GET } = await import('@/app/api/editions/[id]/route')
-    const res = await GET(new Request('http://test'), { params: Promise.resolve({ id: 'missing' }) })
+    const res = await GET(new Request('http://test'), {
+      params: Promise.resolve({ id: 'missing' }),
+    })
     expect(res.status).toBe(404)
   })
 
@@ -87,7 +89,10 @@ describe('PUT /api/editions/[id]', () => {
   it('calls activateEdition when body.action is "activate"', async () => {
     mockActivateEdition.mockResolvedValue(undefined)
     const { PUT } = await import('@/app/api/editions/[id]/route')
-    const req = new Request('http://test', { method: 'PUT', body: JSON.stringify({ action: 'activate' }) })
+    const req = new Request('http://test', {
+      method: 'PUT',
+      body: JSON.stringify({ action: 'activate' }),
+    })
     const res = await PUT(req, { params: Promise.resolve({ id: 'e1' }) })
     expect(res.status).toBe(200)
     expect(mockActivateEdition).toHaveBeenCalledWith('e1')
@@ -101,10 +106,13 @@ describe('PUT /api/editions/[id]', () => {
       body: JSON.stringify({ hitDate: '2026-11-19', deadlineEnabled: false }),
     })
     await PUT(req, { params: Promise.resolve({ id: 'e1' }) })
-    expect(mockUpdateEdition).toHaveBeenCalledWith('e1', expect.objectContaining({
-      hitDate: expect.any(Date),
-      deadlineEnabled: false,
-    }))
+    expect(mockUpdateEdition).toHaveBeenCalledWith(
+      'e1',
+      expect.objectContaining({
+        hitDate: expect.any(Date),
+        deadlineEnabled: false,
+      })
+    )
   })
 
   it('returns 400 on invalid hitDate', async () => {
@@ -121,7 +129,10 @@ describe('PUT /api/editions/[id]', () => {
     const { auth } = await import('@/auth')
     ;(auth as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ user: { role: 'PUBLIC' } })
     const { PUT } = await import('@/app/api/editions/[id]/route')
-    const req = new Request('http://test', { method: 'PUT', body: JSON.stringify({ action: 'activate' }) })
+    const req = new Request('http://test', {
+      method: 'PUT',
+      body: JSON.stringify({ action: 'activate' }),
+    })
     const res = await PUT(req, { params: Promise.resolve({ id: 'e1' }) })
     expect(res.status).toBe(403)
   })

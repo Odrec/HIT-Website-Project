@@ -78,7 +78,9 @@ export default function EditionsPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>HIT {e.year}</CardTitle>
-              <CardDescription>HIT-Datum: {new Date(e.hitDate).toLocaleDateString('de-DE')}</CardDescription>
+              <CardDescription>
+                HIT-Datum: {new Date(e.hitDate).toLocaleDateString('de-DE')}
+              </CardDescription>
             </div>
             <Badge variant={badgeVariant(e.status)}>{e.status}</Badge>
           </CardHeader>

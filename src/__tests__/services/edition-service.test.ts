@@ -25,9 +25,7 @@ vi.mock('@/lib/db/prisma', () => ({
 
 import {
   listEditions,
-  getEdition,
   createEdition,
-  updateEdition,
   deleteEdition,
   activateEdition,
   isDeadlinePassed,
@@ -42,7 +40,10 @@ afterEach(() => vi.useRealTimers())
 
 describe('listEditions', () => {
   it('returns editions newest-first by year', async () => {
-    mockFindMany.mockResolvedValue([{ id: 'e1', year: 2027 }, { id: 'e2', year: 2026 }])
+    mockFindMany.mockResolvedValue([
+      { id: 'e1', year: 2027 },
+      { id: 'e2', year: 2026 },
+    ])
     const result = await listEditions()
     expect(result).toHaveLength(2)
     expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { year: 'desc' } })

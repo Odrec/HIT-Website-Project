@@ -100,7 +100,12 @@ export async function getDeadlineInfo(editionId?: string): Promise<DeadlineInfo>
     : await getActiveEditionOrNull()
 
   if (!edition?.submissionDeadline) {
-    return { deadline: null, deadlineEnabled: edition?.deadlineEnabled ?? false, passed: false, daysRemaining: null }
+    return {
+      deadline: null,
+      deadlineEnabled: edition?.deadlineEnabled ?? false,
+      passed: false,
+      daysRemaining: null,
+    }
   }
 
   const now = new Date()
