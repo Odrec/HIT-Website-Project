@@ -94,7 +94,7 @@ describe('eventService.getById edition scoping', () => {
 })
 
 describe('eventService.create edition stamping', () => {
-  it('always stamps active editionId via edition.connect', async () => {
+  it('always stamps active editionId via edition.connect (no scalar override)', async () => {
     mockCreate.mockResolvedValue({ id: 'new' })
     await eventService.create({
       title: 'T',
@@ -102,18 +102,16 @@ describe('eventService.create edition stamping', () => {
       locationType: 'CONFIRMED',
       institution: 'UNI',
     } as never)
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          edition: { connect: { id: 'active-edition-id' } },
-        }),
-      })
-    )
+    const call = mockCreate.mock.calls[0][0] as {
+      data: { edition?: { connect: { id: string } }; editionId?: string }
+    }
+    expect(call.data.edition).toEqual({ connect: { id: 'active-edition-id' } })
+    expect(call.data.editionId).toBeUndefined()
   })
 })
 
 describe('eventService.duplicate edition stamping', () => {
-  it('fetches source with editionId=null (cross-edition), stamps active editionId on clone', async () => {
+  it('fetches source cross-edition and stamps active editionId on clone', async () => {
     mockFindFirst.mockResolvedValue({
       id: 'original',
       title: 'X',
@@ -142,17 +140,41 @@ describe('eventService.duplicate edition stamping', () => {
     })
     mockCreate.mockResolvedValue({ id: 'duplicate' })
     await eventService.duplicate('original')
-    // getById for duplicate should use editionId: null (cross-edition)
-    expect(mockFindFirst).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'original' } })
-    )
-    // create should stamp active edition
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          edition: { connect: { id: 'active-edition-id' } },
-        }),
-      })
-    )
+    // Source fetch is cross-edition (no editionId in where)
+    const findFirstCall = mockFindFirst.mock.calls[0][0] as { where: Record<string, unknown> }
+    expect(findFirstCall.where).toEqual({ id: 'original' })
+    // Clone stamps active edition via relation-connect only; no scalar editionId
+    const createCall = mockCreate.mock.calls[0][0] as {
+      data: { edition?: { connect: { id: string } }; editionId?: string }
+    }
+    expect(createCall.data.edition).toEqual({ connect: { id: 'active-edition-id' } })
+    expect(createCall.data.editionId).toBeUndefined()
+  })
+})
+
+describe('eventService primary-key only operations (intentionally unscoped)', () => {
+  // These tests pin down the current contract: update/delete/deleteMany do NOT
+  // inject editionId scoping, because they operate on primary keys only.
+  // Scoping these would break legitimate admin flows that hold event ids
+  // fetched from cross-edition views. See spec §2.
+
+  it('update is primary-key only', async () => {
+    mockUpdate.mockResolvedValue({ id: 'event-1' })
+    await eventService.update({ id: 'event-1' } as never)
+    const call = mockUpdate.mock.calls[0][0] as { where: Record<string, unknown> }
+    expect(call.where).toEqual({ id: 'event-1' })
+    expect((call.where as { editionId?: string }).editionId).toBeUndefined()
+  })
+
+  it('delete is primary-key only', async () => {
+    mockDelete.mockResolvedValue({ id: 'event-1' })
+    await eventService.delete('event-1')
+    expect(mockDelete).toHaveBeenCalledWith({ where: { id: 'event-1' } })
+  })
+
+  it('deleteMany is primary-key only', async () => {
+    mockDeleteMany.mockResolvedValue({ count: 2 })
+    await eventService.deleteMany(['e1', 'e2'])
+    expect(mockDeleteMany).toHaveBeenCalledWith({ where: { id: { in: ['e1', 'e2'] } } })
   })
 })

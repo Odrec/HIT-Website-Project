@@ -214,7 +214,11 @@ export const eventService = {
   },
 
   /**
-   * Create a new event
+   * Create a new event in the currently ACTIVE edition.
+   *
+   * No editionId override is accepted — submitters cannot target past or
+   * future editions. The rollover flow in PR B uses a separate write path
+   * that stamps a different edition.
    */
   async create(input: CreateEventInput) {
     const activeEditionId = await getActiveEditionId()
@@ -292,7 +296,12 @@ export const eventService = {
   },
 
   /**
-   * Update an existing event
+   * Update an existing event.
+   *
+   * Operates on primary key only — no edition scoping. Callers must ensure
+   * the `id` comes from a trusted edition-filtered source (e.g. eventService.list
+   * or getById), otherwise an admin with a stale cross-edition id could
+   * accidentally mutate a different year's event. See spec §2.
    */
   async update(input: UpdateEventInput) {
     const {
@@ -390,7 +399,9 @@ export const eventService = {
   },
 
   /**
-   * Delete an event
+   * Delete an event by id.
+   *
+   * Operates on primary key only — no edition scoping. See `update` for caveats.
    */
   async delete(id: string) {
     return prisma.event.delete({
@@ -399,7 +410,11 @@ export const eventService = {
   },
 
   /**
-   * Delete multiple events
+   * Delete multiple events by id.
+   *
+   * Operates on primary keys only — no edition scoping. Admin routes that
+   * expose this MUST have already filtered the id list to the intended
+   * edition, or stale cross-edition ids could be silently removed. See spec §2.
    */
   async deleteMany(ids: string[]) {
     return prisma.event.deleteMany({
@@ -410,7 +425,11 @@ export const eventService = {
   },
 
   /**
-   * Duplicate an event
+   * Duplicate an event into the active edition.
+   *
+   * Fetches the source event cross-edition (admin-only operation — the caller
+   * is trusted to pick a legitimate source). The clone always lands in the
+   * active edition regardless of the source's edition.
    */
   async duplicate(id: string) {
     const original = await this.getById(id, { editionId: null })
