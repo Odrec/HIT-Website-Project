@@ -42,9 +42,18 @@ interface MelderSectionProps {
   onChange: (data: MelderData) => void
   melderId: string | null
   onMelderIdChange: (id: string) => void
+  titleOptions?: string[]
 }
 
-export function MelderSection({ value, onChange, melderId, onMelderIdChange }: MelderSectionProps) {
+const MELDER_TITLE_DATALIST_ID = 'melder-title-suggestions'
+
+export function MelderSection({
+  value,
+  onChange,
+  melderId,
+  onMelderIdChange,
+  titleOptions,
+}: MelderSectionProps) {
   const [loaded, setLoaded] = useState(false)
   // Edit mode is latched on mount from the initial melderId. Required because
   // the create-mode path auto-links the current user's profile, which would
@@ -150,7 +159,15 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               onChange={(e) => updateField('title', e.target.value)}
               placeholder="Dr., Prof., etc."
               readOnly={readOnly}
+              list={titleOptions && titleOptions.length > 0 ? MELDER_TITLE_DATALIST_ID : undefined}
             />
+            {titleOptions && titleOptions.length > 0 && (
+              <datalist id={MELDER_TITLE_DATALIST_ID}>
+                {titleOptions.map((t) => (
+                  <option key={t} value={t} />
+                ))}
+              </datalist>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label>
