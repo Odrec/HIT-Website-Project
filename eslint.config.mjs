@@ -10,6 +10,7 @@ export default [
       '.next/**',
       'out/**',
       'build/**',
+      'src/generated/**',
       '*.config.js',
       '*.config.mjs',
       '*.config.ts',

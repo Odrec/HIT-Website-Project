@@ -116,9 +116,7 @@ describe('POST /api/schedule/share', () => {
     const response = await POST(request as unknown as NextRequest)
     const data = await response.json()
 
-    expect(data.url).toBe(
-      'https://hit-website-virtuos-openstack.uni-osnabrueck.de/s/abc123'
-    )
+    expect(data.url).toBe('https://hit-website-virtuos-openstack.uni-osnabrueck.de/s/abc123')
     vi.unstubAllEnvs()
   })
 

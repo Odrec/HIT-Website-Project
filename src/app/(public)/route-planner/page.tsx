@@ -275,8 +275,7 @@ export default function RoutePlannerPage() {
     if (intermediate) params.set('waypoints', intermediate)
     return `https://www.google.com/maps/dir/?${params.toString()}`
   }, [route])
-  const googleMapsTruncated =
-    !!route && route.waypoints.length > GOOGLE_MAPS_MAX_STOPS
+  const googleMapsTruncated = !!route && route.waypoints.length > GOOGLE_MAPS_MAX_STOPS
 
   const handleBuildingClick = (building: BuildingInfo) => {
     setSelectedBuilding(building)
@@ -494,20 +493,16 @@ export default function RoutePlannerPage() {
                     {googleMapsUrl && (
                       <>
                         <Button asChild variant="outline" className="w-full">
-                          <a
-                            href={googleMapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             In Google Maps öffnen
                           </a>
                         </Button>
                         {googleMapsTruncated && (
                           <p className="text-xs text-muted-foreground italic px-1">
-                            Google Maps unterstützt nur bis zu {GOOGLE_MAPS_MAX_STOPS}{' '}
-                            Stationen — nur die ersten {GOOGLE_MAPS_MAX_STOPS} Ihres Zeitplans
-                            werden übernommen.
+                            Google Maps unterstützt nur bis zu {GOOGLE_MAPS_MAX_STOPS} Stationen —
+                            nur die ersten {GOOGLE_MAPS_MAX_STOPS} Ihres Zeitplans werden
+                            übernommen.
                           </p>
                         )}
                       </>

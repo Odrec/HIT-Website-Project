@@ -34,6 +34,7 @@ import {
 import { TimeGridPicker } from '@/components/events/TimeGridPicker'
 import { BuildingRoomSelect } from '@/components/events/BuildingRoomSelect'
 import { ImageUpload } from '@/components/events/ImageUpload'
+import { Affiliation } from '@/types/events'
 
 interface BuildingOption {
   id: string
@@ -654,10 +655,7 @@ export function EventForm({
                         <Select
                           value={watch(`lecturers.${index}.affiliation`) || ''}
                           onValueChange={(value) =>
-                            setValue(
-                              `lecturers.${index}.affiliation`,
-                              value as 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN'
-                            )
+                            setValue(`lecturers.${index}.affiliation`, value as Affiliation)
                           }
                         >
                           <SelectTrigger>
