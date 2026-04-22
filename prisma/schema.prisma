@@ -83,6 +83,19 @@ model StudyProgram {
   @@map("study_programs")
 }
 
+/// Academic title (Dr., Prof., M.A., ...) — admin-managed vocabulary used by
+/// the Melder and Dozent title fields. Values are still free-text on the
+/// Melder/Lecturer records; this table only drives the suggestion dropdown.
+model Title {
+  id        String   @id @default(cuid())
+  value     String   @unique @db.VarChar(50)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("titles")
+}
+
 /// Information market (Infomarkt) locations
 model InformationMarket {
   id       String                    @id @default(cuid())

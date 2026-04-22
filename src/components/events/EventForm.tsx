@@ -51,6 +51,8 @@ interface StudyProgram {
   clusters?: { name: string }[]
 }
 
+const LECTURER_TITLE_DATALIST_ID = 'lecturer-title-suggestions'
+
 interface InfoMarket {
   id: string
   name: string
@@ -73,6 +75,7 @@ export function EventForm({
   const [buildings, setBuildings] = useState<BuildingOption[]>([])
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([])
   const [infoMarkets, setInfoMarkets] = useState<InfoMarket[]>([])
+  const [titleOptions, setTitleOptions] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
 
   const [deadlineInfo, setDeadlineInfo] = useState<{
@@ -141,21 +144,28 @@ export function EventForm({
   useEffect(() => {
     async function fetchData() {
       try {
-        const [buildingsRes, programsRes, marketsRes, settingsRes] = await Promise.all([
+        const [buildingsRes, programsRes, marketsRes, settingsRes, titlesRes] = await Promise.all([
           fetch('/api/buildings'),
           fetch('/api/study-programs'),
           fetch('/api/locations/info-markets'),
           fetch('/api/settings'),
+          fetch('/api/titles'),
         ])
 
         const buildingsData = await buildingsRes.json()
         const programsData = await programsRes.json()
         const marketsData = await marketsRes.json()
         const settingsData = await settingsRes.json()
+        const titlesData = titlesRes.ok ? await titlesRes.json() : []
 
         setBuildings(Array.isArray(buildingsData) ? buildingsData : [])
         setStudyPrograms(Array.isArray(programsData) ? programsData : [])
         setInfoMarkets(Array.isArray(marketsData) ? marketsData : [])
+        setTitleOptions(
+          Array.isArray(titlesData)
+            ? (titlesData as Array<{ value: string }>).map((t) => t.value)
+            : []
+        )
 
         // Pre-fill date from settings if no initial data
         if (settingsData?.hitDate && !initialData?.timeStart) {
@@ -307,6 +317,7 @@ export function EventForm({
             onChange={setMelderData}
             melderId={melderId}
             onMelderIdChange={setMelderId}
+            titleOptions={titleOptions}
           />
 
           {/* Section 2: Veranstaltungsinfo */}
@@ -615,6 +626,13 @@ export function EventForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {titleOptions.length > 0 && (
+                <datalist id={LECTURER_TITLE_DATALIST_ID}>
+                  {titleOptions.map((t) => (
+                    <option key={t} value={t} />
+                  ))}
+                </datalist>
+              )}
               {lecturerFields.length === 0 ? (
                 <p className="text-sm text-gray-500">Keine Dozierenden hinzugefügt</p>
               ) : (
@@ -635,11 +653,23 @@ export function EventForm({
                       </Button>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label>Titel</Label>
+                        <Input
+                          {...register(`lecturers.${index}.title`)}
+                          placeholder="Dr., Prof., etc."
+                          list={titleOptions.length > 0 ? LECTURER_TITLE_DATALIST_ID : undefined}
+                        />
+                      </div>
                       <div className="space-y-1.5">
                         <Label>
-                          Vorname <span className="text-red-500">*</span>
+                          Vorname
+                          {index === 0 && <span className="text-red-500"> *</span>}
                         </Label>
-                        <Input {...register(`lecturers.${index}.firstName`)} placeholder="Max" />
+                        <Input
+                          {...register(`lecturers.${index}.firstName`)}
+                          placeholder={index === 0 ? 'Max' : 'optional'}
+                        />
                         {errors.lecturers?.[index]?.firstName && (
                           <p className="text-sm text-red-500">
                             {errors.lecturers[index].firstName?.message}
@@ -652,7 +682,9 @@ export function EventForm({
                         </Label>
                         <Input
                           {...register(`lecturers.${index}.lastName`)}
-                          placeholder="Mustermann"
+                          placeholder={
+                            index === 0 ? 'Mustermann' : 'z.B. Mustermann oder Mitarbeitende'
+                          }
                         />
                         {errors.lecturers?.[index]?.lastName && (
                           <p className="text-sm text-red-500">

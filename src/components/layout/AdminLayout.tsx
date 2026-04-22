@@ -18,6 +18,7 @@ import {
   Settings,
   HelpCircle,
   Bus,
+  BadgeCheck,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -52,6 +53,12 @@ const sidebarItems = [
     title: 'Melder',
     href: '/admin/melders',
     icon: Users,
+  },
+  {
+    title: 'Titel',
+    href: '/admin/titles',
+    icon: BadgeCheck,
+    adminOnly: true,
   },
   {
     title: 'Raumzuordnung',

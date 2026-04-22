@@ -3,13 +3,29 @@
 import { z } from 'zod'
 import { affiliationValues } from './melder'
 
+// Vorname is required for the first lecturer (refined below at the array
+// level). For additional entries it may be left blank — the Nachname field
+// commonly carries a group label like "Mitarbeitende" or "Studierende".
 export const lecturerSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
+  firstName: z.string().default(''),
   lastName: z.string().min(1, 'Last name is required'),
   title: z.string().optional().default(''),
   email: z.string().email('Invalid email').optional().or(z.literal('')).default(''),
   affiliation: z.enum(affiliationValues).optional().or(z.literal('')),
 })
+
+export const lecturerArraySchema = z
+  .array(lecturerSchema)
+  .default([])
+  .superRefine((lecturers, ctx) => {
+    if (lecturers.length > 0 && lecturers[0].firstName.trim().length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Vorname ist für die erste dozierende Person erforderlich',
+        path: [0, 'firstName'],
+      })
+    }
+  })
 
 export const organizerSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -58,7 +74,7 @@ export const eventFormSchema = z
       .default(''),
     photoUrl: z.string().url('Invalid URL').optional().or(z.literal('')).default(''),
     institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
-    lecturers: z.array(lecturerSchema).default([]),
+    lecturers: lecturerArraySchema,
     organizers: z.array(organizerSchema).default([]),
     studyProgramIds: z.array(z.string()).default([]),
     infoMarketIds: z.array(z.string()).default([]),
