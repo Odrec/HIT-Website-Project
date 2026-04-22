@@ -423,17 +423,34 @@ export function EventForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="eventDate">
-                  Datum <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="eventDate"
-                  type="date"
-                  value={dateStr}
-                  onChange={(e) => setDateStr(e.target.value)}
-                />
-              </div>
+              {isAdmin ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="eventDate">
+                    Datum <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="eventDate"
+                    type="date"
+                    value={dateStr}
+                    onChange={(e) => setDateStr(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label>Datum</Label>
+                  <p className="text-sm text-gray-700">
+                    {dateStr
+                      ? new Date(`${dateStr}T00:00:00Z`).toLocaleDateString('de-DE', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          timeZone: 'UTC',
+                        })
+                      : 'Wird von der Administration festgelegt'}
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <TimeGridPicker value={startTime} onChange={setStartTime} label="Beginn" required />
                 <TimeGridPicker value={endTime} onChange={setEndTime} label="Ende" required />
