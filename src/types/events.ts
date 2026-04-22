@@ -91,8 +91,7 @@ export interface StudyProgram {
   id: string
   name: string
   institution: Institution
-  clusterId?: string
-  cluster?: StudyProgramCluster
+  clusters?: StudyProgramCluster[]
 }
 
 export interface StudyProgramCluster {

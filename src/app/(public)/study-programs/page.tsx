@@ -29,8 +29,7 @@ interface StudyProgram {
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
   url: string | null
-  clusterId: string | null
-  cluster: Cluster | null
+  clusters: Cluster[]
 }
 
 const institutionColors: Record<string, string> = {
@@ -66,22 +65,29 @@ export default function StudyProgramsPage() {
 
   // Filter programs based on search and institution
   const filteredPrograms = studyPrograms.filter((program) => {
+    const needle = search.toLowerCase()
     const matchesSearch =
-      program.name.toLowerCase().includes(search.toLowerCase()) ||
-      program.cluster?.name.toLowerCase().includes(search.toLowerCase())
+      program.name.toLowerCase().includes(needle) ||
+      program.clusters.some((c) => c.name.toLowerCase().includes(needle))
     const matchesInstitution =
       institutionFilter === 'all' || program.institution === institutionFilter
     return matchesSearch && matchesInstitution
   })
 
-  // Group programs by cluster
+  // Group programs by Studienfeld — a program assigned to multiple fields
+  // appears in each group (stakeholder requirement).
   const groupedPrograms = filteredPrograms.reduce(
     (acc, program) => {
-      const clusterName = program.cluster?.name || 'Weitere Studiengänge'
-      if (!acc[clusterName]) {
-        acc[clusterName] = { programs: [], icon: program.cluster?.icon || null }
+      const entries =
+        program.clusters.length > 0
+          ? program.clusters.map((c) => ({ name: c.name, icon: c.icon }))
+          : [{ name: 'Weitere Studiengänge', icon: null }]
+      for (const entry of entries) {
+        if (!acc[entry.name]) {
+          acc[entry.name] = { programs: [], icon: entry.icon }
+        }
+        acc[entry.name].programs.push(program)
       }
-      acc[clusterName].programs.push(program)
       return acc
     },
     {} as Record<string, { programs: StudyProgram[]; icon: string | null }>

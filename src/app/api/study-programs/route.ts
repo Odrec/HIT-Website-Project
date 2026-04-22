@@ -93,15 +93,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or missing institution' }, { status: 400 })
     }
 
+    const clusterIds: string[] = Array.isArray(body.clusterIds)
+      ? body.clusterIds.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+      : []
+
     const program = await prisma.studyProgram.create({
       data: {
         name: body.name,
         institution: body.institution,
         url: body.url || null,
-        clusterId: body.clusterId || null,
+        ...(clusterIds.length > 0 && {
+          clusters: { connect: clusterIds.map((id) => ({ id })) },
+        }),
       },
       include: {
-        cluster: true,
+        clusters: true,
       },
     })
 

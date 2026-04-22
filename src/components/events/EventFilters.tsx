@@ -34,11 +34,11 @@ interface StudyProgram {
   id: string
   name: string
   institution: string
-  cluster?: {
+  clusters?: {
     id: string
     name: string
     icon: string | null
-  } | null
+  }[]
 }
 
 const eventTypes = [
@@ -95,14 +95,18 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
     return sp.institution === mappedInstitution || sp.institution === 'BOTH'
   })
 
-  // Group study programs by cluster
+  // Group study programs by Studienfeld. A program assigned to multiple
+  // Studienfeldern appears in each group (stakeholder requirement).
   const groupedPrograms = filteredStudyPrograms.reduce<Record<string, StudyProgram[]>>(
     (acc, program) => {
-      const clusterName = program.cluster?.name || 'Sonstige'
-      if (!acc[clusterName]) {
-        acc[clusterName] = []
+      const clusterNames =
+        program.clusters && program.clusters.length > 0
+          ? program.clusters.map((c) => c.name)
+          : ['Sonstige']
+      for (const clusterName of clusterNames) {
+        if (!acc[clusterName]) acc[clusterName] = []
+        acc[clusterName].push(program)
       }
-      acc[clusterName].push(program)
       return acc
     },
     {}
@@ -286,7 +290,9 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
                     <div key={clusterName}>
                       <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold text-hit-gray-500">
                         <ClusterIcon
-                          icon={programs[0]?.cluster?.icon}
+                          icon={
+                            programs[0]?.clusters?.find((c) => c.name === clusterName)?.icon ?? null
+                          }
                           name={clusterName}
                           size={16}
                         />

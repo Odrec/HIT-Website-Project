@@ -86,7 +86,7 @@ export const eventService = {
       where.studyPrograms = {
         some: {
           studyProgram: {
-            clusterId: filters.clusterId,
+            clusters: { some: { id: filters.clusterId } },
           },
         },
       }
@@ -135,7 +135,7 @@ export const eventService = {
             include: {
               studyProgram: {
                 include: {
-                  cluster: true,
+                  clusters: true,
                 },
               },
             },
@@ -185,7 +185,7 @@ export const eventService = {
           include: {
             studyProgram: {
               include: {
-                cluster: true,
+                clusters: true,
               },
             },
           },

@@ -14,7 +14,7 @@ export const studyProgramService = {
     return prisma.studyProgram.findMany({
       where: filters?.institution ? { institution: filters.institution } : undefined,
       include: {
-        cluster: true,
+        clusters: true,
       },
       orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
@@ -27,7 +27,7 @@ export const studyProgramService = {
     return prisma.studyProgram.findUnique({
       where: { id },
       include: {
-        cluster: true,
+        clusters: true,
         events: {
           include: {
             event: true,
@@ -65,10 +65,10 @@ export const studyProgramService = {
       orderBy: { name: 'asc' },
     })
 
-    // Also get programs without a cluster
+    // Also get programs without any cluster
     const unclustered = await prisma.studyProgram.findMany({
       where: {
-        clusterId: null,
+        clusters: { none: {} },
         ...(institution ? { institution } : {}),
       },
       orderBy: { name: 'asc' },

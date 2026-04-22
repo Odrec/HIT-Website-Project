@@ -11,7 +11,7 @@ interface RouteParams {
 /**
  * GET /api/study-programs/clusters/[id] - Get a single cluster
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const cluster = await prisma.studyProgramCluster.findUnique({
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 /**
  * DELETE /api/study-programs/clusters/[id] - Delete a cluster (requires admin)
  */
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()
@@ -98,7 +98,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Cluster not found' }, { status: 404 })
     }
 
-    // Note: Deleting a cluster will set clusterId to null on associated programs (onDelete: SetNull)
+    // Deleting a Studienfeld removes the m2m junction rows (cascading) — the
+    // programs themselves survive, they just no longer belong to this field.
     await prisma.studyProgramCluster.delete({
       where: { id },
     })

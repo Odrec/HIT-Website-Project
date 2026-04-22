@@ -48,7 +48,7 @@ interface StudyProgram {
   id: string
   name: string
   institution: string
-  cluster?: { name: string } | null
+  clusters?: { name: string }[]
 }
 
 interface InfoMarket {
@@ -215,7 +215,10 @@ export function EventForm({
     .map((sp) => ({
       value: sp.id,
       label: sp.name,
-      group: sp.cluster?.name || (sp.institution === 'UNI' ? 'Universität' : 'Hochschule'),
+      // In the selector we only show the first Studienfeld as a grouping hint —
+      // the selection targets the program itself, not a cluster, and a program
+      // appearing twice in the dropdown would be confusing.
+      group: sp.clusters?.[0]?.name || (sp.institution === 'UNI' ? 'Universität' : 'Hochschule'),
     }))
 
   // Convert info markets to multi-select options

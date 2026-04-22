@@ -13,7 +13,7 @@ import type {
   EndSessionResource,
 } from '@/types/navigator'
 import { Institution, EventType, LocationType, Affiliation } from '@/types/events'
-import type { StudyProgram, Event, Building, Room } from '@/types/events'
+import type { StudyProgram, StudyProgramCluster, Event, Building, Room } from '@/types/events'
 
 // In-memory session store (in production, use Redis)
 // Use globalThis to persist sessions across Next.js hot-reloads in development
@@ -504,7 +504,7 @@ export async function getRecommendations(
   // Get all programs from database
   const programs = await prisma.studyProgram.findMany({
     include: {
-      cluster: true,
+      clusters: true,
       events: {
         include: {
           event: {
@@ -681,14 +681,11 @@ export async function getRecommendations(
       id: program.id,
       name: program.name,
       institution: program.institution as unknown as Institution,
-      clusterId: program.clusterId || undefined,
-      cluster: program.cluster
-        ? {
-            id: program.cluster.id,
-            name: program.cluster.name,
-            description: program.cluster.description || undefined,
-          }
-        : undefined,
+      clusters: program.clusters.map((c) => ({
+        id: c.id,
+        name: c.name,
+        description: c.description || undefined,
+      })),
     }
 
     return {
@@ -704,31 +701,28 @@ export async function getRecommendations(
   const qualifiedPrograms = scoredPrograms.filter((p) => p.relevanceScore >= 60)
   const topPrograms = qualifiedPrograms.slice(0, limit)
 
-  // Group by cluster
-  const clusterMap: Record<string, ProgramRecommendation[]> = {}
+  // Group by cluster — a program assigned to multiple Studienfelder appears
+  // equally in each (stakeholder requirement).
+  const clusterMap: Record<
+    string,
+    { cluster: StudyProgramCluster; progs: ProgramRecommendation[] }
+  > = {}
   for (const prog of topPrograms) {
-    if (prog.program.clusterId) {
-      if (!clusterMap[prog.program.clusterId]) {
-        clusterMap[prog.program.clusterId] = []
+    for (const cluster of prog.program.clusters ?? []) {
+      if (!clusterMap[cluster.id]) {
+        clusterMap[cluster.id] = { cluster, progs: [] }
       }
-      clusterMap[prog.program.clusterId].push(prog)
+      clusterMap[cluster.id].progs.push(prog)
     }
   }
 
-  const clusters: ClusterRecommendation[] = []
-  for (const clusterId of Object.keys(clusterMap)) {
-    const progs = clusterMap[clusterId]
-    const cluster = progs[0].program.cluster
-    if (cluster) {
-      clusters.push({
-        cluster,
-        programs: progs,
-        averageScore:
-          progs.reduce((acc: number, p: ProgramRecommendation) => acc + p.relevanceScore, 0) /
-          progs.length,
-      })
-    }
-  }
+  const clusters: ClusterRecommendation[] = Object.values(clusterMap).map(({ cluster, progs }) => ({
+    cluster,
+    programs: progs,
+    averageScore:
+      progs.reduce((acc: number, p: ProgramRecommendation) => acc + p.relevanceScore, 0) /
+      progs.length,
+  }))
   clusters.sort((a, b) => b.averageScore - a.averageScore)
 
   // End session resources
@@ -830,7 +824,6 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
         id: sp.studyProgram.id,
         name: sp.studyProgram.name,
         institution: sp.studyProgram.institution as unknown as Institution,
-        clusterId: sp.studyProgram.clusterId || undefined,
       })),
       createdAt: new Date(e.createdAt),
       updatedAt: new Date(e.updatedAt),

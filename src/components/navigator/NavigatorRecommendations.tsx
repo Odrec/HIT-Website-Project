@@ -108,10 +108,10 @@ export function NavigatorRecommendations({
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Building2 className="w-4 h-4" />
                       <span>{getInstitutionLabel(rec.program.institution)}</span>
-                      {rec.program.cluster && (
+                      {rec.program.clusters && rec.program.clusters.length > 0 && (
                         <>
                           <span>•</span>
-                          <span>{rec.program.cluster.name}</span>
+                          <span>{rec.program.clusters.map((c) => c.name).join(', ')}</span>
                         </>
                       )}
                     </div>

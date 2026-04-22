@@ -11,13 +11,13 @@ interface RouteParams {
 /**
  * GET /api/study-programs/[id] - Get a single study program
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const program = await prisma.studyProgram.findUnique({
       where: { id },
       include: {
-        cluster: true,
+        clusters: true,
         events: {
           include: {
             event: true,
@@ -68,16 +68,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Invalid or missing institution' }, { status: 400 })
     }
 
+    const clusterIds: string[] = Array.isArray(body.clusterIds)
+      ? body.clusterIds.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+      : []
+
     const program = await prisma.studyProgram.update({
       where: { id },
       data: {
         name: body.name,
         institution: body.institution,
         url: body.url || null,
-        clusterId: body.clusterId || null,
+        clusters: { set: clusterIds.map((cid) => ({ id: cid })) },
       },
       include: {
-        cluster: true,
+        clusters: true,
       },
     })
 
@@ -91,7 +95,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 /**
  * DELETE /api/study-programs/[id] - Delete a study program (requires admin)
  */
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()

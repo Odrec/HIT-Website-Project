@@ -68,7 +68,7 @@ const eventInclude = {
     include: {
       studyProgram: {
         include: {
-          cluster: true,
+          clusters: true,
         },
       },
     },
@@ -196,8 +196,9 @@ export const exportService = {
       const clusterNames = new Set<string>()
 
       for (const esp of event.studyPrograms) {
-        const clusterName = esp.studyProgram.cluster?.name
-        clusterNames.add(clusterName ?? 'Ohne Studienfeld')
+        for (const cluster of esp.studyProgram.clusters) {
+          clusterNames.add(cluster.name)
+        }
       }
 
       if (clusterNames.size === 0) {
@@ -395,10 +396,10 @@ export const exportService = {
 
       const clusterEntries = new Map<string, string | null>()
       for (const esp of event.studyPrograms) {
-        const cluster = esp.studyProgram.cluster
-        const clusterName = cluster?.name ?? 'Ohne Studienfeld'
-        if (!clusterEntries.has(clusterName)) {
-          clusterEntries.set(clusterName, cluster?.icon ?? null)
+        for (const cluster of esp.studyProgram.clusters) {
+          if (!clusterEntries.has(cluster.name)) {
+            clusterEntries.set(cluster.name, cluster.icon ?? null)
+          }
         }
       }
       if (clusterEntries.size === 0) {
