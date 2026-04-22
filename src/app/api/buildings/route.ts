@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
       shortName,
       address,
       campus,
+      institution,
       latitude,
       longitude,
       hasAccessibility,
@@ -46,6 +47,10 @@ export async function POST(request: NextRequest) {
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'Name ist erforderlich' }, { status: 400 })
     }
+
+    const validInstitutions = ['UNI', 'HOCHSCHULE', 'BOTH'] as const
+    type Inst = (typeof validInstitutions)[number]
+    const resolvedInstitution: Inst = validInstitutions.includes(institution) ? institution : 'BOTH'
 
     // Generate slug from name if not provided
     const buildingSlug =
@@ -67,6 +72,7 @@ export async function POST(request: NextRequest) {
         shortName: shortName?.trim() || null,
         address: address?.trim() || null,
         campus: campus?.trim() || null,
+        institution: resolvedInstitution,
         latitude: latitude != null ? parseFloat(latitude) : null,
         longitude: longitude != null ? parseFloat(longitude) : null,
         hasAccessibility: hasAccessibility ?? false,

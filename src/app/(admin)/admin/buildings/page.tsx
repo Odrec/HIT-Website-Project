@@ -16,6 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -41,6 +48,7 @@ interface Building {
   name: string
   shortName: string | null
   campus: string | null
+  institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
   address: string | null
   latitude: number | null
   longitude: number | null
@@ -49,6 +57,12 @@ interface Building {
   rooms: Room[]
   createdAt: string
   updatedAt: string
+}
+
+const institutionLabels: Record<'UNI' | 'HOCHSCHULE' | 'BOTH', string> = {
+  UNI: 'Universität',
+  HOCHSCHULE: 'Hochschule',
+  BOTH: 'Beide',
 }
 
 export default function BuildingsPage() {
@@ -66,6 +80,7 @@ export default function BuildingsPage() {
     slug: '',
     address: '',
     campus: '',
+    institution: 'BOTH' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
     latitude: '',
     longitude: '',
     hasAccessibility: false,
@@ -133,6 +148,7 @@ export default function BuildingsPage() {
       slug: '',
       address: '',
       campus: '',
+      institution: 'BOTH',
       latitude: '',
       longitude: '',
       hasAccessibility: false,
@@ -149,6 +165,7 @@ export default function BuildingsPage() {
       slug: building.slug,
       address: building.address || '',
       campus: building.campus || '',
+      institution: building.institution,
       latitude: building.latitude?.toString() || '',
       longitude: building.longitude?.toString() || '',
       hasAccessibility: building.hasAccessibility,
@@ -168,6 +185,7 @@ export default function BuildingsPage() {
         slug: buildingForm.slug.trim() || undefined,
         address: buildingForm.address.trim() || null,
         campus: buildingForm.campus.trim() || null,
+        institution: buildingForm.institution,
         latitude: buildingForm.latitude ? parseFloat(buildingForm.latitude) : null,
         longitude: buildingForm.longitude ? parseFloat(buildingForm.longitude) : null,
         hasAccessibility: buildingForm.hasAccessibility,
@@ -348,6 +366,7 @@ export default function BuildingsPage() {
                       <TableHead className="w-8"></TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Campus</TableHead>
+                      <TableHead>Institution</TableHead>
                       <TableHead>Adresse</TableHead>
                       <TableHead>Räume</TableHead>
                       <TableHead className="text-right">Aktionen</TableHead>
@@ -386,6 +405,11 @@ export default function BuildingsPage() {
                               </div>
                             </TableCell>
                             <TableCell>{building.campus || '-'}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {institutionLabels[building.institution]}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="max-w-[200px] truncate">
                               {building.address || '-'}
                             </TableCell>
@@ -419,7 +443,7 @@ export default function BuildingsPage() {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${building.id}-rooms`}>
-                              <TableCell colSpan={6} className="bg-muted/30 p-0">
+                              <TableCell colSpan={7} className="bg-muted/30 p-0">
                                 <div className="px-8 py-4 space-y-3">
                                   <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-semibold flex items-center gap-2">
@@ -680,6 +704,33 @@ export default function BuildingsPage() {
                   placeholder="z.B. schloss, westerberg, caprivi"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="building-institution">Institution</Label>
+              <Select
+                value={buildingForm.institution}
+                onValueChange={(v) =>
+                  setBuildingForm({
+                    ...buildingForm,
+                    institution: v as 'UNI' | 'HOCHSCHULE' | 'BOTH',
+                  })
+                }
+              >
+                <SelectTrigger id="building-institution">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(['UNI', 'HOCHSCHULE', 'BOTH'] as const).map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {institutionLabels[v]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Bestimmt, für welche Institution dieses Gebäude im Veranstaltungs-Formular angeboten
+                wird.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="building-address">Adresse</Label>

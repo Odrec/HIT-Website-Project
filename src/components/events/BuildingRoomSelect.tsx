@@ -19,6 +19,7 @@ interface Building {
   id: string
   name: string
   campus: string | null
+  institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
   rooms: Room[]
 }
 
@@ -27,6 +28,9 @@ interface BuildingRoomSelectProps {
   roomId: string
   onBuildingChange: (id: string) => void
   onRoomChange: (id: string) => void
+  /** Event institution. Buildings whose institution doesn't match (and which
+   *  aren't BOTH) are hidden from the dropdown. Undefined shows everything. */
+  institution?: 'UNI' | 'HOCHSCHULE' | 'BOTH'
 }
 
 export function BuildingRoomSelect({
@@ -34,6 +38,7 @@ export function BuildingRoomSelect({
   roomId,
   onBuildingChange,
   onRoomChange,
+  institution,
 }: BuildingRoomSelectProps) {
   const [buildings, setBuildings] = useState<Building[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,6 +50,10 @@ export function BuildingRoomSelect({
       .finally(() => setLoading(false))
   }, [])
 
+  const filteredBuildings = buildings.filter((b) => {
+    if (!institution || institution === 'BOTH') return true
+    return b.institution === institution || b.institution === 'BOTH'
+  })
   const selectedBuilding = buildings.find((b) => b.id === buildingId)
   const rooms = selectedBuilding?.rooms ?? []
 
@@ -64,7 +73,7 @@ export function BuildingRoomSelect({
             <SelectValue placeholder={loading ? 'Laden...' : 'Gebäude wählen'} />
           </SelectTrigger>
           <SelectContent>
-            {buildings.map((b) => (
+            {filteredBuildings.map((b) => (
               <SelectItem key={b.id} value={b.id}>
                 {b.name}
                 {b.campus && ` (${b.campus})`}

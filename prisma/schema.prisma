@@ -312,22 +312,26 @@ model Melder {
 
 /// Campus building — single source of truth for locations, coordinates, and routing
 model Building {
-  id                 String   @id @default(cuid())
-  slug               String   @unique @db.VarChar(50)
-  name               String   @db.VarChar(200)
-  shortName          String?  @db.VarChar(50)
-  address            String?  @db.Text
-  campus             String?  @db.VarChar(50)
+  id                 String       @id @default(cuid())
+  slug               String       @unique @db.VarChar(50)
+  name               String       @db.VarChar(200)
+  shortName          String?      @db.VarChar(50)
+  address            String?      @db.Text
+  campus             String?      @db.VarChar(50)
+  /// Owner institution. BOTH is used for shared buildings (Westerberg etc.)
+  /// and drives the building filter in the event form.
+  institution        Institution  @default(BOTH)
   latitude           Float?
   longitude          Float?
-  hasAccessibility   Boolean  @default(false)
-  accessibilityNotes String?  @db.Text
+  hasAccessibility   Boolean      @default(false)
+  accessibilityNotes String?      @db.Text
   rooms              Room[]
   events             Event[]
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@index([campus])
+  @@index([institution])
   @@map("buildings")
 }
 

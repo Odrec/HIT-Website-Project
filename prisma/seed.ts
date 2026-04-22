@@ -56,21 +56,21 @@ async function main() {
 
   const buildingData = [
     // Schloss Campus
-    { slug: 'schloss', name: 'Schloss Osnabrück', shortName: 'Schloss', address: 'Neuer Graben 29, 49074 Osnabrück', campus: 'schloss', latitude: 52.27148, longitude: 8.04424, hasAccessibility: true },
-    { slug: 'uos-aula', name: 'Aula der Universität', shortName: 'Aula', address: 'Neuer Graben 29, 49074 Osnabrück', campus: 'schloss', latitude: 52.27148, longitude: 8.04424, hasAccessibility: true },
-    { slug: 'seminarstrasse', name: 'Seminarstraße Gebäude', shortName: 'Seminar', address: 'Seminarstraße 20, 49074 Osnabrück', campus: 'schloss', latitude: 52.27130, longitude: 8.04585, hasAccessibility: false, accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang' },
+    { slug: 'schloss', name: 'Schloss Osnabrück', shortName: 'Schloss', address: 'Neuer Graben 29, 49074 Osnabrück', campus: 'schloss', institution: Institution.UNI, latitude: 52.27148, longitude: 8.04424, hasAccessibility: true },
+    { slug: 'uos-aula', name: 'Aula der Universität', shortName: 'Aula', address: 'Neuer Graben 29, 49074 Osnabrück', campus: 'schloss', institution: Institution.UNI, latitude: 52.27148, longitude: 8.04424, hasAccessibility: true },
+    { slug: 'seminarstrasse', name: 'Seminarstraße Gebäude', shortName: 'Seminar', address: 'Seminarstraße 20, 49074 Osnabrück', campus: 'schloss', institution: Institution.UNI, latitude: 52.27130, longitude: 8.04585, hasAccessibility: false, accessibilityNotes: 'Historisches Gebäude, eingeschränkter Zugang' },
     // Westerberg Campus
-    { slug: 'avz', name: 'AVZ (Allgemeines Verfügungszentrum)', shortName: 'AVZ', address: 'Albrechtstraße 28, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28386, longitude: 8.02513, hasAccessibility: true },
-    { slug: 'biologie', name: 'Biologiegebäude', shortName: 'Bio', address: 'Barbarastraße 11, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28272, longitude: 8.02173, hasAccessibility: true },
-    { slug: 'physik', name: 'Physikgebäude', shortName: 'Physik', address: 'Barbarastraße 7, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28482, longitude: 8.02508, hasAccessibility: true },
-    { slug: 'chemie', name: 'Chemiegebäude', shortName: 'Chemie', address: 'Barbarastraße 7, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28476, longitude: 8.02431, hasAccessibility: true },
-    { slug: 'mathematik', name: 'Mathematik/Informatik', shortName: 'Mathe/Info', address: 'Albrechtstraße 28a, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28439, longitude: 8.02605, hasAccessibility: true },
-    { slug: 'eihu', name: 'EIHU (Erweiterungsbau Informatik)', shortName: 'EIHU', address: 'Wachsbleiche 27, 49076 Osnabrück', campus: 'westerberg', latitude: 52.28371, longitude: 8.02531, hasAccessibility: true },
+    { slug: 'avz', name: 'AVZ (Allgemeines Verfügungszentrum)', shortName: 'AVZ', address: 'Albrechtstraße 28, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28386, longitude: 8.02513, hasAccessibility: true },
+    { slug: 'biologie', name: 'Biologiegebäude', shortName: 'Bio', address: 'Barbarastraße 11, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28272, longitude: 8.02173, hasAccessibility: true },
+    { slug: 'physik', name: 'Physikgebäude', shortName: 'Physik', address: 'Barbarastraße 7, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28482, longitude: 8.02508, hasAccessibility: true },
+    { slug: 'chemie', name: 'Chemiegebäude', shortName: 'Chemie', address: 'Barbarastraße 7, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28476, longitude: 8.02431, hasAccessibility: true },
+    { slug: 'mathematik', name: 'Mathematik/Informatik', shortName: 'Mathe/Info', address: 'Albrechtstraße 28a, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28439, longitude: 8.02605, hasAccessibility: true },
+    { slug: 'eihu', name: 'EIHU (Erweiterungsbau Informatik)', shortName: 'EIHU', address: 'Wachsbleiche 27, 49076 Osnabrück', campus: 'westerberg', institution: Institution.UNI, latitude: 52.28371, longitude: 8.02531, hasAccessibility: true },
     // Caprivi Campus (Hochschule)
-    { slug: 'caprivi-a', name: 'Caprivistraße Gebäude A', shortName: 'CN-A', address: 'Caprivistraße 30a, 49076 Osnabrück', campus: 'caprivi', latitude: 52.2756, longitude: 8.0148, hasAccessibility: true },
-    { slug: 'caprivi-b', name: 'Caprivistraße Gebäude B', shortName: 'CN-B', address: 'Caprivistraße 30b, 49076 Osnabrück', campus: 'caprivi', latitude: 52.2761, longitude: 8.0155, hasAccessibility: true },
-    { slug: 'caprivi-c', name: 'Caprivistraße Gebäude C', shortName: 'CN-C', address: 'Caprivistraße 30c, 49076 Osnabrück', campus: 'caprivi', latitude: 52.2766, longitude: 8.0162, hasAccessibility: true },
-    { slug: 'caprivi-mensa', name: 'Mensa Caprivi', shortName: 'Mensa CN', address: 'Caprivistraße 30, 49076 Osnabrück', campus: 'caprivi', latitude: 52.2751, longitude: 8.0141, hasAccessibility: true },
+    { slug: 'caprivi-a', name: 'Caprivistraße Gebäude A', shortName: 'CN-A', address: 'Caprivistraße 30a, 49076 Osnabrück', campus: 'caprivi', institution: Institution.HOCHSCHULE, latitude: 52.2756, longitude: 8.0148, hasAccessibility: true },
+    { slug: 'caprivi-b', name: 'Caprivistraße Gebäude B', shortName: 'CN-B', address: 'Caprivistraße 30b, 49076 Osnabrück', campus: 'caprivi', institution: Institution.HOCHSCHULE, latitude: 52.2761, longitude: 8.0155, hasAccessibility: true },
+    { slug: 'caprivi-c', name: 'Caprivistraße Gebäude C', shortName: 'CN-C', address: 'Caprivistraße 30c, 49076 Osnabrück', campus: 'caprivi', institution: Institution.HOCHSCHULE, latitude: 52.2766, longitude: 8.0162, hasAccessibility: true },
+    { slug: 'caprivi-mensa', name: 'Mensa Caprivi', shortName: 'Mensa CN', address: 'Caprivistraße 30, 49076 Osnabrück', campus: 'caprivi', institution: Institution.HOCHSCHULE, latitude: 52.2751, longitude: 8.0141, hasAccessibility: true },
   ]
 
   const buildings: Record<string, { id: string }> = {}
