@@ -196,6 +196,7 @@ async function main() {
 
   const infoMarkets = await Promise.all([
     prisma.informationMarket.create({ data: { name: 'Infomarkt Schloss', location: 'Schloss Innenhof' } }),
+    prisma.informationMarket.create({ data: { name: 'Infomarkt SL', location: 'Westerberg (SL)' } }),
     prisma.informationMarket.create({ data: { name: 'Infomarkt Caprivi', location: 'Caprivi Campus Foyer' } }),
   ])
 
