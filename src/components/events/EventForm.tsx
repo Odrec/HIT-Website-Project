@@ -586,7 +586,7 @@ export function EventForm({
                   }
                 >
                   <Plus className="mr-1 h-4 w-4" />
-                  Dozent hinzufügen
+                  Dozierende hinzufügen
                 </Button>
               </CardTitle>
               <CardDescription className="text-xs">
@@ -595,14 +595,14 @@ export function EventForm({
             </CardHeader>
             <CardContent className="space-y-3">
               {lecturerFields.length === 0 ? (
-                <p className="text-sm text-gray-500">Keine Dozenten hinzugefügt</p>
+                <p className="text-sm text-gray-500">Keine Dozierenden hinzugefügt</p>
               ) : (
                 lecturerFields.map((field, index) => (
                   <div key={field.id} className="border rounded-lg p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">Dozent {index + 1}</span>
+                        <span className="text-sm font-medium">Dozierende {index + 1}</span>
                       </div>
                       <Button
                         type="button"
@@ -656,7 +656,7 @@ export function EventForm({
                           onValueChange={(value) =>
                             setValue(
                               `lecturers.${index}.affiliation`,
-                              value as 'UNI' | 'HOCHSCHULE' | 'EXTERN'
+                              value as 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN'
                             )
                           }
                         >
@@ -666,6 +666,7 @@ export function EventForm({
                           <SelectContent>
                             <SelectItem value="UNI">Universität</SelectItem>
                             <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
+                            <SelectItem value="BEIDE">Beide</SelectItem>
                             <SelectItem value="EXTERN">Extern</SelectItem>
                           </SelectContent>
                         </Select>
@@ -732,7 +733,7 @@ export function EventForm({
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center justify-between text-base">
-              <span>Ansprechpartner (intern)</span>
+              <span>Ansprechpersonen (intern)</span>
               <Button
                 type="button"
                 variant="outline"
@@ -746,7 +747,7 @@ export function EventForm({
                 }
               >
                 <Plus className="mr-1 h-4 w-4" />
-                Ansprechpartner hinzufügen
+                Ansprechperson hinzufügen
               </Button>
             </CardTitle>
             <CardDescription className="text-xs">
@@ -755,14 +756,14 @@ export function EventForm({
           </CardHeader>
           <CardContent className="space-y-3">
             {organizerFields.length === 0 ? (
-              <p className="text-sm text-gray-500">Keine Ansprechpartner hinzugefügt</p>
+              <p className="text-sm text-gray-500">Keine Ansprechpersonen hinzugefügt</p>
             ) : (
               organizerFields.map((field, index) => (
                 <div key={field.id} className="border rounded-lg p-3 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Building className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium">Ansprechpartner {index + 1}</span>
+                      <span className="text-sm font-medium">Ansprechperson {index + 1}</span>
                     </div>
                     <Button
                       type="button"

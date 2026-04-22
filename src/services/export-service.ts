@@ -111,6 +111,7 @@ function formatInstitution(institution: Institution | Affiliation): string {
     case 'HOCHSCHULE':
       return 'Hochschule'
     case 'BOTH':
+    case 'BEIDE':
       return 'Beide'
     case 'EXTERN':
       return 'Extern'
@@ -185,7 +186,7 @@ export const exportService = {
 
   /**
    * Events grouped by study-program cluster name.
-   * Events in multiple clusters appear in each. "Ohne Cluster" for unclustered.
+   * Events in multiple clusters appear in each. "Ohne Studienfeld" for unclustered.
    */
   async eventsByCluster(): Promise<Record<string, EventRow[]>> {
     const events = await fetchAllEvents()
@@ -196,11 +197,11 @@ export const exportService = {
 
       for (const esp of event.studyPrograms) {
         const clusterName = esp.studyProgram.cluster?.name
-        clusterNames.add(clusterName ?? 'Ohne Cluster')
+        clusterNames.add(clusterName ?? 'Ohne Studienfeld')
       }
 
       if (clusterNames.size === 0) {
-        clusterNames.add('Ohne Cluster')
+        clusterNames.add('Ohne Studienfeld')
       }
 
       const row = eventToRow(event)
@@ -395,13 +396,13 @@ export const exportService = {
       const clusterEntries = new Map<string, string | null>()
       for (const esp of event.studyPrograms) {
         const cluster = esp.studyProgram.cluster
-        const clusterName = cluster?.name ?? 'Ohne Cluster'
+        const clusterName = cluster?.name ?? 'Ohne Studienfeld'
         if (!clusterEntries.has(clusterName)) {
           clusterEntries.set(clusterName, cluster?.icon ?? null)
         }
       }
       if (clusterEntries.size === 0) {
-        clusterEntries.set('Ohne Cluster', null)
+        clusterEntries.set('Ohne Studienfeld', null)
       }
 
       for (const [name, icon] of clusterEntries) {

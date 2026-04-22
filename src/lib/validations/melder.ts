@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const affiliationValues = ['UNI', 'HOCHSCHULE', 'EXTERN'] as const
+export const affiliationValues = ['UNI', 'HOCHSCHULE', 'BEIDE', 'EXTERN'] as const
 
 export const melderFormSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich').max(200),
@@ -20,5 +20,6 @@ export type MelderFormData = z.infer<typeof melderFormSchema>
 export const affiliationLabels: Record<string, string> = {
   UNI: 'Universität Osnabrück',
   HOCHSCHULE: 'Hochschule Osnabrück',
+  BEIDE: 'Beide',
   EXTERN: 'Extern',
 }

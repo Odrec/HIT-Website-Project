@@ -160,7 +160,7 @@ export default function EditEventPage() {
       lastName: l.lastName,
       title: l.title || '',
       email: l.email || '',
-      affiliation: (l.affiliation as 'UNI' | 'HOCHSCHULE' | 'EXTERN') || '',
+      affiliation: (l.affiliation as 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN') || '',
     })),
     organizers: event.organizers.map((o) => ({
       email: o.email,

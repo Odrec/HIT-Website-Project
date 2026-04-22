@@ -9,6 +9,7 @@ export enum Institution {
 export enum Affiliation {
   UNI = 'UNI',
   HOCHSCHULE = 'HOCHSCHULE',
+  BEIDE = 'BEIDE',
   EXTERN = 'EXTERN',
 }
 

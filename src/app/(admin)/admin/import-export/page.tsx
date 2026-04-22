@@ -118,7 +118,7 @@ export default function ImportExportPage() {
         'Zusätzliche Info',
         'Foto-URL',
         'Studiengänge',
-        'Dozenten',
+        'Dozierende',
         'Studiengangsübergreifend',
         'Ortshinweis',
         'Gebäude',
@@ -396,8 +396,8 @@ export default function ImportExportPage() {
                 href="/api/export/excel?view=events-az"
               />
               <ExportCard
-                title="Nach Cluster"
-                description="Veranstaltungen gruppiert nach Studienfeld-Cluster"
+                title="Nach Studienfeld"
+                description="Veranstaltungen gruppiert nach Studienfeld"
                 icon={GraduationCap}
                 href="/api/export/excel?view=events-cluster"
               />
@@ -420,7 +420,7 @@ export default function ImportExportPage() {
                 href="/api/export/excel?view=events-building"
               />
               <ExportCard
-                title="Melder / Ansprechpartner"
+                title="Melder / Ansprechpersonen"
                 description="Alle Melder mit Kontaktdaten"
                 icon={Users}
                 href="/api/export/excel?view=melders"
@@ -445,7 +445,7 @@ export default function ImportExportPage() {
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <ExportCard
                 title="Programm-Broschüre"
-                description="Druckfertiges PDF-Programm nach Cluster"
+                description="Druckfertiges PDF-Programm nach Studienfeld"
                 icon={BookOpen}
                 href="/api/export/pdf/booklet"
               />

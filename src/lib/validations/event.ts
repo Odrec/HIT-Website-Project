@@ -7,7 +7,7 @@ export const lecturerSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   title: z.string().optional().default(''),
   email: z.string().email('Invalid email').optional().or(z.literal('')).default(''),
-  affiliation: z.enum(['UNI', 'HOCHSCHULE', 'EXTERN']).optional().or(z.literal('')),
+  affiliation: z.enum(['UNI', 'HOCHSCHULE', 'BEIDE', 'EXTERN']).optional().or(z.literal('')),
 })
 
 export const organizerSchema = z.object({
