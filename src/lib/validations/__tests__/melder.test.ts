@@ -4,15 +4,26 @@ import { melderFormSchema } from '../melder'
 describe('melderFormSchema', () => {
   it('accepts valid melder data', () => {
     const result = melderFormSchema.safeParse({
-      name: 'Dr. Schmidt',
+      firstName: 'Hans',
+      lastName: 'Schmidt',
       email: 'schmidt@uni-osnabrueck.de',
       affiliation: 'UNI',
     })
     expect(result.success).toBe(true)
   })
 
-  it('rejects missing name', () => {
+  it('rejects missing firstName', () => {
     const result = melderFormSchema.safeParse({
+      lastName: 'Schmidt',
+      email: 'test@test.de',
+      affiliation: 'UNI',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects missing lastName', () => {
+    const result = melderFormSchema.safeParse({
+      firstName: 'Hans',
       email: 'test@test.de',
       affiliation: 'UNI',
     })
@@ -21,7 +32,8 @@ describe('melderFormSchema', () => {
 
   it('rejects invalid affiliation', () => {
     const result = melderFormSchema.safeParse({
-      name: 'Test',
+      firstName: 'Hans',
+      lastName: 'Schmidt',
       email: 'test@test.de',
       affiliation: 'INVALID',
     })
@@ -30,7 +42,8 @@ describe('melderFormSchema', () => {
 
   it('rejects invalid email', () => {
     const result = melderFormSchema.safeParse({
-      name: 'Test',
+      firstName: 'Hans',
+      lastName: 'Schmidt',
       email: 'not-an-email',
       affiliation: 'EXTERN',
     })

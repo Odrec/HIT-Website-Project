@@ -25,7 +25,8 @@ interface MelderUser {
 
 interface Melder {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   title: string | null
   email: string
   phone: string | null
@@ -118,7 +119,7 @@ export default function MeldersPage() {
                       <TableRow key={melder.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <p>{melder.name}</p>
+                            <p>{[melder.firstName, melder.lastName].filter(Boolean).join(' ')}</p>
                             {melder.title && (
                               <p className="text-xs text-muted-foreground">{melder.title}</p>
                             )}
@@ -150,7 +151,9 @@ export default function MeldersPage() {
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <CardTitle className="text-base">{melder.name}</CardTitle>
+                      <CardTitle className="text-base">
+                        {[melder.firstName, melder.lastName].filter(Boolean).join(' ')}
+                      </CardTitle>
                       {melder.title && (
                         <p className="text-xs text-muted-foreground mt-0.5">{melder.title}</p>
                       )}

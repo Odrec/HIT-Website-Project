@@ -32,7 +32,8 @@ export enum LocationType {
 export interface Melder {
   id: string
   userId: string
-  name: string
+  firstName: string
+  lastName: string
   title: string | null
   email: string
   phone: string | null

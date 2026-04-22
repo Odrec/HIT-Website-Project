@@ -22,7 +22,8 @@ export interface EventRow {
 }
 
 export interface MelderRow {
-  name: string
+  vorname: string
+  nachname: string
   titel: string
   email: string
   telefon: string
@@ -292,11 +293,12 @@ export const exportService = {
   async melders(): Promise<MelderRow[]> {
     const melders = await prisma.melder.findMany({
       include: { _count: { select: { events: true } } },
-      orderBy: { name: 'asc' },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     })
 
     return melders.map((m) => ({
-      name: m.name,
+      vorname: m.firstName,
+      nachname: m.lastName,
       titel: m.title ?? '',
       email: m.email,
       telefon: m.phone ?? '',

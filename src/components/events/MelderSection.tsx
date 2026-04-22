@@ -14,7 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { affiliationLabels } from '@/lib/validations/melder'
 
 export interface MelderData {
-  name: string
+  firstName: string
+  lastName: string
   title: string
   email: string
   phone: string
@@ -25,7 +26,8 @@ export interface MelderData {
 }
 
 export const defaultMelderData: MelderData = {
-  name: '',
+  firstName: '',
+  lastName: '',
   title: '',
   email: '',
   phone: '',
@@ -54,7 +56,8 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
     const controller = new AbortController()
 
     const populate = (melder: {
-      name?: string | null
+      firstName?: string | null
+      lastName?: string | null
       title?: string | null
       email?: string | null
       phone?: string | null
@@ -64,7 +67,8 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
       room?: string | null
     }) => {
       onChange({
-        name: melder.name || '',
+        firstName: melder.firstName || '',
+        lastName: melder.lastName || '',
         title: melder.title || '',
         email: melder.email || '',
         phone: melder.phone || '',
@@ -119,14 +123,26 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>
-              Name <span className="text-red-500">*</span>
+              Vorname <span className="text-red-500">*</span>
             </Label>
             <Input
-              value={value.name}
-              onChange={(e) => updateField('name', e.target.value)}
+              value={value.firstName}
+              onChange={(e) => updateField('firstName', e.target.value)}
               readOnly={readOnly}
             />
           </div>
+          <div className="space-y-1.5">
+            <Label>
+              Nachname <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              value={value.lastName}
+              onChange={(e) => updateField('lastName', e.target.value)}
+              readOnly={readOnly}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Titel</Label>
             <Input
@@ -136,8 +152,6 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               readOnly={readOnly}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>
               E-Mail <span className="text-red-500">*</span>
@@ -149,6 +163,8 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               readOnly={readOnly}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Telefon</Label>
             <Input
@@ -157,8 +173,6 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               readOnly={readOnly}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>
               Zugehörigkeit <span className="text-red-500">*</span>
@@ -180,6 +194,8 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Fakultät</Label>
             <Input
@@ -188,8 +204,6 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               readOnly={readOnly}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Fachbereich</Label>
             <Input
@@ -198,6 +212,8 @@ export function MelderSection({ value, onChange, melderId, onMelderIdChange }: M
               readOnly={readOnly}
             />
           </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Raum</Label>
             <Input
