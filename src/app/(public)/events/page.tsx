@@ -58,11 +58,11 @@ interface Event {
     id: string
     name: string
     institution: string
-    cluster?: {
+    clusters?: Array<{
       id: string
       name: string
       icon: string | null
-    } | null
+    }>
   }>
   isCrossProgram?: boolean
 }
@@ -462,16 +462,15 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
     }
     let addedToCluster = false
     for (const sp of event.studyPrograms) {
-      if (sp.cluster) {
-        const key = sp.cluster.id
-        if (!clusterMap.has(key)) {
-          clusterMap.set(key, {
-            name: sp.cluster.name,
-            icon: sp.cluster.icon ?? null,
+      for (const cluster of sp.clusters ?? []) {
+        if (!clusterMap.has(cluster.id)) {
+          clusterMap.set(cluster.id, {
+            name: cluster.name,
+            icon: cluster.icon ?? null,
             events: new Map(),
           })
         }
-        clusterMap.get(key)!.events.set(event.id, event)
+        clusterMap.get(cluster.id)!.events.set(event.id, event)
         addedToCluster = true
       }
     }

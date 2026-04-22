@@ -221,7 +221,7 @@ export async function GET(request: NextRequest) {
                   name: true,
                   institution: true,
                   url: true,
-                  cluster: {
+                  clusters: {
                     select: {
                       id: true,
                       name: true,

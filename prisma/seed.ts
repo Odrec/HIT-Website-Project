@@ -158,35 +158,35 @@ async function main() {
 
   const studyPrograms = await Promise.all([
     // Geistes- und Sozialwissenschaften, Sport
-    prisma.studyProgram.create({ data: { name: 'Psychologie (B.Sc.)', institution: Institution.UNI, clusterId: clusters[0].id } }),
-    prisma.studyProgram.create({ data: { name: 'Soziologie (B.A.)', institution: Institution.UNI, clusterId: clusters[0].id } }),
-    prisma.studyProgram.create({ data: { name: 'Sportwissenschaft (B.A.)', institution: Institution.UNI, clusterId: clusters[0].id } }),
-    prisma.studyProgram.create({ data: { name: 'Soziale Arbeit (B.A.)', institution: Institution.HOCHSCHULE, clusterId: clusters[0].id } }),
+    prisma.studyProgram.create({ data: { name: 'Psychologie (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Soziologie (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Sportwissenschaft (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Soziale Arbeit (B.A.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[0].id }] } } }),
     // Mathematik, Informatik, Naturwissenschaften
-    prisma.studyProgram.create({ data: { name: 'Informatik (B.Sc.)', institution: Institution.UNI, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Mathematik (B.Sc.)', institution: Institution.UNI, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Biologie (B.Sc.)', institution: Institution.UNI, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Physik (B.Sc.)', institution: Institution.UNI, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Chemie (B.Sc.)', institution: Institution.UNI, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Elektrotechnik (B.Eng.)', institution: Institution.HOCHSCHULE, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Maschinenbau (B.Eng.)', institution: Institution.HOCHSCHULE, clusterId: clusters[1].id } }),
-    prisma.studyProgram.create({ data: { name: 'Medieninformatik (B.Sc.)', institution: Institution.HOCHSCHULE, clusterId: clusters[1].id } }),
+    prisma.studyProgram.create({ data: { name: 'Informatik (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Mathematik (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Biologie (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Physik (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Chemie (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Elektrotechnik (B.Eng.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Maschinenbau (B.Eng.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[1].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Medieninformatik (B.Sc.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[1].id }] } } }),
     // Rechts- und Wirtschaftswissenschaften
-    prisma.studyProgram.create({ data: { name: 'Betriebswirtschaftslehre (B.Sc.)', institution: Institution.UNI, clusterId: clusters[2].id } }),
-    prisma.studyProgram.create({ data: { name: 'Rechtswissenschaft (Staatsexamen)', institution: Institution.UNI, clusterId: clusters[2].id } }),
-    prisma.studyProgram.create({ data: { name: 'Wirtschaftsingenieurwesen (B.Eng.)', institution: Institution.HOCHSCHULE, clusterId: clusters[2].id } }),
+    prisma.studyProgram.create({ data: { name: 'Betriebswirtschaftslehre (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[2].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Rechtswissenschaft (Staatsexamen)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[2].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Wirtschaftsingenieurwesen (B.Eng.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[2].id }] } } }),
     // Sprach-, Literatur- und Kulturwissenschaften
-    prisma.studyProgram.create({ data: { name: 'Germanistik/Deutsch (B.A.)', institution: Institution.UNI, clusterId: clusters[3].id } }),
-    prisma.studyProgram.create({ data: { name: 'Anglistik/Englisch (B.A.)', institution: Institution.UNI, clusterId: clusters[3].id } }),
-    prisma.studyProgram.create({ data: { name: 'Romanistik/Französisch (B.A.)', institution: Institution.UNI, clusterId: clusters[3].id } }),
+    prisma.studyProgram.create({ data: { name: 'Germanistik/Deutsch (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[3].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Anglistik/Englisch (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[3].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Romanistik/Französisch (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[3].id }] } } }),
     // Theologie, Kunst, Musik, Textil
-    prisma.studyProgram.create({ data: { name: 'Evangelische Theologie/Religion (B.A.)', institution: Institution.UNI, clusterId: clusters[4].id } }),
-    prisma.studyProgram.create({ data: { name: 'Musik/Musikwissenschaft (B.A.)', institution: Institution.UNI, clusterId: clusters[4].id } }),
-    prisma.studyProgram.create({ data: { name: 'Textiles Gestalten (B.A.)', institution: Institution.HOCHSCHULE, clusterId: clusters[4].id } }),
+    prisma.studyProgram.create({ data: { name: 'Evangelische Theologie/Religion (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[4].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Musik/Musikwissenschaft (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[4].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Textiles Gestalten (B.A.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[4].id }] } } }),
     // Lehramt
-    prisma.studyProgram.create({ data: { name: 'Lehramt Grundschule', institution: Institution.UNI, clusterId: clusters[5].id } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Haupt-/Realschule', institution: Institution.UNI, clusterId: clusters[5].id } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Gymnasium', institution: Institution.UNI, clusterId: clusters[5].id } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Grundschule', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Haupt-/Realschule', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Gymnasium', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
   ])
 
   // ==========================================================================

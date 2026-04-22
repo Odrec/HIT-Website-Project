@@ -61,8 +61,7 @@ interface StudyProgram {
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
   url: string | null
-  clusterId: string | null
-  cluster: Cluster | null
+  clusters: Cluster[]
   createdAt: string
   updatedAt: string
 }
@@ -94,7 +93,7 @@ export default function StudyProgramsPage() {
     name: '',
     institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
     url: '',
-    clusterId: '',
+    clusterIds: [] as string[],
   })
 
   // Cluster Dialog
@@ -148,7 +147,7 @@ export default function StudyProgramsPage() {
     const searchLower = search.toLowerCase()
     return (
       prog.name.toLowerCase().includes(searchLower) ||
-      (prog.cluster && prog.cluster.name.toLowerCase().includes(searchLower))
+      prog.clusters.some((c) => c.name.toLowerCase().includes(searchLower))
     )
   })
 
@@ -159,7 +158,7 @@ export default function StudyProgramsPage() {
       name: '',
       institution: 'UNI',
       url: '',
-      clusterId: '',
+      clusterIds: [],
     })
     setProgramDialogOpen(true)
   }
@@ -170,7 +169,7 @@ export default function StudyProgramsPage() {
       name: program.name,
       institution: program.institution,
       url: program.url || '',
-      clusterId: program.clusterId || '',
+      clusterIds: program.clusters.map((c) => c.id),
     })
     setProgramDialogOpen(true)
   }
@@ -184,7 +183,7 @@ export default function StudyProgramsPage() {
         name: programFormData.name.trim(),
         institution: programFormData.institution,
         url: programFormData.url.trim() || null,
-        clusterId: programFormData.clusterId || null,
+        clusterIds: programFormData.clusterIds,
       }
 
       const url = editingProgram
@@ -421,10 +420,14 @@ export default function StudyProgramsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {program.cluster ? (
-                            <div className="flex items-center gap-2">
+                          {program.clusters.length > 0 ? (
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <Folder className="h-4 w-4 text-muted-foreground" />
-                              {program.cluster.name}
+                              {program.clusters.map((c) => (
+                                <Badge key={c.id} variant="secondary" className="font-normal">
+                                  {c.name}
+                                </Badge>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-muted-foreground">-</span>
@@ -506,8 +509,8 @@ export default function StudyProgramsPage() {
                   </TableHeader>
                   <TableBody>
                     {clusters.map((cluster) => {
-                      const programCount = studyPrograms.filter(
-                        (p) => p.clusterId === cluster.id
+                      const programCount = studyPrograms.filter((p) =>
+                        p.clusters.some((c) => c.id === cluster.id)
                       ).length
                       return (
                         <TableRow key={cluster.id}>
@@ -630,31 +633,44 @@ export default function StudyProgramsPage() {
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cluster">Studienfeld</Label>
-              <Select
-                value={programFormData.clusterId || '__none__'}
-                onValueChange={(value) =>
-                  setProgramFormData({
-                    ...programFormData,
-                    clusterId: value === '__none__' ? '' : value,
+              <Label>Studienfelder</Label>
+              <p className="text-xs text-muted-foreground">
+                Ein Studiengang kann mehreren Studienfeldern zugeordnet werden und erscheint dann in
+                jedem.
+              </p>
+              <div className="space-y-2 rounded-md border p-3">
+                {clusters.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Noch keine Studienfelder vorhanden
+                  </p>
+                ) : (
+                  clusters.map((cluster) => {
+                    const checked = programFormData.clusterIds.includes(cluster.id)
+                    return (
+                      <label
+                        key={cluster.id}
+                        className="flex cursor-pointer items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          checked={checked}
+                          onChange={(e) => {
+                            setProgramFormData((prev) => ({
+                              ...prev,
+                              clusterIds: e.target.checked
+                                ? [...prev.clusterIds, cluster.id]
+                                : prev.clusterIds.filter((id) => id !== cluster.id),
+                            }))
+                          }}
+                        />
+                        <Folder className="h-4 w-4 text-muted-foreground" />
+                        <span>{cluster.name}</span>
+                      </label>
+                    )
                   })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Kein Studienfeld" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Kein Studienfeld</SelectItem>
-                  {clusters.map((cluster) => (
-                    <SelectItem key={cluster.id} value={cluster.id}>
-                      <div className="flex items-center gap-2">
-                        <Folder className="h-4 w-4" />
-                        {cluster.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>
