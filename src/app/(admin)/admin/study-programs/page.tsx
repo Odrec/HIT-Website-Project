@@ -303,7 +303,7 @@ export default function StudyProgramsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Studiengänge</h1>
-          <p className="text-muted-foreground">Verwalten Sie Studiengänge und Cluster</p>
+          <p className="text-muted-foreground">Verwalten Sie Studiengänge und Studienfelder</p>
         </div>
       </div>
 
@@ -315,7 +315,7 @@ export default function StudyProgramsPage() {
           </TabsTrigger>
           <TabsTrigger value="clusters" className="gap-2">
             <Folder className="h-4 w-4" />
-            Cluster
+            Studienfelder
           </TabsTrigger>
         </TabsList>
 
@@ -341,7 +341,7 @@ export default function StudyProgramsPage() {
               <div className="flex gap-4">
                 <div className="flex-1">
                   <Input
-                    placeholder="Nach Studiengang oder Cluster suchen..."
+                    placeholder="Nach Studiengang oder Studienfeld suchen..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -391,7 +391,7 @@ export default function StudyProgramsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Institution</TableHead>
-                      <TableHead>Cluster</TableHead>
+                      <TableHead>Studienfeld</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -480,7 +480,7 @@ export default function StudyProgramsPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Folder className="h-5 w-5" />
-                Cluster ({clusters.length})
+                Studienfelder ({clusters.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -492,7 +492,7 @@ export default function StudyProgramsPage() {
                 </div>
               ) : clusters.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  Noch keine Cluster vorhanden
+                  Noch keine Studienfelder vorhanden
                 </div>
               ) : (
                 <Table>
@@ -630,7 +630,7 @@ export default function StudyProgramsPage() {
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cluster">Cluster</Label>
+              <Label htmlFor="cluster">Studienfeld</Label>
               <Select
                 value={programFormData.clusterId || '__none__'}
                 onValueChange={(value) =>
@@ -641,10 +641,10 @@ export default function StudyProgramsPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Kein Cluster" />
+                  <SelectValue placeholder="Kein Studienfeld" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">Kein Cluster</SelectItem>
+                  <SelectItem value="__none__">Kein Studienfeld</SelectItem>
                   {clusters.map((cluster) => (
                     <SelectItem key={cluster.id} value={cluster.id}>
                       <div className="flex items-center gap-2">
@@ -675,11 +675,13 @@ export default function StudyProgramsPage() {
       <Dialog open={clusterDialogOpen} onOpenChange={setClusterDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingCluster ? 'Cluster bearbeiten' : 'Neuer Cluster'}</DialogTitle>
+            <DialogTitle>
+              {editingCluster ? 'Studienfeld bearbeiten' : 'Neues Studienfeld'}
+            </DialogTitle>
             <DialogDescription>
               {editingCluster
-                ? 'Bearbeiten Sie die Details des Clusters'
-                : 'Fügen Sie einen neuen Cluster hinzu'}
+                ? 'Bearbeiten Sie die Details des Studienfelds'
+                : 'Fügen Sie ein neues Studienfeld hinzu'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -700,7 +702,7 @@ export default function StudyProgramsPage() {
                 onChange={(e) =>
                   setClusterFormData({ ...clusterFormData, description: e.target.value })
                 }
-                placeholder="Optionale Beschreibung des Clusters"
+                placeholder="Optionale Beschreibung des Studienfelds"
               />
             </div>
           </div>
@@ -723,7 +725,7 @@ export default function StudyProgramsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {itemToDelete?.type === 'program' ? 'Studiengang löschen' : 'Cluster löschen'}
+              {itemToDelete?.type === 'program' ? 'Studiengang löschen' : 'Studienfeld löschen'}
             </DialogTitle>
             <DialogDescription>
               Sind Sie sicher, dass Sie &quot;{itemToDelete?.item.name}&quot; löschen möchten? Diese

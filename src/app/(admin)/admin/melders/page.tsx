@@ -27,7 +27,7 @@ interface Melder {
   title: string | null
   email: string
   phone: string | null
-  affiliation: 'UNI' | 'HOCHSCHULE' | 'EXTERN'
+  affiliation: 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN'
   fakultaet: string | null
   fachbereich: string | null
   room: string | null
@@ -40,12 +40,14 @@ interface Melder {
 const affiliationLabels: Record<string, string> = {
   UNI: 'Universität',
   HOCHSCHULE: 'Hochschule',
+  BEIDE: 'Beide',
   EXTERN: 'Extern',
 }
 
 const affiliationVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
   UNI: 'default',
   HOCHSCHULE: 'secondary',
+  BEIDE: 'secondary',
   EXTERN: 'outline',
 }
 

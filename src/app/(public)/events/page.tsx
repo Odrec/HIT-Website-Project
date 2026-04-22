@@ -342,7 +342,7 @@ function EventsContent() {
             </TabsTrigger>
             <TabsTrigger value="cluster" className="gap-1.5">
               <BookOpen className="h-3.5 w-3.5" />
-              Nach Cluster
+              Nach Studienfeld
             </TabsTrigger>
             <TabsTrigger value="az" className="gap-1.5">
               <ArrowDownAZ className="h-3.5 w-3.5" />

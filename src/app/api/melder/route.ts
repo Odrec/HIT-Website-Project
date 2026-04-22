@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   }
-  const validAffiliations = ['UNI', 'HOCHSCHULE', 'EXTERN']
+  const validAffiliations = ['UNI', 'HOCHSCHULE', 'BEIDE', 'EXTERN']
   if (!validAffiliations.includes(affiliation)) {
     return NextResponse.json({ error: 'Ungültige Zugehörigkeit' }, { status: 400 })
   }

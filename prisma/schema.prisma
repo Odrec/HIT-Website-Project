@@ -45,6 +45,7 @@ enum UserRole {
 enum Affiliation {
   UNI
   HOCHSCHULE
+  BEIDE
   EXTERN
 }
 

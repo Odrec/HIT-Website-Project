@@ -325,7 +325,7 @@ export default function EventDetailPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  {event.eventType === 'VORTRAG' ? 'Referent(en)' : 'Ansprechpartner'}
+                  {event.eventType === 'VORTRAG' ? 'Referierende' : 'Ansprechpersonen'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
