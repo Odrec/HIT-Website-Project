@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma'
 import { cacheGet, cacheSet } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { getActiveEdition } from '@/lib/active-edition'
 
 /**
  * Generate a cache key from query parameters
@@ -122,10 +123,11 @@ export async function GET(request: NextRequest) {
 
     // Time filters - filter by time of day on the HIT date
     // Frontend sends time strings like "09:00", "14:30"
-    // We construct full datetimes using the HIT date from settings
-    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } })
-    const hitDateObj = settings?.hitDate ?? new Date('2026-11-19')
-    const HIT_DATE = hitDateObj.toISOString().slice(0, 10)
+    // We construct full datetimes using the HIT date from the active edition
+    const edition = await getActiveEdition()
+    const HIT_DATE = edition.hitDate.toISOString().slice(0, 10)
+    // Scope every event query to the active edition so cross-tenant rows never leak.
+    where.AND.push({ editionId: edition.id })
     if (timeFrom) {
       const fromDateTime = new Date(`${HIT_DATE}T${timeFrom}:00`)
       if (!isNaN(fromDateTime.getTime())) {

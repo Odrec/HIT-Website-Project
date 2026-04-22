@@ -7,6 +7,9 @@ vi.mock('@/lib/db/prisma', () => ({
     event: { findMany: vi.fn() },
   },
 }))
+vi.mock('@/lib/active-edition', () => ({
+  getActiveEditionId: vi.fn().mockResolvedValue('active-edition-id'),
+}))
 
 import { GET } from '@/app/api/export/html/route'
 import { auth } from '@/auth'
