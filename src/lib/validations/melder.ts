@@ -6,7 +6,7 @@ export const melderFormSchema = z.object({
   firstName: z.string().min(1, 'Vorname ist erforderlich').max(200),
   lastName: z.string().min(1, 'Nachname ist erforderlich').max(200),
   title: z.string().max(100).optional().or(z.literal('')),
-  email: z.string().email('Ungültige E-Mail-Adresse'),
+  email: z.email('Ungültige E-Mail-Adresse'),
   phone: z.string().max(50).optional().or(z.literal('')),
   affiliation: z.enum(affiliationValues, {
     message: 'Zugehörigkeit ist erforderlich',

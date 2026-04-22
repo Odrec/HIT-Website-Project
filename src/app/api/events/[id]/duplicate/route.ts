@@ -11,7 +11,7 @@ interface RouteParams {
 /**
  * POST /api/events/[id]/duplicate - Duplicate an event (requires authentication)
  */
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()

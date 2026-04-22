@@ -12,7 +12,7 @@ interface RouteParams {
 /**
  * GET /api/users/[id] - Get a single user (requires admin)
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()
@@ -137,7 +137,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 /**
  * DELETE /api/users/[id] - Delete a user (requires admin)
  */
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()

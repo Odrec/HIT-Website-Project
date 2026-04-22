@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db/prisma'
 /**
  * GET /api/events/public/[id] - Get a single event with related events
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
 

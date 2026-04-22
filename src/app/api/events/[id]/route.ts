@@ -13,7 +13,7 @@ interface RouteParams {
 /**
  * GET /api/events/[id] - Get a single event by ID
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const event = await eventService.getById(id)
@@ -129,7 +129,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 /**
  * DELETE /api/events/[id] - Delete an event (requires authentication)
  */
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     // Check authentication
     const session = await auth()

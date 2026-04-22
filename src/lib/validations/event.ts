@@ -10,7 +10,7 @@ export const lecturerSchema = z.object({
   firstName: z.string().default(''),
   lastName: z.string().min(1, 'Last name is required'),
   title: z.string().optional().default(''),
-  email: z.string().email('Invalid email').optional().or(z.literal('')).default(''),
+  email: z.email('Invalid email').optional().or(z.literal('')).default(''),
   affiliation: z.enum(affiliationValues).optional().or(z.literal('')),
 })
 
@@ -28,7 +28,7 @@ export const lecturerArraySchema = z
   })
 
 export const organizerSchema = z.object({
-  email: z.string().email('Invalid email'),
+  email: z.email('Invalid email'),
   phone: z.string().optional().default(''),
   internalOnly: z.boolean().default(true),
 })
@@ -74,7 +74,7 @@ export const eventFormSchema = z
       .max(2000, 'Additional info must be less than 2000 characters')
       .optional()
       .default(''),
-    photoUrl: z.string().url('Invalid URL').optional().or(z.literal('')).default(''),
+    photoUrl: z.url('Invalid URL').optional().or(z.literal('')).default(''),
     institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
     lecturers: lecturerArraySchema,
     organizers: z.array(organizerSchema).default([]),
