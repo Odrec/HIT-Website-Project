@@ -57,7 +57,12 @@ export async function updateEdition(
 }
 
 export async function activateEdition(id: string) {
+  const target = await prisma.hitEdition.findUnique({ where: { id } })
+  if (!target) throw new Error('Edition not found')
+
   const currentActive = await prisma.hitEdition.findFirst({ where: { status: 'ACTIVE' } })
+  // Archive the old ACTIVE first, then flip the target — this ordering keeps the
+  // "exactly one ACTIVE" invariant even if a future partial-unique index is added.
   const ops = [prisma.hitEdition.update({ where: { id }, data: { status: 'ACTIVE' } })]
   if (currentActive && currentActive.id !== id) {
     ops.unshift(

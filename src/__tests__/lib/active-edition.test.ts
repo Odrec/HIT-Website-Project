@@ -10,6 +10,7 @@ vi.mock('@/lib/db/prisma', () => ({
   },
 }))
 
+// Bust the React.cache between tests by re-importing with vi.resetModules.
 beforeEach(() => {
   vi.clearAllMocks()
   vi.resetModules()

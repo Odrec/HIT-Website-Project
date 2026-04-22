@@ -60,22 +60,50 @@ describe('createEdition', () => {
 })
 
 describe('activateEdition', () => {
+  it('throws when the target edition does not exist', async () => {
+    mockFindUnique.mockResolvedValue(null)
+    await expect(activateEdition('missing')).rejects.toThrow('Edition not found')
+    expect(mockTransaction).not.toHaveBeenCalled()
+  })
+
   it('flips target to ACTIVE and old ACTIVE to ARCHIVED in one transaction', async () => {
+    mockFindUnique.mockResolvedValue({ id: 'e1', status: 'DRAFT' })
     mockFindFirst.mockResolvedValue({ id: 'old-active', status: 'ACTIVE' })
     mockTransaction.mockImplementation(async (ops) => ops)
     await activateEdition('e1')
     expect(mockTransaction).toHaveBeenCalledOnce()
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 'old-active' },
+      data: { status: 'ARCHIVED' },
+    })
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 'e1' },
+      data: { status: 'ACTIVE' },
+    })
+    expect(mockTransaction.mock.calls[0][0]).toHaveLength(2)
   })
 
   it('skips archive step when no ACTIVE edition exists yet', async () => {
+    mockFindUnique.mockResolvedValue({ id: 'e1', status: 'DRAFT' })
     mockFindFirst.mockResolvedValue(null)
     mockTransaction.mockImplementation(async (ops) => ops)
     await activateEdition('e1')
     expect(mockTransaction).toHaveBeenCalledOnce()
+    expect(mockTransaction.mock.calls[0][0]).toHaveLength(1)
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: 'e1' },
+      data: { status: 'ACTIVE' },
+    })
   })
 })
 
 describe('deleteEdition', () => {
+  it('throws when the edition does not exist', async () => {
+    mockFindUnique.mockResolvedValue(null)
+    await expect(deleteEdition('missing')).rejects.toThrow('Edition not found')
+    expect(mockDelete).not.toHaveBeenCalled()
+  })
+
   it('refuses to delete an edition that has events', async () => {
     mockFindUnique.mockResolvedValue({ id: 'e1', status: 'DRAFT' })
     const mockPrisma = await import('@/lib/db/prisma')
