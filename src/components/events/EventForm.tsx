@@ -150,7 +150,7 @@ export function EventForm({
           fetch('/api/buildings'),
           fetch('/api/study-programs'),
           fetch('/api/locations/info-markets'),
-          fetch('/api/settings'),
+          fetch('/api/editions/active'),
           fetch('/api/titles'),
         ])
 
