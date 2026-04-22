@@ -1,13 +1,14 @@
 // Event form validation schema using Zod
 
 import { z } from 'zod'
+import { affiliationValues } from './melder'
 
 export const lecturerSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   title: z.string().optional().default(''),
   email: z.string().email('Invalid email').optional().or(z.literal('')).default(''),
-  affiliation: z.enum(['UNI', 'HOCHSCHULE', 'BEIDE', 'EXTERN']).optional().or(z.literal('')),
+  affiliation: z.enum(affiliationValues).optional().or(z.literal('')),
 })
 
 export const organizerSchema = z.object({

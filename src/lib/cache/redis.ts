@@ -26,13 +26,13 @@ function createRedisClient(): Redis {
 
   client.on('connect', () => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Redis] Connected successfully')
+      console.warn('[Redis] Connected successfully')
     }
   })
 
   client.on('ready', () => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Redis] Ready to accept commands')
+      console.warn('[Redis] Ready to accept commands')
     }
   })
 

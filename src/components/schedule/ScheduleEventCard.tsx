@@ -161,7 +161,7 @@ export function ScheduleEventCard({
         {/* Lecturers */}
         {!compact && event.lecturers && event.lecturers.length > 0 && (
           <div className="mt-2 text-sm text-muted-foreground">
-            <span className="font-medium">Referent: </span>
+            <span className="font-medium">Referierende: </span>
             {event.lecturers.map((l, i) => (
               <span key={l.id}>
                 {i > 0 && ', '}

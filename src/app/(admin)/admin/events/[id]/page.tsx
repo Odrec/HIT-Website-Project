@@ -8,6 +8,7 @@ import { ChevronLeft, Loader2, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
+import { Affiliation } from '@/types/events'
 
 interface EventData {
   id: string
@@ -160,7 +161,7 @@ export default function EditEventPage() {
       lastName: l.lastName,
       title: l.title || '',
       email: l.email || '',
-      affiliation: (l.affiliation as 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN') || '',
+      affiliation: (l.affiliation as Affiliation) || '',
     })),
     organizers: event.organizers.map((o) => ({
       email: o.email,

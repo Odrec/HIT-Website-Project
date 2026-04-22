@@ -31,8 +31,10 @@ function GuideTrackingContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
 
-  const [status, setStatus] = useState<TrackingStatus>('idle')
-  const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState<TrackingStatus>(() => (token ? 'idle' : 'error'))
+  const [error, setError] = useState<string | null>(() =>
+    token ? null : 'Kein Token angegeben. Bitte verwenden Sie den Link vom Admin.'
+  )
   const [busName, setBusName] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
@@ -44,15 +46,13 @@ function GuideTrackingContent() {
   const lastSendRef = useRef<number>(0)
   const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tokenRef = useRef(token)
-  tokenRef.current = token
+  useEffect(() => {
+    tokenRef.current = token
+  }, [token])
 
   // Validate token on mount
   useEffect(() => {
-    if (!token) {
-      setError('Kein Token angegeben. Bitte verwenden Sie den Link vom Admin.')
-      setStatus('error')
-      return
-    }
+    if (!token) return
 
     fetch('/api/bus-positions', {
       method: 'POST',

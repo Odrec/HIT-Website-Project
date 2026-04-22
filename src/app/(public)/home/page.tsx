@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Calendar,
   Search,
@@ -119,10 +120,13 @@ export default function HomePage() {
             </div>
             {/* Infotag Banner */}
             <div className="hidden lg:block shrink-0">
-              <img
+              <Image
                 src="/infotag-banner.png"
                 alt="Hochschul Infotag"
-                className="w-[320px] rounded-lg shadow-2xl"
+                width={815}
+                height={371}
+                priority
+                className="w-[320px] h-auto rounded-lg shadow-2xl"
               />
             </div>
           </div>

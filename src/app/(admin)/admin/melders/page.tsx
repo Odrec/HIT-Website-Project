@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Affiliation } from '@/types/events'
+import { affiliationLabels } from '@/lib/validations/melder'
 
 interface MelderUser {
   id: string
@@ -27,7 +29,7 @@ interface Melder {
   title: string | null
   email: string
   phone: string | null
-  affiliation: 'UNI' | 'HOCHSCHULE' | 'BEIDE' | 'EXTERN'
+  affiliation: Affiliation
   fakultaet: string | null
   fachbereich: string | null
   room: string | null
@@ -35,13 +37,6 @@ interface Melder {
   updatedAt: string
   user: MelderUser
   _count: { events: number }
-}
-
-const affiliationLabels: Record<string, string> = {
-  UNI: 'Universität',
-  HOCHSCHULE: 'Hochschule',
-  BEIDE: 'Beide',
-  EXTERN: 'Extern',
 }
 
 const affiliationVariants: Record<string, 'default' | 'secondary' | 'outline'> = {

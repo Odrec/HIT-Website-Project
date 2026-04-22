@@ -44,7 +44,7 @@ const EVENT_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'Uhrzeit', key: 'uhrzeit', width: 18 },
   { header: 'Gebäude', key: 'gebaeude', width: 20 },
   { header: 'Raum', key: 'raum', width: 15 },
-  { header: 'Dozent/in', key: 'dozent', width: 30 },
+  { header: 'Dozierende', key: 'dozent', width: 30 },
   { header: 'Beschreibung', key: 'beschreibung', width: 50 },
 ]
 
@@ -76,7 +76,7 @@ const INFOMARKT_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'Veranstaltung', key: 'veranstaltung', width: 35 },
   { header: 'Institution', key: 'institution', width: 15 },
   { header: 'Studiengänge', key: 'studiengaenge', width: 40 },
-  { header: 'Dozent/in', key: 'dozent', width: 30 },
+  { header: 'Dozierende', key: 'dozent', width: 30 },
 ]
 
 // ---------------------------------------------------------------------------

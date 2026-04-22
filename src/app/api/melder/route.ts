@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
+import { affiliationValues } from '@/lib/validations/melder'
 
 export async function GET() {
   const session = await auth()
@@ -25,8 +26,7 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   }
-  const validAffiliations = ['UNI', 'HOCHSCHULE', 'BEIDE', 'EXTERN']
-  if (!validAffiliations.includes(affiliation)) {
+  if (!affiliationValues.includes(affiliation)) {
     return NextResponse.json({ error: 'Ungültige Zugehörigkeit' }, { status: 400 })
   }
 

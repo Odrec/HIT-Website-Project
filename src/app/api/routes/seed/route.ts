@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
 import { fetchWalkingDirections } from '@/services/google-directions'
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   const session = await auth()
   if (!session || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 403 })
