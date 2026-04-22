@@ -11,7 +11,7 @@ interface RouteParams {
 /**
  * GET /api/buildings/[id] - Get a single building with rooms
  */
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const building = await prisma.building.findUnique({
@@ -48,6 +48,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       shortName,
       address,
       campus,
+      institution,
       latitude,
       longitude,
       hasAccessibility,
@@ -63,6 +64,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Gebäude nicht gefunden' }, { status: 404 })
     }
 
+    const validInstitutions = ['UNI', 'HOCHSCHULE', 'BOTH'] as const
+    type Inst = (typeof validInstitutions)[number]
+    const resolvedInstitution: Inst | undefined = validInstitutions.includes(institution)
+      ? institution
+      : undefined
+
     const building = await prisma.building.update({
       where: { id },
       data: {
@@ -71,6 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         shortName: shortName?.trim() || null,
         address: address?.trim() || null,
         campus: campus?.trim() || null,
+        ...(resolvedInstitution !== undefined && { institution: resolvedInstitution }),
         latitude: latitude != null ? parseFloat(latitude) : null,
         longitude: longitude != null ? parseFloat(longitude) : null,
         hasAccessibility: hasAccessibility ?? existing.hasAccessibility,
@@ -89,7 +97,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 /**
  * DELETE /api/buildings/[id] - Delete a building (requires admin, cascades to rooms)
  */
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth()
     if (!session || session.user.role !== 'ADMIN') {

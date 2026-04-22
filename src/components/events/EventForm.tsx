@@ -491,6 +491,7 @@ export function EventForm({
                 roomId={watch('roomId') || ''}
                 onBuildingChange={(id) => setValue('buildingId', id)}
                 onRoomChange={(id) => setValue('roomId', id)}
+                institution={watchInstitution}
               />
 
               <div className="space-y-1.5">
