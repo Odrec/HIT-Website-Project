@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     // Deadline check for non-admin users
     if (session.user.role !== 'ADMIN') {
-      const { isDeadlinePassed } = await import('@/services/settings-service')
+      const { isDeadlinePassed } = await import('@/services/edition-service')
       if (await isDeadlinePassed()) {
         return NextResponse.json(
           {

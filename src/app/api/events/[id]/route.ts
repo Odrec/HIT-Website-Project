@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Ownership and deadline checks for non-admin users
     if (role !== 'ADMIN') {
       // Check deadline
-      const { isDeadlinePassed } = await import('@/services/settings-service')
+      const { isDeadlinePassed } = await import('@/services/edition-service')
       if (await isDeadlinePassed()) {
         return NextResponse.json(
           { error: 'Anmeldefrist abgelaufen. Änderungen nur durch Administratoren möglich.' },
