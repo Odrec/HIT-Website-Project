@@ -52,6 +52,18 @@ enum CampusArea {
   INNENSTADT
 }
 
+enum EditionStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EventReviewStatus {
+  DRAFT_FROM_ROLLOVER
+  NEEDS_REVIEW
+  PUBLISHED
+}
+
 enum UserRole {
   ADMIN
   ORGANIZER
@@ -126,6 +138,24 @@ model InformationMarket {
 // Event Tables
 // =============================================================================
 
+/// A single HIT year. One row is always ACTIVE; others may be DRAFT or ARCHIVED.
+model HitEdition {
+  id                 String           @id @default(cuid())
+  year               Int              @unique
+  hitDate            DateTime
+  submissionDeadline DateTime?
+  deadlineEnabled    Boolean          @default(true)
+  status             EditionStatus    @default(DRAFT)
+  events             Event[]
+  userSchedules      UserSchedule[]
+  sharedSchedules    SharedSchedule[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([status])
+  @@map("hit_editions")
+}
+
 /// Main event entity - lectures, workshops, tours, info stands, etc.
 model Event {
   id              String                    @id @default(cuid())
@@ -146,6 +176,12 @@ model Event {
   photoUrl        String?                   @db.VarChar(500)
   institution     Institution
   isCrossProgram  Boolean                   @default(false)
+  editionId     String
+  edition       HitEdition        @relation(fields: [editionId], references: [id])
+  reviewStatus  EventReviewStatus @default(PUBLISHED)
+  sourceEventId String?
+  sourceEvent   Event?            @relation("EventCloneSource", fields: [sourceEventId], references: [id], onDelete: SetNull)
+  clones        Event[]           @relation("EventCloneSource")
   locationHint    String?
   melderId        String?
   melder          Melder?                   @relation(fields: [melderId], references: [id])
@@ -174,6 +210,9 @@ model Event {
   @@index([institution, eventType])      // Filtering by institution and type
   @@index([timeStart, timeEnd])          // Time range queries
   @@index([institution, timeStart])      // Events by institution sorted by time
+
+  @@index([editionId])
+  @@index([editionId, reviewStatus])
 
   @@map("events")
 }
@@ -261,11 +300,14 @@ model UserSchedule {
   sessionId String?        @db.VarChar(100) // For anonymous users
   name      String         @default("My Schedule") @db.VarChar(100)
   items     ScheduleItem[]
+  editionId String
+  edition   HitEdition @relation(fields: [editionId], references: [id])
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
   @@index([sessionId])
   @@index([userId])
+  @@index([editionId])
   @@map("user_schedules")
 }
 
@@ -291,25 +333,18 @@ model SharedSchedule {
   id        String   @id @default(cuid())
   code      String   @unique @db.VarChar(10)
   eventIds  String[]
+  editionId String
+  edition   HitEdition @relation(fields: [editionId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([editionId])
   @@map("shared_schedules")
 }
 
 // =============================================================================
 // Site Config & Submission Tables
 // =============================================================================
-
-/// Singleton for site-wide configuration
-model SiteSettings {
-  id                  String   @id @default("default")
-  hitDate             DateTime?
-  submissionDeadline  DateTime?
-  deadlineEnabled     Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-}
 
 /// Reporter/submitter profile linked to a User account
 model Melder {
