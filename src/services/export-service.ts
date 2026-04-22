@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db/prisma'
 import type { EventType, Institution, Affiliation } from '@/generated/prisma/client/enums'
 import { formatEventTime } from '@/lib/event-time'
+import { getActiveEditionId } from '@/lib/active-edition'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -153,7 +154,9 @@ function eventToRow(event: EventWithRelations): EventRow {
 // ---------------------------------------------------------------------------
 
 async function fetchAllEvents() {
+  const editionId = await getActiveEditionId()
   return prisma.event.findMany({
+    where: { editionId },
     include: eventInclude,
   })
 }
@@ -167,7 +170,9 @@ export const exportService = {
    * All events sorted A-Z by title, returned as flat rows.
    */
   async eventsAZ(): Promise<EventRow[]> {
+    const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
+      where: { editionId },
       include: eventInclude,
       orderBy: { title: 'asc' },
     })
@@ -178,7 +183,9 @@ export const exportService = {
    * All events sorted by timeStart, returned as flat rows.
    */
   async eventsByTime(): Promise<EventRow[]> {
+    const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
+      where: { editionId },
       include: eventInclude,
       orderBy: { timeStart: 'asc' },
     })
@@ -376,8 +383,10 @@ export const exportService = {
    * Cross-program events separated out. Info markets included.
    */
   async eventsForBooklet() {
+    const editionId = await getActiveEditionId()
     const [events, infoMarkets] = await Promise.all([
       prisma.event.findMany({
+        where: { editionId },
         include: eventInclude,
         orderBy: { title: 'asc' },
       }),
@@ -436,9 +445,11 @@ export const exportService = {
    * Events for a given institution (including BOTH), with relations, sorted by time then title.
    */
   async eventsForRoomAssignment(institution: 'UNI' | 'HOCHSCHULE') {
+    const editionId = await getActiveEditionId()
     return prisma.event.findMany({
       where: {
         institution: { in: [institution, 'BOTH'] },
+        editionId,
       },
       include: {
         building: true,

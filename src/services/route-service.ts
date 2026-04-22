@@ -15,6 +15,7 @@ import type {
 } from '@/types/routes'
 import { prisma } from '@/lib/db/prisma'
 import { fetchWalkingDirections } from '@/services/google-directions'
+import { getActiveEditionId } from '@/lib/active-edition'
 
 /**
  * Convert a DB Building record to the BuildingInfo type used by the frontend.
@@ -401,8 +402,9 @@ export async function calculateRoute(
  * Get coordinates for an event from its building
  */
 export async function getEventCoordinates(eventId: string): Promise<Coordinates | null> {
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
+  const editionId = await getActiveEditionId()
+  const event = await prisma.event.findFirst({
+    where: { id: eventId, editionId },
     include: { building: true },
   })
 
@@ -446,11 +448,13 @@ export async function calculateScheduleRoute(
   }
 ): Promise<Route> {
   const { scheduledEventIds, includeCurrentLocation, currentCoordinates } = request
+  const editionId = await getActiveEditionId()
 
   // Fetch events from database
   const events = await prisma.event.findMany({
     where: {
       id: { in: scheduledEventIds },
+      editionId,
     },
     include: {
       building: true,
@@ -505,11 +509,13 @@ export async function analyzeTravelTimes(
     minWarningMinutes: 3,
   }
 ): Promise<TravelTimeAnalysis[]> {
+  const editionId = await getActiveEditionId()
   // Fetch events from database
   const events = await prisma.event.findMany({
     where: {
       id: { in: scheduledEventIds },
       timeStart: { not: null },
+      editionId,
     },
     include: {
       building: true,
@@ -597,9 +603,10 @@ export async function getSuggestedAlternatives(
     newTravelTime: number
   }[]
 > {
+  const editionId = await getActiveEditionId()
   // Get the conflicting event
-  const conflictingEvent = await prisma.event.findUnique({
-    where: { id: conflictingEventId },
+  const conflictingEvent = await prisma.event.findFirst({
+    where: { id: conflictingEventId, editionId },
     include: {
       building: true,
       studyPrograms: {
@@ -612,7 +619,7 @@ export async function getSuggestedAlternatives(
 
   // Get all scheduled events
   const scheduledEvents = await prisma.event.findMany({
-    where: { id: { in: scheduledEventIds } },
+    where: { id: { in: scheduledEventIds }, editionId },
     include: { building: true },
     orderBy: { timeStart: 'asc' },
   })
@@ -635,6 +642,7 @@ export async function getSuggestedAlternatives(
           studyProgramId: { in: studyProgramIds },
         },
       },
+      editionId,
     },
     include: { building: true },
     take: 10,

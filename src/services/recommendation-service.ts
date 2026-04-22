@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { EventType, LocationType, Institution } from '@/types/events'
 import { formatEventTime } from '@/lib/event-time'
 import { eventPairOverlapMinutes } from '@/lib/schedule-conflicts'
+import { getActiveEditionId } from '@/lib/active-edition'
 import type { Event } from '@/types/events'
 import type {
   RecommendationContext,
@@ -179,8 +180,9 @@ export const recommendationService = {
     } = filters
 
     // Build query to fetch candidate events
+    const editionId = await getActiveEditionId()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {}
+    const where: any = { editionId }
 
     // Exclude already scheduled events
     if (scheduledEventIds.length > 0) {
@@ -231,7 +233,7 @@ export const recommendationService = {
     const scheduledEvents =
       scheduledEventIds.length > 0
         ? await prisma.event.findMany({
-            where: { id: { in: scheduledEventIds } },
+            where: { id: { in: scheduledEventIds }, editionId },
             include: { building: true, room: true },
           })
         : []
@@ -476,16 +478,17 @@ export const recommendationService = {
     scheduledEventIds: string[]
   ): Promise<BatchAddResult> {
     const { eventIds, skipConflicts = true } = request
+    const editionId = await getActiveEditionId()
 
     // Fetch all events
     const events = await prisma.event.findMany({
-      where: { id: { in: eventIds } },
+      where: { id: { in: eventIds }, editionId },
     })
 
     const scheduledEvents =
       scheduledEventIds.length > 0
         ? await prisma.event.findMany({
-            where: { id: { in: scheduledEventIds } },
+            where: { id: { in: scheduledEventIds }, editionId },
           })
         : []
 
@@ -548,8 +551,9 @@ export const recommendationService = {
       }
     }
 
+    const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { id: { in: scheduledEventIds } },
+      where: { id: { in: scheduledEventIds }, editionId },
       include: {
         building: true,
         room: true,
@@ -815,8 +819,9 @@ export const recommendationService = {
     }
 
     const eventIds = sortedPopularity.map((p) => p.eventId)
+    const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { id: { in: eventIds } },
+      where: { id: { in: eventIds }, editionId },
       include: {
         building: true,
         room: true,
@@ -861,11 +866,13 @@ export const recommendationService = {
     const minStart = new Date(Math.min(...timeSlots.map((s) => new Date(s.start).getTime())))
     const maxEnd = new Date(Math.max(...timeSlots.map((s) => new Date(s.end).getTime())))
 
+    const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
       where: {
         id: excludeEventIds.length > 0 ? { notIn: excludeEventIds } : undefined,
         timeStart: { gte: minStart },
         timeEnd: { lte: maxEnd },
+        editionId,
       },
       include: {
         building: true,
