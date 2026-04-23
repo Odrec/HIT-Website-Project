@@ -34,6 +34,12 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(result, { status: 201 })
   } catch (err) {
+    if (err instanceof Error && 'code' in err && (err as { code?: string }).code === 'P2002') {
+      return NextResponse.json(
+        { error: `Für das Jahr ${body.year} existiert bereits eine Edition.` },
+        { status: 409 }
+      )
+    }
     const message = err instanceof Error ? err.message : 'Rollover failed'
     return NextResponse.json({ error: message }, { status: 400 })
   }

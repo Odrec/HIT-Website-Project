@@ -77,7 +77,8 @@ export default function EditionsPage() {
       <div>
         <h1 className="text-2xl font-bold">Editionen</h1>
         <p className="text-sm text-muted-foreground">
-          Verwaltung der HIT-Jahrgänge. Rollover-Funktion wird in einer späteren Version ergänzt.
+          Verwaltung der HIT-Jahrgänge. Starte eine neue Edition über &quot;Neue Edition
+          starten&quot; auf der aktuellen Edition, um Veranstaltungen zu übernehmen.
         </p>
       </div>
 
@@ -164,10 +165,10 @@ export default function EditionsPage() {
 
       {rolloverSourceYear !== null && (
         <RolloverModal
+          key={`rollover-${rolloverSourceYear}-${rolloverOpen}`}
           currentActiveYear={rolloverSourceYear}
           open={rolloverOpen}
           onOpenChange={setRolloverOpen}
-          onSuccess={reloadEditions}
         />
       )}
     </div>

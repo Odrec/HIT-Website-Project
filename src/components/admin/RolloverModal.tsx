@@ -20,10 +20,9 @@ interface Props {
   currentActiveYear: number
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess: () => void
 }
 
-export function RolloverModal({ currentActiveYear, open, onOpenChange, onSuccess }: Props) {
+export function RolloverModal({ currentActiveYear, open, onOpenChange }: Props) {
   const router = useRouter()
   const { toast } = useToast()
   const [year, setYear] = useState(String(currentActiveYear + 1))
@@ -57,7 +56,8 @@ export function RolloverModal({ currentActiveYear, open, onOpenChange, onSuccess
           : 'Keine Veranstaltungen übernommen.',
       })
       onOpenChange(false)
-      onSuccess()
+      // Navigate to events list; the `reviewFilter=rollover` param is wired up in PR B's
+      // events-list toggle (next chunk) — for now it's a harmless hint in the URL.
       router.push('/admin/events?reviewFilter=rollover')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Rollover fehlgeschlagen'

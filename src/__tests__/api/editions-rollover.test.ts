@@ -78,8 +78,8 @@ describe('POST /api/editions/rollover', () => {
     expect(res.status).toBe(400)
   })
 
-  it('returns 400 when service throws', async () => {
-    mockRollover.mockRejectedValue(new Error('Unique constraint failed'))
+  it('returns 400 when service throws a generic error', async () => {
+    mockRollover.mockRejectedValue(new Error('DB down'))
     const { POST } = await import('@/app/api/editions/rollover/route')
     const req = new Request('http://test', {
       method: 'POST',
@@ -87,7 +87,25 @@ describe('POST /api/editions/rollover', () => {
     })
     const res = await POST(req)
     expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'Unique constraint failed' })
+    expect(await res.json()).toEqual({ error: 'DB down' })
+  })
+
+  it('returns 409 with German message on Prisma P2002 unique violation', async () => {
+    mockRollover.mockRejectedValue(
+      Object.assign(new Error('Unique constraint failed on the fields: (`year`)'), {
+        code: 'P2002',
+      })
+    )
+    const { POST } = await import('@/app/api/editions/rollover/route')
+    const req = new Request('http://test', {
+      method: 'POST',
+      body: JSON.stringify({ year: 2027, hitDate: '2027-11-18', cloneEvents: true }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({
+      error: 'Für das Jahr 2027 existiert bereits eine Edition.',
+    })
   })
 
   it('rejects non-ADMIN callers', async () => {
