@@ -47,6 +47,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { eventTypeLabels, institutionLabels } from '@/lib/validations/event'
 
 interface Event {
@@ -90,6 +92,7 @@ function EventsListContent() {
   const [eventType, setEventType] = useState(searchParams.get('eventType') || '')
   const [institution, setInstitution] = useState(searchParams.get('institution') || '')
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10))
+  const [includeReview, setIncludeReview] = useState(false)
 
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -116,6 +119,7 @@ function EventsListContent() {
       if (search) params.set('search', search)
       if (eventType) params.set('eventType', eventType)
       if (institution) params.set('institution', institution)
+      if (includeReview) params.set('includeReview', '1')
 
       const res = await fetch(`/api/events?${params.toString()}`)
       const data: EventsResponse = await res.json()
@@ -128,7 +132,7 @@ function EventsListContent() {
     } finally {
       setLoading(false)
     }
-  }, [page, search, eventType, institution])
+  }, [page, search, eventType, institution, includeReview])
 
   useEffect(() => {
     fetchEvents()
@@ -273,11 +277,24 @@ function EventsListContent() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button type="submit" variant="outline" size="sm">
                 <Search className="mr-2 h-4 w-4" />
                 Suchen
               </Button>
+              <div className="flex items-center gap-2 ml-auto sm:ml-2">
+                <Checkbox
+                  id="includeReview"
+                  checked={includeReview}
+                  onCheckedChange={(v) => {
+                    setIncludeReview(!!v)
+                    setPage(1)
+                  }}
+                />
+                <Label htmlFor="includeReview" className="cursor-pointer text-sm">
+                  Alle anzeigen inkl. Prüfstand
+                </Label>
+              </div>
               <Button type="button" variant="ghost" size="sm" onClick={clearFilters}>
                 Filter zurücksetzen
               </Button>

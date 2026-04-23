@@ -182,6 +182,7 @@ export interface EventFilters {
   search?: string
   isCrossProgram?: boolean
   melderId?: string
+  reviewStatus?: 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW' | 'PUBLISHED'
 }
 
 export interface EventSortOptions {

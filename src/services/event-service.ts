@@ -103,6 +103,10 @@ export const eventService = {
       where.melderId = filters.melderId
     }
 
+    if (filters.reviewStatus) {
+      where.reviewStatus = filters.reviewStatus
+    }
+
     if (filters.search) {
       where.OR = [
         { title: { contains: filters.search, mode: 'insensitive' } },

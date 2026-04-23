@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       ? new Date(searchParams.get('startDate')!)
       : undefined
     const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
+    const includeReview = searchParams.get('includeReview') === '1'
 
     // Parse sort options
     const sortField = (searchParams.get('sortField') || 'createdAt') as
@@ -65,6 +66,7 @@ export async function GET(request: NextRequest) {
         startDate,
         endDate,
         ...(melderId !== undefined ? { melderId } : {}),
+        ...(includeReview ? {} : { reviewStatus: 'PUBLISHED' as const }),
       },
       sort: {
         field: sortField,
