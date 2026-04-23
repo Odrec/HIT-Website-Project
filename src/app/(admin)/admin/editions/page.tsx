@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { RolloverModal } from '@/components/admin/RolloverModal'
 
 type Edition = {
   id: string
@@ -24,13 +25,20 @@ export default function EditionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Partial<Edition>>({})
   const [saving, setSaving] = useState(false)
+  const [rolloverOpen, setRolloverOpen] = useState(false)
+  const [rolloverSourceYear, setRolloverSourceYear] = useState<number | null>(null)
 
-  useEffect(() => {
+  const reloadEditions = () => {
     fetch('/api/editions')
       .then((r) => r.json())
       .then(setEditions)
       .catch(() => toast({ variant: 'destructive', title: 'Fehler beim Laden' }))
-  }, [toast])
+  }
+
+  useEffect(() => {
+    reloadEditions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const startEdit = (e: Edition) => {
     setEditingId(e.id)
@@ -135,11 +143,33 @@ export default function EditionsPage() {
                     Bearbeiten
                   </Button>
                 )}
+                {e.status === 'ACTIVE' && (
+                  <Button
+                    className="mt-2 ml-2"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setRolloverSourceYear(e.year)
+                      setRolloverOpen(true)
+                    }}
+                  >
+                    Neue Edition starten
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>
         </Card>
       ))}
+
+      {rolloverSourceYear !== null && (
+        <RolloverModal
+          currentActiveYear={rolloverSourceYear}
+          open={rolloverOpen}
+          onOpenChange={setRolloverOpen}
+          onSuccess={reloadEditions}
+        />
+      )}
     </div>
   )
 }
