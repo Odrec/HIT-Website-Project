@@ -15,6 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { AlertTriangle, Pencil, Check, Trash2 } from 'lucide-react'
 import { formatEventTimeRange } from '@/lib/event-time'
 import type { EventReviewStatus } from '@/types/events'
@@ -54,6 +62,12 @@ export default function PruefstandPage() {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
+  const notifyBadge = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('pruefstand:refresh'))
+    }
+  }
+
   const fetchEvents = useCallback(async () => {
     setLoading(true)
     try {
@@ -85,6 +99,7 @@ export default function PruefstandPage() {
         next.delete(id)
         return next
       })
+      notifyBadge()
       fetchEvents()
     } catch {
       toast({ variant: 'destructive', title: 'Veröffentlichen fehlgeschlagen' })
@@ -103,6 +118,7 @@ export default function PruefstandPage() {
         next.delete(id)
         return next
       })
+      notifyBadge()
       fetchEvents()
     } catch {
       toast({ variant: 'destructive', title: 'Verwerfen fehlgeschlagen' })
@@ -127,6 +143,7 @@ export default function PruefstandPage() {
       })
     }
     setSelected(new Set())
+    notifyBadge()
     fetchEvents()
   }
 
@@ -185,35 +202,40 @@ export default function PruefstandPage() {
           ) : events.length === 0 ? (
             <p className="text-muted-foreground text-sm">Keine Einträge im Prüfstand.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left">
-                  <th className="py-2 w-8">
-                    <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
-                  </th>
-                  <th className="py-2">Titel</th>
-                  <th className="py-2">Melder</th>
-                  <th className="py-2">Herkunft</th>
-                  <th className="py-2">Zeit</th>
-                  <th className="py-2">Raum</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2 text-right">Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={toggleAll}
+                      aria-label="Alle auswählen"
+                    />
+                  </TableHead>
+                  <TableHead>Titel</TableHead>
+                  <TableHead>Melder</TableHead>
+                  <TableHead>Herkunft</TableHead>
+                  <TableHead>Zeit</TableHead>
+                  <TableHead>Raum</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Aktionen</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {events.map((e) => (
-                  <tr key={e.id} className="border-b">
-                    <td className="py-2">
+                  <TableRow key={e.id}>
+                    <TableCell>
                       <Checkbox
                         checked={selected.has(e.id)}
                         onCheckedChange={() => toggleSelected(e.id)}
+                        aria-label={`${e.title} auswählen`}
                       />
-                    </td>
-                    <td className="py-2 font-medium">{e.title}</td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell className="font-medium">{e.title}</TableCell>
+                    <TableCell>
                       {e.melder ? `${e.melder.firstName} ${e.melder.lastName}` : '—'}
-                    </td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell>
                       {e.sourceEvent ? (
                         <span className="text-muted-foreground">
                           HIT {e.sourceEvent.edition.year} · {e.sourceEvent.title}
@@ -221,8 +243,8 @@ export default function PruefstandPage() {
                       ) : (
                         '—'
                       )}
-                    </td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell>
                       {e.timeStart && e.timeEnd ? (
                         formatEventTimeRange(new Date(e.timeStart), new Date(e.timeEnd))
                       ) : (
@@ -230,8 +252,8 @@ export default function PruefstandPage() {
                           <AlertTriangle className="h-3 w-3" /> fehlt
                         </span>
                       )}
-                    </td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell>
                       {e.room ? (
                         `${e.building?.name ?? ''} ${e.room.name}`.trim()
                       ) : (
@@ -239,15 +261,21 @@ export default function PruefstandPage() {
                           <AlertTriangle className="h-3 w-3" /> fehlt
                         </span>
                       )}
-                    </td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell>
                       <Badge variant={statusVariant(e.reviewStatus)}>
                         {statusLabel(e.reviewStatus)}
                       </Badge>
-                    </td>
-                    <td className="py-2">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button size="icon" variant="ghost" asChild title="Bearbeiten">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          asChild
+                          title="Bearbeiten"
+                          aria-label="Bearbeiten"
+                        >
                           <Link href={`/admin/events/${e.id}`}>
                             <Pencil className="h-4 w-4" />
                           </Link>
@@ -257,6 +285,7 @@ export default function PruefstandPage() {
                           variant="ghost"
                           onClick={() => handlePublish(e.id)}
                           title="Veröffentlichen"
+                          aria-label="Veröffentlichen"
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -265,15 +294,16 @@ export default function PruefstandPage() {
                           variant="ghost"
                           onClick={() => handleDiscard(e.id)}
                           title="Verwerfen"
+                          aria-label="Verwerfen"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

@@ -3,21 +3,39 @@
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 
+const REFRESH_EVENT = 'pruefstand:refresh'
+
+/**
+ * Emit this event from anywhere in the app to trigger a badge refresh:
+ *   window.dispatchEvent(new Event('pruefstand:refresh'))
+ */
 export function PruefstandBadge() {
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    let cancelled = false
-    fetch('/api/events/pruefstand/count')
-      .then((r) => (r.ok ? r.json() : { count: 0 }))
-      .then((data) => {
-        if (!cancelled) setCount(data.count ?? 0)
-      })
-      .catch(() => {
-        if (!cancelled) setCount(0)
-      })
+    const controller = new AbortController()
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/events/pruefstand/count', {
+          cache: 'no-store',
+          signal: controller.signal,
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (controller.signal.aborted) return
+        setCount(data.count ?? 0)
+      } catch {
+        // Leave the prior count if the fetch fails
+      }
+    }
+
+    void load()
+    const handler = () => void load()
+    window.addEventListener(REFRESH_EVENT, handler)
     return () => {
-      cancelled = true
+      controller.abort()
+      window.removeEventListener(REFRESH_EVENT, handler)
     }
   }, [])
 
