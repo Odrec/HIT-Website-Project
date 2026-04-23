@@ -40,6 +40,40 @@ Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei import
 
 Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf der Campuskarte im Routenplaner. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
 
-## Einstellungen
+## Editionen & Rollover
 
-Unter **Einstellungen** konfigurieren Sie globale Parameter wie das HIT-Datum, E-Mail-Benachrichtigungen und weitere Systemoptionen.
+Jede HIT wird als eigene **Edition** verwaltet. Immer genau eine Edition ist aktiv (Status `ACTIVE`), weitere sind `DRAFT` (in Vorbereitung) oder `ARCHIVED` (abgeschlossen).
+
+**Aktuelle Edition bearbeiten:** Unter **Editionen** (`/admin/editions`) kannst du HIT-Datum und Einsendeschluss der aktiven Edition anpassen.
+
+**Neue Edition starten (Rollover):** Auf der aktiven Edition auf **Neue Edition starten** klicken. Im Dialog:
+
+1. Jahr eingeben (vorausgefüllt mit dem Folgejahr)
+2. HIT-Datum angeben
+3. Einsendeschluss optional setzen
+4. Checkbox **Alle Veranstaltungen übernehmen** aktiv lassen, um die Veranstaltungen der aktuellen Edition als Entwürfe ins Prüfstand zu kopieren
+
+Nach dem Rollover:
+
+- Die alte Edition wird automatisch auf `ARCHIVED` gesetzt
+- Die neue Edition ist `ACTIVE`
+- Kopierte Veranstaltungen haben den Status `DRAFT_FROM_ROLLOVER`, ihre Zeiten sind geleert
+- Der Melder bleibt erhalten, sofern das Konto noch existiert
+
+## Prüfstand
+
+Unter **Prüfstand** (`/admin/pruefstand`) findest du alle aus dem Rollover kopierten Veranstaltungen, die noch nicht veröffentlicht sind.
+
+Pro Zeile:
+
+- **Bearbeiten** öffnet das Formular; der Status wechselt beim Speichern auf `NEEDS_REVIEW`. Ein Hinweis oben im Formular zeigt die Quelle an: *Aus: HIT {Jahr} · {Titel}*.
+- **Veröffentlichen** flippt den Status auf `PUBLISHED`. Die Veranstaltung erscheint auf der öffentlichen Seite.
+- **Verwerfen** löscht den Entwurf. Die Quellveranstaltung in der archivierten Edition bleibt unberührt.
+
+Mehrfachauswahl mit den Checkboxen links, dann **Veröffentlichen** oben drücken für Bulk-Aktion.
+
+Das **Sidebar-Badge** zeigt live die Anzahl noch nicht veröffentlichter Entwürfe.
+
+## Vergangene Editionen
+
+Archivierte Editionen bleiben in der Datenbank. Kurzlinks (`/s/<code>`) aus einer älteren Edition funktionieren weiterhin: sie öffnen den Stundenplan **schreibgeschützt** mit einem Hinweis auf das ursprüngliche HIT-Jahr.
