@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import {
-  getEdition,
-  updateEdition,
-  deleteEdition,
-  activateEdition,
-} from '@/services/edition-service'
+import { getEdition, updateEdition, deleteEdition } from '@/services/edition-service'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -25,17 +20,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
   const { id } = await params
   const body = await request.json()
-
-  // Special action: activate
-  if (body.action === 'activate') {
-    try {
-      await activateEdition(id)
-      return NextResponse.json({ ok: true })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to activate'
-      return NextResponse.json({ error: message }, { status: 400 })
-    }
-  }
 
   // Validate dates before building the update payload
   if (body.hitDate !== undefined) {
