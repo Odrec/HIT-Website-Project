@@ -83,7 +83,6 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-hit-uni-600 via-hit-uni-500 to-hit-hs-500 text-white">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="max-w-3xl">

@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RolloverModal } from '@/components/admin/RolloverModal'
+import { formatEventDateDMY } from '@/lib/event-time'
 
 type Edition = {
   id: string
@@ -87,9 +88,7 @@ export default function EditionsPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>HIT {e.year}</CardTitle>
-              <CardDescription>
-                HIT-Datum: {new Date(e.hitDate).toLocaleDateString('de-DE')}
-              </CardDescription>
+              <CardDescription>HIT-Datum: {formatEventDateDMY(e.hitDate)}</CardDescription>
             </div>
             <Badge variant={badgeVariant(e.status)}>{e.status}</Badge>
           </CardHeader>
@@ -134,9 +133,7 @@ export default function EditionsPage() {
               <div className="space-y-1 text-sm">
                 <div>
                   <strong>Einsendeschluss:</strong>{' '}
-                  {e.submissionDeadline
-                    ? new Date(e.submissionDeadline).toLocaleDateString('de-DE')
-                    : '—'}
+                  {e.submissionDeadline ? formatEventDateDMY(e.submissionDeadline) : '—'}
                   {!e.deadlineEnabled && ' (deaktiviert)'}
                 </div>
                 {e.status !== 'ARCHIVED' && (
