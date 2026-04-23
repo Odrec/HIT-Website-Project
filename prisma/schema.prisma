@@ -52,6 +52,18 @@ enum CampusArea {
   INNENSTADT
 }
 
+enum EditionStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum EventReviewStatus {
+  DRAFT_FROM_ROLLOVER
+  NEEDS_REVIEW
+  PUBLISHED
+}
+
 enum UserRole {
   ADMIN
   ORGANIZER
@@ -114,9 +126,9 @@ model Title {
 
 /// Information market (Infomarkt) locations
 model InformationMarket {
-  id       String                    @id @default(cuid())
-  name     String                    @db.VarChar(200)
-  location String                    @db.VarChar(200)
+  id       String                   @id @default(cuid())
+  name     String                   @db.VarChar(200)
+  location String                   @db.VarChar(200)
   events   EventInformationMarket[]
 
   @@map("information_markets")
@@ -126,40 +138,64 @@ model InformationMarket {
 // Event Tables
 // =============================================================================
 
+/// A single HIT year. One row is always ACTIVE; others may be DRAFT or ARCHIVED.
+model HitEdition {
+  id                 String           @id @default(cuid())
+  year               Int              @unique
+  hitDate            DateTime
+  submissionDeadline DateTime?
+  deadlineEnabled    Boolean          @default(true)
+  status             EditionStatus    @default(DRAFT)
+  events             Event[]
+  userSchedules      UserSchedule[]
+  sharedSchedules    SharedSchedule[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([status])
+  @@map("hit_editions")
+}
+
 /// Main event entity - lectures, workshops, tours, info stands, etc.
 model Event {
-  id              String                    @id @default(cuid())
-  title           String                    @db.VarChar(200)
-  description     String?                   @db.Text
-  eventType       EventType
-  timeStart       DateTime?
-  timeEnd         DateTime?
-  locationType    LocationType
-  locationDetails Json?                     @db.JsonB
+  id               String                   @id @default(cuid())
+  title            String                   @db.VarChar(200)
+  description      String?                  @db.Text
+  eventType        EventType
+  timeStart        DateTime?
+  timeEnd          DateTime?
+  locationType     LocationType
+  locationDetails  Json?                    @db.JsonB
   /// CONFIRMED = building/room chosen; WISH = area + free-text preferences.
-  locationMode    LocationMode              @default(CONFIRMED)
+  locationMode     LocationMode             @default(CONFIRMED)
   /// Campus area when locationMode = WISH.
   locationWishArea CampusArea?
-  roomRequest     String?                   @db.Text
-  meetingPoint    String?                   @db.VarChar(500)
-  additionalInfo  String?                   @db.Text
-  photoUrl        String?                   @db.VarChar(500)
-  institution     Institution
-  isCrossProgram  Boolean                   @default(false)
-  locationHint    String?
-  melderId        String?
-  melder          Melder?                   @relation(fields: [melderId], references: [id])
-  buildingId      String?
-  building        Building?                 @relation(fields: [buildingId], references: [id])
-  roomId          String?
-  room            Room?                     @relation(fields: [roomId], references: [id])
-  lecturers       Lecturer[]
-  organizers      EventOrganizer[]
-  studyPrograms   EventStudyProgram[]
-  infoMarkets     EventInformationMarket[]
-  scheduleItems   ScheduleItem[]
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
+  roomRequest      String?                  @db.Text
+  meetingPoint     String?                  @db.VarChar(500)
+  additionalInfo   String?                  @db.Text
+  photoUrl         String?                  @db.VarChar(500)
+  institution      Institution
+  isCrossProgram   Boolean                  @default(false)
+  editionId        String
+  edition          HitEdition               @relation(fields: [editionId], references: [id])
+  reviewStatus     EventReviewStatus        @default(PUBLISHED)
+  sourceEventId    String?
+  sourceEvent      Event?                   @relation("EventCloneSource", fields: [sourceEventId], references: [id], onDelete: SetNull)
+  clones           Event[]                  @relation("EventCloneSource")
+  locationHint     String?
+  melderId         String?
+  melder           Melder?                  @relation(fields: [melderId], references: [id])
+  buildingId       String?
+  building         Building?                @relation(fields: [buildingId], references: [id])
+  roomId           String?
+  room             Room?                    @relation(fields: [roomId], references: [id])
+  lecturers        Lecturer[]
+  organizers       EventOrganizer[]
+  studyPrograms    EventStudyProgram[]
+  infoMarkets      EventInformationMarket[]
+  scheduleItems    ScheduleItem[]
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
 
   // Single-column indexes
   @@index([eventType])
@@ -169,12 +205,13 @@ model Event {
   @@index([melderId])
   @@index([buildingId])
   @@index([roomId])
-
   // Compound indexes for common query patterns
-  @@index([institution, eventType])      // Filtering by institution and type
-  @@index([timeStart, timeEnd])          // Time range queries
-  @@index([institution, timeStart])      // Events by institution sorted by time
-
+  @@index([institution, eventType]) // Filtering by institution and type
+  @@index([timeStart, timeEnd]) // Time range queries
+  @@index([institution, timeStart]) // Events by institution sorted by time
+  @@index([editionId])
+  @@index([editionId, reviewStatus])
+  @@index([sourceEventId])
   @@map("events")
 }
 
@@ -238,15 +275,15 @@ model EventInformationMarket {
 
 /// User account for authentication and authorization
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique @db.VarChar(200)
-  passwordHash  String?        @db.VarChar(255)
-  name          String?        @db.VarChar(200)
-  role          UserRole       @default(PUBLIC)
-  schedules     UserSchedule[]
-  melder        Melder?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id           String         @id @default(cuid())
+  email        String         @unique @db.VarChar(200)
+  passwordHash String?        @db.VarChar(255)
+  name         String?        @db.VarChar(200)
+  role         UserRole       @default(PUBLIC)
+  schedules    UserSchedule[]
+  melder       Melder?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([email])
   @@index([role])
@@ -261,11 +298,14 @@ model UserSchedule {
   sessionId String?        @db.VarChar(100) // For anonymous users
   name      String         @default("My Schedule") @db.VarChar(100)
   items     ScheduleItem[]
+  editionId String
+  edition   HitEdition     @relation(fields: [editionId], references: [id])
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
   @@index([sessionId])
   @@index([userId])
+  @@index([editionId])
   @@map("user_schedules")
 }
 
@@ -288,28 +328,21 @@ model ScheduleItem {
 
 /// Shared schedule with short link code for anonymous schedule sharing
 model SharedSchedule {
-  id        String   @id @default(cuid())
-  code      String   @unique @db.VarChar(10)
+  id        String     @id @default(cuid())
+  code      String     @unique @db.VarChar(10)
   eventIds  String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  editionId String
+  edition   HitEdition @relation(fields: [editionId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
+  @@index([editionId])
   @@map("shared_schedules")
 }
 
 // =============================================================================
 // Site Config & Submission Tables
 // =============================================================================
-
-/// Singleton for site-wide configuration
-model SiteSettings {
-  id                  String   @id @default("default")
-  hitDate             DateTime?
-  submissionDeadline  DateTime?
-  deadlineEnabled     Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-}
 
 /// Reporter/submitter profile linked to a User account
 model Melder {
@@ -328,27 +361,29 @@ model Melder {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   events      Event[]
+
+  @@map("melders")
 }
 
 /// Campus building — single source of truth for locations, coordinates, and routing
 model Building {
-  id                 String       @id @default(cuid())
-  slug               String       @unique @db.VarChar(50)
-  name               String       @db.VarChar(200)
-  shortName          String?      @db.VarChar(50)
-  address            String?      @db.Text
-  campus             String?      @db.VarChar(50)
+  id                 String      @id @default(cuid())
+  slug               String      @unique @db.VarChar(50)
+  name               String      @db.VarChar(200)
+  shortName          String?     @db.VarChar(50)
+  address            String?     @db.Text
+  campus             String?     @db.VarChar(50)
   /// Owner institution. BOTH is used for shared buildings (Westerberg etc.)
   /// and drives the building filter in the event form.
-  institution        Institution  @default(BOTH)
+  institution        Institution @default(BOTH)
   latitude           Float?
   longitude          Float?
-  hasAccessibility   Boolean      @default(false)
-  accessibilityNotes String?      @db.Text
+  hasAccessibility   Boolean     @default(false)
+  accessibilityNotes String?     @db.Text
   rooms              Room[]
   events             Event[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   @@index([campus])
   @@index([institution])
@@ -371,14 +406,14 @@ model Room {
 
 /// Admin-configured scheduled export
 model ExportSchedule {
-  id        String   @id @default(cuid())
-  type      String   // "html" (extensible for future export types)
+  id        String    @id @default(cuid())
+  type      String // "html" (extensible for future export types)
   startDate DateTime
-  frequency String   // "daily" | "weekly"
-  enabled   Boolean  @default(true)
+  frequency String // "daily" | "weekly"
+  enabled   Boolean   @default(true)
   lastRun   DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 /// Cached walking route between two buildings from Google Directions API
@@ -405,7 +440,7 @@ model CachedRoute {
 /// Shuttle bus for real-time GPS tracking
 model ShuttleBus {
   id        String       @id @default(cuid())
-  name      String       // e.g. "Bus 1"
+  name      String // e.g. "Bus 1"
   number    Int          @unique
   token     String       @unique
   active    Boolean      @default(true)

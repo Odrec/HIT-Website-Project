@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { nanoid } from 'nanoid'
+import { getActiveEditionId } from '@/lib/active-edition'
 
 function getPublicOrigin(request: NextRequest): string {
   const configured = process.env.NEXTAUTH_URL
@@ -26,9 +27,10 @@ export async function POST(request: NextRequest) {
 
     const sortedIds = [...eventIds].sort()
     const origin = getPublicOrigin(request)
+    const editionId = await getActiveEditionId()
 
     const existing = await prisma.sharedSchedule.findFirst({
-      where: { eventIds: { equals: sortedIds } },
+      where: { eventIds: { equals: sortedIds }, editionId },
     })
 
     if (existing) {
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const code = nanoid(6)
     const shared = await prisma.sharedSchedule.create({
-      data: { code, eventIds: sortedIds },
+      data: { code, eventIds: sortedIds, editionId },
     })
 
     return NextResponse.json({ code: shared.code, url: `${origin}/s/${shared.code}` })

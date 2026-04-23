@@ -1,6 +1,7 @@
 // Navigator Service - AI-powered study program navigation
 
 import { prisma } from '@/lib/db/prisma'
+import { getActiveEditionId } from '@/lib/active-edition'
 import type {
   NavigatorSession,
   NavigatorMessage,
@@ -764,6 +765,7 @@ export async function getRecommendations(
  * Get events for recommended programs
  */
 export async function getEventsForPrograms(programIds: string[]): Promise<Event[]> {
+  const editionId = await getActiveEditionId()
   const events = await prisma.event.findMany({
     where: {
       studyPrograms: {
@@ -773,6 +775,7 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
           },
         },
       },
+      editionId,
     },
     include: {
       building: true,

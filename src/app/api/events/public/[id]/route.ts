@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
+import { getActiveEditionId } from '@/lib/active-edition'
 
 /**
  * GET /api/events/public/[id] - Get a single event with related events
@@ -9,10 +10,11 @@ import { prisma } from '@/lib/db/prisma'
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    const editionId = await getActiveEditionId()
 
     // Fetch the event with all its relations
-    const event = await prisma.event.findUnique({
-      where: { id },
+    const event = await prisma.event.findFirst({
+      where: { id, editionId },
       include: {
         building: true,
         room: true,
@@ -74,6 +76,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
               studyProgramId: { in: studyProgramIds },
             },
           },
+          editionId,
         },
         take: 6,
         orderBy: { timeStart: 'asc' },
@@ -122,6 +125,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
             notIn: relatedEvents.map((e) => e.id),
           },
           eventType: event.eventType,
+          editionId,
         },
         take: 3 - relatedEvents.length,
         orderBy: { timeStart: 'asc' },

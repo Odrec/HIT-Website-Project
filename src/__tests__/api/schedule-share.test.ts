@@ -21,6 +21,11 @@ vi.mock('nanoid', () => ({
   nanoid: () => 'abc123',
 }))
 
+// Mock active-edition resolver
+vi.mock('@/lib/active-edition', () => ({
+  getActiveEditionId: vi.fn().mockResolvedValue('active-edition-id'),
+}))
+
 import { POST } from '@/app/api/schedule/share/route'
 import { GET } from '@/app/api/schedule/share/[code]/route'
 

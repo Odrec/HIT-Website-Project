@@ -1,6 +1,7 @@
 // Event Service - Business logic for event management
 
 import { Prisma } from '@/generated/prisma/client/client'
+import { getActiveEditionId } from '@/lib/active-edition'
 import { prisma } from '@/lib/db/prisma'
 import type {
   CreateEventInput,
@@ -27,6 +28,8 @@ export interface ListEventsOptions {
   page?: number
   pageSize?: number
   includeRelations?: boolean
+  /** editionId scoping: undefined = active, string = that edition, null = cross-edition (admin only). */
+  editionId?: string | null
 }
 
 /**
@@ -148,6 +151,11 @@ export const eventService = {
         }
       : undefined
 
+    // Edition scoping: default to active unless caller explicitly passes an id or null.
+    if (options.editionId !== null) {
+      where.editionId = options.editionId ?? (await getActiveEditionId())
+    }
+
     // Execute queries in parallel
     const [data, total] = await Promise.all([
       prisma.event.findMany({
@@ -170,11 +178,17 @@ export const eventService = {
   },
 
   /**
-   * Get a single event by ID
+   * Get a single event by ID.
+   *
+   * Uses findFirst (not findUnique) so we can compound id + editionId in the where clause.
    */
-  async getById(id: string) {
-    return prisma.event.findUnique({
-      where: { id },
+  async getById(id: string, options: { editionId?: string | null } = {}) {
+    const where: { id: string; editionId?: string } = { id }
+    if (options.editionId !== null) {
+      where.editionId = options.editionId ?? (await getActiveEditionId())
+    }
+    return prisma.event.findFirst({
+      where,
       include: {
         lecturers: true,
         organizers: true,
@@ -200,9 +214,14 @@ export const eventService = {
   },
 
   /**
-   * Create a new event
+   * Create a new event in the currently ACTIVE edition.
+   *
+   * No editionId override is accepted — submitters cannot target past or
+   * future editions. The rollover flow in PR B uses a separate write path
+   * that stamps a different edition.
    */
   async create(input: CreateEventInput) {
+    const activeEditionId = await getActiveEditionId()
     const {
       lecturers = [],
       organizers = [],
@@ -219,6 +238,7 @@ export const eventService = {
     return prisma.event.create({
       data: {
         ...eventData,
+        edition: { connect: { id: activeEditionId } },
         isCrossProgram: input.isCrossProgram ?? false,
         locationHint: input.locationHint || null,
         locationWishArea: locationWishArea || null,
@@ -276,7 +296,12 @@ export const eventService = {
   },
 
   /**
-   * Update an existing event
+   * Update an existing event.
+   *
+   * Operates on primary key only — no edition scoping. Callers must ensure
+   * the `id` comes from a trusted edition-filtered source (e.g. eventService.list
+   * or getById), otherwise an admin with a stale cross-edition id could
+   * accidentally mutate a different year's event. See spec §2.
    */
   async update(input: UpdateEventInput) {
     const {
@@ -374,7 +399,9 @@ export const eventService = {
   },
 
   /**
-   * Delete an event
+   * Delete an event by id.
+   *
+   * Operates on primary key only — no edition scoping. See `update` for caveats.
    */
   async delete(id: string) {
     return prisma.event.delete({
@@ -383,7 +410,11 @@ export const eventService = {
   },
 
   /**
-   * Delete multiple events
+   * Delete multiple events by id.
+   *
+   * Operates on primary keys only — no edition scoping. Admin routes that
+   * expose this MUST have already filtered the id list to the intended
+   * edition, or stale cross-edition ids could be silently removed. See spec §2.
    */
   async deleteMany(ids: string[]) {
     return prisma.event.deleteMany({
@@ -394,13 +425,18 @@ export const eventService = {
   },
 
   /**
-   * Duplicate an event
+   * Duplicate an event into the active edition.
+   *
+   * Fetches the source event cross-edition (admin-only operation — the caller
+   * is trusted to pick a legitimate source). The clone always lands in the
+   * active edition regardless of the source's edition.
    */
   async duplicate(id: string) {
-    const original = await this.getById(id)
+    const original = await this.getById(id, { editionId: null })
     if (!original) {
       throw new Error('Event not found')
     }
+    const activeEditionId = await getActiveEditionId()
 
     return prisma.event.create({
       data: {
@@ -420,9 +456,10 @@ export const eventService = {
         institution: original.institution,
         isCrossProgram: original.isCrossProgram,
         locationHint: original.locationHint,
-        melderId: original.melderId,
-        buildingId: original.buildingId,
-        roomId: original.roomId,
+        edition: { connect: { id: activeEditionId } },
+        ...(original.melderId && { melder: { connect: { id: original.melderId } } }),
+        ...(original.buildingId && { building: { connect: { id: original.buildingId } } }),
+        ...(original.roomId && { room: { connect: { id: original.roomId } } }),
         lecturers: {
           create: original.lecturers.map((lecturer) => ({
             firstName: lecturer.firstName,

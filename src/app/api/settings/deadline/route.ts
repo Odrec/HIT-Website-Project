@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDeadlineInfo } from '@/services/settings-service'
+import { getDeadlineInfo } from '@/services/edition-service'
 
 export async function GET() {
   try {

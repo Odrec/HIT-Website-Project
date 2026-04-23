@@ -77,8 +77,8 @@ const sidebarItems = [
     adminOnly: true,
   },
   {
-    title: 'Einstellungen',
-    href: '/admin/settings',
+    title: 'Editionen',
+    href: '/admin/editions',
     icon: Settings,
     adminOnly: true,
   },

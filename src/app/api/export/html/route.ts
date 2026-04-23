@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import type { EventType, Institution } from '@/generated/prisma/client/enums'
 import { formatEventTime } from '@/lib/event-time'
+import { getActiveEditionId } from '@/lib/active-edition'
 
 // ---------------------------------------------------------------------------
 // Event include shape
@@ -207,7 +208,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  const editionId = await getActiveEditionId()
   const events = await prisma.event.findMany({
+    where: { editionId },
     include: eventInclude,
     orderBy: { title: 'asc' },
   })

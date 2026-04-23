@@ -39,8 +39,8 @@ const navItems = [
     icon: FileSpreadsheet,
   },
   {
-    title: 'Einstellungen',
-    href: '/admin/settings',
+    title: 'Editionen',
+    href: '/admin/editions',
     icon: Settings,
   },
 ]

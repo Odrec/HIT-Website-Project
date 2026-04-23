@@ -77,7 +77,7 @@ function SchedulePageContent() {
   useEffect(() => {
     const fetchHitDate = async () => {
       try {
-        const response = await fetch('/api/settings')
+        const response = await fetch('/api/editions/active')
         if (response.ok) {
           const data = await response.json()
           if (data.hitDate) {

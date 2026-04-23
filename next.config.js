@@ -18,6 +18,15 @@ const nextConfig = {
     // acceptable here because only authenticated admins can set photoUrl.
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
+  async redirects() {
+    return [
+      {
+        source: '/admin/settings',
+        destination: '/admin/editions',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

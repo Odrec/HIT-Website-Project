@@ -34,20 +34,13 @@ async function main() {
   await prisma.user.deleteMany()
 
   // ==========================================================================
-  // Seed Site Settings
+  // Resolve the ACTIVE HitEdition (seeded by migration)
   // ==========================================================================
-  console.log('⚙️ Seeding site settings...')
-
-  await prisma.siteSettings.upsert({
-    where: { id: 'default' },
-    update: {},
-    create: {
-      id: 'default',
-      hitDate: new Date('2026-11-19T00:00:00Z'),
-      submissionDeadline: new Date('2026-10-15T00:00:00Z'),
-      deadlineEnabled: true,
-    },
-  })
+  const activeEdition = await prisma.hitEdition.findFirst({ where: { status: 'ACTIVE' } })
+  if (!activeEdition) {
+    throw new Error('seed: no ACTIVE HitEdition — run `prisma migrate deploy` first')
+  }
+  const editionId = activeEdition.id
 
   // ==========================================================================
   // Create Buildings (all 13 campus buildings)
@@ -243,6 +236,7 @@ async function main() {
     // --- Schloss Campus events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Einführung in die Informatik',
         description: 'Erfahren Sie alles über das Informatik-Studium an der Universität Osnabrück. Wir zeigen Ihnen, was Sie erwartet und welche Karrieremöglichkeiten sich bieten.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -254,6 +248,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Studium der Rechtswissenschaft',
         description: 'Informationsveranstaltung über das Jura-Studium mit Einblicken in die Studieninhalte, Praxisbezug und berufliche Perspektiven.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -263,6 +258,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'BWL — Studium und Berufsperspektiven',
         description: 'Vorstellung des BWL-Studiengangs mit Schwerpunkten, Auslandssemester und Karrieremöglichkeiten.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -272,6 +268,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Campusführung Schloss und Innenstadt',
         description: 'Rundgang über den Schloss-Campus und die umliegenden Uni-Gebäude in der Innenstadt.',
         eventType: EventType.RUNDGANG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -284,6 +281,7 @@ async function main() {
     // --- Seminarstraße events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Germanistik — Sprache, Literatur, Medien',
         description: 'Was erwartet Sie im Germanistik-Studium? Lehrende stellen den Studiengang vor.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -293,6 +291,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Fremdsprachen studieren: Anglistik & Romanistik',
         description: 'Informationen zu den Studiengängen Anglistik und Romanistik.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -304,6 +303,7 @@ async function main() {
     // --- AVZ events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Workshop: Psychologie im Alltag',
         description: 'Interaktiver Workshop zu psychologischen Phänomenen im Alltag. Für alle Interessierten geeignet.',
         eventType: EventType.WORKSHOP, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -313,6 +313,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Soziologie — Gesellschaft verstehen',
         description: 'Einblick in das Soziologie-Studium und aktuelle Forschungsthemen.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -324,6 +325,7 @@ async function main() {
     // --- Biologie events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Laborführung Biologie',
         description: 'Besichtigung der biologischen Forschungslabore mit Live-Demonstrationen.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -336,6 +338,7 @@ async function main() {
     // --- Physik events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Physik zum Anfassen',
         description: 'Spannende Physik-Experimente live erleben! Professoren zeigen faszinierende Phänomene.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -347,6 +350,7 @@ async function main() {
     // --- Chemie events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Chemie-Show: Feuer, Farben, Faszination',
         description: 'Spektakuläre Chemie-Vorführung mit Experimenten zum Staunen.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -358,6 +362,7 @@ async function main() {
     // --- Mathe/Info events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Mathematik — Mehr als Rechnen',
         description: 'Warum Mathematik studieren? Einblicke in Studienalltag und Berufschancen.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -367,6 +372,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Workshop: Programmieren für Anfänger',
         description: 'Erste Schritte in Python — ein Hands-on-Workshop für alle ohne Vorkenntnisse.',
         eventType: EventType.WORKSHOP, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -379,6 +385,7 @@ async function main() {
     // --- EIHU events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'KI und Machine Learning — Forschung live',
         description: 'Vorführung aktueller KI-Forschungsprojekte im KI-Labor der Uni.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.UNI,
@@ -390,6 +397,7 @@ async function main() {
     // --- Caprivi A events (Hochschule) ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Laborführung Maschinenbau',
         description: 'Besichtigen Sie unsere modernen Maschinenbau-Labore und sehen Sie aktuelle Forschungsprojekte.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.HOCHSCHULE,
@@ -400,6 +408,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Elektrotechnik — Technik der Zukunft',
         description: 'Vorstellung des Studiengangs Elektrotechnik mit Laborbesichtigung.',
         eventType: EventType.VORTRAG, locationType: LocationType.OTHER, institution: Institution.HOCHSCHULE,
@@ -411,6 +420,7 @@ async function main() {
     // --- Caprivi B events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Werkstattführung: Prototypenbau',
         description: 'Sehen Sie, wie Studierende eigene Prototypen in der Werkstatt bauen.',
         eventType: EventType.LABORFUEHRUNG, locationType: LocationType.OTHER, institution: Institution.HOCHSCHULE,
@@ -422,6 +432,7 @@ async function main() {
     // --- Caprivi C events ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Medieninformatik — Kreativität trifft Technik',
         description: 'Vorstellung des Studiengangs mit Demos aus dem Medien-Labor.',
         eventType: EventType.WORKSHOP, locationType: LocationType.OTHER, institution: Institution.HOCHSCHULE,
@@ -433,6 +444,7 @@ async function main() {
     // --- Infostand events (no building) ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Infostand Wirtschaftsingenieurwesen',
         description: 'Besuchen Sie unseren Infostand und erfahren Sie mehr über das Studium.',
         eventType: EventType.INFOSTAND, locationType: LocationType.INFOMARKT_CN,
@@ -443,6 +455,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Infostand Lehramt',
         description: 'Alle Informationen zu den Lehramtsstudiengängen an einem Ort.',
         eventType: EventType.INFOSTAND, locationType: LocationType.INFOMARKT_SCHLOSS,
@@ -453,6 +466,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Infostand Soziale Arbeit',
         description: 'Infos zum Studiengang Soziale Arbeit der Hochschule.',
         eventType: EventType.INFOSTAND, locationType: LocationType.INFOMARKT_CN,
@@ -464,6 +478,7 @@ async function main() {
     // --- Campusführungen (both) ---
     prisma.event.create({
       data: {
+        editionId,
         title: 'Campusführung Westerberg',
         description: 'Rundgang über den Westerberg-Campus mit Besuch der wichtigsten Gebäude.',
         eventType: EventType.RUNDGANG, locationType: LocationType.OTHER, institution: Institution.BOTH,
@@ -474,6 +489,7 @@ async function main() {
     }),
     prisma.event.create({
       data: {
+        editionId,
         title: 'Campusführung Caprivi (Hochschule)',
         description: 'Lernen Sie den Caprivi-Campus der Hochschule kennen.',
         eventType: EventType.RUNDGANG, locationType: LocationType.OTHER, institution: Institution.HOCHSCHULE,
@@ -591,6 +607,7 @@ async function main() {
 
   const schedule = await prisma.userSchedule.create({
     data: {
+      editionId,
       userId: adminUser.id,
       name: 'Mein HIT-Plan',
       items: {
