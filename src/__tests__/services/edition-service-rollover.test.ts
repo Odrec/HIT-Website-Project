@@ -118,7 +118,13 @@ describe('rollover — event cloning', () => {
     reviewStatus: 'PUBLISHED',
     sourceEventId: null,
     lecturers: [
-      { firstName: 'Ada', lastName: 'Lovelace', title: 'Prof.', email: 'a@uni.de', affiliation: 'UNI' },
+      {
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        title: 'Prof.',
+        email: 'a@uni.de',
+        affiliation: 'UNI',
+      },
     ],
     organizers: [{ email: 'o@uni.de', phone: null, internalOnly: true }],
     studyPrograms: [{ studyProgramId: 'sp-1' }],
@@ -148,7 +154,9 @@ describe('rollover — event cloning', () => {
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
     mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
-    const createCall = mockEventCreate.mock.calls[0][0] as { data: { timeStart: Date | null; timeEnd: Date | null } }
+    const createCall = mockEventCreate.mock.calls[0][0] as {
+      data: { timeStart: Date | null; timeEnd: Date | null }
+    }
     expect(createCall.data.timeStart).toBeNull()
     expect(createCall.data.timeEnd).toBeNull()
   })
