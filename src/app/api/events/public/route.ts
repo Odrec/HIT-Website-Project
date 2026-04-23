@@ -28,8 +28,12 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
 
+    // Resolve the active edition once so it can scope both the cache key
+    // and the where-clause filter below.
+    const edition = await getActiveEdition()
+
     // Check cache first (if Redis is available)
-    const cacheKey = generateCacheKey(searchParams)
+    const cacheKey = `${generateCacheKey(searchParams)}:edition:${edition.id}`
     const redisConnected = await isRedisConnected()
 
     if (redisConnected) {
@@ -124,7 +128,7 @@ export async function GET(request: NextRequest) {
     // Time filters - filter by time of day on the HIT date
     // Frontend sends time strings like "09:00", "14:30"
     // We construct full datetimes using the HIT date from the active edition
-    const edition = await getActiveEdition()
+    // (edition already resolved at the top of the handler for the cache key).
     const HIT_DATE = edition.hitDate.toISOString().slice(0, 10)
     // Scope every event query to the active edition so cross-tenant rows never leak.
     where.AND.push({ editionId: edition.id })

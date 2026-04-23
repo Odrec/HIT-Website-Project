@@ -298,8 +298,9 @@ export const exportService = {
    * All Melder records with event count.
    */
   async melders(): Promise<MelderRow[]> {
+    const editionId = await getActiveEditionId()
     const melders = await prisma.melder.findMany({
-      include: { _count: { select: { events: true } } },
+      include: { _count: { select: { events: { where: { editionId } } } } },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     })
 
@@ -321,7 +322,9 @@ export const exportService = {
    * All Lecturer records with their event's building/room.
    */
   async lecturers(): Promise<LecturerRow[]> {
+    const editionId = await getActiveEditionId()
     const lecturers = await prisma.lecturer.findMany({
+      where: { event: { editionId } },
       include: {
         event: {
           include: {
@@ -348,7 +351,9 @@ export const exportService = {
    * All EventInformationMarket records with event + market details.
    */
   async infomaerkte(): Promise<InfomarktRow[]> {
+    const editionId = await getActiveEditionId()
     const records = await prisma.eventInformationMarket.findMany({
+      where: { event: { editionId } },
       include: {
         market: true,
         event: {
