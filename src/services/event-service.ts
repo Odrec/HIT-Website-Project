@@ -198,10 +198,9 @@ export const eventService = {
     const editionId = options.editionId ?? (await getActiveEditionId())
     const where: Prisma.EventWhereInput = {
       editionId,
-      reviewStatus:
-        options.reviewStatus ?? {
-          in: ['DRAFT_FROM_ROLLOVER', 'NEEDS_REVIEW'],
-        },
+      reviewStatus: options.reviewStatus ?? {
+        in: ['DRAFT_FROM_ROLLOVER', 'NEEDS_REVIEW'],
+      },
     }
     if (options.search) {
       where.title = { contains: options.search, mode: 'insensitive' }

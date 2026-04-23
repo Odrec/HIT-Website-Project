@@ -8,10 +8,7 @@ import { eventService } from '@/services'
  * Flips an event's reviewStatus to PUBLISHED, removing it from the
  * Prüfstand queue and making it visible to public consumers. Admin-only.
  */
-export async function POST(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session || session.user.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 403 })
