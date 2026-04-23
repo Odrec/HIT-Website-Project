@@ -38,6 +38,10 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Analytics** | Cookieless Matomo tracking with custom events (schedule, search, filters) |
 | **Legal Pages** | Impressum, Datenschutz (with Matomo disclosure), Barrierefreiheit (BITV 2.0) |
 
+### Multi-Year Support
+
+This installation serves multiple HIT editions over time. Each `HitEdition` (one `ACTIVE` at a time, others `DRAFT` or `ARCHIVED`) scopes events, user schedules, and shared-schedule links. Admins manage editions via `/admin/editions` and roll over to the next year via a one-click "Neue Edition starten" action that clones events into a Prüfstand review queue (`/admin/pruefstand`) for finalization. Past-edition shared-schedule short-links continue to resolve cross-edition.
+
 ---
 
 ## 🛠️ Tech Stack

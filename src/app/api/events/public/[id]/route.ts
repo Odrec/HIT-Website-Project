@@ -7,10 +7,12 @@ import { getActiveEditionId } from '@/lib/active-edition'
 /**
  * GET /api/events/public/[id] - Get a single event with related events
  */
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const editionId = await getActiveEditionId()
+    const { searchParams } = new URL(request.url)
+    const editionIdOverride = searchParams.get('edition')
+    const editionId = editionIdOverride ?? (await getActiveEditionId())
 
     // Fetch the event with all its relations
     const event = await prisma.event.findFirst({

@@ -10,12 +10,12 @@ export default async function ShortLinkPage({ params }: Props) {
 
   const shared = await prisma.sharedSchedule.findUnique({
     where: { code },
+    select: { code: true },
   })
 
   if (!shared) {
     notFound()
   }
 
-  const encoded = Buffer.from(JSON.stringify(shared.eventIds)).toString('base64')
-  redirect(`/schedule?share=${encoded}`)
+  redirect(`/schedule?share=${shared.code}`)
 }
