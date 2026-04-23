@@ -56,9 +56,9 @@ export function RolloverModal({ currentActiveYear, open, onOpenChange }: Props) 
           : 'Keine Veranstaltungen übernommen.',
       })
       onOpenChange(false)
-      // Navigate to events list; the `reviewFilter=rollover` param is wired up in PR B's
-      // events-list toggle (next chunk) — for now it's a harmless hint in the URL.
-      router.push('/admin/events?reviewFilter=rollover')
+      // Navigate to events list; ?includeReview=1 surfaces the freshly-cloned
+      // Prüfstand entries on the admin events page (Fix B in PR B Chunk 3).
+      router.push('/admin/events?includeReview=1')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Rollover fehlgeschlagen'
       toast({ variant: 'destructive', title: 'Fehler', description: message })

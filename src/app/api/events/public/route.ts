@@ -132,6 +132,9 @@ export async function GET(request: NextRequest) {
     const HIT_DATE = edition.hitDate.toISOString().slice(0, 10)
     // Scope every event query to the active edition so cross-tenant rows never leak.
     where.AND.push({ editionId: edition.id })
+    // Only surface published events publicly — DRAFT_FROM_ROLLOVER clones and
+    // other Prüfstand entries must stay hidden until editors finalize them.
+    where.AND.push({ reviewStatus: 'PUBLISHED' })
     if (timeFrom) {
       const fromDateTime = new Date(`${HIT_DATE}T${timeFrom}:00`)
       if (!isNaN(fromDateTime.getTime())) {

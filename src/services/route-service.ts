@@ -404,7 +404,7 @@ export async function calculateRoute(
 export async function getEventCoordinates(eventId: string): Promise<Coordinates | null> {
   const editionId = await getActiveEditionId()
   const event = await prisma.event.findFirst({
-    where: { id: eventId, editionId },
+    where: { id: eventId, editionId, reviewStatus: 'PUBLISHED' },
     include: { building: true },
   })
 
@@ -455,6 +455,7 @@ export async function calculateScheduleRoute(
     where: {
       id: { in: scheduledEventIds },
       editionId,
+      reviewStatus: 'PUBLISHED',
     },
     include: {
       building: true,
@@ -516,6 +517,7 @@ export async function analyzeTravelTimes(
       id: { in: scheduledEventIds },
       timeStart: { not: null },
       editionId,
+      reviewStatus: 'PUBLISHED',
     },
     include: {
       building: true,
@@ -606,7 +608,7 @@ export async function getSuggestedAlternatives(
   const editionId = await getActiveEditionId()
   // Get the conflicting event
   const conflictingEvent = await prisma.event.findFirst({
-    where: { id: conflictingEventId, editionId },
+    where: { id: conflictingEventId, editionId, reviewStatus: 'PUBLISHED' },
     include: {
       building: true,
       studyPrograms: {
@@ -619,7 +621,7 @@ export async function getSuggestedAlternatives(
 
   // Get all scheduled events
   const scheduledEvents = await prisma.event.findMany({
-    where: { id: { in: scheduledEventIds }, editionId },
+    where: { id: { in: scheduledEventIds }, editionId, reviewStatus: 'PUBLISHED' },
     include: { building: true },
     orderBy: { timeStart: 'asc' },
   })
@@ -643,6 +645,7 @@ export async function getSuggestedAlternatives(
         },
       },
       editionId,
+      reviewStatus: 'PUBLISHED',
     },
     include: { building: true },
     take: 10,

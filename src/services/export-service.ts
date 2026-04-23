@@ -156,7 +156,7 @@ function eventToRow(event: EventWithRelations): EventRow {
 async function fetchAllEvents() {
   const editionId = await getActiveEditionId()
   return prisma.event.findMany({
-    where: { editionId },
+    where: { editionId, reviewStatus: 'PUBLISHED' },
     include: eventInclude,
   })
 }
@@ -172,7 +172,7 @@ export const exportService = {
   async eventsAZ(): Promise<EventRow[]> {
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { editionId },
+      where: { editionId, reviewStatus: 'PUBLISHED' },
       include: eventInclude,
       orderBy: { title: 'asc' },
     })
@@ -185,7 +185,7 @@ export const exportService = {
   async eventsByTime(): Promise<EventRow[]> {
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { editionId },
+      where: { editionId, reviewStatus: 'PUBLISHED' },
       include: eventInclude,
       orderBy: { timeStart: 'asc' },
     })
@@ -300,7 +300,11 @@ export const exportService = {
   async melders(): Promise<MelderRow[]> {
     const editionId = await getActiveEditionId()
     const melders = await prisma.melder.findMany({
-      include: { _count: { select: { events: { where: { editionId } } } } },
+      include: {
+        _count: {
+          select: { events: { where: { editionId, reviewStatus: 'PUBLISHED' } } },
+        },
+      },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     })
 
@@ -324,7 +328,7 @@ export const exportService = {
   async lecturers(): Promise<LecturerRow[]> {
     const editionId = await getActiveEditionId()
     const lecturers = await prisma.lecturer.findMany({
-      where: { event: { editionId } },
+      where: { event: { editionId, reviewStatus: 'PUBLISHED' } },
       include: {
         event: {
           include: {
@@ -353,7 +357,7 @@ export const exportService = {
   async infomaerkte(): Promise<InfomarktRow[]> {
     const editionId = await getActiveEditionId()
     const records = await prisma.eventInformationMarket.findMany({
-      where: { event: { editionId } },
+      where: { event: { editionId, reviewStatus: 'PUBLISHED' } },
       include: {
         market: true,
         event: {
@@ -391,7 +395,7 @@ export const exportService = {
     const editionId = await getActiveEditionId()
     const [events, infoMarkets] = await Promise.all([
       prisma.event.findMany({
-        where: { editionId },
+        where: { editionId, reviewStatus: 'PUBLISHED' },
         include: eventInclude,
         orderBy: { title: 'asc' },
       }),
@@ -455,6 +459,7 @@ export const exportService = {
       where: {
         institution: { in: [institution, 'BOTH'] },
         editionId,
+        reviewStatus: 'PUBLISHED',
       },
       include: {
         building: true,

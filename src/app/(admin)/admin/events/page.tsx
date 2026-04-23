@@ -92,7 +92,7 @@ function EventsListContent() {
   const [eventType, setEventType] = useState(searchParams.get('eventType') || '')
   const [institution, setInstitution] = useState(searchParams.get('institution') || '')
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10))
-  const [includeReview, setIncludeReview] = useState(false)
+  const [includeReview, setIncludeReview] = useState(searchParams.get('includeReview') === '1')
 
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -181,6 +181,7 @@ function EventsListContent() {
     setSearch('')
     setEventType('')
     setInstitution('')
+    setIncludeReview(false)
     setPage(1)
   }
 

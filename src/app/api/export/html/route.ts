@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
 
   const editionId = await getActiveEditionId()
   const events = await prisma.event.findMany({
-    where: { editionId },
+    where: { editionId, reviewStatus: 'PUBLISHED' },
     include: eventInclude,
     orderBy: { title: 'asc' },
   })

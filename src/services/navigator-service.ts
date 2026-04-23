@@ -776,6 +776,7 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
         },
       },
       editionId,
+      reviewStatus: 'PUBLISHED',
     },
     include: {
       building: true,

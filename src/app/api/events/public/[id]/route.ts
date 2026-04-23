@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     // Fetch the event with all its relations
     const event = await prisma.event.findFirst({
-      where: { id, editionId },
+      where: { id, editionId, reviewStatus: 'PUBLISHED' },
       include: {
         building: true,
         room: true,
@@ -77,6 +77,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
             },
           },
           editionId,
+          reviewStatus: 'PUBLISHED',
         },
         take: 6,
         orderBy: { timeStart: 'asc' },
@@ -126,6 +127,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
           },
           eventType: event.eventType,
           editionId,
+          reviewStatus: 'PUBLISHED',
         },
         take: 3 - relatedEvents.length,
         orderBy: { timeStart: 'asc' },

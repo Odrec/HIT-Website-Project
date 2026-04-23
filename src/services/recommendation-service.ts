@@ -182,7 +182,7 @@ export const recommendationService = {
     // Build query to fetch candidate events
     const editionId = await getActiveEditionId()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { editionId }
+    const where: any = { editionId, reviewStatus: 'PUBLISHED' }
 
     // Exclude already scheduled events
     if (scheduledEventIds.length > 0) {
@@ -233,7 +233,7 @@ export const recommendationService = {
     const scheduledEvents =
       scheduledEventIds.length > 0
         ? await prisma.event.findMany({
-            where: { id: { in: scheduledEventIds }, editionId },
+            where: { id: { in: scheduledEventIds }, editionId, reviewStatus: 'PUBLISHED' },
             include: { building: true, room: true },
           })
         : []
@@ -482,13 +482,13 @@ export const recommendationService = {
 
     // Fetch all events
     const events = await prisma.event.findMany({
-      where: { id: { in: eventIds }, editionId },
+      where: { id: { in: eventIds }, editionId, reviewStatus: 'PUBLISHED' },
     })
 
     const scheduledEvents =
       scheduledEventIds.length > 0
         ? await prisma.event.findMany({
-            where: { id: { in: scheduledEventIds }, editionId },
+            where: { id: { in: scheduledEventIds }, editionId, reviewStatus: 'PUBLISHED' },
           })
         : []
 
@@ -553,7 +553,7 @@ export const recommendationService = {
 
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { id: { in: scheduledEventIds }, editionId },
+      where: { id: { in: scheduledEventIds }, editionId, reviewStatus: 'PUBLISHED' },
       include: {
         building: true,
         room: true,
@@ -821,7 +821,7 @@ export const recommendationService = {
     const eventIds = sortedPopularity.map((p) => p.eventId)
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
-      where: { id: { in: eventIds }, editionId },
+      where: { id: { in: eventIds }, editionId, reviewStatus: 'PUBLISHED' },
       include: {
         building: true,
         room: true,
@@ -873,6 +873,7 @@ export const recommendationService = {
         timeStart: { gte: minStart },
         timeEnd: { lte: maxEnd },
         editionId,
+        reviewStatus: 'PUBLISHED',
       },
       include: {
         building: true,

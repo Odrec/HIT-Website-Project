@@ -37,27 +37,34 @@ beforeEach(() => {
 })
 
 describe('export-service edition scoping (relation joins)', () => {
-  it('lecturers() filters by active edition via event relation', async () => {
+  it('lecturers() filters by active edition and published review-status via event relation', async () => {
     await exportService.lecturers()
     expect(mockLecturerFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ event: { editionId: 'active-edition-id' } }),
+        where: expect.objectContaining({
+          event: { editionId: 'active-edition-id', reviewStatus: 'PUBLISHED' },
+        }),
       })
     )
   })
 
-  it('melders() counts only active-edition events', async () => {
+  it('melders() counts only active-edition published events', async () => {
     await exportService.melders()
     const call = mockMelderFindMany.mock.calls[0][0]
     expect(call._count).toBeUndefined()
-    expect(call.include._count.select.events.where).toEqual({ editionId: 'active-edition-id' })
+    expect(call.include._count.select.events.where).toEqual({
+      editionId: 'active-edition-id',
+      reviewStatus: 'PUBLISHED',
+    })
   })
 
-  it('infomaerkte() filters junction rows by active edition via event relation', async () => {
+  it('infomaerkte() filters junction rows by active edition and published review-status via event relation', async () => {
     await exportService.infomaerkte()
     expect(mockEventInformationMarketFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ event: { editionId: 'active-edition-id' } }),
+        where: expect.objectContaining({
+          event: { editionId: 'active-edition-id', reviewStatus: 'PUBLISHED' },
+        }),
       })
     )
   })
