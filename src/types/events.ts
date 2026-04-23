@@ -168,6 +168,7 @@ export interface CreateEventInput {
 
 export interface UpdateEventInput extends Partial<CreateEventInput> {
   id: string
+  reviewStatus?: 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW' | 'PUBLISHED'
 }
 
 // Filter types for event queries
