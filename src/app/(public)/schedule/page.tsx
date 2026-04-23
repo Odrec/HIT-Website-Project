@@ -104,59 +104,78 @@ function SchedulePageContent() {
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
   const [mapLocationFilter, setMapLocationFilter] = useState<'all' | 'mine'>('all')
   const [buildings, setBuildings] = useState<BuildingInfo[]>([])
+  const [pastEdition, setPastEdition] = useState<{ editionId: string; year: number } | null>(null)
+  const [activeEditionId, setActiveEditionId] = useState<string | null>(null)
 
-  // Check for shared schedule in URL
+  // Fetch the active edition ID so we can detect when a shared schedule
+  // belongs to a past edition and should render read-only.
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/editions/active')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.id) setActiveEditionId(data.id)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Check for shared schedule in URL (value is a short code, NOT base64 anymore)
   useEffect(() => {
     const shareParam = searchParams.get('share')
-    if (shareParam && state.isLoaded && state.items.length === 0) {
-      setIsLoadingShared(true)
-      try {
-        const eventIds = JSON.parse(atob(shareParam)) as string[]
-        // In a real implementation, we would fetch these events from the API
-        // For now, we'll show a message that the shared schedule is being loaded
+    if (!shareParam || !state.isLoaded || state.items.length > 0) return
+
+    setIsLoadingShared(true)
+    fetch(`/api/schedule/share/${shareParam}`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error('share lookup failed')
+        return r.json() as Promise<{
+          eventIds: string[]
+          editionId: string
+          editionYear: number | null
+        }>
+      })
+      .then(async (payload) => {
         toast({
           title: 'Geteilter Zeitplan',
-          description: `${eventIds.length} Events werden geladen...`,
+          description: `${payload.eventIds.length} Veranstaltungen werden geladen...`,
         })
-
-        // Fetch events and add them to schedule
-        fetchSharedEvents(eventIds)
-      } catch {
+        await fetchSharedEvents(payload.eventIds, payload.editionId)
+        if (activeEditionId && payload.editionId !== activeEditionId) {
+          setPastEdition({
+            editionId: payload.editionId,
+            year: payload.editionYear ?? 0,
+          })
+        }
+        toast({
+          title: 'Zeitplan geladen',
+          description: 'Der geteilte Zeitplan wurde erfolgreich geladen.',
+        })
+      })
+      .catch(() => {
         toast({
           variant: 'destructive',
           title: 'Fehler',
           description: 'Der geteilte Zeitplan konnte nicht geladen werden.',
         })
+      })
+      .finally(() => {
         setIsLoadingShared(false)
-      }
-    }
-    // fetchSharedEvents is defined in component scope and only called from
-    // inside this effect — including it would create a new reference each
-    // render and retrigger the share-link import on every render.
+      })
+    // fetchSharedEvents is defined in component scope; exclude from deps to
+    // avoid re-triggering the share import on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, state.isLoaded, state.items.length, toast])
+  }, [searchParams, state.isLoaded, state.items.length, toast, activeEditionId])
 
-  const fetchSharedEvents = async (eventIds: string[]) => {
-    try {
-      for (const id of eventIds) {
-        const response = await fetch(`/api/events/public/${id}`)
-        if (response.ok) {
-          const data = await response.json()
-          addEvent(data.event)
-        }
+  const fetchSharedEvents = async (eventIds: string[], editionId: string) => {
+    for (const id of eventIds) {
+      const response = await fetch(`/api/events/public/${id}?edition=${editionId}`)
+      if (response.ok) {
+        const data = await response.json()
+        addEvent(data.event)
       }
-      toast({
-        title: 'Zeitplan geladen',
-        description: 'Der geteilte Zeitplan wurde erfolgreich geladen.',
-      })
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: 'Fehler',
-        description: 'Einige Events konnten nicht geladen werden.',
-      })
-    } finally {
-      setIsLoadingShared(false)
     }
   }
 
@@ -306,6 +325,7 @@ function SchedulePageContent() {
   })
 
   const handleClearSchedule = () => {
+    if (pastEdition) return
     if (confirm('Möchtest du wirklich alle Events aus deinem Zeitplan entfernen?')) {
       clearSchedule()
       toast({
@@ -316,6 +336,7 @@ function SchedulePageContent() {
   }
 
   const handleShareSchedule = async () => {
+    if (pastEdition) return
     if (state.items.length === 0) return
     setShareLoading(true)
     try {
@@ -418,6 +439,16 @@ function SchedulePageContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {pastEdition && (
+        <div
+          className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm mb-6"
+          role="note"
+        >
+          <strong>Hinweis:</strong> Dieser Stundenplan gehört zur HIT{' '}
+          {pastEdition.year > 0 ? pastEdition.year : ''}. Er wird schreibgeschützt angezeigt —
+          Veranstaltungen können nicht hinzugefügt, entfernt oder neu geteilt werden.
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
@@ -441,7 +472,7 @@ function SchedulePageContent() {
               variant="outline"
               size="sm"
               onClick={handleShareSchedule}
-              disabled={shareLoading}
+              disabled={shareLoading || !!pastEdition}
             >
               {shareLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -462,6 +493,7 @@ function SchedulePageContent() {
               variant="outline"
               size="sm"
               onClick={handleClearSchedule}
+              disabled={!!pastEdition}
               className="text-destructive hover:text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
