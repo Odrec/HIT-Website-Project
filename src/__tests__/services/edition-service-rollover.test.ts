@@ -6,6 +6,7 @@ const mockHitEditionFindFirst = vi.fn()
 const mockEventFindMany = vi.fn()
 const mockEventCreate = vi.fn()
 const mockMelderFindUnique = vi.fn()
+const mockMelderFindMany = vi.fn()
 const mockTransaction = vi.fn()
 
 vi.mock('@/lib/db/prisma', () => ({
@@ -21,6 +22,7 @@ vi.mock('@/lib/db/prisma', () => ({
     },
     melder: {
       findUnique: (...args: unknown[]) => mockMelderFindUnique(...args),
+      findMany: (...args: unknown[]) => mockMelderFindMany(...args),
     },
     $transaction: (fn: (tx: unknown) => Promise<unknown>) => mockTransaction(fn),
   },
@@ -38,7 +40,7 @@ beforeEach(() => {
         findFirst: mockHitEditionFindFirst,
       },
       event: { findMany: mockEventFindMany, create: mockEventCreate },
-      melder: { findUnique: mockMelderFindUnique },
+      melder: { findUnique: mockMelderFindUnique, findMany: mockMelderFindMany },
     }
     return fn(tx)
   })
@@ -77,6 +79,7 @@ describe('rollover — edition creation and archival', () => {
     await rollover(baseInput)
     expect(mockHitEditionCreate).toHaveBeenCalled()
     expect(mockHitEditionUpdate).not.toHaveBeenCalled()
+    expect(mockEventFindMany).not.toHaveBeenCalled()
   })
 
   it('persists submissionDeadline when provided', async () => {
@@ -125,6 +128,7 @@ describe('rollover — event cloning', () => {
   it('creates one clone per source event with DRAFT_FROM_ROLLOVER and sourceEventId', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
     expect(mockEventCreate).toHaveBeenCalledOnce()
     expect(mockEventCreate).toHaveBeenCalledWith(
@@ -142,6 +146,7 @@ describe('rollover — event cloning', () => {
   it('nulls timeStart/timeEnd on clones', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
     const createCall = mockEventCreate.mock.calls[0][0] as { data: { timeStart: Date | null; timeEnd: Date | null } }
     expect(createCall.data.timeStart).toBeNull()
@@ -151,6 +156,7 @@ describe('rollover — event cloning', () => {
   it('preserves melderId when the Melder still exists', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
     const createCall = mockEventCreate.mock.calls[0][0] as {
       data: { melder?: { connect: { id: string } } }
@@ -161,6 +167,7 @@ describe('rollover — event cloning', () => {
   it('nulls melderId when the Melder no longer exists', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue(null)
+    mockMelderFindMany.mockResolvedValue([])
     await rollover(baseInput)
     const createCall = mockEventCreate.mock.calls[0][0] as {
       data: { melder?: { connect: { id: string } } }
@@ -171,6 +178,7 @@ describe('rollover — event cloning', () => {
   it('deep-clones lecturers, organizers, studyPrograms, infoMarkets', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
     const createCall = mockEventCreate.mock.calls[0][0] as {
       data: {
@@ -189,6 +197,7 @@ describe('rollover — event cloning', () => {
   it('copies buildingId, roomId, photoUrl, institution as-is', async () => {
     mockEventFindMany.mockResolvedValue([sourceEvent])
     mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
     await rollover(baseInput)
     const createCall = mockEventCreate.mock.calls[0][0] as {
       data: {
@@ -209,6 +218,33 @@ describe('rollover — event cloning', () => {
     await rollover({ ...baseInput, cloneEvents: false })
     expect(mockEventCreate).not.toHaveBeenCalled()
     expect(mockEventFindMany).not.toHaveBeenCalled()
+  })
+
+  it('sourceEventId points to the immediate predecessor (not the lineage root)', async () => {
+    // Source event is itself already a clone from 2025 (has sourceEventId = '2025-original')
+    const alreadyClonedEvent = {
+      ...sourceEvent,
+      id: '2026-clone',
+      sourceEventId: '2025-original',
+    }
+    mockEventFindMany.mockResolvedValue([alreadyClonedEvent])
+    mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
+    await rollover(baseInput)
+    const createCall = mockEventCreate.mock.calls[0][0] as {
+      data: { sourceEvent?: { connect: { id: string } } }
+    }
+    // Clone should point to its immediate predecessor (2026-clone), not the root (2025-original)
+    expect(createCall.data.sourceEvent).toEqual({ connect: { id: '2026-clone' } })
+  })
+
+  it('returns edition and clonedCount', async () => {
+    mockEventFindMany.mockResolvedValue([sourceEvent, { ...sourceEvent, id: 'src-2' }])
+    mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
+    const result = await rollover(baseInput)
+    expect(result.edition.id).toBe('new-edition')
+    expect(result.clonedCount).toBe(2)
   })
 })
 

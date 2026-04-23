@@ -133,12 +133,29 @@ export async function rollover(input: RolloverInput) {
         },
       })
 
+      const melderIds = [
+        ...new Set(
+          sourceEvents
+            .map((e) => e.melderId)
+            .filter((id): id is string => id !== null && id !== undefined)
+        ),
+      ]
+      const existingMelderIds = melderIds.length
+        ? new Set(
+            (
+              await tx.melder.findMany({
+                where: { id: { in: melderIds } },
+                select: { id: true },
+              })
+            ).map((m) => m.id)
+          )
+        : new Set<string>()
+
       for (const src of sourceEvents) {
-        let melderStillExists = false
-        if (src.melderId) {
-          const melder = await tx.melder.findUnique({ where: { id: src.melderId } })
-          melderStillExists = !!melder
-        }
+        // Defensive: Melder→Event FK defaults to Restrict, so deletion of a Melder
+        // with clones is blocked at the DB level. This guard catches future schema
+        // changes or direct DB edits that bypass the FK.
+        const melderStillExists = !!src.melderId && existingMelderIds.has(src.melderId)
 
         await tx.event.create({
           data: {
