@@ -166,8 +166,11 @@ export interface CreateEventInput {
   infoMarketIds?: string[]
 }
 
+export type EventReviewStatus = 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW' | 'PUBLISHED'
+
 export interface UpdateEventInput extends Partial<CreateEventInput> {
   id: string
+  reviewStatus?: EventReviewStatus
 }
 
 // Filter types for event queries
@@ -182,7 +185,7 @@ export interface EventFilters {
   search?: string
   isCrossProgram?: boolean
   melderId?: string
-  reviewStatus?: 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW' | 'PUBLISHED'
+  reviewStatus?: EventReviewStatus
 }
 
 export interface EventSortOptions {

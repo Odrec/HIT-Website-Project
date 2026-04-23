@@ -182,6 +182,75 @@ export const eventService = {
   },
 
   /**
+   * List events that are awaiting admin review (Prüfstand queue).
+   *
+   * Defaults to the active edition and to the non-PUBLISHED statuses
+   * (DRAFT_FROM_ROLLOVER + NEEDS_REVIEW). Callers can narrow to a single
+   * status or filter by title search.
+   */
+  async listPruefstand(
+    options: {
+      editionId?: string
+      reviewStatus?: 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW'
+      search?: string
+    } = {}
+  ) {
+    const editionId = options.editionId ?? (await getActiveEditionId())
+    const where: Prisma.EventWhereInput = {
+      editionId,
+      reviewStatus: options.reviewStatus ?? {
+        in: ['DRAFT_FROM_ROLLOVER', 'NEEDS_REVIEW'],
+      },
+    }
+    if (options.search) {
+      where.title = { contains: options.search, mode: 'insensitive' }
+    }
+    return prisma.event.findMany({
+      where,
+      include: {
+        melder: true,
+        building: true,
+        room: { include: { building: true } },
+        sourceEvent: {
+          select: { id: true, title: true, edition: { select: { year: true } } },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    })
+  },
+
+  /**
+   * Count events awaiting admin review in the given edition (default: active).
+   */
+  async countPruefstand(options: { editionId?: string } = {}) {
+    const editionId = options.editionId ?? (await getActiveEditionId())
+    return prisma.event.count({
+      where: {
+        editionId,
+        reviewStatus: { in: ['DRAFT_FROM_ROLLOVER', 'NEEDS_REVIEW'] },
+      },
+    })
+  },
+
+  /**
+   * Mark an event as PUBLISHED, removing it from the Prüfstand queue.
+   */
+  async publish(id: string) {
+    const existing = await prisma.event.findUnique({
+      where: { id },
+      select: { reviewStatus: true },
+    })
+    if (!existing) throw new Error('Event not found')
+    if (existing.reviewStatus === 'PUBLISHED') {
+      throw new Error('Event ist bereits veröffentlicht')
+    }
+    return prisma.event.update({
+      where: { id },
+      data: { reviewStatus: 'PUBLISHED' },
+    })
+  },
+
+  /**
    * Get a single event by ID.
    *
    * Uses findFirst (not findUnique) so we can compound id + editionId in the where clause.
@@ -211,6 +280,13 @@ export const eventService = {
         infoMarkets: {
           include: {
             market: true,
+          },
+        },
+        sourceEvent: {
+          select: {
+            id: true,
+            title: true,
+            edition: { select: { year: true } },
           },
         },
       },

@@ -48,6 +48,12 @@ interface EventData {
   }[]
   studyPrograms: { studyProgramId: string }[]
   infoMarkets: { marketId: string }[]
+  sourceEventId: string | null
+  sourceEvent: {
+    id: string
+    title: string
+    edition: { year: number }
+  } | null
 }
 
 export default function EditEventPage() {
@@ -181,6 +187,14 @@ export default function EditEventPage() {
     roomId: event.roomId || '',
   }
 
+  const sourceEventProp =
+    event.sourceEventId && event.sourceEvent
+      ? {
+          title: event.sourceEvent.title,
+          edition: { year: event.sourceEvent.edition.year },
+        }
+      : null
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -230,6 +244,7 @@ export default function EditEventPage() {
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         isAdmin={session?.user?.role === 'ADMIN'}
+        sourceEvent={sourceEventProp}
       />
     </div>
   )

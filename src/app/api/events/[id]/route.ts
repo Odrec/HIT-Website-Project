@@ -101,7 +101,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Parse dates if provided
-    const updateData = {
+    const updateData: Record<string, unknown> & { id: string } = {
       id,
       ...body,
       isCrossProgram: body.isCrossProgram ?? false,
@@ -113,7 +113,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       timeEnd: body.timeEnd ? new Date(body.timeEnd) : undefined,
     }
 
-    const event = await eventService.update(updateData)
+    // Auto-promote rollover drafts on first save: DRAFT_FROM_ROLLOVER → NEEDS_REVIEW
+    // unless the caller explicitly set reviewStatus in the body.
+    if (
+      body.reviewStatus === undefined &&
+      existing &&
+      'reviewStatus' in existing &&
+      (existing as { reviewStatus?: string }).reviewStatus === 'DRAFT_FROM_ROLLOVER'
+    ) {
+      updateData.reviewStatus = 'NEEDS_REVIEW'
+    }
+
+    const event = await eventService.update(updateData as Parameters<typeof eventService.update>[0])
 
     // Fire-and-forget email notification with change detection
     type EmailArg = Parameters<typeof sendEventUpdatedEmail>[0]
