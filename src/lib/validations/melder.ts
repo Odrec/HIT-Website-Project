@@ -19,8 +19,8 @@ export const melderFormSchema = z.object({
 export type MelderFormData = z.infer<typeof melderFormSchema>
 
 export const affiliationLabels: Record<string, string> = {
-  UNI: 'Universität Osnabrück',
-  HOCHSCHULE: 'Hochschule Osnabrück',
+  UNI: 'Universität',
+  HOCHSCHULE: 'Hochschule',
   BEIDE: 'Beide',
   EXTERN: 'Extern',
 }
