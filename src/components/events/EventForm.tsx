@@ -224,6 +224,33 @@ export function EventForm({
     }
   }, [melderId, setValue])
 
+  // "Dozent 1 = Melder_in" — opt-in shortcut. When checked, mirror the Melder
+  // profile into the first lecturer row and keep them in sync as the Melder
+  // fields are edited. Unchecking stops the sync but leaves current values
+  // alone so nothing is silently erased.
+  const [lecturer0EqualsMelder, setLecturer0EqualsMelder] = useState(false)
+
+  useEffect(() => {
+    if (!lecturer0EqualsMelder) return
+    if (lecturerFields.length === 0) {
+      appendLecturer({
+        firstName: melderData.firstName,
+        lastName: melderData.lastName,
+        title: melderData.title,
+        email: melderData.email,
+        affiliation: (melderData.affiliation as Affiliation) || undefined,
+      })
+      return
+    }
+    setValue('lecturers.0.firstName', melderData.firstName)
+    setValue('lecturers.0.lastName', melderData.lastName)
+    setValue('lecturers.0.title', melderData.title)
+    setValue('lecturers.0.email', melderData.email)
+    if (melderData.affiliation) {
+      setValue('lecturers.0.affiliation', melderData.affiliation as Affiliation)
+    }
+  }, [lecturer0EqualsMelder, melderData, lecturerFields.length, appendLecturer, setValue])
+
   // Convert study programs to multi-select options
   const studyProgramOptions: MultiSelectOption[] = studyPrograms
     .filter((sp) => {
@@ -714,6 +741,16 @@ export function EventForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="lecturer0EqualsMelder"
+                  checked={lecturer0EqualsMelder}
+                  onCheckedChange={(v) => setLecturer0EqualsMelder(!!v)}
+                />
+                <Label htmlFor="lecturer0EqualsMelder" className="text-sm font-normal">
+                  Dozent_in 1 = gleich Melder_in
+                </Label>
+              </div>
               {titleOptions.length > 0 && (
                 <datalist id={LECTURER_TITLE_DATALIST_ID}>
                   {titleOptions.map((t) => (

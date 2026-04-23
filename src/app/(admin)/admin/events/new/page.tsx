@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { ChevronLeft, CheckCircle2, Pencil } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, Pencil, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
@@ -126,7 +126,7 @@ export default function NewEventPage() {
                 </dl>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-wrap gap-3 pt-2">
                 <Button onClick={() => router.push('/admin/events')}>OK</Button>
                 <Button
                   variant="outline"
@@ -134,6 +134,16 @@ export default function NewEventPage() {
                 >
                   <Pencil className="h-4 w-4 mr-2" />
                   Bearbeiten
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setCreatedEvent(null)
+                    setError(null)
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Weitere Veranstaltung mit gleicher Melder_in
                 </Button>
               </div>
             </div>
