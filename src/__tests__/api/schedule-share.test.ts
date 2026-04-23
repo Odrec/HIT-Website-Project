@@ -5,6 +5,7 @@ import { NextRequest } from 'next/server'
 const mockCreate = vi.fn()
 const mockFindUnique = vi.fn()
 const mockFindFirst = vi.fn()
+const mockEditionFindUnique = vi.fn()
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -12,6 +13,9 @@ vi.mock('@/lib/db/prisma', () => ({
       create: (...args: unknown[]) => mockCreate(...args),
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
       findFirst: (...args: unknown[]) => mockFindFirst(...args),
+    },
+    hitEdition: {
+      findUnique: (...args: unknown[]) => mockEditionFindUnique(...args),
     },
   },
 }))
@@ -167,6 +171,43 @@ describe('GET /api/schedule/share/[code]', () => {
       params: Promise.resolve({ code: 'nope99' }),
     })
 
+    expect(response.status).toBe(404)
+  })
+})
+
+describe('GET /api/schedule/share/[code] edition context', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns eventIds, editionId, and editionYear', async () => {
+    mockFindUnique.mockResolvedValue({
+      code: 'abc123',
+      eventIds: ['ev1', 'ev2'],
+      editionId: 'ed-2026',
+    })
+    mockEditionFindUnique.mockResolvedValue({
+      id: 'ed-2026',
+      year: 2026,
+    })
+
+    const response = await GET(new Request('http://test') as unknown as NextRequest, {
+      params: Promise.resolve({ code: 'abc123' }),
+    })
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      eventIds: ['ev1', 'ev2'],
+      editionId: 'ed-2026',
+      editionYear: 2026,
+    })
+  })
+
+  it('returns 404 when the code does not exist', async () => {
+    mockFindUnique.mockResolvedValue(null)
+
+    const response = await GET(new Request('http://test') as unknown as NextRequest, {
+      params: Promise.resolve({ code: 'missing' }),
+    })
     expect(response.status).toBe(404)
   })
 })

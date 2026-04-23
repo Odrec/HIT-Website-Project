@@ -16,7 +16,16 @@ export async function GET(
       return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ eventIds: shared.eventIds })
+    const edition = await prisma.hitEdition.findUnique({
+      where: { id: shared.editionId },
+      select: { year: true },
+    })
+
+    return NextResponse.json({
+      eventIds: shared.eventIds,
+      editionId: shared.editionId,
+      editionYear: edition?.year ?? null,
+    })
   } catch {
     return NextResponse.json({ error: 'Failed to load shared schedule' }, { status: 500 })
   }
