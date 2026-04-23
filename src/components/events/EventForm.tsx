@@ -64,6 +64,11 @@ interface EventFormProps {
   onSubmit: (data: EventFormValues) => Promise<void>
   isSubmitting?: boolean
   isAdmin?: boolean
+  /** When editing a rollover clone, source event info for the "Aus: HIT …" banner. */
+  sourceEvent?: {
+    title: string
+    edition: { year: number }
+  } | null
 }
 
 export function EventForm({
@@ -71,6 +76,7 @@ export function EventForm({
   onSubmit,
   isSubmitting = false,
   isAdmin,
+  sourceEvent,
 }: EventFormProps) {
   const [buildings, setBuildings] = useState<BuildingOption[]>([])
   const [studyPrograms, setStudyPrograms] = useState<StudyProgram[]>([])
@@ -285,6 +291,12 @@ export function EventForm({
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
+      {sourceEvent && (
+        <div className="rounded-md border border-hit-uni-200 bg-hit-uni-50 px-4 py-3 text-sm">
+          <span className="font-medium">Aus:</span> HIT {sourceEvent.edition.year} ·{' '}
+          {sourceEvent.title}
+        </div>
+      )}
       {/* Deadline banner */}
       {deadlineInfo && deadlineInfo.deadline && (
         <div

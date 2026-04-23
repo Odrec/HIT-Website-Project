@@ -283,6 +283,13 @@ export const eventService = {
             market: true,
           },
         },
+        sourceEvent: {
+          select: {
+            id: true,
+            title: true,
+            edition: { select: { year: true } },
+          },
+        },
       },
     })
   },
