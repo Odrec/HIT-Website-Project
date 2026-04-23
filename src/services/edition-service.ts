@@ -94,6 +94,108 @@ export async function isDeadlinePassed(editionId?: string): Promise<boolean> {
   return new Date() > edition.submissionDeadline
 }
 
+export interface RolloverInput {
+  year: number
+  hitDate: Date
+  submissionDeadline?: Date | null
+  cloneEvents: boolean
+}
+
+export async function rollover(input: RolloverInput) {
+  return prisma.$transaction(async (tx) => {
+    const previousActive = await tx.hitEdition.findFirst({ where: { status: 'ACTIVE' } })
+    if (previousActive) {
+      await tx.hitEdition.update({
+        where: { id: previousActive.id },
+        data: { status: 'ARCHIVED' },
+      })
+    }
+
+    const newEdition = await tx.hitEdition.create({
+      data: {
+        year: input.year,
+        hitDate: input.hitDate,
+        submissionDeadline: input.submissionDeadline ?? null,
+        deadlineEnabled: true,
+        status: 'ACTIVE',
+      },
+    })
+
+    let clonedCount = 0
+    if (input.cloneEvents && previousActive) {
+      const sourceEvents = await tx.event.findMany({
+        where: { editionId: previousActive.id },
+        include: {
+          lecturers: true,
+          organizers: true,
+          studyPrograms: true,
+          infoMarkets: true,
+        },
+      })
+
+      for (const src of sourceEvents) {
+        let melderStillExists = false
+        if (src.melderId) {
+          const melder = await tx.melder.findUnique({ where: { id: src.melderId } })
+          melderStillExists = !!melder
+        }
+
+        await tx.event.create({
+          data: {
+            title: src.title,
+            description: src.description,
+            eventType: src.eventType,
+            timeStart: null,
+            timeEnd: null,
+            locationType: src.locationType,
+            locationDetails: src.locationDetails ?? undefined,
+            locationMode: src.locationMode,
+            locationWishArea: src.locationWishArea,
+            roomRequest: src.roomRequest,
+            meetingPoint: src.meetingPoint,
+            additionalInfo: src.additionalInfo,
+            photoUrl: src.photoUrl,
+            institution: src.institution,
+            isCrossProgram: src.isCrossProgram,
+            locationHint: src.locationHint,
+            reviewStatus: 'DRAFT_FROM_ROLLOVER',
+            sourceEvent: { connect: { id: src.id } },
+            edition: { connect: { id: newEdition.id } },
+            ...(melderStillExists && src.melderId && { melder: { connect: { id: src.melderId } } }),
+            ...(src.buildingId && { building: { connect: { id: src.buildingId } } }),
+            ...(src.roomId && { room: { connect: { id: src.roomId } } }),
+            lecturers: {
+              create: src.lecturers.map((l) => ({
+                firstName: l.firstName,
+                lastName: l.lastName,
+                title: l.title,
+                email: l.email,
+                affiliation: l.affiliation,
+              })),
+            },
+            organizers: {
+              create: src.organizers.map((o) => ({
+                email: o.email,
+                phone: o.phone,
+                internalOnly: o.internalOnly,
+              })),
+            },
+            studyPrograms: {
+              create: src.studyPrograms.map((sp) => ({ studyProgramId: sp.studyProgramId })),
+            },
+            infoMarkets: {
+              create: src.infoMarkets.map((im) => ({ marketId: im.marketId })),
+            },
+          },
+        })
+        clonedCount++
+      }
+    }
+
+    return { edition: newEdition, clonedCount }
+  })
+}
+
 export async function getDeadlineInfo(editionId?: string): Promise<DeadlineInfo> {
   const edition = editionId
     ? await prisma.hitEdition.findUnique({ where: { id: editionId } })
