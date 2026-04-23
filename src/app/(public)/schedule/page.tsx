@@ -634,7 +634,7 @@ function SchedulePageContent() {
             {view === 'timeline' ? (
               <Card>
                 <CardContent className="p-4">
-                  <ScheduleTimeline selectedDate={selectedDate} showControls />
+                  <ScheduleTimeline selectedDate={selectedDate} showControls={!pastEdition} />
                 </CardContent>
               </Card>
             ) : (
@@ -660,6 +660,7 @@ function SchedulePageContent() {
                         key={item.id}
                         scheduleEvent={item}
                         hasConflict={conflictEventIds.has(item.eventId)}
+                        showControls={!pastEdition}
                       />
                     ))
                 )}
@@ -675,7 +676,12 @@ function SchedulePageContent() {
                 </h3>
                 <div className="space-y-4">
                   {eventsWithoutTime.map((item) => (
-                    <ScheduleEventCard key={item.id} scheduleEvent={item} hasConflict={false} />
+                    <ScheduleEventCard
+                      key={item.id}
+                      scheduleEvent={item}
+                      hasConflict={false}
+                      showControls={!pastEdition}
+                    />
                   ))}
                 </div>
               </div>
