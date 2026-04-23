@@ -10,7 +10,9 @@ import {
   Settings,
   LayoutDashboard,
   FileSpreadsheet,
+  ClipboardCheck,
 } from 'lucide-react'
+import { PruefstandBadge } from '@/components/admin/PruefstandBadge'
 
 const navItems = [
   {
@@ -22,6 +24,11 @@ const navItems = [
     title: 'Veranstaltungen',
     href: '/admin/events',
     icon: Calendar,
+  },
+  {
+    title: 'Prüfstand',
+    href: '/admin/pruefstand',
+    icon: ClipboardCheck,
   },
   {
     title: 'Studiengänge',
@@ -67,7 +74,8 @@ export function AdminNav() {
             )}
           >
             <Icon className="h-5 w-5" />
-            {item.title}
+            <span>{item.title}</span>
+            {item.href === '/admin/pruefstand' && <PruefstandBadge />}
           </Link>
         )
       })}

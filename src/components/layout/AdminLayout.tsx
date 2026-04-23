@@ -19,10 +19,12 @@ import {
   HelpCircle,
   Bus,
   BadgeCheck,
+  ClipboardCheck,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { PruefstandBadge } from '@/components/admin/PruefstandBadge'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -38,6 +40,12 @@ const sidebarItems = [
     title: 'Veranstaltungen',
     href: '/admin/events',
     icon: Calendar,
+  },
+  {
+    title: 'Prüfstand',
+    href: '/admin/pruefstand',
+    icon: ClipboardCheck,
+    adminOnly: true,
   },
   {
     title: 'Studiengänge',
@@ -142,7 +150,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                {item.title}
+                <span>{item.title}</span>
+                {item.href === '/admin/pruefstand' && <PruefstandBadge />}
               </Link>
             )
           })}
@@ -219,7 +228,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                {item.title}
+                <span>{item.title}</span>
+                {item.href === '/admin/pruefstand' && <PruefstandBadge />}
               </Link>
             )
           })}

@@ -7,13 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -98,7 +92,8 @@ export default function PruefstandPage() {
   }
 
   const handleDiscard = async (id: string) => {
-    if (!confirm('Diesen Entwurf wirklich verwerfen? Die Quellveranstaltung bleibt unberührt.')) return
+    if (!confirm('Diesen Entwurf wirklich verwerfen? Die Quellveranstaltung bleibt unberührt.'))
+      return
     try {
       const res = await fetch(`/api/events/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('delete failed')
@@ -156,7 +151,8 @@ export default function PruefstandPage() {
         <CardHeader>
           <CardTitle>Prüfstand</CardTitle>
           <CardDescription>
-            Aus der letzten Edition übernommene Entwürfe. Bearbeiten, veröffentlichen oder verwerfen.
+            Aus der letzten Edition übernommene Entwürfe. Bearbeiten, veröffentlichen oder
+            verwerfen.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -179,11 +175,7 @@ export default function PruefstandPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
             />
-            <Button
-              variant="default"
-              disabled={selected.size === 0}
-              onClick={handleBulkPublish}
-            >
+            <Button variant="default" disabled={selected.size === 0} onClick={handleBulkPublish}>
               {selected.size > 0 ? `${selected.size} veröffentlichen` : 'Markierte veröffentlichen'}
             </Button>
           </div>
