@@ -46,6 +46,13 @@ describe('GET /api/events/pruefstand', () => {
     expect(mockListPruefstand).toHaveBeenCalledWith({})
   })
 
+  it('forwards ?edition=<id> to the service', async () => {
+    mockListPruefstand.mockResolvedValue([])
+    const { GET } = await import('@/app/api/events/pruefstand/route')
+    await GET(new Request('http://test/api/events/pruefstand?edition=ed-2027'))
+    expect(mockListPruefstand).toHaveBeenCalledWith({ editionId: 'ed-2027' })
+  })
+
   it('rejects non-ADMIN callers', async () => {
     const { auth } = await import('@/auth')
     ;(auth as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ user: { role: 'PUBLIC' } })

@@ -24,8 +24,10 @@ export async function GET(request: Request) {
       ? (rawStatus as 'DRAFT_FROM_ROLLOVER' | 'NEEDS_REVIEW')
       : undefined
   const search = searchParams.get('search') || undefined
+  const editionId = searchParams.get('edition') || undefined
 
   const events = await eventService.listPruefstand({
+    ...(editionId && { editionId }),
     ...(reviewStatus && { reviewStatus }),
     ...(search && { search }),
   })

@@ -237,6 +237,14 @@ export const eventService = {
    * Mark an event as PUBLISHED, removing it from the Prüfstand queue.
    */
   async publish(id: string) {
+    const existing = await prisma.event.findUnique({
+      where: { id },
+      select: { reviewStatus: true },
+    })
+    if (!existing) throw new Error('Event not found')
+    if (existing.reviewStatus === 'PUBLISHED') {
+      throw new Error('Event ist bereits veröffentlicht')
+    }
     return prisma.event.update({
       where: { id },
       data: { reviewStatus: 'PUBLISHED' },

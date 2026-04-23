@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockFindMany = vi.fn()
 const mockCount = vi.fn()
 const mockUpdate = vi.fn()
+const mockFindUnique = vi.fn()
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -10,6 +11,7 @@ vi.mock('@/lib/db/prisma', () => ({
       findMany: (...args: unknown[]) => mockFindMany(...args),
       count: (...args: unknown[]) => mockCount(...args),
       update: (...args: unknown[]) => mockUpdate(...args),
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
     },
   },
 }))
@@ -100,7 +102,8 @@ describe('eventService.countPruefstand', () => {
 })
 
 describe('eventService.publish', () => {
-  it('flips the event to reviewStatus=PUBLISHED', async () => {
+  it('flips non-PUBLISHED events to PUBLISHED', async () => {
+    mockFindUnique.mockResolvedValue({ reviewStatus: 'DRAFT_FROM_ROLLOVER' })
     mockUpdate.mockResolvedValue({ id: 'ev1', reviewStatus: 'PUBLISHED' })
     const result = await eventService.publish('ev1')
     expect(result.reviewStatus).toBe('PUBLISHED')
@@ -108,5 +111,17 @@ describe('eventService.publish', () => {
       where: { id: 'ev1' },
       data: { reviewStatus: 'PUBLISHED' },
     })
+  })
+
+  it('throws when the event does not exist', async () => {
+    mockFindUnique.mockResolvedValue(null)
+    await expect(eventService.publish('missing')).rejects.toThrow('Event not found')
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('throws when already PUBLISHED', async () => {
+    mockFindUnique.mockResolvedValue({ reviewStatus: 'PUBLISHED' })
+    await expect(eventService.publish('ev1')).rejects.toThrow('bereits veröffentlicht')
+    expect(mockUpdate).not.toHaveBeenCalled()
   })
 })
