@@ -61,6 +61,21 @@ describe('eventService.list edition scoping', () => {
     const call = mockFindMany.mock.calls[0][0] as { where: { editionId?: string } }
     expect(call.where.editionId).toBeUndefined()
   })
+
+  it('filters by reviewStatus when provided', async () => {
+    await eventService.list({ filters: { reviewStatus: 'PUBLISHED' } })
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ reviewStatus: 'PUBLISHED' }),
+      })
+    )
+  })
+
+  it('does not filter by reviewStatus when not provided', async () => {
+    await eventService.list({})
+    const call = mockFindMany.mock.calls[0][0] as { where: Record<string, unknown> }
+    expect(call.where.reviewStatus).toBeUndefined()
+  })
 })
 
 describe('eventService.getById edition scoping', () => {

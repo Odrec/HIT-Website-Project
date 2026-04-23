@@ -6,7 +6,6 @@ const mockListEditions = vi.fn()
 const mockCreateEdition = vi.fn()
 const mockGetEdition = vi.fn()
 const mockUpdateEdition = vi.fn()
-const mockActivateEdition = vi.fn()
 const mockDeleteEdition = vi.fn()
 
 vi.mock('@/services/edition-service', () => ({
@@ -14,7 +13,6 @@ vi.mock('@/services/edition-service', () => ({
   createEdition: (...args: unknown[]) => mockCreateEdition(...args),
   getEdition: (...args: unknown[]) => mockGetEdition(...args),
   updateEdition: (...args: unknown[]) => mockUpdateEdition(...args),
-  activateEdition: (...args: unknown[]) => mockActivateEdition(...args),
   deleteEdition: (...args: unknown[]) => mockDeleteEdition(...args),
 }))
 
@@ -86,18 +84,6 @@ describe('GET /api/editions/[id]', () => {
 })
 
 describe('PUT /api/editions/[id]', () => {
-  it('calls activateEdition when body.action is "activate"', async () => {
-    mockActivateEdition.mockResolvedValue(undefined)
-    const { PUT } = await import('@/app/api/editions/[id]/route')
-    const req = new Request('http://test', {
-      method: 'PUT',
-      body: JSON.stringify({ action: 'activate' }),
-    })
-    const res = await PUT(req, { params: Promise.resolve({ id: 'e1' }) })
-    expect(res.status).toBe(200)
-    expect(mockActivateEdition).toHaveBeenCalledWith('e1')
-  })
-
   it('calls updateEdition with spread fields', async () => {
     mockUpdateEdition.mockResolvedValue({ id: 'e1', year: 2026 })
     const { PUT } = await import('@/app/api/editions/[id]/route')
