@@ -12,7 +12,7 @@ export default function BarrierefreiheitPage() {
           <CardContent className="prose prose-sm max-w-none pt-6">
             <p>
               Die Zentrale Studienberatung Osnabrück ist bemüht, den Webauftritt des
-              Hochschulinformationstags (HIT) im Einklang mit den nationalen Rechtsvorschriften zur
+              Hochschulinfotags (HIT) im Einklang mit den nationalen Rechtsvorschriften zur
               Umsetzung der Richtlinie (EU) 2016/2102 des Europäischen Parlaments barrierefrei
               zugänglich zu machen.
             </p>

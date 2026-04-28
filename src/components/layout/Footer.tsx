@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* About HIT */}
           <div>
-            <h3 className="font-semibold text-hit-gray-900 mb-3">Hochschulinformationstag</h3>
+            <h3 className="font-semibold text-hit-gray-900 mb-3">Hochschulinfotag</h3>
             <p className="text-sm text-hit-gray-600">
               Der HIT bietet Studieninteressierten die Möglichkeit, Universität und Hochschule
               Osnabrück kennenzulernen.

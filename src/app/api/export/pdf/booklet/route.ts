@@ -453,7 +453,7 @@ export async function GET() {
             h(PDFImage, { src: hsLogoBase64, style: { height: 30 } }),
             h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung')
           ),
-          h(Text, { style: styles.coverTitle }, 'Hochschulinformationstag'),
+          h(Text, { style: styles.coverTitle }, 'Hochschulinfotag'),
           h(Text, { style: styles.coverSubtitle }, 'Programm'),
           h(Text, { style: styles.coverDate }, '19. November 2026'),
           h(Text, { style: styles.coverFooter }, 'www.zsb-os.de')

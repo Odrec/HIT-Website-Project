@@ -211,7 +211,7 @@ function EventsContent() {
           <HelpLink href="/hilfe/besucher#veranstaltungen" />
         </div>
         <p className="mt-2 text-hit-gray-600">
-          Entdecken Sie alle Veranstaltungen des Hochschulinformationstags 2026
+          Entdecken Sie alle Veranstaltungen des Hochschulinfotags 2026
         </p>
       </div>
 

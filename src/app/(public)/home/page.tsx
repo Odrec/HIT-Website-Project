@@ -88,7 +88,7 @@ export default function HomePage() {
             <div className="max-w-3xl">
               <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Hochschul&shy;informationstag 2026
+                Hochschul&shy;infotag 2026
               </h1>
               <p className="mt-6 text-lg text-white/90 max-w-2xl">
                 Entdecken Sie die Universität und Hochschule Osnabrück! Besuchen Sie Vorträge,
@@ -404,7 +404,7 @@ export default function HomePage() {
       <section className="bg-gradient-to-r from-hit-uni-600 to-hit-hs-500 py-12 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl font-bold lg:text-3xl">
-            Bereit für den Hochschulinformationstag?
+            Bereit für den Hochschulinfotag?
           </h2>
           <p className="mt-4 text-white/90 max-w-2xl mx-auto">
             Erstellen Sie jetzt Ihren persönlichen Stundenplan und verpassen Sie keine
