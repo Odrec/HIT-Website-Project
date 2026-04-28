@@ -42,6 +42,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         submissionDeadline: body.submissionDeadline ? new Date(body.submissionDeadline) : null,
       }),
       ...(body.deadlineEnabled !== undefined && { deadlineEnabled: body.deadlineEnabled }),
+      ...(body.multiplikatorCafeEventId !== undefined && {
+        multiplikatorCafeEventId: body.multiplikatorCafeEventId ?? null,
+      }),
     })
     return NextResponse.json(edition)
   } catch (err) {

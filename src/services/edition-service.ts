@@ -42,6 +42,7 @@ export async function updateEdition(
     hitDate?: Date
     submissionDeadline?: Date | null
     deadlineEnabled?: boolean
+    multiplikatorCafeEventId?: string | null
   }
 ) {
   return prisma.hitEdition.update({
@@ -52,6 +53,9 @@ export async function updateEdition(
         submissionDeadline: input.submissionDeadline,
       }),
       ...(input.deadlineEnabled !== undefined && { deadlineEnabled: input.deadlineEnabled }),
+      ...(input.multiplikatorCafeEventId !== undefined && {
+        multiplikatorCafeEventId: input.multiplikatorCafeEventId,
+      }),
     },
   })
 }
