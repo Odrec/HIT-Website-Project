@@ -41,7 +41,7 @@ interface EventCardProps {
     meetingPoint?: string | null
     photoUrl?: string | null
     locationHint?: string | null
-    building?: { id: string; name: string } | null
+    building?: { id: string; slug?: string; name: string } | null
     room?: { id: string; name: string } | null
   }
   viewMode: 'list' | 'grid'
@@ -93,7 +93,10 @@ function convertToEvent(event: EventCardProps['event']): Event {
     building: event.building
       ? {
           id: event.building.id,
-          slug: '',
+          // Slug is required for travel-time warnings on the schedule timeline.
+          // The public events API returns it; if a caller passes a stripped
+          // event, we fall back to the id as a last resort.
+          slug: event.building.slug ?? event.building.id,
           name: event.building.name,
           shortName: null,
           address: null,

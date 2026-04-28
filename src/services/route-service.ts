@@ -303,6 +303,7 @@ function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): Ro
   legs.forEach((leg, index) => {
     const from = leg.startWaypoint
     const to = leg.endWaypoint
+    let hasInsufficientTime = false
 
     // Check if both waypoints are events with times
     if (from.timeEnd && to.timeStart) {
@@ -313,6 +314,7 @@ function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): Ro
         const severity =
           availableTime < leg.duration ? 'error' : availableTime < requiredTime ? 'warning' : 'info'
 
+        hasInsufficientTime = true
         warnings.push({
           type: 'insufficient_time',
           severity,
@@ -333,8 +335,10 @@ function checkTravelWarnings(legs: RouteLeg[], settings: TravelTimeSettings): Ro
       }
     }
 
-    // Check for long distances
-    if (leg.distance > 1500) {
+    // Check for long distances. If we already raised an insufficient_time
+    // warning for this leg, the long-distance note is redundant — the user
+    // already sees the gehzeit and knows it's too far for the gap.
+    if (leg.distance > 1500 && !hasInsufficientTime) {
       warnings.push({
         type: 'long_distance',
         severity: 'info',
