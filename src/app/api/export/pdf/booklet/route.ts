@@ -308,21 +308,6 @@ export async function GET() {
 
     const { clustered, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
 
-    // Build base64 map of cluster icons
-    const clusterIconDir = path.join(process.cwd(), 'public/clusters')
-    const clusterIconMap: Record<string, string> = {}
-    for (const [clusterName, clusterData] of Object.entries(clustered)) {
-      if (clusterData.icon) {
-        try {
-          const iconPath = path.join(clusterIconDir, clusterData.icon)
-          clusterIconMap[clusterName] =
-            `data:image/svg+xml;base64,${readFileSync(iconPath).toString('base64')}`
-        } catch {
-          // Icon file not found — skip
-        }
-      }
-    }
-
     // -- Build pages --
 
     const contentPages: React.ReactElement[] = []
@@ -337,14 +322,7 @@ export async function GET() {
         h(
           Page,
           { size: 'A4', style: styles.page, key: `cluster-${clusterName}` },
-          h(
-            View,
-            { style: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 } },
-            clusterIconMap[clusterName]
-              ? h(PDFImage, { src: clusterIconMap[clusterName], style: { width: 24, height: 24 } })
-              : null,
-            h(Text, { style: styles.clusterHeader }, clusterName)
-          ),
+          h(Text, { style: styles.clusterHeader }, clusterName),
           h(
             View,
             { style: styles.columnsContainer },

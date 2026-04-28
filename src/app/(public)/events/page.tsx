@@ -21,7 +21,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
 import { EventCalendarView } from '@/components/events/EventCalendarView'
-import { ClusterIcon } from '@/components/ui/cluster-icon'
 import { trackEvent, trackSearch } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
 
@@ -61,7 +60,6 @@ interface Event {
     clusters?: Array<{
       id: string
       name: string
-      icon: string | null
     }>
   }>
   isCrossProgram?: boolean
@@ -446,7 +444,7 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
   // Build cluster -> events map via study programs
   const clusterMap = new Map<
     string,
-    { name: string; icon: string | null; events: Map<string, Event> }
+    { name: string; events: Map<string, Event> }
   >()
   const unclustered = new Map<string, Event>()
   const crossProgram = new Map<string, Event>()
@@ -466,7 +464,6 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
         if (!clusterMap.has(cluster.id)) {
           clusterMap.set(cluster.id, {
             name: cluster.name,
-            icon: cluster.icon ?? null,
             events: new Map(),
           })
         }
@@ -490,7 +487,6 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
         <Card key={key}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <ClusterIcon icon={cluster.icon} name={cluster.name} size={24} />
               {cluster.name}
               <span className="text-sm font-normal text-hit-gray-500">
                 ({cluster.events.size} Veranstaltung{cluster.events.size !== 1 ? 'en' : ''})

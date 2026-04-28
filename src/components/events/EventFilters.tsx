@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { ClusterIcon } from '@/components/ui/cluster-icon'
 
 interface FilterState {
   eventType: string
@@ -37,7 +36,6 @@ interface StudyProgram {
   clusters?: {
     id: string
     name: string
-    icon: string | null
   }[]
 }
 
@@ -288,14 +286,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
                 ) : (
                   Object.entries(groupedPrograms).map(([clusterName, programs]) => (
                     <div key={clusterName}>
-                      <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold text-hit-gray-500">
-                        <ClusterIcon
-                          icon={
-                            programs[0]?.clusters?.find((c) => c.name === clusterName)?.icon ?? null
-                          }
-                          name={clusterName}
-                          size={16}
-                        />
+                      <div className="px-2 py-1.5 text-xs font-semibold text-hit-gray-500">
                         {clusterName}
                       </div>
                       {programs.map((program) => (

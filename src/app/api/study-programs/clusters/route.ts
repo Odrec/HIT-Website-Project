@@ -35,11 +35,18 @@ export async function POST(request: NextRequest) {
     if (!body.name) {
       return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
+    if (!body.institution || !['UNI', 'HOCHSCHULE', 'BOTH'].includes(body.institution)) {
+      return NextResponse.json(
+        { error: 'Missing or invalid required field: institution (UNI, HOCHSCHULE, or BOTH)' },
+        { status: 400 }
+      )
+    }
 
     const cluster = await prisma.studyProgramCluster.create({
       data: {
         name: body.name,
         description: body.description || null,
+        institution: body.institution,
       },
       include: {
         programs: true,

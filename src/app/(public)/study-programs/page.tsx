@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { GraduationCap, Search, Building2, Filter, ExternalLink, HelpCircle } from 'lucide-react'
-import { ClusterIcon } from '@/components/ui/cluster-icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -21,7 +20,6 @@ interface Cluster {
   id: string
   name: string
   description: string | null
-  icon: string | null
 }
 
 interface StudyProgram {
@@ -80,17 +78,17 @@ export default function StudyProgramsPage() {
     (acc, program) => {
       const entries =
         program.clusters.length > 0
-          ? program.clusters.map((c) => ({ name: c.name, icon: c.icon }))
-          : [{ name: 'Weitere Studiengänge', icon: null }]
-      for (const entry of entries) {
-        if (!acc[entry.name]) {
-          acc[entry.name] = { programs: [], icon: entry.icon }
+          ? program.clusters.map((c) => c.name)
+          : ['Weitere Studiengänge']
+      for (const name of entries) {
+        if (!acc[name]) {
+          acc[name] = { programs: [] }
         }
-        acc[entry.name].programs.push(program)
+        acc[name].programs.push(program)
       }
       return acc
     },
-    {} as Record<string, { programs: StudyProgram[]; icon: string | null }>
+    {} as Record<string, { programs: StudyProgram[] }>
   )
 
   // Sort cluster names alphabetically, but put "Weitere Studiengänge" at the end
@@ -227,14 +225,7 @@ export default function StudyProgramsPage() {
               {sortedClusterNames.map((clusterName) => (
                 <Card key={clusterName}>
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClusterIcon
-                        icon={groupedPrograms[clusterName].icon}
-                        name={clusterName}
-                        size={24}
-                      />
-                      <CardTitle className="text-xl">{clusterName}</CardTitle>
-                    </div>
+                    <CardTitle className="text-xl">{clusterName}</CardTitle>
                     <CardDescription>
                       {groupedPrograms[clusterName].programs.length} Studiengang
                       {groupedPrograms[clusterName].programs.length !== 1 ? 'e' : ''}
