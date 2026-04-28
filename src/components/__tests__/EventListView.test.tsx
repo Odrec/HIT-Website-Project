@@ -67,4 +67,27 @@ describe('EventListView', () => {
     render(<EventListView />)
     expect(await screen.findByText(/Keine Veranstaltungen gefunden/)).toBeInTheDocument()
   })
+
+  it('does not refetch on every render when staticFilters is an inline literal', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ events: [sampleEvent], total: 1 }),
+    } as Response)
+
+    // Parent re-renders with the same logical filter values but a fresh
+    // object reference each time. The fetch must only fire once.
+    const Parent = () => <EventListView staticFilters={{ clusterId: 'abc' }} />
+    const { rerender } = render(<Parent />)
+
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled())
+
+    rerender(<Parent />)
+    rerender(<Parent />)
+    rerender(<Parent />)
+
+    // Wait a moment for any pending effects to settle
+    await new Promise((r) => setTimeout(r, 50))
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
 })

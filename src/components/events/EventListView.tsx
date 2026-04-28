@@ -108,6 +108,10 @@ export function EventListView({
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  // Stable serialization so callers can pass inline `staticFilters={{...}}`
+  // without causing fetchEvents to be recreated every render.
+  const staticFiltersKey = JSON.stringify(staticFilters)
+
   const fetchEvents = useCallback(async () => {
     setLoading(true)
     try {
@@ -122,7 +126,8 @@ export function EventListView({
       if (filters.timeTo) params.set('timeTo', filters.timeTo)
       params.set('sortBy', sortBy)
       params.set('sortOrder', sortOrder)
-      for (const [k, v] of Object.entries(staticFilters)) params.set(k, v)
+      const parsedStatic: Record<string, string> = JSON.parse(staticFiltersKey)
+      for (const [k, v] of Object.entries(parsedStatic)) params.set(k, v)
 
       const response = await fetch(`/api/events/public?${params.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch events')
@@ -134,7 +139,7 @@ export function EventListView({
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, debouncedSearch, filters, sortBy, sortOrder, staticFilters])
+  }, [page, pageSize, debouncedSearch, filters, sortBy, sortOrder, staticFiltersKey])
 
   useEffect(() => {
     fetchEvents()
