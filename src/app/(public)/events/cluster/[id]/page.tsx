@@ -22,9 +22,11 @@ export default async function ClusterEventsPage({ params }: { params: Promise<{ 
         <Link href="/events" className="inline-flex items-center gap-1 text-sm text-hit-gray-500 hover:text-hit-uni-500">
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </Link>
-        <p className={`mt-3 inline-block border-b-2 pb-1 text-xs font-bold uppercase tracking-wide ${accentColor}`}>
-          {cluster.institution === 'HOCHSCHULE' ? 'Hochschule' : 'Universität'} · Studienfeld
-        </p>
+        <div className="mt-3">
+          <span className={`inline-block border-b-2 pb-1 text-xs font-bold uppercase tracking-wide ${accentColor}`}>
+            {cluster.institution === 'HOCHSCHULE' ? 'Hochschule' : 'Universität'} · Studienfeld
+          </span>
+        </div>
         <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">{cluster.name}</h1>
       </div>
       <EventListView staticFilters={{ clusterId: id }} />
