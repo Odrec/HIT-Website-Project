@@ -39,6 +39,7 @@ type ScheduleAction =
   | { type: 'UPDATE_PRIORITY'; payload: { eventId: string; priority: number } }
   | { type: 'CLEAR_SCHEDULE' }
   | { type: 'SET_CONFLICTS'; payload: TimeConflict[] }
+  | { type: 'PATCH_EVENTS'; payload: Array<{ eventId: string; event: Event }> }
 
 interface ScheduleContextType {
   state: ScheduleState
@@ -119,6 +120,19 @@ function scheduleReducer(state: ScheduleState, action: ScheduleAction): Schedule
         conflicts: action.payload,
       }
     }
+    case 'PATCH_EVENTS': {
+      const patches = new Map(action.payload.map((p) => [p.eventId, p.event]))
+      const newItems = state.items.map((item) => {
+        const fresh = patches.get(item.eventId)
+        return fresh ? { ...item, event: fresh } : item
+      })
+      const conflicts = detectConflicts(newItems)
+      return {
+        ...state,
+        items: newItems,
+        conflicts,
+      }
+    }
     default:
       return state
   }
@@ -190,6 +204,45 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       }
     }
   }, [state.items, state.isLoaded])
+
+  // One-time self-healing migration: events added before the EventCard slug fix
+  // were saved with `event.building.slug = ''`, which suppresses travel-time
+  // warnings on the schedule timeline. On load, refetch any item whose stored
+  // building lacks a slug and patch it back into state + localStorage.
+  useEffect(() => {
+    if (!state.isLoaded) return
+    const stale = state.items.filter(
+      (item) => item.event.building != null && !item.event.building.slug
+    )
+    if (stale.length === 0) return
+
+    let cancelled = false
+    Promise.all(
+      stale.map(async (item) => {
+        try {
+          const res = await fetch(`/api/events/public/${item.eventId}`)
+          if (!res.ok) return null
+          const data = (await res.json()) as { event?: Event }
+          if (!data.event) return null
+          return { eventId: item.eventId, event: data.event }
+        } catch {
+          return null
+        }
+      })
+    ).then((results) => {
+      if (cancelled) return
+      const patches = results.filter(
+        (r): r is { eventId: string; event: Event } => r !== null
+      )
+      if (patches.length > 0) dispatch({ type: 'PATCH_EVENTS', payload: patches })
+    })
+
+    return () => {
+      cancelled = true
+    }
+    // We only want this to run on the initial load — not on every state change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isLoaded])
 
   const addEvent = useCallback(
     (event: Event) => {
