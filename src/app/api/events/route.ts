@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       : undefined
     const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
     const includeReview = searchParams.get('includeReview') === '1'
+    const editionId = searchParams.get('editionId') || undefined
 
     // Parse sort options
     const sortField = (searchParams.get('sortField') || 'createdAt') as
@@ -56,6 +57,7 @@ export async function GET(request: NextRequest) {
     const result = await eventService.list({
       page,
       pageSize,
+      editionId,
       filters: {
         search,
         institution,

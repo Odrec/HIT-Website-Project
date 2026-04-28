@@ -125,6 +125,50 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Cluster filter
+    const clusterId = searchParams.get('clusterId')
+    if (clusterId) {
+      where.AND.push({
+        studyPrograms: {
+          some: {
+            studyProgram: {
+              clusters: {
+                some: { id: clusterId },
+              },
+            },
+          },
+        },
+      })
+    }
+
+    // Lehramt combined filter — union of UNI "Lehramt" and HS "Lehramt an berufsbildenden Schulen".
+    // NOTE: clusters are looked up by exact name. If either name is changed in the seed/admin,
+    // update both sides here too — otherwise the filter silently returns zero results.
+    const lehramtCombined = searchParams.get('lehramtCombined')
+    if (lehramtCombined === 'true') {
+      const lehramtClusters = await prisma.studyProgramCluster.findMany({
+        where: {
+          OR: [
+            { institution: 'UNI', name: 'Lehramt' },
+            { institution: 'HOCHSCHULE', name: 'Lehramt an berufsbildenden Schulen' },
+          ],
+        },
+        select: { id: true },
+      })
+      const lehramtIds = lehramtClusters.map((c) => c.id)
+      where.AND.push({
+        studyPrograms: {
+          some: {
+            studyProgram: {
+              clusters: {
+                some: { id: { in: lehramtIds } },
+              },
+            },
+          },
+        },
+      })
+    }
+
     // Time filters - filter by time of day on the HIT date
     // Frontend sends time strings like "09:00", "14:30"
     // We construct full datetimes using the HIT date from the active edition
@@ -234,7 +278,6 @@ export async function GET(request: NextRequest) {
                     select: {
                       id: true,
                       name: true,
-                      icon: true,
                     },
                   },
                 },

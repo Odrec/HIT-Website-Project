@@ -1,6 +1,6 @@
 # Anleitung für Besucher
 
-Willkommen beim Hochschulinformationstag (HIT) 2026! Hier erfahren Sie, wie Sie die Website optimal nutzen können.
+Willkommen beim Hochschulinfotag (HIT) 2026! Hier erfahren Sie, wie Sie die Website optimal nutzen können.
 
 ## Veranstaltungen
 

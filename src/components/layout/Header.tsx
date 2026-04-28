@@ -25,24 +25,23 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto flex h-[86px] items-center justify-between px-4">
-        {/* Institutional Logos */}
-        <div className="flex items-center gap-3">
+        {/* Institutional Logos — official ZSB combined-logo split into two clickable halves */}
+        <div className="flex items-center">
           <a href="https://www.uni-osnabrueck.de" target="_blank" rel="noopener noreferrer">
             <Image
-              src="/logos/uos-logo.svg"
+              src="/logos/uos-half.svg"
               alt="Universität Osnabrück"
-              width={120}
-              height={40}
+              width={215}
+              height={67}
               className="h-11 w-auto sm:h-14"
             />
           </a>
-          <div className="h-11 w-px bg-hit-gray-200" />
           <a href="https://www.hs-osnabrueck.de" target="_blank" rel="noopener noreferrer">
             <Image
-              src="/logos/hs-logo.svg"
+              src="/logos/hs-half.svg"
               alt="Hochschule Osnabrück"
-              width={120}
-              height={40}
+              width={215}
+              height={67}
               className="h-11 w-auto sm:h-14"
             />
           </a>

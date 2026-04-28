@@ -18,7 +18,10 @@ type Edition = {
   submissionDeadline: string | null
   deadlineEnabled: boolean
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+  multiplikatorCafeEventId: string | null
 }
+
+type EditionEvent = { id: string; title: string }
 
 export default function EditionsPage() {
   const { toast } = useToast()
@@ -28,6 +31,7 @@ export default function EditionsPage() {
   const [saving, setSaving] = useState(false)
   const [rolloverOpen, setRolloverOpen] = useState(false)
   const [rolloverSourceYear, setRolloverSourceYear] = useState<number | null>(null)
+  const [editionEvents, setEditionEvents] = useState<EditionEvent[]>([])
 
   const reloadEditions = () => {
     fetch('/api/editions')
@@ -47,7 +51,12 @@ export default function EditionsPage() {
       hitDate: e.hitDate.slice(0, 10),
       submissionDeadline: e.submissionDeadline ? e.submissionDeadline.slice(0, 10) : null,
       deadlineEnabled: e.deadlineEnabled,
+      multiplikatorCafeEventId: e.multiplikatorCafeEventId,
     })
+    fetch(`/api/events?editionId=${e.id}&pageSize=500&includeReview=1`)
+      .then((r) => r.json())
+      .then((d) => setEditionEvents(d.data.map((ev: { id: string; title: string }) => ({ id: ev.id, title: ev.title }))))
+      .catch(() => setEditionEvents([]))
   }
 
   const saveEdit = async (id: string) => {
@@ -119,6 +128,27 @@ export default function EditionsPage() {
                     onCheckedChange={(v) => setDraft({ ...draft, deadlineEnabled: !!v })}
                   />
                   <Label>Einsendeschluss aktiv</Label>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="multiplikatorCafeEventId">Multiplikator*innen-Café Veranstaltung (optional)</Label>
+                  <select
+                    id="multiplikatorCafeEventId"
+                    value={draft.multiplikatorCafeEventId ?? ''}
+                    onChange={(ev) =>
+                      setDraft({ ...draft, multiplikatorCafeEventId: ev.target.value || null })
+                    }
+                    className="w-full rounded-md border bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="">— keine —</option>
+                    {editionEvents.map((ev) => (
+                      <option key={ev.id} value={ev.id}>{ev.title}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    Wenn gesetzt, erscheint der Link &quot;Multiplikator*innen-Café&quot; auf der Veranstaltungs-Übersicht
+                    und führt direkt zu dieser Veranstaltung. Wenn keine Veranstaltung ausgewählt ist, wird der
+                    Link ausgeblendet.
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={() => saveEdit(e.id)} disabled={saving}>

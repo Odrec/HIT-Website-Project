@@ -406,7 +406,7 @@ export const exportService = {
     ])
 
     const crossProgram: typeof events = []
-    const clustered: Record<string, { icon: string | null; events: typeof events }> = {}
+    const clustered: Record<string, { events: typeof events }> = {}
 
     for (const event of events) {
       if (event.isCrossProgram) {
@@ -414,20 +414,18 @@ export const exportService = {
         continue
       }
 
-      const clusterEntries = new Map<string, string | null>()
+      const clusterNames = new Set<string>()
       for (const esp of event.studyPrograms) {
         for (const cluster of esp.studyProgram.clusters) {
-          if (!clusterEntries.has(cluster.name)) {
-            clusterEntries.set(cluster.name, cluster.icon ?? null)
-          }
+          clusterNames.add(cluster.name)
         }
       }
-      if (clusterEntries.size === 0) {
-        clusterEntries.set('Ohne Studienfeld', null)
+      if (clusterNames.size === 0) {
+        clusterNames.add('Ohne Studienfeld')
       }
 
-      for (const [name, icon] of clusterEntries) {
-        if (!clustered[name]) clustered[name] = { icon, events: [] }
+      for (const name of clusterNames) {
+        if (!clustered[name]) clustered[name] = { events: [] }
         clustered[name].events.push(event)
       }
     }
@@ -438,7 +436,7 @@ export const exportService = {
     }
 
     // Sort cluster keys
-    const sortedClustered: Record<string, { icon: string | null; events: typeof events }> = {}
+    const sortedClustered: Record<string, { events: typeof events }> = {}
     for (const key of Object.keys(clustered).sort((a, b) => a.localeCompare(b, 'de'))) {
       sortedClustered[key] = clustered[key]
     }

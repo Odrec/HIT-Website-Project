@@ -876,7 +876,7 @@ function SchedulePageContent() {
         <div className="text-center mb-6 pb-3 border-b-2 border-black">
           <h2 className="text-xl font-bold m-0">Mein HIT 2026 Zeitplan</h2>
           <p className="text-sm text-gray-600 m-0">
-            Hochschulinformationstag &mdash;{' '}
+            Hochschulinfotag &mdash;{' '}
             {selectedDate ? formatEventDateDMY(selectedDate) : '19. November 2026'}
           </p>
         </div>
