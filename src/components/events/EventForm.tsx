@@ -461,7 +461,7 @@ export function EventForm({
                   checked={watch('isCrossProgram')}
                   onCheckedChange={(checked) => setValue('isCrossProgram', checked as boolean)}
                 />
-                <Label htmlFor="isCrossProgram">Studiengangsübergreifend</Label>
+                <Label htmlFor="isCrossProgram">Rund ums Studium</Label>
               </div>
             </CardContent>
           </Card>
@@ -704,7 +704,7 @@ export function EventForm({
                 onChange={(value) => setValue('studyProgramIds', value)}
                 placeholder={
                   watchIsCrossProgram
-                    ? 'Studiengangsübergreifend (alle)'
+                    ? 'Rund ums Studium (alle Studiengänge)'
                     : 'Studiengänge auswählen...'
                 }
                 searchPlaceholder="Studiengang suchen..."

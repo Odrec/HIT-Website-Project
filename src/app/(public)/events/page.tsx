@@ -541,7 +541,7 @@ function ClusterView({ events, viewMode: rawViewMode }: { events: Event[]; viewM
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <BookOpen className="h-5 w-5 text-hit-uni-400" />
-              Studiengangsübergreifend
+              Rund ums Studium
               <span className="text-sm font-normal text-hit-gray-500">
                 ({crossProgram.size} Veranstaltung{crossProgram.size !== 1 ? 'en' : ''})
               </span>
@@ -682,7 +682,7 @@ function AZView({ events, viewMode: rawViewMode }: { events: Event[]; viewMode: 
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <ArrowDownAZ className="h-4 w-4 text-hit-uni-400" />
-              Studiengangsübergreifend
+              Rund ums Studium
               <span className="text-sm font-normal text-hit-gray-500">({crossProgram.size})</span>
             </CardTitle>
           </CardHeader>
