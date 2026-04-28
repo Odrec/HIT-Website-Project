@@ -25,7 +25,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 
 | Feature | Description |
 |---------|-------------|
-| **Event Browsing** | Browse and search all HIT events with advanced filtering (cluster and A-Z views), study programs link to external Uni/HS pages |
+| **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Each entry opens its own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
 | **Schedule Builder** | Create personalized event schedules with conflict detection, QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |
@@ -51,7 +51,7 @@ This installation serves multiple HIT editions over time. Each `HitEdition` (one
 | **Framework** | Next.js 16 with App Router |
 | **Language** | TypeScript 5, React 19 |
 | **Styling** | Tailwind CSS + shadcn/ui |
-| **Database** | PostgreSQL 16 with Prisma 6 ORM |
+| **Database** | PostgreSQL 16 with Prisma 7 ORM |
 | **Cache** | Redis 7 (ioredis) |
 | **Auth** | NextAuth v5 (role-based: Admin, Organizer, Public) |
 | **Maps** | Leaflet + React-Leaflet |
@@ -198,9 +198,15 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── (public)/          # Public routes (events, schedule, navigator)
-│   ├── (admin)/           # Admin routes (events, room assignments, import/export)
-│   └── api/               # API routes (includes export/excel, export/pdf)
+│   ├── (public)/          # Public routes
+│   │   ├── events/        # Entry-point landing + sub-routes:
+│   │   │                  #   cluster/[id], lehramt, a-z, rund-ums-studium,
+│   │   │                  #   infomaerkte, search, [id] (detail)
+│   │   ├── schedule/      # Personal schedule + shared schedule renderer
+│   │   ├── navigator/     # AI study navigator
+│   │   └── route-planner/ # Campus route map
+│   ├── (admin)/           # Admin routes (events, room assignments, import/export, editions)
+│   └── api/               # API routes (includes export/excel, export/pdf, health)
 ├── components/
 │   ├── ui/                # shadcn/ui base components
 │   ├── layout/            # Layout components (Header, Footer, etc.)
@@ -238,12 +244,16 @@ After running the seed script:
 
 | Endpoint | Method | Description | Cache |
 |----------|--------|-------------|-------|
-| `/api/events/public` | GET | List all public events (paginated) | 5 min |
+| `/api/health` | GET | Liveness check for the container healthcheck | No |
+| `/api/events/public` | GET | List all public events (paginated). Supports `clusterId` and `lehramtCombined=true` filters used by event sub-routes | 5 min |
 | `/api/events/public/[id]` | GET | Get single event details | 5 min |
+| `/api/clusters` | GET | List `StudyProgramCluster` rows grouped by institution (`{ uni: [...], hochschule: [...] }`) | No |
+| `/api/multiplikator-cafe` | GET | Currently configured Multiplikator\*innen-Café event id from the active edition (`{ eventId: string \| null }`) | No |
 | `/api/study-programs` | GET | List all study programs | 15 min |
 | `/api/buildings` | GET | List all buildings with rooms | 1 hour |
 | `/api/routes` | POST | Calculate route between locations | No |
 | `/api/routes/directions` | GET | Walking directions with cache (Google API fallback) | DB |
+| `/api/routes/analyze` | POST | Travel-time analysis between consecutive routable schedule events | No |
 | `/api/settings/deadline` | GET | Public deadline info (date, passed, days remaining) | No |
 | `/api/recommendations` | POST | Get event recommendations | No |
 | `/api/navigator` | POST | AI navigator chat | No |

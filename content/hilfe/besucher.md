@@ -4,13 +4,29 @@ Willkommen beim Hochschulinfotag (HIT) 2026! Hier erfahren Sie, wie Sie die Webs
 
 ## Veranstaltungen
 
-Auf der Seite **Veranstaltungen** finden Sie alle Angebote des HIT. Nutzen Sie die Suchleiste, um nach Stichworten zu suchen, oder filtern Sie nach Fachbereich, Institution (Universität oder Hochschule), Zeitslot und Veranstaltungsart. Sie können zwischen Listen-, Kachel- und Kalenderansicht wechseln.
+Auf der Seite **Veranstaltungen** finden Sie die Einstiege in alle Angebote des HIT. Nutzen Sie die Suchleiste oben, um direkt nach Stichworten zu suchen, oder wählen Sie einen passenden Einstieg:
+
+- **Studienfelder Universität** und **Studienfelder Hochschule** — die jeweiligen Studienbereiche als Kacheln. Ein Klick öffnet alle Veranstaltungen des gewählten Felds.
+- **Lehramt** — alle Lehramts-Veranstaltungen aus Universität und Hochschule auf einer Seite.
+- **Studiengänge A-Z** — alphabetisch nach Studiengang sortierte Übersicht mit Buchstaben-Sprungleiste.
+- **Infomärkte** — kuratierte Seite mit Erklärtext und allen Veranstaltungen an den Infomarkt-Standorten Schloss und Caprivi.
+- **Rund ums Studium** — hochschulübergreifende Angebote (Studienberatung, Finanzierung, Auslandsstudium, …).
+- **Multiplikator\*innen-Café** — direkter Link zur entsprechenden Veranstaltung, sofern eine vom Team festgelegt ist.
+
+In den Unterseiten können Sie weiter filtern (Veranstaltungsart, Institution, Zeit), nach Titel/Zeit sortieren und zwischen Listen-, Kachel- und Kalenderansicht wechseln.
 
 Auf der Detailseite einer Veranstaltung finden Sie im Abschnitt **„Ort"** die Schaltfläche **„Auf Karte anzeigen"**, sofern der Veranstaltungsort bekannte Koordinaten hat. Damit öffnen Sie den Standort direkt in Google Maps — auf dem Smartphone startet in der Regel die installierte Karten-App.
 
 ## Stundenplan
 
-Erstellen Sie Ihren persönlichen Stundenplan, indem Sie auf einer Veranstaltungsseite auf **„Zum Stundenplan hinzufügen"** klicken. Bei Zeitkonflikten werden Sie automatisch gewarnt. Teilen Sie Ihren Plan per **QR-Code** oder **Kurzlink** mit Freunden — ohne Anmeldung.
+Erstellen Sie Ihren persönlichen Stundenplan, indem Sie auf einer Veranstaltungsseite auf **„Zum Stundenplan hinzufügen"** klicken. Teilen Sie Ihren Plan per **QR-Code** oder **Kurzlink** mit Freunden — ohne Anmeldung.
+
+Auf der Stundenplan-Seite werden zwei Arten von Hinweisen automatisch angezeigt:
+
+- **Zeitkonflikte** (gelbes ⚠) — zwei Veranstaltungen überschneiden sich zeitlich.
+- **Knappe Reisezeiten** (rotes 👣) — die Pause zwischen zwei aufeinanderfolgenden Veranstaltungen reicht nicht für den Fußweg zwischen den Gebäuden. Eine Liste unter dem Plan nennt Detail.
+
+**Priorität:** Für jede Veranstaltung im Plan können Sie über die kleinen Pfeile eine Priorität einstellen (Standard: 1). Die Priorität wird nur dann auf der Kachel angezeigt, wenn Sie sie tatsächlich erhöht haben. Sie spielt eine Rolle, wenn Veranstaltungen zeitlich kollidieren — die höchste Priorität (kleinere Zahl = wichtiger) gibt an, welcher Termin Vorrang haben soll, und beeinflusst auch Empfehlungen.
 
 ## Studiengangs-Navigator
 
