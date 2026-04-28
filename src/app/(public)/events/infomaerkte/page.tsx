@@ -4,6 +4,8 @@ import { prisma } from '@/lib/db/prisma'
 import { EventCard } from '@/components/events/EventCard'
 import { getActiveEdition } from '@/lib/active-edition'
 
+export const dynamic = 'force-dynamic'
+
 export default async function InfomaerktePage() {
   const edition = await getActiveEdition()
   const eventsByLocation = await prisma.event.findMany({
