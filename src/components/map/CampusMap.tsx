@@ -274,8 +274,19 @@ export default function CampusMap({
                 )
                   return null
 
-                // Check if this leg has a warning
-                const analysis = travelAnalyses[index]
+                // Match the analysis to this leg by event ID pair, NOT by
+                // index. The route filters out events whose building lacks
+                // coordinates, but the analyses array is built from a
+                // different (broader) event filter, so the indices do not
+                // line up in general.
+                const fromId = leg.startWaypoint.eventId
+                const toId = leg.endWaypoint.eventId
+                const analysis =
+                  fromId && toId
+                    ? travelAnalyses.find(
+                        (a) => a.eventFromId === fromId && a.eventToId === toId
+                      )
+                    : undefined
                 const hasWarning = analysis && analysis.status !== 'ok'
                 const segmentColor = hasWarning ? '#dc2626' : '#2563eb'
 
