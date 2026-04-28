@@ -8,7 +8,8 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Clock, MapPin, AlertTriangle, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
+import { Clock, MapPin, AlertTriangle, Trash2, ChevronUp, ChevronDown, Footprints } from 'lucide-react'
+import { useScheduleTravelWarnings } from '@/hooks/use-schedule-travel-warnings'
 
 interface ScheduleTimelineProps {
   selectedDate?: Date
@@ -65,6 +66,12 @@ export function ScheduleTimeline({
   className,
 }: ScheduleTimelineProps) {
   const { state, removeEvent, updatePriority, getConflicts } = useSchedule()
+  const travelWarnings = useScheduleTravelWarnings(state.items)
+  const travelWarningByEventId = useMemo(() => {
+    const m = new Map<string, (typeof travelWarnings)[number]>()
+    for (const w of travelWarnings) m.set(w.toEvent.eventId, w)
+    return m
+  }, [travelWarnings])
 
   // Get events for the selected date, split into timeline and Infostände
   const { timelineEvents, infostands } = useMemo(() => {
@@ -291,10 +298,36 @@ export function ScheduleTimeline({
                         </Link>
                       </div>
 
-                      {/* Conflict warning + always-visible remove button */}
+                      {/* Conflict warning + travel warning + always-visible remove button */}
                       <div className="flex items-center gap-0.5 flex-shrink-0">
                         {item.hasConflict && (
-                          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          <AlertTriangle
+                            className="h-4 w-4 text-yellow-500"
+                            aria-label="Zeitkonflikt"
+                          />
+                        )}
+                        {travelWarningByEventId.get(item.scheduleEvent.eventId) && (
+                          <span
+                            title={
+                              travelWarningByEventId.get(item.scheduleEvent.eventId)
+                                ? `Knappe Reisezeit: ${
+                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
+                                      .travelMinutes
+                                  } Min Fußweg von ${
+                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
+                                      .fromBuildingName
+                                  }, aber nur ${
+                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
+                                      .gapMinutes
+                                  } Min Pause.`
+                                : undefined
+                            }
+                          >
+                            <Footprints
+                              className="h-4 w-4 text-destructive"
+                              aria-label="Knappe Reisezeit"
+                            />
+                          </span>
                         )}
                         {showControls && (
                           <Button
@@ -406,6 +439,34 @@ export function ScheduleTimeline({
                 <span className="font-medium">{conflict.event2.event.title}</span>
                 {' überschneiden sich um '}
                 {conflict.overlapMinutes} Minuten
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Travel-time warnings summary */}
+      {travelWarnings.length > 0 && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2 text-red-800">
+            <Footprints className="h-5 w-5" />
+            <span className="font-medium">
+              {travelWarnings.length} knappe Reisezeit
+              {travelWarnings.length > 1 ? 'en' : ''} zwischen Veranstaltungen
+            </span>
+          </div>
+          <ul className="mt-2 space-y-1 text-sm text-red-700">
+            {travelWarnings.map((w, idx) => (
+              <li key={idx}>
+                Von <span className="font-medium">{w.fromEvent.event.title}</span>
+                {' ('}
+                {w.fromBuildingName}
+                {') zu '}
+                <span className="font-medium">{w.toEvent.event.title}</span>
+                {' ('}
+                {w.toBuildingName}
+                {'): nur '}
+                {w.gapMinutes} Min Pause für ca. {w.travelMinutes} Min Fußweg
               </li>
             ))}
           </ul>
