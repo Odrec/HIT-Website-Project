@@ -135,14 +135,26 @@ async function main() {
   // ==========================================================================
   console.log('📚 Creating study program clusters...')
 
-  const clusters = await Promise.all([
-    prisma.studyProgramCluster.create({ data: { name: 'Geistes- und Sozialwissenschaften, Sport', description: 'Humanities, social sciences, and sports', icon: 'geistes-sozial-sport.svg' } }),
-    prisma.studyProgramCluster.create({ data: { name: 'Mathematik, Informatik, Naturwissenschaften', description: 'Mathematics, computer science, and natural sciences', icon: 'mathe-info-natur.svg' } }),
-    prisma.studyProgramCluster.create({ data: { name: 'Rechts- und Wirtschaftswissenschaften', description: 'Law and economics', icon: 'rechts-wirtschaft.svg' } }),
-    prisma.studyProgramCluster.create({ data: { name: 'Sprach-, Literatur- und Kulturwissenschaften', description: 'Languages, literature, and cultural studies', icon: 'sprach-literatur-kultur.svg' } }),
-    prisma.studyProgramCluster.create({ data: { name: 'Theologie, Kunst, Musik, Textil', description: 'Theology, art, music, and textile', icon: 'theologie-kunst-musik.svg' } }),
-    prisma.studyProgramCluster.create({ data: { name: 'Lehramt', description: 'Teacher education programs', icon: 'lehramt.svg' } }),
+  const uniClusters = await Promise.all([
+    prisma.studyProgramCluster.create({ data: { name: 'Geistes- und Sozialwissenschaften, Sport', description: 'Humanities, social sciences, and sports', institution: Institution.UNI } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Mathematik, Informatik, Naturwissenschaften', description: 'Mathematics, computer science, and natural sciences', institution: Institution.UNI } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Rechts- und Wirtschaftswissenschaften', description: 'Law and economics', institution: Institution.UNI } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Sprach-, Literatur- und Kulturwissenschaften', description: 'Languages, literature, and cultural studies', institution: Institution.UNI } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Theologie, Kunst, Musik, Textil', description: 'Theology, art, music, and textile', institution: Institution.UNI } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Lehramt', description: 'Teacher education programs', institution: Institution.UNI } }),
   ])
+
+  const hsClusters = await Promise.all([
+    prisma.studyProgramCluster.create({ data: { name: 'Agrar- und Ernährungswissenschaften, Landschaftsarchitektur', description: 'Agriculture, nutrition, and landscape architecture', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Gesundheit und Soziales', description: 'Health and social work', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Informatik und Wirtschaftsinformatik', description: 'Computer science and business information systems', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Ingenieurwissenschaften', description: 'Engineering sciences', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Lehramt an berufsbildenden Schulen', description: 'Teacher education for vocational schools', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Musik, Theater, Design', description: 'Music, theater, and design', institution: Institution.HOCHSCHULE } }),
+    prisma.studyProgramCluster.create({ data: { name: 'Rechts- und Wirtschaftswissenschaften', description: 'Law and economics (applied)', institution: Institution.HOCHSCHULE } }),
+  ])
+
+  const clusters = [...uniClusters, ...hsClusters]
 
   // ==========================================================================
   // Create Study Programs
