@@ -11,7 +11,7 @@ import { shouldShowMultiplikatorCafeLink } from '@/lib/multiplikator-cafe'
 interface Cluster {
   id: string
   name: string
-  institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+  institution: 'UNI' | 'HOCHSCHULE'
 }
 
 interface MultiplikatorCafe {
@@ -27,7 +27,10 @@ function EventsLandingContent() {
 
   useEffect(() => {
     fetch('/api/clusters')
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`/api/clusters returned ${r.status}`)
+        return r.json()
+      })
       .then((data) => {
         // Stable display order: keep DB ordering. The Lehramt cluster (Uni)
         // is appended last so it visually anchors as the 6th tile.

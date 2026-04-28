@@ -141,7 +141,9 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Lehramt combined filter — union of UNI "Lehramt" and HS "Lehramt an berufsbildenden Schulen"
+    // Lehramt combined filter — union of UNI "Lehramt" and HS "Lehramt an berufsbildenden Schulen".
+    // NOTE: clusters are looked up by exact name. If either name is changed in the seed/admin,
+    // update both sides here too — otherwise the filter silently returns zero results.
     const lehramtCombined = searchParams.get('lehramtCombined')
     if (lehramtCombined === 'true') {
       const lehramtClusters = await prisma.studyProgramCluster.findMany({
