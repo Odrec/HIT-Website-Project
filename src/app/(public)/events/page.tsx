@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { HelpLink } from '@/components/help/HelpLink'
+import { shouldShowMultiplikatorCafeLink } from '@/lib/multiplikator-cafe'
 
 interface Cluster {
   id: string
@@ -115,7 +116,7 @@ function EventsLandingContent() {
           <LandingLink href="/events/a-z" label="Studiengänge A-Z" />
           <LandingLink href="/events/infomaerkte" label="Infomärkte" />
           <LandingLink href="/events/rund-ums-studium" label="Rund ums Studium" />
-          {multiplikatorCafe.eventId && (
+          {shouldShowMultiplikatorCafeLink(multiplikatorCafe.eventId) && (
             <LandingLink href={`/events/${multiplikatorCafe.eventId}`} label="Multiplikator*innen-Café" />
           )}
         </div>
