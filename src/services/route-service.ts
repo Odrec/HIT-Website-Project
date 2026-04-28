@@ -531,16 +531,27 @@ export async function analyzeTravelTimes(
     },
   })
 
+  // Pre-filter to events that resolve to coordinates. The route does the same
+  // implicit filter when building waypoints, so iterating consecutive pairs
+  // here gives us one analysis per route leg — without that, a non-routable
+  // event sitting between two routable ones (e.g. a timed Infostand) would
+  // hide the leg's analysis entirely.
+  const resolvedEvents: Array<{
+    event: (typeof events)[number]
+    resolved: NonNullable<Awaited<ReturnType<typeof resolveEventCoordinates>>>
+  }> = []
+  for (const event of events) {
+    const resolved = await resolveEventCoordinates(event)
+    if (resolved) resolvedEvents.push({ event, resolved })
+  }
+
   const analyses: TravelTimeAnalysis[] = []
 
-  for (let i = 0; i < events.length - 1; i++) {
-    const eventFrom = events[i]
-    const eventTo = events[i + 1]
+  for (let i = 0; i < resolvedEvents.length - 1; i++) {
+    const { event: eventFrom, resolved: fromResolved } = resolvedEvents[i]
+    const { event: eventTo, resolved: toResolved } = resolvedEvents[i + 1]
 
-    const fromResolved = await resolveEventCoordinates(eventFrom)
-    const toResolved = await resolveEventCoordinates(eventTo)
-
-    if (fromResolved && toResolved && eventFrom.timeEnd && eventTo.timeStart) {
+    if (eventFrom.timeEnd && eventTo.timeStart) {
       // Try cached/API route first, fall back to straight-line estimate
       const cached = await getDirections(
         fromResolved.buildingSlug,
