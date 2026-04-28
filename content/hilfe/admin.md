@@ -28,6 +28,10 @@ Die **Melder**-Verwaltung zeigt alle Veranstalter-Kontakte. Hier sehen Sie, wer 
 
 Verwalten Sie die Studiengangsliste unter **Studiengänge**. Jeder Eintrag enthält Name, Institution (Uni/HS), Fachbereich und den Link zur offiziellen Seite.
 
+## Studienfelder (Cluster)
+
+Die Studienfelder sind in zwei Gruppen aufgeteilt: **Universität** (6 Cluster, inkl. Lehramt) und **Hochschule** (7 Cluster). Beim Anlegen eines neuen Clusters müssen Sie über das Pflichtfeld **Institution** angeben, zu welcher Hochschule das Cluster gehört (`UNI` oder `HOCHSCHULE`) — die öffentliche Einstiegsseite zeigt die beiden Gruppen getrennt mit Farbakzent (Uni-Rot, HS-Blau). Die Studiengänge werden den Clustern in der Studiengangs-Verwaltung zugeordnet.
+
 ## Benutzer & Rollen
 
 Unter **Benutzer** verwalten Sie die Zugänge. Es gibt drei Rollen: **Admin** (Vollzugriff), **Veranstalter** (eigene Events) und **Öffentlich** (nur Lesen). Legen Sie neue Benutzer an oder ändern Sie bestehende Rollen.
@@ -44,7 +48,7 @@ Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den 
 
 Jede HIT wird als eigene **Edition** verwaltet. Immer genau eine Edition ist aktiv (Status `ACTIVE`), weitere sind `DRAFT` (in Vorbereitung) oder `ARCHIVED` (abgeschlossen).
 
-**Aktuelle Edition bearbeiten:** Unter **Editionen** (`/admin/editions`) kannst du HIT-Datum und Einsendeschluss der aktiven Edition anpassen.
+**Aktuelle Edition bearbeiten:** Unter **Editionen** (`/admin/editions`) kannst du HIT-Datum und Einsendeschluss der aktiven Edition anpassen. Hier wählst du auch die Veranstaltung für das **Multiplikator\*innen-Café** aus: das Dropdown listet alle Veranstaltungen der aktiven Edition. Solange keine Veranstaltung gewählt ist, blendet die öffentliche Einstiegsseite den Link „Multiplikator\*innen-Café" aus.
 
 **Neue Edition starten (Rollover):** Auf der aktiven Edition auf **Neue Edition starten** klicken. Im Dialog:
 
