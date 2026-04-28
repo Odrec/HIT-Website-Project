@@ -107,14 +107,21 @@ export function ScheduleEventCard({
             </Badge>
           </div>
 
-          {/* Priority indicator */}
+          {/* Priority indicator — only shown when priority has been customized away from the default */}
           <div className="flex items-center gap-1">
             {hasConflict && (
               <span title="Zeitkonflikt">
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
               </span>
             )}
-            <span className="text-xs font-medium bg-muted px-1.5 py-0.5 rounded">P{priority}</span>
+            {priority > 1 && (
+              <span
+                className="text-xs font-medium bg-muted px-1.5 py-0.5 rounded"
+                title="Priorität: bestimmt, welcher Termin bei Zeitkonflikten Vorrang hat"
+              >
+                Prio. {priority}
+              </span>
+            )}
           </div>
         </div>
 

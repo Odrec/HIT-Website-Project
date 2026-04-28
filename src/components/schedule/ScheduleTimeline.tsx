@@ -291,10 +291,24 @@ export function ScheduleTimeline({
                         </Link>
                       </div>
 
-                      {/* Conflict warning */}
-                      {item.hasConflict && (
-                        <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                      )}
+                      {/* Conflict warning + always-visible remove button */}
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        {item.hasConflict && (
+                          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                        )}
+                        {showControls && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
+                            title="Aus Stundenplan entfernen"
+                            aria-label="Aus Stundenplan entfernen"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Event details */}
@@ -324,50 +338,46 @@ export function ScheduleTimeline({
                       </div>
                     )}
 
-                    {/* Controls */}
+                    {/* Priority controls (only when there's room — trash is always shown in the header) */}
                     {showControls && !compact && height >= 144 && (
-                      <div className="mt-auto pt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handlePriorityUp(
-                                item.scheduleEvent.eventId,
-                                item.scheduleEvent.priority
-                              )
-                            }
-                            title="Priorität erhöhen"
-                          >
-                            <ChevronUp className="h-3 w-3" />
-                          </Button>
-                          <span className="text-xs font-medium px-1">
-                            P{item.scheduleEvent.priority}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handlePriorityDown(
-                                item.scheduleEvent.eventId,
-                                item.scheduleEvent.priority
-                              )
-                            }
-                            title="Priorität verringern"
-                          >
-                            <ChevronDown className="h-3 w-3" />
-                          </Button>
-                        </div>
+                      <div className="mt-auto pt-2 flex items-center gap-1">
+                        <span
+                          className="text-xs text-muted-foreground mr-1"
+                          title="Priorität: bestimmt, welcher Termin bei Zeitkonflikten Vorrang hat"
+                        >
+                          Prio.
+                        </span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
-                          title="Entfernen"
+                          className="h-6 w-6"
+                          onClick={() =>
+                            handlePriorityUp(
+                              item.scheduleEvent.eventId,
+                              item.scheduleEvent.priority
+                            )
+                          }
+                          disabled={item.scheduleEvent.priority <= 1}
+                          title="Priorität erhöhen"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <ChevronUp className="h-3 w-3" />
+                        </Button>
+                        <span className="text-xs font-medium px-1">
+                          {item.scheduleEvent.priority}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() =>
+                            handlePriorityDown(
+                              item.scheduleEvent.eventId,
+                              item.scheduleEvent.priority
+                            )
+                          }
+                          title="Priorität verringern"
+                        >
+                          <ChevronDown className="h-3 w-3" />
                         </Button>
                       </div>
                     )}
