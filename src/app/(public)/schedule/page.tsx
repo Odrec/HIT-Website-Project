@@ -502,6 +502,21 @@ function SchedulePageContent() {
         )}
       </div>
 
+      {/* How it works (hidden on past-edition shared views) */}
+      {!pastEdition && (
+        <div
+          className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 mb-6 print:hidden"
+          role="note"
+        >
+          So füllst du deinen Zeitplan: Öffne die{' '}
+          <Link href="/events" className="font-medium underline hover:no-underline">
+            Veranstaltungssuche
+          </Link>
+          , wähle dort die Veranstaltungen aus, die dich interessieren, und füge sie über
+          „Zum Zeitplan hinzufügen" hinzu. Sie erscheinen anschließend hier auf dieser Seite.
+        </div>
+      )}
+
       {/* Empty state */}
       {state.items.length === 0 && !isLoadingShared && (
         <Card className="text-center py-16">
