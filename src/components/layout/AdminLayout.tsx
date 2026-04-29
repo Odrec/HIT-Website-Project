@@ -240,13 +240,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className="flex flex-1 flex-col">
         {/* Mobile Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-white px-4 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)}>
+          <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen">
             <Menu className="h-6 w-6" />
           </button>
           <span className="font-bold">
             <span className="text-hit-uni-500">HIT</span>
             <span className="text-hit-gray-400"> Admin</span>
           </span>
+          <Link
+            href="/"
+            className="ml-auto flex items-center gap-1 text-sm text-hit-gray-600 hover:text-hit-uni-500"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Website</span>
+          </Link>
         </header>
 
         {/* Desktop Header */}
