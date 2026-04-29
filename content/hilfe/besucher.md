@@ -19,14 +19,14 @@ Auf der Detailseite einer Veranstaltung finden Sie im Abschnitt **„Ort"** die 
 
 ## Stundenplan
 
-Erstellen Sie Ihren persönlichen Stundenplan, indem Sie auf einer Veranstaltungsseite auf **„Zum Stundenplan hinzufügen"** klicken. Teilen Sie Ihren Plan per **QR-Code** oder **Kurzlink** mit Freunden — ohne Anmeldung.
+Veranstaltungen kommen über die **Veranstaltungssuche** in den Stundenplan: Öffnen Sie [/events](/events), wählen Sie eine Veranstaltung und klicken Sie auf **„Zum Stundenplan hinzufügen"**. Auf der Stundenplan-Seite finden Sie oben einen Hinweis, der genau auf diesen Ablauf verweist. Teilen Sie Ihren fertigen Plan per **QR-Code** oder **Kurzlink** mit Freunden — ohne Anmeldung.
 
 Auf der Stundenplan-Seite werden zwei Arten von Hinweisen automatisch angezeigt:
 
 - **Zeitkonflikte** (gelbes ⚠) — zwei Veranstaltungen überschneiden sich zeitlich.
 - **Knappe Reisezeiten** (rotes 👣) — die Pause zwischen zwei aufeinanderfolgenden Veranstaltungen reicht nicht für den Fußweg zwischen den Gebäuden. Eine Liste unter dem Plan nennt Detail.
 
-**Priorität:** Für jede Veranstaltung im Plan können Sie über die kleinen Pfeile eine Priorität einstellen (Standard: 1). Die Priorität wird nur dann auf der Kachel angezeigt, wenn Sie sie tatsächlich erhöht haben. Sie spielt eine Rolle, wenn Veranstaltungen zeitlich kollidieren — die höchste Priorität (kleinere Zahl = wichtiger) gibt an, welcher Termin Vorrang haben soll, und beeinflusst auch Empfehlungen.
+**Priorität:** Jede Veranstaltung im Plan lässt sich mit einer Priorität markieren — **Hoch**, **Mittel** (Standard) oder **Niedrig**. So sehen Sie auf einen Blick, welche Termine Ihnen am wichtigsten sind. Eine farbige Markierung erscheint nur, wenn Sie den Wert vom Standard „Mittel" abweichen lassen.
 
 ## Studiengangs-Navigator
 
