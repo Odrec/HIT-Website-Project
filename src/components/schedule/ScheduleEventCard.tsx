@@ -3,6 +3,12 @@
 import Link from 'next/link'
 import { formatEventTimeRange, formatEventDateWeekday } from '@/lib/event-time'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
+import {
+  SCHEDULE_PRIORITY_LABELS,
+  SCHEDULE_PRIORITY_ORDER,
+  DEFAULT_SCHEDULE_PRIORITY,
+  type SchedulePriority,
+} from '@/types/schedule'
 import { generateGoogleCalendarUrl } from '@/lib/calendar-utils'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -14,10 +20,14 @@ import {
   MapPin,
   AlertTriangle,
   Trash2,
-  ChevronUp,
-  ChevronDown,
   ExternalLink,
 } from 'lucide-react'
+
+const PRIORITY_BADGE_CLASS: Record<SchedulePriority, string> = {
+  HIGH: 'bg-red-100 text-red-800 border-red-200',
+  MEDIUM: 'bg-amber-100 text-amber-800 border-amber-200',
+  LOW: 'bg-slate-100 text-slate-700 border-slate-200',
+}
 
 interface ScheduleEventCardProps {
   scheduleEvent: ScheduleEvent
@@ -76,12 +86,8 @@ export function ScheduleEventCard({
     removeEvent(event.id)
   }
 
-  const handlePriorityUp = () => {
-    updatePriority(event.id, Math.max(1, priority - 1))
-  }
-
-  const handlePriorityDown = () => {
-    updatePriority(event.id, priority + 1)
+  const handlePrioritySelect = (next: SchedulePriority) => {
+    updatePriority(event.id, next)
   }
 
   return (
@@ -114,13 +120,14 @@ export function ScheduleEventCard({
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
               </span>
             )}
-            {priority > 1 && (
-              <span
-                className="text-xs font-medium bg-muted px-1.5 py-0.5 rounded"
-                title="Priorität: bestimmt, welcher Termin bei Zeitkonflikten Vorrang hat"
+            {priority !== DEFAULT_SCHEDULE_PRIORITY && (
+              <Badge
+                variant="outline"
+                className={cn('text-xs', PRIORITY_BADGE_CLASS[priority])}
+                title="Priorität: hilft dir, wichtige Termine zu markieren"
               >
-                Prio. {priority}
-              </span>
+                Prio. {SCHEDULE_PRIORITY_LABELS[priority]}
+              </Badge>
             )}
           </div>
         </div>
@@ -182,29 +189,32 @@ export function ScheduleEventCard({
         {/* Controls */}
         {showControls && (
           <div className="mt-3 pt-3 border-t space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-xs text-muted-foreground mr-1">Priorität:</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={handlePriorityUp}
-                  disabled={priority <= 1}
-                  title="Priorität erhöhen"
+                <div
+                  role="radiogroup"
+                  aria-label="Priorität wählen"
+                  className="inline-flex rounded-md border border-input overflow-hidden"
                 >
-                  <ChevronUp className="h-4 w-4" />
-                </Button>
-                <span className="text-sm font-medium px-2">{priority}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={handlePriorityDown}
-                  title="Priorität verringern"
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
+                  {SCHEDULE_PRIORITY_ORDER.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      role="radio"
+                      aria-checked={priority === p}
+                      onClick={() => handlePrioritySelect(p)}
+                      className={cn(
+                        'px-2.5 py-1 text-xs font-medium transition-colors',
+                        priority === p
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-muted-foreground hover:bg-muted'
+                      )}
+                    >
+                      {SCHEDULE_PRIORITY_LABELS[p]}
+                    </button>
+                  ))}
+                </div>
               </div>
               <Button
                 variant="ghost"

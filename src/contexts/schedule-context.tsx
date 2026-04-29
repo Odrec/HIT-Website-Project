@@ -10,13 +10,17 @@ import React, {
 } from 'react'
 import type { Event } from '@/types/events'
 import { detectConflicts as detectConflictsGeneric } from '@/lib/schedule-conflicts'
+import {
+  DEFAULT_SCHEDULE_PRIORITY,
+  type SchedulePriority,
+} from '@/types/schedule'
 
 // Types for client-side schedule management
 export interface ScheduleEvent {
   id: string
   eventId: string
   event: Event
-  priority: number
+  priority: SchedulePriority
   addedAt: Date
 }
 
@@ -36,7 +40,7 @@ type ScheduleAction =
   | { type: 'LOAD_SCHEDULE'; payload: ScheduleEvent[] }
   | { type: 'ADD_EVENT'; payload: ScheduleEvent }
   | { type: 'REMOVE_EVENT'; payload: string }
-  | { type: 'UPDATE_PRIORITY'; payload: { eventId: string; priority: number } }
+  | { type: 'UPDATE_PRIORITY'; payload: { eventId: string; priority: SchedulePriority } }
   | { type: 'CLEAR_SCHEDULE' }
   | { type: 'SET_CONFLICTS'; payload: TimeConflict[] }
   | { type: 'PATCH_EVENTS'; payload: Array<{ eventId: string; event: Event }> }
@@ -46,7 +50,7 @@ interface ScheduleContextType {
   addEvent: (event: Event) => void
   removeEvent: (eventId: string) => void
   isInSchedule: (eventId: string) => boolean
-  updatePriority: (eventId: string, priority: number) => void
+  updatePriority: (eventId: string, priority: SchedulePriority) => void
   clearSchedule: () => void
   getEventCount: () => number
   getConflicts: () => TimeConflict[]
@@ -54,6 +58,18 @@ interface ScheduleContextType {
 }
 
 const STORAGE_KEY = 'hit-schedule'
+
+// Migrate older localStorage entries that stored priority as a number
+// (1 = important, 2+ = less important) to the new 3-level enum.
+function normalizeStoredPriority(value: unknown): SchedulePriority {
+  if (value === 'HIGH' || value === 'MEDIUM' || value === 'LOW') return value
+  if (typeof value === 'number') {
+    if (value <= 1) return 'HIGH'
+    if (value === 2) return 'MEDIUM'
+    return 'LOW'
+  }
+  return DEFAULT_SCHEDULE_PRIORITY
+}
 
 // Detect conflicts between schedule items. Delegates to the shared detector
 // in src/lib/schedule-conflicts.ts so every caller in the app — context,
@@ -170,10 +186,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
               createdAt: string
               updatedAt: string
             }
-            priority: number
+            priority: SchedulePriority | number
             addedAt: string
           }) => ({
             ...item,
+            priority: normalizeStoredPriority(item.priority),
             addedAt: new Date(item.addedAt),
             event: {
               ...item.event,
@@ -255,7 +272,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         id: `schedule-${event.id}-${Date.now()}`,
         eventId: event.id,
         event,
-        priority: 1, // Default priority
+        priority: DEFAULT_SCHEDULE_PRIORITY,
         addedAt: new Date(),
       }
 
@@ -275,7 +292,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     [state.items]
   )
 
-  const updatePriority = useCallback((eventId: string, priority: number) => {
+  const updatePriority = useCallback((eventId: string, priority: SchedulePriority) => {
     dispatch({ type: 'UPDATE_PRIORITY', payload: { eventId, priority } })
   }, [])
 
