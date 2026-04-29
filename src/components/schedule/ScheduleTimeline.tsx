@@ -259,18 +259,18 @@ export function ScheduleTimeline({
                 <Card
                   key={item.scheduleEvent.id}
                   className={cn(
-                    'absolute overflow-hidden transition-all',
+                    'absolute transition-all',
                     item.hasConflict && 'ring-2 ring-yellow-500',
                     compact ? 'p-1' : 'p-2'
                   )}
                   style={{
                     top: `${top}px`,
-                    height: `${height - 4}px`,
+                    minHeight: `${height - 4}px`,
                     left: `${left}%`,
                     width: `calc(${columnWidth}% - 4px)`,
                   }}
                 >
-                  <CardContent className="p-0 h-full flex flex-col">
+                  <CardContent className="p-0 flex flex-col">
                     {/* Event header */}
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex-grow min-w-0">
@@ -289,7 +289,7 @@ export function ScheduleTimeline({
                         >
                           <h4
                             className={cn(
-                              'font-medium line-clamp-2 group-hover/link:underline',
+                              'font-medium break-words group-hover/link:underline',
                               compact ? 'text-xs' : 'text-sm'
                             )}
                           >
@@ -345,11 +345,11 @@ export function ScheduleTimeline({
                     </div>
 
                     {/* Event details */}
-                    {!compact && height >= 96 && (
+                    {!compact && (
                       <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
                         {item.scheduleEvent.event.timeStart && (
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                            <Clock className="h-3 w-3 flex-shrink-0" />
                             <span>
                               {formatEventTimeRange(
                                 item.scheduleEvent.event.timeStart,
@@ -359,9 +359,9 @@ export function ScheduleTimeline({
                           </div>
                         )}
                         {item.scheduleEvent.event.building && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            <span className="truncate">
+                          <div className="flex items-start gap-1">
+                            <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                            <span className="break-words">
                               {item.scheduleEvent.event.building.name}
                               {item.scheduleEvent.event.room?.name &&
                                 `, ${item.scheduleEvent.event.room.name}`}

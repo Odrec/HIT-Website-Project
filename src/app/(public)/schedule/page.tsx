@@ -6,7 +6,6 @@ import {
   formatEventTimeRange,
   formatEventDateLong,
   formatEventDateShort,
-  formatEventDateShortYear,
   formatEventDateDMY,
   formatEventDateKey,
   formatEventICalLocal,
@@ -526,19 +525,19 @@ function SchedulePageContent() {
       {/* Schedule content */}
       {state.items.length > 0 && (
         <div className="grid lg:grid-cols-4 gap-6">
-          {/* Date selector (sidebar on desktop) */}
+          {/* Date selector (sidebar on desktop) — only when there's a real choice */}
           <div className="lg:col-span-1 print:hidden">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CalendarDays className="h-5 w-5" />
-                  Datum auswählen
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {scheduleDates.length > 0 ? (
-                    scheduleDates.map((date) => {
+            {scheduleDates.length > 1 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CalendarDays className="h-5 w-5" />
+                    Datum auswählen
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {scheduleDates.map((date) => {
                       const dateEvents = state.items.filter(
                         (item) => item.event.timeStart && isSameEventDay(item.event.timeStart, date)
                       )
@@ -560,32 +559,24 @@ function SchedulePageContent() {
                           </div>
                         </Button>
                       )
-                    })
-                  ) : (
-                    <Button
-                      variant="default"
-                      className="w-full"
-                      onClick={() => setSelectedDate(selectedDate)}
-                    >
-                      {formatEventDateShortYear(selectedDate)}
-                    </Button>
-                  )}
-                </div>
+                    })}
+                  </div>
 
-                {eventsWithoutTime.length > 0 && (
-                  <>
-                    <Separator className="my-4" />
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium">Ohne feste Zeit:</span>
-                      <span className="ml-2">{eventsWithoutTime.length} Events</span>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  {eventsWithoutTime.length > 0 && (
+                    <>
+                      <Separator className="my-4" />
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-medium">Ohne feste Zeit:</span>
+                        <span className="ml-2">{eventsWithoutTime.length} Events</span>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Statistics */}
-            <Card className="mt-4">
+            <Card className={cn(scheduleDates.length > 1 && 'mt-4')}>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <FileText className="h-5 w-5" />
