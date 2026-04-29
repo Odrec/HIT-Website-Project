@@ -211,11 +211,6 @@ export function ScheduleTimeline({
 
   return (
     <div className={cn('relative', className)}>
-      {/* Date header */}
-      {selectedDate && (
-        <h3 className="text-lg font-semibold mb-4">{formatEventDateLong(selectedDate)}</h3>
-      )}
-
       {/* Timeline container */}
       <div className="flex">
         {/* Time labels */}
