@@ -255,18 +255,18 @@ export function ScheduleTimeline({
                 <Card
                   key={item.scheduleEvent.id}
                   className={cn(
-                    'absolute transition-all',
+                    'absolute overflow-hidden transition-all',
                     item.hasConflict && 'ring-2 ring-yellow-500',
                     compact ? 'p-1' : 'p-2'
                   )}
                   style={{
                     top: `${top}px`,
-                    minHeight: `${height - 4}px`,
+                    height: `${height - 4}px`,
                     left: `${left}%`,
                     width: `calc(${columnWidth}% - 4px)`,
                   }}
                 >
-                  <CardContent className="p-0 flex flex-col">
+                  <CardContent className="p-0 h-full flex flex-col">
                     {/* Event header */}
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex-grow min-w-0">
@@ -282,10 +282,11 @@ export function ScheduleTimeline({
                         <Link
                           href={`/events/${item.scheduleEvent.event.id}`}
                           className="group/link"
+                          title={item.scheduleEvent.event.title}
                         >
                           <h4
                             className={cn(
-                              'font-medium break-words group-hover/link:underline',
+                              'font-medium line-clamp-3 break-words group-hover/link:underline',
                               compact ? 'text-xs' : 'text-sm'
                             )}
                           >
@@ -355,9 +356,16 @@ export function ScheduleTimeline({
                           </div>
                         )}
                         {item.scheduleEvent.event.building && (
-                          <div className="flex items-start gap-1">
-                            <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                            <span className="break-words">
+                          <div
+                            className="flex items-center gap-1"
+                            title={`${item.scheduleEvent.event.building.name}${
+                              item.scheduleEvent.event.room?.name
+                                ? `, ${item.scheduleEvent.event.room.name}`
+                                : ''
+                            }`}
+                          >
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">
                               {item.scheduleEvent.event.building.name}
                               {item.scheduleEvent.event.room?.name &&
                                 `, ${item.scheduleEvent.event.room.name}`}
