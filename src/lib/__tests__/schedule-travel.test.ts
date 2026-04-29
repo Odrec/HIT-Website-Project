@@ -20,7 +20,7 @@ function ev(opts: {
     id: opts.id,
     eventId: opts.id,
     addedAt: new Date(),
-    priority: 1,
+    priority: 'MEDIUM',
     event: {
       id: opts.id,
       title: opts.id,

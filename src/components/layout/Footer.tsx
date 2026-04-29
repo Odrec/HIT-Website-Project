@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
 /**
@@ -54,15 +53,6 @@ export function Footer() {
           {/* Institutions */}
           <div>
             <h3 className="font-semibold text-hit-gray-900 mb-3">Institutionen</h3>
-            <div className="mb-4">
-              <Image
-                src="/logos/uos-hs-combined.svg"
-                alt="Universität Osnabrück und Hochschule Osnabrück"
-                width={280}
-                height={44}
-                className="h-auto w-full max-w-[280px]"
-              />
-            </div>
             <ul className="space-y-2 text-sm">
               <li>
                 <a

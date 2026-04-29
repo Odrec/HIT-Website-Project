@@ -3,12 +3,17 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import { useSchedule, type ScheduleEvent } from '@/contexts/schedule-context'
+import {
+  SCHEDULE_PRIORITY_LABELS,
+  SCHEDULE_PRIORITY_ORDER,
+  type SchedulePriority,
+} from '@/types/schedule'
 import { formatEventTimeRange, formatEventDateLong, isSameEventDay } from '@/lib/event-time'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Clock, MapPin, AlertTriangle, Trash2, ChevronUp, ChevronDown, Footprints } from 'lucide-react'
+import { Clock, MapPin, AlertTriangle, Trash2, Footprints } from 'lucide-react'
 import { useScheduleTravelWarnings } from '@/hooks/use-schedule-travel-warnings'
 
 interface ScheduleTimelineProps {
@@ -184,12 +189,8 @@ export function ScheduleTimeline({
     removeEvent(eventId)
   }
 
-  const handlePriorityUp = (eventId: string, currentPriority: number) => {
-    updatePriority(eventId, Math.max(1, currentPriority - 1))
-  }
-
-  const handlePriorityDown = (eventId: string, currentPriority: number) => {
-    updatePriority(eventId, currentPriority + 1)
+  const handlePrioritySelect = (eventId: string, priority: SchedulePriority) => {
+    updatePriority(eventId, priority)
   }
 
   if (timelineEvents.length === 0 && infostands.length === 0) {
@@ -259,18 +260,18 @@ export function ScheduleTimeline({
                 <Card
                   key={item.scheduleEvent.id}
                   className={cn(
-                    'absolute overflow-hidden transition-all',
+                    'absolute transition-all',
                     item.hasConflict && 'ring-2 ring-yellow-500',
                     compact ? 'p-1' : 'p-2'
                   )}
                   style={{
                     top: `${top}px`,
-                    height: `${height - 4}px`,
+                    minHeight: `${height - 4}px`,
                     left: `${left}%`,
                     width: `calc(${columnWidth}% - 4px)`,
                   }}
                 >
-                  <CardContent className="p-0 h-full flex flex-col">
+                  <CardContent className="p-0 flex flex-col">
                     {/* Event header */}
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex-grow min-w-0">
@@ -289,7 +290,7 @@ export function ScheduleTimeline({
                         >
                           <h4
                             className={cn(
-                              'font-medium line-clamp-2 group-hover/link:underline',
+                              'font-medium break-words group-hover/link:underline',
                               compact ? 'text-xs' : 'text-sm'
                             )}
                           >
@@ -345,11 +346,11 @@ export function ScheduleTimeline({
                     </div>
 
                     {/* Event details */}
-                    {!compact && height >= 96 && (
+                    {!compact && (
                       <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
                         {item.scheduleEvent.event.timeStart && (
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                            <Clock className="h-3 w-3 flex-shrink-0" />
                             <span>
                               {formatEventTimeRange(
                                 item.scheduleEvent.event.timeStart,
@@ -359,9 +360,9 @@ export function ScheduleTimeline({
                           </div>
                         )}
                         {item.scheduleEvent.event.building && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            <span className="truncate">
+                          <div className="flex items-start gap-1">
+                            <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                            <span className="break-words">
                               {item.scheduleEvent.event.building.name}
                               {item.scheduleEvent.event.room?.name &&
                                 `, ${item.scheduleEvent.event.room.name}`}
@@ -373,45 +374,38 @@ export function ScheduleTimeline({
 
                     {/* Priority controls (only when there's room — trash is always shown in the header) */}
                     {showControls && !compact && height >= 144 && (
-                      <div className="mt-auto pt-2 flex items-center gap-1">
+                      <div className="mt-auto pt-2 flex items-center gap-1.5 flex-wrap">
                         <span
-                          className="text-xs text-muted-foreground mr-1"
-                          title="Priorität: bestimmt, welcher Termin bei Zeitkonflikten Vorrang hat"
+                          className="text-xs text-muted-foreground"
+                          title="Priorität: hilft dir, wichtige Termine zu markieren"
                         >
                           Prio.
                         </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() =>
-                            handlePriorityUp(
-                              item.scheduleEvent.eventId,
-                              item.scheduleEvent.priority
-                            )
-                          }
-                          disabled={item.scheduleEvent.priority <= 1}
-                          title="Priorität erhöhen"
+                        <div
+                          role="radiogroup"
+                          aria-label="Priorität wählen"
+                          className="inline-flex rounded-md border border-input overflow-hidden"
                         >
-                          <ChevronUp className="h-3 w-3" />
-                        </Button>
-                        <span className="text-xs font-medium px-1">
-                          {item.scheduleEvent.priority}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() =>
-                            handlePriorityDown(
-                              item.scheduleEvent.eventId,
-                              item.scheduleEvent.priority
-                            )
-                          }
-                          title="Priorität verringern"
-                        >
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
+                          {SCHEDULE_PRIORITY_ORDER.map((p) => (
+                            <button
+                              key={p}
+                              type="button"
+                              role="radio"
+                              aria-checked={item.scheduleEvent.priority === p}
+                              onClick={() =>
+                                handlePrioritySelect(item.scheduleEvent.eventId, p)
+                              }
+                              className={cn(
+                                'px-1.5 py-0.5 text-[10px] font-medium transition-colors leading-tight',
+                                item.scheduleEvent.priority === p
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-background text-muted-foreground hover:bg-muted'
+                              )}
+                            >
+                              {SCHEDULE_PRIORITY_LABELS[p]}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </CardContent>

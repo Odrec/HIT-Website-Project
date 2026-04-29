@@ -46,7 +46,10 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Initialize session (with ref guard to prevent duplicate calls in StrictMode)
+  // Initialize session (with ref guard to prevent duplicate calls in StrictMode).
+  // The ref must be reset in the finally block so a Neu-starten click can
+  // initialize a fresh session — otherwise the second call early-returns and
+  // the user is left with an empty chat focused on the input field.
   const initializeSession = useCallback(async () => {
     if (initializingRef.current || sessionId) return
     initializingRef.current = true
@@ -83,6 +86,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
       })
     } finally {
       setIsLoading(false)
+      initializingRef.current = false
     }
   }, [sessionId, toast])
 
@@ -198,7 +202,12 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     sendMessage(suggestion)
   }
 
-  // Handle restart
+  // Handle restart. We deliberately don't call initializeSession() here:
+  // setSessionId(null) re-creates the initializeSession callback with a
+  // fresh closure (sessionId === null), and the mount-effect re-runs
+  // because the callback identity changed, which kicks off a new session.
+  // Calling it inline would use the stale closure (sessionId still
+  // truthy) and early-return — leaving the chat empty.
   const handleRestart = async () => {
     if (sessionId) {
       try {
@@ -218,8 +227,6 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     setShowRecommendations(false)
     setCrisisDetected(null)
     setIsComplete(false)
-
-    await initializeSession()
   }
 
   // Handle view events for program
