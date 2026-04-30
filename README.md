@@ -323,23 +323,14 @@ docker-compose --profile tools up -d
 
 For comprehensive testing instructions, see **[Testing Guide](docs/TESTING-GUIDE.md)**.
 
-### Quick Load Test
+### Load Testing
+
+Load tests run via [k6](https://k6.io). See
+[`loadtest/README.md`](loadtest/README.md) for installation and the
+available scenarios (smoke, ramp, spike, soak).
 
 ```bash
-# Start the app first
-npm run dev
-
-# Run load test (in another terminal)
-npx ts-node scripts/load-test.ts
-```
-
-### Custom Load Test
-
-```bash
-LOAD_TEST_URL=http://localhost:3000 \
-LOAD_TEST_CONCURRENT=100 \
-LOAD_TEST_DURATION=60 \
-npx ts-node scripts/load-test.ts
+BASE_URL=http://localhost:3000 npm run loadtest:smoke
 ```
 
 ---
