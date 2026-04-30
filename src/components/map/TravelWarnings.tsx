@@ -124,7 +124,7 @@ export default function TravelWarnings({
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
-                      Gehzeit: {formatTime(analysis.walkingTime)}
+                      Benötigt: {formatTime(analysis.requiredTime)}
                     </span>
                     <span>Verfügbar: {formatTime(analysis.timeBetweenEvents)}</span>
                   </div>

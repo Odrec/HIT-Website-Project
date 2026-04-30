@@ -177,6 +177,7 @@ export interface TravelTimeAnalysis {
   eventToTitle: string
   timeBetweenEvents: number // seconds
   walkingTime: number // seconds
+  requiredTime: number // seconds — walkingTime + buffer
   distance: number // meters
   hasSufficientTime: boolean
   timeMargin: number // seconds (can be negative)

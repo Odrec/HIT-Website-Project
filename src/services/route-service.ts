@@ -572,7 +572,8 @@ export async function analyzeTravelTimes(
       }
 
       const timeBetweenEvents = (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
-      const timeMargin = timeBetweenEvents - walkingTime - settings.bufferMinutes * 60
+      const requiredTime = walkingTime + settings.bufferMinutes * 60
+      const timeMargin = timeBetweenEvents - requiredTime
 
       let status: 'ok' | 'tight' | 'insufficient'
       if (timeMargin < 0) {
@@ -590,6 +591,7 @@ export async function analyzeTravelTimes(
         eventToTitle: eventTo.title,
         timeBetweenEvents,
         walkingTime,
+        requiredTime,
         distance,
         hasSufficientTime: status === 'ok',
         timeMargin,
