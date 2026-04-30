@@ -552,6 +552,29 @@ export async function analyzeTravelTimes(
     const { event: eventTo, resolved: toResolved } = resolvedEvents[i + 1]
 
     if (eventFrom.timeEnd && eventTo.timeStart) {
+      // Overlapping events: surface as a scheduling conflict, not a travel
+      // warning. "X Min. zu wenig" reads as a walking-time problem, but the
+      // user can't attend both regardless of walking time.
+      if (eventTo.timeStart.getTime() < eventFrom.timeEnd.getTime()) {
+        const overlapSeconds =
+          (eventFrom.timeEnd.getTime() - eventTo.timeStart.getTime()) / 1000
+        analyses.push({
+          eventFromId: eventFrom.id,
+          eventToId: eventTo.id,
+          eventFromTitle: eventFrom.title,
+          eventToTitle: eventTo.title,
+          timeBetweenEvents: -overlapSeconds,
+          walkingTime: 0,
+          requiredTime: 0,
+          distance: 0,
+          hasSufficientTime: false,
+          timeMargin: -overlapSeconds,
+          overlapMinutes: Math.ceil(overlapSeconds / 60),
+          status: 'conflict',
+        })
+        continue
+      }
+
       // Try cached/API route first, fall back to straight-line estimate
       const cached = await getDirections(
         fromResolved.buildingSlug,

@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       okCount: analyses.filter((a) => a.status === 'ok').length,
       tightCount: analyses.filter((a) => a.status === 'tight').length,
       insufficientCount: analyses.filter((a) => a.status === 'insufficient').length,
+      conflictCount: analyses.filter((a) => a.status === 'conflict').length,
       hasIssues: analyses.some((a) => a.status !== 'ok'),
       totalWalkingTime: analyses.reduce((sum, a) => sum + a.walkingTime, 0),
       totalDistance: analyses.reduce((sum, a) => sum + a.distance, 0),
