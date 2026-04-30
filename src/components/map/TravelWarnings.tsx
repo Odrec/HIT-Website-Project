@@ -126,9 +126,23 @@ export default function TravelWarnings({
                   </p>
 
                   {analysis.status === 'conflict' ? (
-                    <p className="text-red-600 font-medium">
-                      Veranstaltungen überschneiden sich um {analysis.overlapMinutes ?? 0} Min.
-                    </p>
+                    <>
+                      <div className="flex flex-wrap gap-3 text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {formatDistance(analysis.distance)}
+                        </span>
+                        <span>Überschneidung: {analysis.overlapMinutes ?? 0} Min.</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Gehzeit: {formatTime(analysis.walkingTime)}
+                        </span>
+                      </div>
+                      <p className="text-red-600 font-medium">
+                        Mindestens {formatTime(Math.abs(analysis.timeMargin))} verlieren, wenn Sie
+                        beide besuchen
+                      </p>
+                    </>
                   ) : (
                     <>
                       <div className="flex flex-wrap gap-3 text-gray-600">
