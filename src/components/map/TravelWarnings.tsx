@@ -80,7 +80,7 @@ export default function TravelWarnings({
           <div
             key={`${analysis.eventFromId}-${analysis.eventToId}`}
             className={`p-3 rounded-lg border ${
-              analysis.status === 'insufficient'
+              analysis.status === 'insufficient' || analysis.status === 'conflict'
                 ? 'bg-red-50 border-red-200'
                 : 'bg-yellow-50 border-yellow-200'
             }`}
@@ -89,14 +89,22 @@ export default function TravelWarnings({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge
-                    variant={analysis.status === 'insufficient' ? 'destructive' : 'outline'}
+                    variant={
+                      analysis.status === 'insufficient' || analysis.status === 'conflict'
+                        ? 'destructive'
+                        : 'outline'
+                    }
                     className={
                       analysis.status === 'tight'
                         ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
                         : ''
                     }
                   >
-                    {analysis.status === 'insufficient' ? 'Nicht genug Zeit' : 'Knappe Zeit'}
+                    {analysis.status === 'conflict'
+                      ? 'Zeitkonflikt'
+                      : analysis.status === 'insufficient'
+                        ? 'Nicht genug Zeit'
+                        : 'Knappe Zeit'}
                   </Badge>
                 </div>
 
@@ -117,27 +125,49 @@ export default function TravelWarnings({
                     </button>
                   </p>
 
-                  <div className="flex flex-wrap gap-3 text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {formatDistance(analysis.distance)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      Benötigt: {formatTime(analysis.requiredTime)}
-                    </span>
-                    <span>Verfügbar: {formatTime(analysis.timeBetweenEvents)}</span>
-                  </div>
+                  {analysis.status === 'conflict' ? (
+                    <>
+                      <div className="flex flex-wrap gap-3 text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {formatDistance(analysis.distance)}
+                        </span>
+                        <span>Überschneidung: {analysis.overlapMinutes ?? 0} Min.</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Gehzeit: {formatTime(analysis.walkingTime)}
+                        </span>
+                      </div>
+                      <p className="text-red-600 font-medium">
+                        Mindestens {formatTime(Math.abs(analysis.timeMargin))} verlieren, wenn Sie
+                        beide besuchen
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap gap-3 text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {formatDistance(analysis.distance)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Benötigt: {formatTime(analysis.requiredTime)}
+                        </span>
+                        <span>Verfügbar: {formatTime(analysis.timeBetweenEvents)}</span>
+                      </div>
 
-                  {analysis.timeMargin < 0 ? (
-                    <p className="text-red-600 font-medium">
-                      {formatTime(Math.abs(analysis.timeMargin))} zu wenig
-                    </p>
-                  ) : analysis.status === 'tight' ? (
-                    <p className="text-yellow-700 font-medium">
-                      {formatTime(analysis.timeMargin)} Puffer
-                    </p>
-                  ) : null}
+                      {analysis.timeMargin < 0 ? (
+                        <p className="text-red-600 font-medium">
+                          {formatTime(Math.abs(analysis.timeMargin))} zu wenig
+                        </p>
+                      ) : analysis.status === 'tight' ? (
+                        <p className="text-yellow-700 font-medium">
+                          {formatTime(analysis.timeMargin)} Puffer
+                        </p>
+                      ) : null}
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -573,6 +573,31 @@ export async function analyzeTravelTimes(
 
       const timeBetweenEvents = (eventTo.timeStart.getTime() - eventFrom.timeEnd.getTime()) / 1000
       const requiredTime = walkingTime + settings.bufferMinutes * 60
+
+      // Overlapping events: still a scheduling conflict, but the user may want
+      // to attend both partially. The minimum time they'll lose from the two
+      // events combined is overlap + walkingTime (any earlier-leave / later-
+      // arrive split adds up to the same total). Surface that explicitly.
+      if (eventTo.timeStart.getTime() < eventFrom.timeEnd.getTime()) {
+        const overlapSeconds =
+          (eventFrom.timeEnd.getTime() - eventTo.timeStart.getTime()) / 1000
+        analyses.push({
+          eventFromId: eventFrom.id,
+          eventToId: eventTo.id,
+          eventFromTitle: eventFrom.title,
+          eventToTitle: eventTo.title,
+          timeBetweenEvents: -overlapSeconds,
+          walkingTime,
+          requiredTime,
+          distance,
+          hasSufficientTime: false,
+          timeMargin: -(overlapSeconds + walkingTime),
+          overlapMinutes: Math.ceil(overlapSeconds / 60),
+          status: 'conflict',
+        })
+        continue
+      }
+
       const timeMargin = timeBetweenEvents - requiredTime
 
       let status: 'ok' | 'tight' | 'insufficient'

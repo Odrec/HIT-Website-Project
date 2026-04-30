@@ -181,7 +181,9 @@ export interface TravelTimeAnalysis {
   distance: number // meters
   hasSufficientTime: boolean
   timeMargin: number // seconds (can be negative)
-  status: 'ok' | 'tight' | 'insufficient'
+  /** overlapMinutes is set when status === 'conflict': how many minutes the events overlap */
+  overlapMinutes?: number
+  status: 'ok' | 'tight' | 'insufficient' | 'conflict'
 }
 
 /**
