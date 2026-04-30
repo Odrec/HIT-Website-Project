@@ -7,6 +7,8 @@ import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
 import { getActiveEdition } from '@/lib/active-edition'
 
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=60, stale-while-revalidate=120'
+
 /**
  * Generate a cache key from query parameters
  */
@@ -51,6 +53,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'X-Cache': 'HIT',
             'X-Cache-Key': cacheKey,
+            'Cache-Control': PUBLIC_CACHE_HEADER,
           },
         })
       }
@@ -351,6 +354,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'X-Cache': 'MISS',
         'X-Cache-Key': cacheKey,
+        'Cache-Control': PUBLIC_CACHE_HEADER,
       },
     })
   } catch (error) {

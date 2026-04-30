@@ -21,6 +21,19 @@ vi.mock('@/lib/active-edition', () => ({
   }),
 }))
 
+vi.mock('@/lib/cache/cache-utils', () => ({
+  cacheGet: vi.fn().mockResolvedValue(null),
+  cacheSet: vi.fn().mockResolvedValue(true),
+}))
+
+vi.mock('@/lib/cache/redis', () => ({
+  isRedisConnected: vi.fn().mockResolvedValue(false),
+  default: {
+    get: vi.fn(),
+    setex: vi.fn(),
+  },
+}))
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockFindMany.mockResolvedValue([])

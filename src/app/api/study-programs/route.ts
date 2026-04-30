@@ -9,6 +9,8 @@ import { cacheGet, cacheSet, invalidateProgramCaches } from '@/lib/cache/cache-u
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
 
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
+
 /**
  * Generate a cache key for study programs
  */
@@ -41,6 +43,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'X-Cache': 'HIT',
             'X-Cache-Key': cacheKey,
+            'Cache-Control': PUBLIC_CACHE_HEADER,
           },
         })
       }
@@ -63,6 +66,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'X-Cache': 'MISS',
         'X-Cache-Key': cacheKey,
+        'Cache-Control': PUBLIC_CACHE_HEADER,
       },
     })
   } catch (error) {

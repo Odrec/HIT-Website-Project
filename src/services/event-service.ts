@@ -3,6 +3,7 @@
 import { Prisma } from '@/generated/prisma/client/client'
 import { getActiveEditionId } from '@/lib/active-edition'
 import { prisma } from '@/lib/db/prisma'
+import { invalidateEventCaches } from '@/lib/cache/cache-utils'
 import type {
   CreateEventInput,
   UpdateEventInput,
@@ -244,10 +245,12 @@ export const eventService = {
     if (existing.reviewStatus === 'PUBLISHED') {
       throw new Error('Event ist bereits veröffentlicht')
     }
-    return prisma.event.update({
+    const result = await prisma.event.update({
       where: { id },
       data: { reviewStatus: 'PUBLISHED' },
     })
+    await invalidateEventCaches()
+    return result
   },
 
   /**
@@ -315,7 +318,7 @@ export const eventService = {
       ...eventData
     } = input
 
-    return prisma.event.create({
+    const result = await prisma.event.create({
       data: {
         ...eventData,
         edition: { connect: { id: activeEditionId } },
@@ -373,6 +376,8 @@ export const eventService = {
         },
       },
     })
+    await invalidateEventCaches()
+    return result
   },
 
   /**
@@ -455,7 +460,7 @@ export const eventService = {
       }
     }
 
-    return prisma.event.update({
+    const result = await prisma.event.update({
       where: { id },
       data: updateData,
       include: {
@@ -476,6 +481,8 @@ export const eventService = {
         },
       },
     })
+    await invalidateEventCaches()
+    return result
   },
 
   /**
@@ -484,9 +491,11 @@ export const eventService = {
    * Operates on primary key only — no edition scoping. See `update` for caveats.
    */
   async delete(id: string) {
-    return prisma.event.delete({
+    const result = await prisma.event.delete({
       where: { id },
     })
+    await invalidateEventCaches()
+    return result
   },
 
   /**
@@ -497,11 +506,13 @@ export const eventService = {
    * edition, or stale cross-edition ids could be silently removed. See spec §2.
    */
   async deleteMany(ids: string[]) {
-    return prisma.event.deleteMany({
+    const result = await prisma.event.deleteMany({
       where: {
         id: { in: ids },
       },
     })
+    await invalidateEventCaches()
+    return result
   },
 
   /**
@@ -518,7 +529,7 @@ export const eventService = {
     }
     const activeEditionId = await getActiveEditionId()
 
-    return prisma.event.create({
+    const result = await prisma.event.create({
       data: {
         title: `${original.title} (Copy)`,
         description: original.description,
@@ -585,6 +596,8 @@ export const eventService = {
         },
       },
     })
+    await invalidateEventCaches()
+    return result
   },
 }
 

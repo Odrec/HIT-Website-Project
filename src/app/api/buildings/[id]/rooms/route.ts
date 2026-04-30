@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { invalidateBuildingCaches } from '@/lib/cache/cache-utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -38,6 +39,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         buildingId: id,
       },
     })
+
+    await invalidateBuildingCaches()
 
     return NextResponse.json(room, { status: 201 })
   } catch (error) {

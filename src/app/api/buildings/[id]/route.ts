@@ -3,6 +3,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { cacheGet, cacheSet, invalidateBuildingCaches } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
+
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -14,6 +19,21 @@ interface RouteParams {
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
+    const cacheKey = CacheKeys.buildings.byId(id)
+    const redisConnected = await isRedisConnected()
+
+    if (redisConnected) {
+      const cached = await cacheGet<unknown>(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': PUBLIC_CACHE_HEADER,
+          },
+        })
+      }
+    }
+
     const building = await prisma.building.findUnique({
       where: { id },
       include: { rooms: { orderBy: { name: 'asc' } } },
@@ -23,7 +43,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Gebäude nicht gefunden' }, { status: 404 })
     }
 
-    return NextResponse.json(building)
+    if (redisConnected) {
+      await cacheSet(cacheKey, building, CacheTTL.BUILDINGS)
+    }
+
+    return NextResponse.json(building, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': PUBLIC_CACHE_HEADER,
+      },
+    })
   } catch (error) {
     console.error('Error fetching building:', error)
     return NextResponse.json({ error: 'Fehler beim Abrufen des Gebäudes' }, { status: 500 })
@@ -87,6 +116,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       include: { rooms: { orderBy: { name: 'asc' } } },
     })
 
+    await invalidateBuildingCaches()
+
     return NextResponse.json(building)
   } catch (error) {
     console.error('Error updating building:', error)
@@ -112,6 +143,8 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     }
 
     await prisma.building.delete({ where: { id } })
+
+    await invalidateBuildingCaches()
 
     return NextResponse.json({ success: true })
   } catch (error) {
