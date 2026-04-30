@@ -3,6 +3,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getActiveEditionId } from '@/lib/active-edition'
+import { cacheGet, cacheSet } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
+
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=60, stale-while-revalidate=120'
 
 /**
  * GET /api/events/public/[id] - Get a single event with related events
@@ -13,6 +18,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { searchParams } = new URL(request.url)
     const editionIdOverride = searchParams.get('edition')
     const editionId = editionIdOverride ?? (await getActiveEditionId())
+
+    // Cache key includes edition so a future cross-edition switch can't leak
+    // a stale event detail across editions.
+    const cacheKey = `${CacheKeys.events.byId(id)}:edition:${editionId}`
+    const redisConnected = await isRedisConnected()
+
+    if (redisConnected) {
+      const cached = await cacheGet<unknown>(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': PUBLIC_CACHE_HEADER,
+          },
+        })
+      }
+    }
 
     // Fetch the event with all its relations
     const event = await prisma.event.findFirst({
@@ -203,9 +225,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       infoMarkets: e.infoMarkets?.map((eim: any) => eim.market) || [],
     })
 
-    return NextResponse.json({
+    const responseData = {
       event: transformEvent(event),
       relatedEvents: relatedEvents.map(transformEvent),
+    }
+
+    if (redisConnected) {
+      await cacheSet(cacheKey, responseData, CacheTTL.EVENTS)
+    }
+
+    return NextResponse.json(responseData, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': PUBLIC_CACHE_HEADER,
+      },
     })
   } catch (error) {
     console.error('Error fetching event:', error)

@@ -3,17 +3,47 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { cacheGet, cacheSet, invalidateBuildingCaches } from '@/lib/cache/cache-utils'
+import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
+import { isRedisConnected } from '@/lib/cache/redis'
+
+const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
 /**
  * GET /api/buildings - List all buildings with rooms
  */
 export async function GET() {
   try {
+    const cacheKey = CacheKeys.buildings.all()
+    const redisConnected = await isRedisConnected()
+
+    if (redisConnected) {
+      const cached = await cacheGet<unknown>(cacheKey)
+      if (cached) {
+        return NextResponse.json(cached, {
+          headers: {
+            'X-Cache': 'HIT',
+            'Cache-Control': PUBLIC_CACHE_HEADER,
+          },
+        })
+      }
+    }
+
     const buildings = await prisma.building.findMany({
       include: { rooms: { orderBy: { name: 'asc' } } },
       orderBy: { name: 'asc' },
     })
-    return NextResponse.json(buildings)
+
+    if (redisConnected) {
+      await cacheSet(cacheKey, buildings, CacheTTL.BUILDINGS)
+    }
+
+    return NextResponse.json(buildings, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': PUBLIC_CACHE_HEADER,
+      },
+    })
   } catch (error) {
     console.error('Error fetching buildings:', error)
     return NextResponse.json({ error: 'Fehler beim Abrufen der Gebäude' }, { status: 500 })
@@ -80,6 +110,8 @@ export async function POST(request: NextRequest) {
       },
       include: { rooms: true },
     })
+
+    await invalidateBuildingCaches()
 
     return NextResponse.json(building, { status: 201 })
   } catch (error) {
