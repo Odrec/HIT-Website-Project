@@ -12,7 +12,11 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "loadtest:smoke": "k6 run --env SCENARIO=smoke loadtest/k6.js",
+    "loadtest:ramp": "k6 run --env SCENARIO=ramp loadtest/k6.js",
+    "loadtest:spike": "k6 run --env SCENARIO=spike loadtest/k6.js",
+    "loadtest:soak": "k6 run --env SCENARIO=soak loadtest/k6.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

@@ -14,101 +14,30 @@ This document provides comprehensive guidance for testing the HIT Website applic
 
 ## Load Testing
 
-### Overview
+Load tests use [k6](https://k6.io). The full load-test suite, scenarios,
+thresholds, and how to run them are documented in
+[`loadtest/README.md`](../loadtest/README.md).
 
-The application includes a custom load testing script that simulates concurrent users accessing the API endpoints. This helps verify that the system can handle the expected traffic during the HIT event.
-
-### Prerequisites
-
-- Node.js 20+ installed
-- Application running locally or accessible at a test URL
-- Redis running (for caching tests)
-- PostgreSQL database running
-
-### Running Load Tests
-
-#### Basic Load Test
+Quick smoke test against a running app:
 
 ```bash
-# Start the application first
-npm run dev
-
-# In another terminal, run the load test
-npx ts-node scripts/load-test.ts
+BASE_URL=http://localhost:3000 npm run loadtest:smoke
 ```
 
-#### Custom Configuration
+Other available scenarios: `loadtest:ramp`, `loadtest:spike`, `loadtest:soak`.
 
-Configure the load test using environment variables:
+### Performance Targets
 
-```bash
-# Simulate 100 concurrent users for 60 seconds
-LOAD_TEST_URL=http://localhost:3000 \
-LOAD_TEST_CONCURRENT=100 \
-LOAD_TEST_DURATION=60 \
-LOAD_TEST_DELAY=500 \
-npx ts-node scripts/load-test.ts
-```
+These are enforced as k6 thresholds in `loadtest/k6.js` — a failing run
+exits non-zero.
 
-#### Configuration Options
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOAD_TEST_URL` | `http://localhost:3000` | Base URL of the application |
-| `LOAD_TEST_CONCURRENT` | `50` | Number of concurrent users |
-| `LOAD_TEST_DURATION` | `30` | Test duration in seconds |
-| `LOAD_TEST_DELAY` | `500` | Delay between requests per user (ms) |
-
-### Interpreting Results
-
-The load test outputs:
-
-- **Total Requests**: Number of requests made during the test
-- **Success Rate**: Percentage of successful (2xx) responses
-- **Response Times**: Average, min, max, and percentiles (p50, p95, p99)
-- **Requests/sec**: Throughput achieved
-- **Endpoint Statistics**: Per-endpoint breakdown
-
-#### Performance Targets
-
-| Metric | Excellent | Acceptable | Poor |
-|--------|-----------|------------|------|
-| Average Response Time | < 500ms | < 1000ms | > 1000ms |
-| 95th Percentile | < 1000ms | < 2000ms | > 2000ms |
-| Success Rate | > 99% | > 95% | < 95% |
-
-### Load Testing for Production
-
-For production-like load testing, consider:
-
-1. **Use external tools**: k6, Artillery, or Apache JMeter for more advanced scenarios
-2. **Test against staging**: Never load test production directly
-3. **Monitor resources**: Watch CPU, memory, and database connections
-4. **Test with realistic data**: Ensure the database has production-scale data
-
-#### Example k6 Script
-
-```javascript
-import http from 'k6/http'
-import { check, sleep } from 'k6'
-
-export const options = {
-  stages: [
-    { duration: '1m', target: 50 },  // Ramp up
-    { duration: '5m', target: 100 }, // Stay at 100 users
-    { duration: '1m', target: 0 },   // Ramp down
-  ],
-}
-
-export default function () {
-  const res = http.get('http://localhost:3000/api/events/public?page=1&pageSize=12')
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
-  })
-  sleep(1)
-}
-```
+| Metric | Target |
+|---|---|
+| Error rate (`http_req_failed`) | < 1% |
+| Overall p95 latency (`http_req_duration`) | < 1500 ms |
+| `/home` p95 latency | < 2000 ms |
+| `/api/events/public` p95 latency | < 1500 ms |
+| `/api/buildings` p95 latency | < 800 ms |
 
 ---
 
