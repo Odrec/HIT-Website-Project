@@ -231,7 +231,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
 
   // Handle view events for program
   const handleViewEvents = (programId: string) => {
-    window.open(`/events?studyProgram=${programId}`, '_blank')
+    window.open(`/events/program/${programId}`, '_blank')
   }
 
   return (
