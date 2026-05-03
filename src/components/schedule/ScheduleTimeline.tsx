@@ -64,6 +64,10 @@ interface TimeSlotEvent {
   hasConflict: boolean
 }
 
+type MobileSegment =
+  | { type: 'timeline'; events: TimeSlotEvent[]; startSlot: number; endSlot: number }
+  | { type: 'cluster'; events: TimeSlotEvent[] }
+
 export function ScheduleTimeline({
   selectedDate,
   showControls = true,
@@ -137,33 +141,30 @@ export function ScheduleTimeline({
       .sort((a, b) => a.startSlot - b.startSlot)
   }, [timelineEvents, getConflicts])
 
-  // Group overlapping events into clusters for layout
-  const layoutItems = useMemo(() => {
+  // Group overlapping events into clusters
+  const clusters = useMemo<TimeSlotEvent[][]>(() => {
     if (timeSlotEvents.length === 0) return []
-
-    // Build overlap clusters: groups of events that overlap with each other
-    const clusters: TimeSlotEvent[][] = []
-    let currentCluster: TimeSlotEvent[] = [timeSlotEvents[0]]
-    let clusterEnd = timeSlotEvents[0].endSlot
-
+    const result: TimeSlotEvent[][] = []
+    let current: TimeSlotEvent[] = [timeSlotEvents[0]]
+    let currentEnd = timeSlotEvents[0].endSlot
     for (let i = 1; i < timeSlotEvents.length; i++) {
       const event = timeSlotEvents[i]
-      if (event.startSlot < clusterEnd) {
-        // Overlaps with current cluster
-        currentCluster.push(event)
-        clusterEnd = Math.max(clusterEnd, event.endSlot)
+      if (event.startSlot < currentEnd) {
+        current.push(event)
+        currentEnd = Math.max(currentEnd, event.endSlot)
       } else {
-        // New cluster
-        clusters.push(currentCluster)
-        currentCluster = [event]
-        clusterEnd = event.endSlot
+        result.push(current)
+        current = [event]
+        currentEnd = event.endSlot
       }
     }
-    clusters.push(currentCluster)
+    result.push(current)
+    return result
+  }, [timeSlotEvents])
 
-    // Assign column positions within each cluster
+  // Desktop: assign column positions within each cluster
+  const layoutItems = useMemo(() => {
     return clusters.flatMap((cluster) => {
-      // Place events into columns within this cluster
       const columns: TimeSlotEvent[][] = []
       cluster.forEach((event) => {
         let placed = false
@@ -183,7 +184,32 @@ export function ScheduleTimeline({
       const numCols = columns.length
       return columns.flatMap((col, colIdx) => col.map((event) => ({ event, colIdx, numCols })))
     })
-  }, [timeSlotEvents])
+  }, [clusters])
+
+  // Mobile: alternate timeline-grids (single events) with stacked clusters
+  // (overlapping events). Single-event clusters bunched together stay in a
+  // shared mini-timeline; conflict clusters break out as full-width cards.
+  const mobileSegments = useMemo<MobileSegment[]>(() => {
+    const segments: MobileSegment[] = []
+    let buf: TimeSlotEvent[] = []
+    const flush = () => {
+      if (buf.length === 0) return
+      const startSlot = Math.min(...buf.map((e) => e.startSlot))
+      const endSlot = Math.max(...buf.map((e) => e.endSlot))
+      segments.push({ type: 'timeline', events: buf, startSlot, endSlot })
+      buf = []
+    }
+    for (const cluster of clusters) {
+      if (cluster.length === 1) {
+        buf.push(cluster[0])
+      } else {
+        flush()
+        segments.push({ type: 'cluster', events: cluster })
+      }
+    }
+    flush()
+    return segments
+  }, [clusters])
 
   const handleRemoveEvent = (eventId: string) => {
     removeEvent(eventId)
@@ -192,6 +218,134 @@ export function ScheduleTimeline({
   const handlePrioritySelect = (eventId: string, priority: SchedulePriority) => {
     updatePriority(eventId, priority)
   }
+
+  const renderEventCardBody = (item: TimeSlotEvent, showPriorityControls: boolean) => (
+    <CardContent className="p-0 h-full flex flex-col">
+      {/* Event header */}
+      <div className="flex items-start justify-between gap-1">
+        <div className="flex-grow min-w-0">
+          <Badge
+            variant="outline"
+            className={cn('text-xs mb-1', eventTypeColors[item.scheduleEvent.event.eventType])}
+          >
+            {eventTypeLabels[item.scheduleEvent.event.eventType]}
+          </Badge>
+          <Link
+            href={`/events/${item.scheduleEvent.event.id}`}
+            className="group/link"
+            title={item.scheduleEvent.event.title}
+          >
+            <h4
+              className={cn(
+                'font-medium line-clamp-3 break-words group-hover/link:underline',
+                compact ? 'text-xs' : 'text-sm'
+              )}
+            >
+              {item.scheduleEvent.event.title}
+            </h4>
+          </Link>
+        </div>
+
+        {/* Conflict warning + travel warning + always-visible remove button */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          {item.hasConflict && (
+            <AlertTriangle className="h-4 w-4 text-yellow-500" aria-label="Zeitkonflikt" />
+          )}
+          {travelWarningByEventId.get(item.scheduleEvent.eventId) && (
+            <span
+              title={`Knappe Reisezeit: ${
+                travelWarningByEventId.get(item.scheduleEvent.eventId)!.travelMinutes
+              } Min Fußweg von ${
+                travelWarningByEventId.get(item.scheduleEvent.eventId)!.fromBuildingName
+              }, aber nur ${
+                travelWarningByEventId.get(item.scheduleEvent.eventId)!.gapMinutes
+              } Min Pause.`}
+            >
+              <Footprints className="h-4 w-4 text-destructive" aria-label="Knappe Reisezeit" />
+            </span>
+          )}
+          {showControls && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
+              title="Aus Stundenplan entfernen"
+              aria-label="Aus Stundenplan entfernen"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Event details */}
+      {!compact && (
+        <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
+          {item.scheduleEvent.event.timeStart && (
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 flex-shrink-0" />
+              <span>
+                {formatEventTimeRange(
+                  item.scheduleEvent.event.timeStart,
+                  item.scheduleEvent.event.timeEnd
+                )}
+              </span>
+            </div>
+          )}
+          {item.scheduleEvent.event.building && (
+            <div
+              className="flex items-center gap-1"
+              title={`${item.scheduleEvent.event.building.name}${
+                item.scheduleEvent.event.room?.name ? `, ${item.scheduleEvent.event.room.name}` : ''
+              }`}
+            >
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">
+                {item.scheduleEvent.event.building.name}
+                {item.scheduleEvent.event.room?.name && `, ${item.scheduleEvent.event.room.name}`}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Priority controls */}
+      {showControls && !compact && showPriorityControls && (
+        <div className="mt-auto pt-2 flex items-center gap-1.5 flex-wrap">
+          <span
+            className="text-xs text-muted-foreground"
+            title="Priorität: hilft dir, wichtige Termine zu markieren"
+          >
+            Prio.
+          </span>
+          <div
+            role="radiogroup"
+            aria-label="Priorität wählen"
+            className="inline-flex rounded-md border border-input overflow-hidden"
+          >
+            {SCHEDULE_PRIORITY_ORDER.map((p) => (
+              <button
+                key={p}
+                type="button"
+                role="radio"
+                aria-checked={item.scheduleEvent.priority === p}
+                onClick={() => handlePrioritySelect(item.scheduleEvent.eventId, p)}
+                className={cn(
+                  'px-1.5 py-0.5 text-[10px] font-medium transition-colors leading-tight',
+                  item.scheduleEvent.priority === p
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-muted'
+                )}
+              >
+                {SCHEDULE_PRIORITY_LABELS[p]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </CardContent>
+  )
 
   if (timelineEvents.length === 0 && infostands.length === 0) {
     return (
@@ -211,8 +365,8 @@ export function ScheduleTimeline({
 
   return (
     <div className={cn('relative', className)}>
-      {/* Timeline container */}
-      <div className="flex">
+      {/* Desktop timeline (≥ md): column-based layout */}
+      <div className="hidden md:flex">
         {/* Time labels */}
         <div className="flex-shrink-0 w-16 pr-2">
           {TIME_SLOTS.map((slot, idx) => (
@@ -266,155 +420,115 @@ export function ScheduleTimeline({
                     width: `calc(${columnWidth}% - 4px)`,
                   }}
                 >
-                  <CardContent className="p-0 h-full flex flex-col">
-                    {/* Event header */}
-                    <div className="flex items-start justify-between gap-1">
-                      <div className="flex-grow min-w-0">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            'text-xs mb-1',
-                            eventTypeColors[item.scheduleEvent.event.eventType]
-                          )}
-                        >
-                          {eventTypeLabels[item.scheduleEvent.event.eventType]}
-                        </Badge>
-                        <Link
-                          href={`/events/${item.scheduleEvent.event.id}`}
-                          className="group/link"
-                          title={item.scheduleEvent.event.title}
-                        >
-                          <h4
-                            className={cn(
-                              'font-medium line-clamp-3 break-words group-hover/link:underline',
-                              compact ? 'text-xs' : 'text-sm'
-                            )}
-                          >
-                            {item.scheduleEvent.event.title}
-                          </h4>
-                        </Link>
-                      </div>
-
-                      {/* Conflict warning + travel warning + always-visible remove button */}
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        {item.hasConflict && (
-                          <AlertTriangle
-                            className="h-4 w-4 text-yellow-500"
-                            aria-label="Zeitkonflikt"
-                          />
-                        )}
-                        {travelWarningByEventId.get(item.scheduleEvent.eventId) && (
-                          <span
-                            title={
-                              travelWarningByEventId.get(item.scheduleEvent.eventId)
-                                ? `Knappe Reisezeit: ${
-                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
-                                      .travelMinutes
-                                  } Min Fußweg von ${
-                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
-                                      .fromBuildingName
-                                  }, aber nur ${
-                                    travelWarningByEventId.get(item.scheduleEvent.eventId)!
-                                      .gapMinutes
-                                  } Min Pause.`
-                                : undefined
-                            }
-                          >
-                            <Footprints
-                              className="h-4 w-4 text-destructive"
-                              aria-label="Knappe Reisezeit"
-                            />
-                          </span>
-                        )}
-                        {showControls && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleRemoveEvent(item.scheduleEvent.eventId)}
-                            title="Aus Stundenplan entfernen"
-                            aria-label="Aus Stundenplan entfernen"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Event details */}
-                    {!compact && (
-                      <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
-                        {item.scheduleEvent.event.timeStart && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3 flex-shrink-0" />
-                            <span>
-                              {formatEventTimeRange(
-                                item.scheduleEvent.event.timeStart,
-                                item.scheduleEvent.event.timeEnd
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        {item.scheduleEvent.event.building && (
-                          <div
-                            className="flex items-center gap-1"
-                            title={`${item.scheduleEvent.event.building.name}${
-                              item.scheduleEvent.event.room?.name
-                                ? `, ${item.scheduleEvent.event.room.name}`
-                                : ''
-                            }`}
-                          >
-                            <MapPin className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate">
-                              {item.scheduleEvent.event.building.name}
-                              {item.scheduleEvent.event.room?.name &&
-                                `, ${item.scheduleEvent.event.room.name}`}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Priority controls (only when there's room — trash is always shown in the header) */}
-                    {showControls && !compact && height >= 144 && (
-                      <div className="mt-auto pt-2 flex items-center gap-1.5 flex-wrap">
-                        <span
-                          className="text-xs text-muted-foreground"
-                          title="Priorität: hilft dir, wichtige Termine zu markieren"
-                        >
-                          Prio.
-                        </span>
-                        <div
-                          role="radiogroup"
-                          aria-label="Priorität wählen"
-                          className="inline-flex rounded-md border border-input overflow-hidden"
-                        >
-                          {SCHEDULE_PRIORITY_ORDER.map((p) => (
-                            <button
-                              key={p}
-                              type="button"
-                              role="radio"
-                              aria-checked={item.scheduleEvent.priority === p}
-                              onClick={() => handlePrioritySelect(item.scheduleEvent.eventId, p)}
-                              className={cn(
-                                'px-1.5 py-0.5 text-[10px] font-medium transition-colors leading-tight',
-                                item.scheduleEvent.priority === p
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-background text-muted-foreground hover:bg-muted'
-                              )}
-                            >
-                              {SCHEDULE_PRIORITY_LABELS[p]}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
+                  {renderEventCardBody(item, height >= 144)}
                 </Card>
               )
             })}
           </div>
         </div>
+      </div>
+
+      {/* Mobile timeline (< md): conflict groups break out as full-width
+          stacked cards under a warning header; non-overlapping events stay in
+          a mini-timeline grid. */}
+      <div className="md:hidden space-y-3">
+        {mobileSegments.map((seg, segIdx) => {
+          if (seg.type === 'timeline') {
+            const slotCount = seg.endSlot - seg.startSlot
+            return (
+              <div key={`tl-${segIdx}`} className="flex">
+                <div className="flex-shrink-0 w-14 pr-2">
+                  {Array.from({ length: slotCount }, (_, i) => {
+                    const globalIdx = seg.startSlot + i
+                    const slot = TIME_SLOTS[globalIdx]
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          'h-12 text-xs flex items-start justify-end pr-2',
+                          globalIdx % 2 === 0
+                            ? 'text-muted-foreground font-medium'
+                            : 'text-muted-foreground/50'
+                        )}
+                      >
+                        {globalIdx % 2 === 0 && slot?.label}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="flex-grow relative">
+                  <div className="absolute inset-0">
+                    {Array.from({ length: slotCount }, (_, i) => {
+                      const globalIdx = seg.startSlot + i
+                      return (
+                        <div
+                          key={i}
+                          className={cn(
+                            'h-12 border-t',
+                            globalIdx % 2 === 0 ? 'border-border' : 'border-border/50'
+                          )}
+                        />
+                      )
+                    })}
+                  </div>
+                  <div className="relative" style={{ minHeight: `${slotCount * 48}px` }}>
+                    {seg.events.map((item) => {
+                      const top = (item.startSlot - seg.startSlot) * 48
+                      const height = item.duration * 48
+                      return (
+                        <Card
+                          key={item.scheduleEvent.id}
+                          className={cn(
+                            'absolute overflow-hidden transition-all left-0 right-1',
+                            compact ? 'p-1' : 'p-2'
+                          )}
+                          style={{ top: `${top}px`, height: `${height - 4}px` }}
+                        >
+                          {renderEventCardBody(item, height >= 144)}
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          // Conflict cluster — full-width stack under a warning header.
+          const earliestStart = seg.events.reduce<Date | null>((acc, e) => {
+            const t = e.scheduleEvent.event.timeStart
+            if (!t) return acc
+            if (!acc) return t
+            return t < acc ? t : acc
+          }, null)
+          const latestEnd = seg.events.reduce<Date | null>((acc, e) => {
+            const t = e.scheduleEvent.event.timeEnd ?? e.scheduleEvent.event.timeStart
+            if (!t) return acc
+            if (!acc) return t
+            return t > acc ? t : acc
+          }, null)
+
+          return (
+            <div key={`cl-${segIdx}`} className="space-y-2">
+              <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900 rounded-lg text-yellow-800 dark:text-yellow-200 text-xs font-semibold">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                <span>
+                  {seg.events.length} überlappende Events
+                  {earliestStart &&
+                    ` · ${formatEventTimeRange(earliestStart, latestEnd ?? undefined)}`}
+                </span>
+              </div>
+              {seg.events.map((item) => (
+                <Card
+                  key={item.scheduleEvent.id}
+                  className={cn('overflow-hidden ring-2 ring-yellow-500', compact ? 'p-2' : 'p-3')}
+                >
+                  {renderEventCardBody(item, true)}
+                </Card>
+              ))}
+            </div>
+          )
+        })}
       </div>
 
       {/* Conflicts summary */}
