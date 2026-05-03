@@ -47,7 +47,7 @@ function EventsLandingContent() {
       .catch(() => setMultiplikatorCafe({ eventId: null }))
   }, [])
 
-  const onSearchSubmit = (e: React.FormEvent) => {
+  const onSearchSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/events/search?q=${encodeURIComponent(searchQuery.trim())}`)
@@ -120,7 +120,10 @@ function EventsLandingContent() {
           <LandingLink href="/events/infomaerkte" label="Infomärkte" />
           <LandingLink href="/events/rund-ums-studium" label="Rund ums Studium" />
           {shouldShowMultiplikatorCafeLink(multiplikatorCafe.eventId) && (
-            <LandingLink href={`/events/${multiplikatorCafe.eventId}`} label="Multiplikator*innen-Café" />
+            <LandingLink
+              href={`/events/${multiplikatorCafe.eventId}`}
+              label="Multiplikator*innen-Café"
+            />
           )}
         </div>
       </section>

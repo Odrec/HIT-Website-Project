@@ -395,9 +395,7 @@ export function ScheduleTimeline({
                               type="button"
                               role="radio"
                               aria-checked={item.scheduleEvent.priority === p}
-                              onClick={() =>
-                                handlePrioritySelect(item.scheduleEvent.eventId, p)
-                              }
+                              onClick={() => handlePrioritySelect(item.scheduleEvent.eventId, p)}
                               className={cn(
                                 'px-1.5 py-0.5 text-[10px] font-medium transition-colors leading-tight',
                                 item.scheduleEvent.priority === p

@@ -579,8 +579,7 @@ export async function analyzeTravelTimes(
       // events combined is overlap + walkingTime (any earlier-leave / later-
       // arrive split adds up to the same total). Surface that explicitly.
       if (eventTo.timeStart.getTime() < eventFrom.timeEnd.getTime()) {
-        const overlapSeconds =
-          (eventFrom.timeEnd.getTime() - eventTo.timeStart.getTime()) / 1000
+        const overlapSeconds = (eventFrom.timeEnd.getTime() - eventTo.timeStart.getTime()) / 1000
         analyses.push({
           eventFromId: eventFrom.id,
           eventToId: eventTo.id,

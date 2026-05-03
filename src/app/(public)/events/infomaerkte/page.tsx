@@ -35,7 +35,7 @@ export default async function InfomaerktePage() {
   })
 
   // Reshape to match EventCard's expected shape
-  const reshape = (e: typeof eventsByLocation[number]) => ({
+  const reshape = (e: (typeof eventsByLocation)[number]) => ({
     id: e.id,
     title: e.title,
     description: e.description,
@@ -59,20 +59,25 @@ export default async function InfomaerktePage() {
     })),
   })
 
-  const schlossEvents = eventsByLocation.filter((e) => e.locationType === 'INFOMARKT_SCHLOSS').map(reshape)
+  const schlossEvents = eventsByLocation
+    .filter((e) => e.locationType === 'INFOMARKT_SCHLOSS')
+    .map(reshape)
   const cnEvents = eventsByLocation.filter((e) => e.locationType === 'INFOMARKT_CN').map(reshape)
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <Link href="/events" className="inline-flex items-center gap-1 text-sm text-hit-gray-500 hover:text-hit-uni-500">
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-1 text-sm text-hit-gray-500 hover:text-hit-uni-500"
+        >
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">Infomärkte</h1>
         <p className="mt-2 max-w-2xl text-hit-gray-600">
           An den Infomärkten an zwei Standorten beraten Studierende und Mitarbeitende der
-          Universität und Hochschule rund um die Studienorientierung. Hier können Sie ohne
-          Anmeldung jederzeit vorbeischauen, Fragen stellen und sich Materialien mitnehmen.
+          Universität und Hochschule rund um die Studienorientierung. Hier können Sie ohne Anmeldung
+          jederzeit vorbeischauen, Fragen stellen und sich Materialien mitnehmen.
         </p>
       </div>
 
@@ -85,7 +90,9 @@ export default async function InfomaerktePage() {
           <p className="text-hit-gray-500">Noch keine Infomarkt-Veranstaltungen am Schloss.</p>
         ) : (
           <div className="flex flex-col gap-4">
-            {schlossEvents.map((e) => (<EventCard key={e.id} event={e as never} viewMode="list" />))}
+            {schlossEvents.map((e) => (
+              <EventCard key={e.id} event={e as never} viewMode="list" />
+            ))}
           </div>
         )}
       </section>
@@ -96,10 +103,14 @@ export default async function InfomaerktePage() {
           <h2 className="text-xl font-semibold text-hit-gray-900">Caprivi</h2>
         </div>
         {cnEvents.length === 0 ? (
-          <p className="text-hit-gray-500">Noch keine Infomarkt-Veranstaltungen am Caprivi-Campus.</p>
+          <p className="text-hit-gray-500">
+            Noch keine Infomarkt-Veranstaltungen am Caprivi-Campus.
+          </p>
         ) : (
           <div className="flex flex-col gap-4">
-            {cnEvents.map((e) => (<EventCard key={e.id} event={e as never} viewMode="list" />))}
+            {cnEvents.map((e) => (
+              <EventCard key={e.id} event={e as never} viewMode="list" />
+            ))}
           </div>
         )}
       </section>

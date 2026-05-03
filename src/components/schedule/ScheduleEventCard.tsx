@@ -14,14 +14,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  AlertTriangle,
-  Trash2,
-  ExternalLink,
-} from 'lucide-react'
+import { Calendar, Clock, MapPin, AlertTriangle, Trash2, ExternalLink } from 'lucide-react'
 
 const PRIORITY_BADGE_CLASS: Record<SchedulePriority, string> = {
   HIGH: 'bg-red-100 text-red-800 border-red-200',

@@ -137,9 +137,13 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">{session.user?.name || session.user?.email}</span>
+                  <span className="text-sm font-medium">
+                    {session.user?.name || session.user?.email}
+                  </span>
                   {session.user?.name && session.user?.email && (
-                    <span className="text-xs font-normal text-hit-gray-500">{session.user.email}</span>
+                    <span className="text-xs font-normal text-hit-gray-500">
+                      {session.user.email}
+                    </span>
                   )}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

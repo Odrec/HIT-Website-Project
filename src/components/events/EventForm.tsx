@@ -276,7 +276,7 @@ export function EventForm({
 
   const [dateError, setDateError] = useState<string | null>(null)
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     setDateError(null)
 

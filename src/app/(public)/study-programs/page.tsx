@@ -77,9 +77,7 @@ export default function StudyProgramsPage() {
   const groupedPrograms = filteredPrograms.reduce(
     (acc, program) => {
       const entries =
-        program.clusters.length > 0
-          ? program.clusters.map((c) => c.name)
-          : ['Weitere Studiengänge']
+        program.clusters.length > 0 ? program.clusters.map((c) => c.name) : ['Weitere Studiengänge']
       for (const name of entries) {
         if (!acc[name]) {
           acc[name] = { programs: [] }
