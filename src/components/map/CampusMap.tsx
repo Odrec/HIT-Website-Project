@@ -283,9 +283,7 @@ export default function CampusMap({
                 const toId = leg.endWaypoint.eventId
                 const analysis =
                   fromId && toId
-                    ? travelAnalyses.find(
-                        (a) => a.eventFromId === fromId && a.eventToId === toId
-                      )
+                    ? travelAnalyses.find((a) => a.eventFromId === fromId && a.eventToId === toId)
                     : undefined
                 const hasWarning = analysis && analysis.status !== 'ok'
                 const segmentColor = hasWarning ? '#dc2626' : '#2563eb'

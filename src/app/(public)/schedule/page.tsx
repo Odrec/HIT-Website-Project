@@ -512,8 +512,8 @@ function SchedulePageContent() {
           <Link href="/events" className="font-medium underline hover:no-underline">
             Veranstaltungssuche
           </Link>
-          , wähle dort die Veranstaltungen aus, die dich interessieren, und füge sie über
-          „Zum Zeitplan hinzufügen" hinzu. Sie erscheinen anschließend hier auf dieser Seite.
+          , wähle dort die Veranstaltungen aus, die dich interessieren, und füge sie über „Zum
+          Zeitplan hinzufügen“ hinzu. Sie erscheinen anschließend hier auf dieser Seite.
         </div>
       )}
 

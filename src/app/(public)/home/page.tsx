@@ -403,9 +403,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-hit-uni-600 to-hit-hs-500 py-12 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold lg:text-3xl">
-            Bereit für den Hochschulinfotag?
-          </h2>
+          <h2 className="text-2xl font-bold lg:text-3xl">Bereit für den Hochschulinfotag?</h2>
           <p className="mt-4 text-white/90 max-w-2xl mx-auto">
             Erstellen Sie jetzt Ihren persönlichen Stundenplan und verpassen Sie keine
             Veranstaltung.

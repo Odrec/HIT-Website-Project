@@ -25,7 +25,14 @@ export function useScheduleTravelWarnings(items: ScheduleEvent[]): TravelWarning
   // Stable serialization of the pairs we need so the effect doesn't refire on
   // every render due to inline-object identity.
   const pairs = useMemo(() => uniqueTravelPairs(items), [items])
-  const pairsKey = useMemo(() => pairs.map((p) => `${p.from}__${p.to}`).sort().join(','), [pairs])
+  const pairsKey = useMemo(
+    () =>
+      pairs
+        .map((p) => `${p.from}__${p.to}`)
+        .sort()
+        .join(','),
+    [pairs]
+  )
 
   useEffect(() => {
     let cancelled = false

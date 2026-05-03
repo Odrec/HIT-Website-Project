@@ -54,8 +54,20 @@ describe('detectTravelWarnings', () => {
 
   it('flags consecutive events in different buildings with insufficient gap', () => {
     const items = [
-      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
-      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T11:00', buildingSlug: 'cn-a', buildingName: 'Caprivi A' }),
+      ev({
+        id: 'a',
+        start: '2026-11-19T09:00',
+        end: '2026-11-19T09:45',
+        buildingSlug: 'schloss',
+        buildingName: 'Schloss',
+      }),
+      ev({
+        id: 'b',
+        start: '2026-11-19T10:00',
+        end: '2026-11-19T11:00',
+        buildingSlug: 'cn-a',
+        buildingName: 'Caprivi A',
+      }),
     ]
     // 25-minute walk; gap is 15 min → shortfall of 25 + 5 - 15 = 15
     const warnings = detectTravelWarnings(items, routesMap([['schloss', 'cn-a', 25 * 60]]))
@@ -90,7 +102,13 @@ describe('detectTravelWarnings', () => {
 
   it('skips Infostände on either side of a pair', () => {
     const items = [
-      ev({ id: 'info', start: '2026-11-19T09:00', end: '2026-11-19T16:00', buildingSlug: 'schloss', eventType: 'INFOSTAND' }),
+      ev({
+        id: 'info',
+        start: '2026-11-19T09:00',
+        end: '2026-11-19T16:00',
+        buildingSlug: 'schloss',
+        eventType: 'INFOSTAND',
+      }),
       ev({ id: 'b', start: '2026-11-19T16:05', end: '2026-11-19T16:30', buildingSlug: 'cn-a' }),
     ]
     const warnings = detectTravelWarnings(items, routesMap([['schloss', 'cn-a', 30 * 60]]))
@@ -140,7 +158,12 @@ describe('uniqueTravelPairs', () => {
     const items = [
       ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:30', buildingSlug: 'schloss' }),
       ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:30', buildingSlug: 'cn-a' }),
-      ev({ id: 'c', start: '2026-11-19T11:00', end: '2026-11-19T11:30', buildingSlug: 'westerberg' }),
+      ev({
+        id: 'c',
+        start: '2026-11-19T11:00',
+        end: '2026-11-19T11:30',
+        buildingSlug: 'westerberg',
+      }),
     ]
     expect(uniqueTravelPairs(items)).toEqual([
       { from: 'schloss', to: 'cn-a' },
@@ -170,7 +193,11 @@ describe('uniqueTravelPairs', () => {
     const warnings = detectTravelWarnings(items, routesMap([['schloss', 'cn-a', 10 * 60]]))
     expect(warnings[0].shortfallMinutes).toBe(3)
     // With a 1-min buffer, required is 11; gap 12 is fine.
-    const warningsLowBuffer = detectTravelWarnings(items, routesMap([['schloss', 'cn-a', 10 * 60]]), 1)
+    const warningsLowBuffer = detectTravelWarnings(
+      items,
+      routesMap([['schloss', 'cn-a', 10 * 60]]),
+      1
+    )
     expect(warningsLowBuffer).toEqual([])
   })
 })

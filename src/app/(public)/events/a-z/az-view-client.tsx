@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { ArrowDownAZ, BookOpen, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EventCard } from '@/components/events/EventCard'
-import { cn } from '@/lib/utils'
 
 interface Event {
   id: string
@@ -27,7 +26,12 @@ interface Event {
     address: string | null
   } | null
   lecturers: Array<{ id: string; firstName: string; lastName: string; title: string | null }>
-  studyPrograms: Array<{ id: string; name: string; institution: string; clusters?: Array<{ id: string; name: string }> }>
+  studyPrograms: Array<{
+    id: string
+    name: string
+    institution: string
+    clusters?: Array<{ id: string; name: string }>
+  }>
   isCrossProgram?: boolean
 }
 
@@ -38,7 +42,10 @@ export function AZViewClient() {
   useEffect(() => {
     fetch('/api/events/public?pageSize=500&sortBy=title&sortOrder=asc')
       .then((r) => r.json())
-      .then((data) => { setEvents(data.events); setLoading(false) })
+      .then((data) => {
+        setEvents(data.events)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -56,8 +63,14 @@ export function AZViewClient() {
   const crossProgram = new Map<string, Event>()
 
   for (const event of events) {
-    if (event.isCrossProgram) { crossProgram.set(event.id, event); continue }
-    if (event.studyPrograms.length === 0) { noProgram.set(event.id, event); continue }
+    if (event.isCrossProgram) {
+      crossProgram.set(event.id, event)
+      continue
+    }
+    if (event.studyPrograms.length === 0) {
+      noProgram.set(event.id, event)
+      continue
+    }
     for (const sp of event.studyPrograms) {
       const letter = sp.name.charAt(0).toUpperCase()
       if (!letterMap.has(letter)) letterMap.set(letter, new Map())
@@ -73,14 +86,20 @@ export function AZViewClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap gap-1">
         {sortedLetters.map((letter) => (
-          <a key={letter} href={`#letter-${letter}`} className="flex h-8 w-8 items-center justify-center rounded bg-hit-uni-50 text-sm font-semibold text-hit-uni-700 hover:bg-hit-uni-100">
+          <a
+            key={letter}
+            href={`#letter-${letter}`}
+            className="flex h-8 w-8 items-center justify-center rounded bg-hit-uni-50 text-sm font-semibold text-hit-uni-700 hover:bg-hit-uni-100"
+          >
             {letter}
           </a>
         ))}
       </div>
 
       {sortedLetters.map((letter) => {
-        const programs = Array.from(letterMap.get(letter)!.values()).sort((a, b) => a.name.localeCompare(b.name, 'de'))
+        const programs = Array.from(letterMap.get(letter)!.values()).sort((a, b) =>
+          a.name.localeCompare(b.name, 'de')
+        )
         return (
           <div key={letter} id={`letter-${letter}`}>
             <h2 className="mb-3 text-2xl font-bold text-hit-uni-600">{letter}</h2>
@@ -91,12 +110,16 @@ export function AZViewClient() {
                     <CardTitle className="flex items-center gap-2 text-base">
                       <ArrowDownAZ className="h-4 w-4 text-hit-uni-500" />
                       {program.name}
-                      <span className="text-sm font-normal text-hit-gray-500">({program.events.size})</span>
+                      <span className="text-sm font-normal text-hit-gray-500">
+                        ({program.events.size})
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-3">
-                      {Array.from(program.events.values()).map((e) => (<EventCard key={e.id} event={e} viewMode="list" />))}
+                      {Array.from(program.events.values()).map((e) => (
+                        <EventCard key={e.id} event={e} viewMode="list" />
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -117,7 +140,9 @@ export function AZViewClient() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">
-              {Array.from(noProgram.values()).map((e) => (<EventCard key={e.id} event={e} viewMode="list" />))}
+              {Array.from(noProgram.values()).map((e) => (
+                <EventCard key={e.id} event={e} viewMode="list" />
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -134,7 +159,9 @@ export function AZViewClient() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">
-              {Array.from(crossProgram.values()).map((e) => (<EventCard key={e.id} event={e} viewMode="list" />))}
+              {Array.from(crossProgram.values()).map((e) => (
+                <EventCard key={e.id} event={e} viewMode="list" />
+              ))}
             </div>
           </CardContent>
         </Card>

@@ -138,7 +138,7 @@ function EventsListContent() {
     fetchEvents()
   }, [fetchEvents])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     setPage(1)
     fetchEvents()

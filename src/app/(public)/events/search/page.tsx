@@ -12,7 +12,10 @@ function SearchContent() {
   return (
     <>
       <div className="mb-8">
-        <Link href="/events" className="inline-flex items-center gap-1 text-sm text-hit-gray-500 hover:text-hit-uni-500">
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-1 text-sm text-hit-gray-500 hover:text-hit-uni-500"
+        >
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">Suchergebnisse</h1>

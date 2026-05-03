@@ -1,14 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import {
-  Calendar,
-  Grid3X3,
-  List,
-  Search,
-  Filter,
-  Loader2,
-} from 'lucide-react'
+import { Calendar, Grid3X3, List, Search, Filter, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EventCard } from '@/components/events/EventCard'
@@ -194,22 +187,46 @@ export function EventListView({
 
           <div className="flex rounded-lg border bg-white p-1">
             <button
-              onClick={() => { setViewMode('list'); trackEvent('navigation', 'view-switch', 'list') }}
-              className={cn('rounded-md p-2 transition-colors', viewMode === 'list' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700')}
+              onClick={() => {
+                setViewMode('list')
+                trackEvent('navigation', 'view-switch', 'list')
+              }}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                viewMode === 'list'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
+              )}
               aria-label="Listenansicht"
             >
               <List className="h-4 w-4" />
             </button>
             <button
-              onClick={() => { setViewMode('grid'); trackEvent('navigation', 'view-switch', 'grid') }}
-              className={cn('rounded-md p-2 transition-colors', viewMode === 'grid' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700')}
+              onClick={() => {
+                setViewMode('grid')
+                trackEvent('navigation', 'view-switch', 'grid')
+              }}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                viewMode === 'grid'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
+              )}
               aria-label="Kachelansicht"
             >
               <Grid3X3 className="h-4 w-4" />
             </button>
             <button
-              onClick={() => { setViewMode('calendar'); trackEvent('navigation', 'view-switch', 'calendar') }}
-              className={cn('rounded-md p-2 transition-colors', viewMode === 'calendar' ? 'bg-hit-uni-100 text-hit-uni-700' : 'text-hit-gray-500 hover:text-hit-gray-700')}
+              onClick={() => {
+                setViewMode('calendar')
+                trackEvent('navigation', 'view-switch', 'calendar')
+              }}
+              className={cn(
+                'rounded-md p-2 transition-colors',
+                viewMode === 'calendar'
+                  ? 'bg-hit-uni-100 text-hit-uni-700'
+                  : 'text-hit-gray-500 hover:text-hit-gray-700'
+              )}
               aria-label="Kalenderansicht"
             >
               <Calendar className="h-4 w-4" />
@@ -221,7 +238,8 @@ export function EventListView({
               value={`${sortBy}-${sortOrder}`}
               onChange={(e) => {
                 const [s, o] = e.target.value.split('-')
-                setSortBy(s); setSortOrder(o as 'asc' | 'desc')
+                setSortBy(s)
+                setSortOrder(o as 'asc' | 'desc')
               }}
               className="rounded-md border bg-white px-3 py-2 text-sm"
             >
@@ -237,7 +255,14 @@ export function EventListView({
 
       {showFilters && (
         <div className="mb-6">
-          <EventFilters filters={filters} onChange={(f) => { setFilters(f); setPage(1) }} onClear={clearFilters} />
+          <EventFilters
+            filters={filters}
+            onChange={(f) => {
+              setFilters(f)
+              setPage(1)
+            }}
+            onClear={clearFilters}
+          />
         </div>
       )}
 
@@ -259,21 +284,49 @@ export function EventListView({
       ) : events.length === 0 ? (
         <div className="rounded-lg border bg-white p-12 text-center">
           <Calendar className="mx-auto h-12 w-12 text-hit-gray-300" />
-          <h3 className="mt-4 text-lg font-medium text-hit-gray-900">Keine Veranstaltungen gefunden</h3>
-          <p className="mt-2 text-hit-gray-600">Versuchen Sie, Ihre Suchkriterien oder Filter anzupassen.</p>
+          <h3 className="mt-4 text-lg font-medium text-hit-gray-900">
+            Keine Veranstaltungen gefunden
+          </h3>
+          <p className="mt-2 text-hit-gray-600">
+            Versuchen Sie, Ihre Suchkriterien oder Filter anzupassen.
+          </p>
         </div>
       ) : viewMode === 'calendar' ? (
         <EventCalendarView events={events} />
       ) : (
         <>
-          <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-4')}>
-            {events.map((e) => (<EventCard key={e.id} event={e} viewMode={viewMode} />))}
+          <div
+            className={cn(
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'
+                : 'flex flex-col gap-4'
+            )}
+          >
+            {events.map((e) => (
+              <EventCard key={e.id} event={e} viewMode={viewMode} />
+            ))}
           </div>
           {totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Zurück</Button>
-              <span className="px-4 text-sm text-hit-gray-600">Seite {page} von {totalPages}</span>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Weiter</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Zurück
+              </Button>
+              <span className="px-4 text-sm text-hit-gray-600">
+                Seite {page} von {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Weiter
+              </Button>
             </div>
           )}
         </>

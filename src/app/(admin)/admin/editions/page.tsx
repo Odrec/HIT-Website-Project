@@ -55,7 +55,11 @@ export default function EditionsPage() {
     })
     fetch(`/api/events?editionId=${e.id}&pageSize=500&includeReview=1`)
       .then((r) => r.json())
-      .then((d) => setEditionEvents(d.data.map((ev: { id: string; title: string }) => ({ id: ev.id, title: ev.title }))))
+      .then((d) =>
+        setEditionEvents(
+          d.data.map((ev: { id: string; title: string }) => ({ id: ev.id, title: ev.title }))
+        )
+      )
       .catch(() => setEditionEvents([]))
   }
 
@@ -130,7 +134,9 @@ export default function EditionsPage() {
                   <Label>Einsendeschluss aktiv</Label>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="multiplikatorCafeEventId">Multiplikator*innen-Café Veranstaltung (optional)</Label>
+                  <Label htmlFor="multiplikatorCafeEventId">
+                    Multiplikator*innen-Café Veranstaltung (optional)
+                  </Label>
                   <select
                     id="multiplikatorCafeEventId"
                     value={draft.multiplikatorCafeEventId ?? ''}
@@ -141,13 +147,15 @@ export default function EditionsPage() {
                   >
                     <option value="">— keine —</option>
                     {editionEvents.map((ev) => (
-                      <option key={ev.id} value={ev.id}>{ev.title}</option>
+                      <option key={ev.id} value={ev.id}>
+                        {ev.title}
+                      </option>
                     ))}
                   </select>
                   <p className="text-xs text-muted-foreground">
-                    Wenn gesetzt, erscheint der Link &quot;Multiplikator*innen-Café&quot; auf der Veranstaltungs-Übersicht
-                    und führt direkt zu dieser Veranstaltung. Wenn keine Veranstaltung ausgewählt ist, wird der
-                    Link ausgeblendet.
+                    Wenn gesetzt, erscheint der Link &quot;Multiplikator*innen-Café&quot; auf der
+                    Veranstaltungs-Übersicht und führt direkt zu dieser Veranstaltung. Wenn keine
+                    Veranstaltung ausgewählt ist, wird der Link ausgeblendet.
                   </p>
                 </div>
                 <div className="flex gap-2">

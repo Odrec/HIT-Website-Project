@@ -10,10 +10,7 @@ import React, {
 } from 'react'
 import type { Event } from '@/types/events'
 import { detectConflicts as detectConflictsGeneric } from '@/lib/schedule-conflicts'
-import {
-  DEFAULT_SCHEDULE_PRIORITY,
-  type SchedulePriority,
-} from '@/types/schedule'
+import { DEFAULT_SCHEDULE_PRIORITY, type SchedulePriority } from '@/types/schedule'
 
 // Types for client-side schedule management
 export interface ScheduleEvent {
@@ -248,9 +245,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       })
     ).then((results) => {
       if (cancelled) return
-      const patches = results.filter(
-        (r): r is { eventId: string; event: Event } => r !== null
-      )
+      const patches = results.filter((r): r is { eventId: string; event: Event } => r !== null)
       if (patches.length > 0) dispatch({ type: 'PATCH_EVENTS', payload: patches })
     })
 

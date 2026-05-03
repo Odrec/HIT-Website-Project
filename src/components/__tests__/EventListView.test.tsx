@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { EventListView } from '../events/EventListView'
 
 // AddToScheduleButton requires ScheduleProvider context — mock it away for unit tests
@@ -44,7 +43,7 @@ describe('EventListView', () => {
     render(<EventListView staticFilters={{ clusterId: 'abc' }} />)
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled())
-    const url = (mockFetch.mock.calls[0][0] as string)
+    const url = mockFetch.mock.calls[0][0] as string
     expect(url).toContain('clusterId=abc')
   })
 
