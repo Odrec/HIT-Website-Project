@@ -606,7 +606,7 @@ export default function EventDetailPage() {
           </div>
           {relatedEvents.length > 3 && (
             <div className="mt-6 text-center">
-              <Link href={`/events?studyProgramId=${event.studyPrograms[0]?.id || ''}`}>
+              <Link href={`/events/program/${event.studyPrograms[0]?.id || ''}`}>
                 <Button variant="outline">Weitere ähnliche Veranstaltungen anzeigen</Button>
               </Link>
             </div>

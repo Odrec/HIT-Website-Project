@@ -242,7 +242,7 @@ export default function StudyProgramsPage() {
                           >
                             <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             <Link
-                              href={`/events?studyProgram=${program.id}`}
+                              href={`/events/program/${program.id}`}
                               className="flex-1 text-sm font-medium hover:text-green-700"
                             >
                               {program.name}
