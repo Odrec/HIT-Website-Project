@@ -40,10 +40,10 @@ export default function HomePage() {
           alt=""
           fill
           priority
-          className="object-cover object-center -z-0"
+          className="object-cover object-top -z-0"
         />
         {/* Dark overlay for text legibility on top of the artwork */}
-        <div className="absolute inset-0 bg-black/45 -z-0" />
+        <div className="absolute inset-0 bg-black/30 -z-0" />
         {/* Störer (Eyecatcher) */}
         <Image
           src="/infotag-stoerer.svg"
