@@ -74,10 +74,10 @@ export default function HomePage() {
               <Image
                 src="/infotag-banner.png"
                 alt="Hochschul Infotag"
-                width={815}
-                height={371}
+                width={3508}
+                height={4961}
                 priority
-                className="w-[320px] h-auto rounded-lg shadow-2xl"
+                className="w-[260px] h-auto rounded-lg shadow-2xl"
               />
             </div>
           </div>
