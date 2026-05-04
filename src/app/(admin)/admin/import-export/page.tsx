@@ -113,7 +113,6 @@ export default function ImportExportPage() {
         'Institution',
         'Beginn',
         'Ende',
-        'Ortstyp',
         'Treffpunkt',
         'Zusätzliche Info',
         'Foto-URL',
@@ -135,7 +134,6 @@ export default function ImportExportPage() {
           institution: string
           timeStart: string | null
           timeEnd: string | null
-          locationType: string
           meetingPoint: string | null
           additionalInfo: string | null
           photoUrl: string | null
@@ -154,7 +152,6 @@ export default function ImportExportPage() {
           event.institution,
           event.timeStart || '',
           event.timeEnd || '',
-          event.locationType,
           event.meetingPoint || '',
           event.additionalInfo || '',
           event.photoUrl || '',
@@ -269,7 +266,6 @@ export default function ImportExportPage() {
               institution: ['UNI', 'HOCHSCHULE', 'BOTH'].includes(institution)
                 ? institution
                 : 'BOTH',
-              locationType: 'OTHER',
             }),
           })
 

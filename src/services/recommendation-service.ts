@@ -1,7 +1,7 @@
 // Recommendation Service - Smart event recommendations based on user context
 
 import { prisma } from '@/lib/db/prisma'
-import { EventType, LocationType, Institution } from '@/types/events'
+import { EventType, Institution } from '@/types/events'
 import { formatEventTime } from '@/lib/event-time'
 import { eventPairOverlapMinutes } from '@/lib/schedule-conflicts'
 import { getActiveEditionId } from '@/lib/active-edition'
@@ -64,7 +64,6 @@ function mapPrismaEvent(prismaEvent: {
   eventType: string
   timeStart: Date | null
   timeEnd: Date | null
-  locationType: string
   locationDetails: unknown
   roomRequest: string | null
   meetingPoint: string | null
@@ -114,7 +113,6 @@ function mapPrismaEvent(prismaEvent: {
     eventType: EventType[prismaEvent.eventType as keyof typeof EventType],
     timeStart: prismaEvent.timeStart ?? undefined,
     timeEnd: prismaEvent.timeEnd ?? undefined,
-    locationType: LocationType[prismaEvent.locationType as keyof typeof LocationType],
     locationDetails: prismaEvent.locationDetails as Record<string, unknown> | undefined,
     roomRequest: prismaEvent.roomRequest ?? undefined,
     meetingPoint: prismaEvent.meetingPoint ?? undefined,

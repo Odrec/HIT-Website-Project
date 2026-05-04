@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eventService } from '@/services'
 import { auth } from '@/auth'
-import { EventType, Institution, LocationType } from '@/types/events'
+import { EventType, Institution } from '@/types/events'
 import { sendEventUpdatedEmail } from '@/lib/email'
 
 interface RouteParams {
@@ -80,15 +80,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.eventType && !Object.values(EventType).includes(body.eventType)) {
       return NextResponse.json(
         { error: `Invalid eventType. Must be one of: ${Object.values(EventType).join(', ')}` },
-        { status: 400 }
-      )
-    }
-
-    if (body.locationType && !Object.values(LocationType).includes(body.locationType)) {
-      return NextResponse.json(
-        {
-          error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}`,
-        },
         { status: 400 }
       )
     }

@@ -46,7 +46,6 @@ interface Event {
   eventType: string
   timeStart: string
   timeEnd: string | null
-  locationType: string
   locationDetails: string | null
   meetingPoint: string | null
   additionalInfo: string | null
@@ -178,7 +177,6 @@ export default function EventDetailPage() {
     eventType: e.eventType as ScheduleEvent['eventType'],
     timeStart: e.timeStart ? new Date(e.timeStart) : undefined,
     timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
-    locationType: e.locationType as ScheduleEvent['locationType'],
     institution: e.institution as ScheduleEvent['institution'],
     building: e.building ?? undefined,
     room: e.room ?? undefined,

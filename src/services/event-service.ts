@@ -536,7 +536,6 @@ export const eventService = {
         eventType: original.eventType,
         timeStart: original.timeStart,
         timeEnd: original.timeEnd,
-        locationType: original.locationType,
         locationDetails: original.locationDetails ?? undefined,
         locationMode: original.locationMode,
         locationWishArea: original.locationWishArea,

@@ -19,7 +19,6 @@ interface EventCardProps {
     eventType: string
     timeStart: string
     timeEnd: string | null
-    locationType: string
     institution: string
     location?: {
       id: string
@@ -88,7 +87,6 @@ function convertToEvent(event: EventCardProps['event']): Event {
     eventType: event.eventType as Event['eventType'],
     timeStart: event.timeStart ? new Date(event.timeStart) : undefined,
     timeEnd: event.timeEnd ? new Date(event.timeEnd) : undefined,
-    locationType: event.locationType as Event['locationType'],
     institution: event.institution as Event['institution'],
     building: event.building
       ? {

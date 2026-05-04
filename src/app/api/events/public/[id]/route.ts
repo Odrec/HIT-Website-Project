@@ -209,7 +209,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       eventType: e.eventType,
       timeStart: e.timeStart?.toISOString(),
       timeEnd: e.timeEnd?.toISOString(),
-      locationType: e.locationType,
       locationDetails: e.locationDetails,
       meetingPoint: e.meetingPoint,
       additionalInfo: e.additionalInfo,

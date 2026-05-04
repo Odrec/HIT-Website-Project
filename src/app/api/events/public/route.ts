@@ -318,7 +318,6 @@ export async function GET(request: NextRequest) {
       eventType: event.eventType,
       timeStart: event.timeStart?.toISOString(),
       timeEnd: event.timeEnd?.toISOString(),
-      locationType: event.locationType,
       locationDetails: event.locationDetails,
       meetingPoint: event.meetingPoint,
       additionalInfo: event.additionalInfo,

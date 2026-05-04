@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { EventType, Institution, LocationType } from '@/types/events'
+import { EventType, Institution } from '@/types/events'
 import type { Event } from '@/types/events'
 import { detectConflicts } from '@/lib/schedule-conflicts'
 
@@ -13,7 +13,6 @@ function makeEvent(eventType: EventType, timeStart: string, timeEnd: string): Ev
     eventType,
     timeStart: new Date(timeStart),
     timeEnd: new Date(timeEnd),
-    locationType: LocationType.OTHER,
     institution: Institution.UNI,
     createdAt: new Date('2026-11-19T00:00:00'),
     updatedAt: new Date('2026-11-19T00:00:00'),

@@ -30,12 +30,6 @@ enum EventType {
   INFOSTAND
 }
 
-enum LocationType {
-  INFOMARKT_SCHLOSS
-  INFOMARKT_CN
-  OTHER
-}
-
 /// How the building/room for an event is captured on the form.
 /// CONFIRMED -> Gebäude + Raum picked from the managed list.
 /// WISH      -> Melder didn't know yet: they pick a campus area and
@@ -167,7 +161,6 @@ model Event {
   eventType        EventType
   timeStart        DateTime?
   timeEnd          DateTime?
-  locationType     LocationType
   locationDetails  Json?                    @db.JsonB
   /// CONFIRMED = building/room chosen; WISH = area + free-text preferences.
   locationMode     LocationMode             @default(CONFIRMED)

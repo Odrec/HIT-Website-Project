@@ -15,7 +15,6 @@ interface Event {
   eventType: string
   timeStart: string
   timeEnd: string | null
-  locationType: string
   institution: string
   location: {
     id: string

@@ -24,7 +24,6 @@ export interface EmailEvent {
   institution: Institution
   timeStart?: Date
   timeEnd?: Date
-  locationType: string
   building?: Building | null
   room?: Room | null
   buildingId?: string | null
