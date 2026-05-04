@@ -168,7 +168,6 @@ export async function rollover(input: RolloverInput) {
             eventType: src.eventType,
             timeStart: null,
             timeEnd: null,
-            locationType: src.locationType,
             locationDetails: src.locationDetails ?? undefined,
             locationMode: src.locationMode,
             locationWishArea: src.locationWishArea,

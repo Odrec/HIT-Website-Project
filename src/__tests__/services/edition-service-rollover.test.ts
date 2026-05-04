@@ -100,7 +100,6 @@ describe('rollover — event cloning', () => {
     eventType: 'LECTURE',
     timeStart: new Date('2026-11-19T10:00:00Z'),
     timeEnd: new Date('2026-11-19T11:00:00Z'),
-    locationType: 'CONFIRMED',
     locationDetails: null,
     locationMode: 'CONFIRMED',
     locationWishArea: null,

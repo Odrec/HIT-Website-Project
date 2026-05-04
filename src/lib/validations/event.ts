@@ -55,7 +55,6 @@ export const eventFormSchema = z
     ]),
     timeStart: z.date().optional().nullable(),
     timeEnd: z.date().optional().nullable(),
-    locationType: z.enum(['INFOMARKT_SCHLOSS', 'INFOMARKT_CN', 'OTHER']),
     locationDetails: z.record(z.string(), z.unknown()).optional(),
     locationMode: z.enum(['CONFIRMED', 'WISH']).default('CONFIRMED'),
     locationWishArea: z.enum(['WESTERBERG', 'CAPRIVI', 'INNENSTADT']).optional().or(z.literal('')),
@@ -109,7 +108,6 @@ export const defaultEventValues: Partial<EventFormValues> = {
   eventType: 'VORTRAG',
   timeStart: null,
   timeEnd: null,
-  locationType: 'OTHER',
   locationMode: 'CONFIRMED',
   institution: 'BOTH',
   lecturers: [],
@@ -131,13 +129,6 @@ export const eventTypeLabels: Record<string, string> = {
   ONLINE: 'Online',
   VIDEO: 'Video',
   INFOSTAND: 'Infostand',
-}
-
-// Location type labels for display
-export const locationTypeLabels: Record<string, string> = {
-  INFOMARKT_SCHLOSS: 'Infomarkt Schloss',
-  INFOMARKT_CN: 'Infomarkt CN',
-  OTHER: 'Anderer Ort',
 }
 
 // Institution labels for display

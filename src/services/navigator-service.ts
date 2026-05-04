@@ -13,7 +13,7 @@ import type {
   QuestionType,
   EndSessionResource,
 } from '@/types/navigator'
-import { Institution, EventType, LocationType, Affiliation } from '@/types/events'
+import { Institution, EventType, Affiliation } from '@/types/events'
 import type { StudyProgram, StudyProgramCluster, Event, Building, Room } from '@/types/events'
 
 // In-memory session store (in production, use Redis)
@@ -660,7 +660,6 @@ export async function getRecommendations(
       eventType: ep.event.eventType as unknown as EventType,
       timeStart: ep.event.timeStart ? new Date(ep.event.timeStart) : undefined,
       timeEnd: ep.event.timeEnd ? new Date(ep.event.timeEnd) : undefined,
-      locationType: ep.event.locationType as unknown as LocationType,
       locationDetails: ep.event.locationDetails as Record<string, unknown> | undefined,
       roomRequest: ep.event.roomRequest || undefined,
       meetingPoint: ep.event.meetingPoint || undefined,
@@ -801,7 +800,6 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       eventType: e.eventType as unknown as EventType,
       timeStart: e.timeStart ? new Date(e.timeStart) : undefined,
       timeEnd: e.timeEnd ? new Date(e.timeEnd) : undefined,
-      locationType: e.locationType as unknown as LocationType,
       locationDetails: e.locationDetails as Record<string, unknown> | undefined,
       roomRequest: e.roomRequest || undefined,
       meetingPoint: e.meetingPoint || undefined,

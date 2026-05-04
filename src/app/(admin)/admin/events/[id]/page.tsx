@@ -17,7 +17,6 @@ interface EventData {
   eventType: string
   timeStart: string | null
   timeEnd: string | null
-  locationType: string
   locationDetails: Record<string, unknown> | null
   locationMode: 'CONFIRMED' | 'WISH'
   locationWishArea: 'WESTERBERG' | 'CAPRIVI' | 'INNENSTADT' | null
@@ -157,7 +156,6 @@ export default function EditEventPage() {
     eventType: event.eventType as EventFormValues['eventType'],
     timeStart: event.timeStart ? new Date(event.timeStart) : null,
     timeEnd: event.timeEnd ? new Date(event.timeEnd) : null,
-    locationType: event.locationType as EventFormValues['locationType'],
     locationDetails: event.locationDetails || undefined,
     locationMode: event.locationMode,
     locationWishArea: event.locationWishArea ?? '',

@@ -114,7 +114,6 @@ describe('eventService.create edition stamping', () => {
     await eventService.create({
       title: 'T',
       eventType: 'LECTURE',
-      locationType: 'CONFIRMED',
       institution: 'UNI',
     } as never)
     const call = mockCreate.mock.calls[0][0] as {
@@ -134,7 +133,6 @@ describe('eventService.duplicate edition stamping', () => {
       eventType: 'LECTURE',
       timeStart: null,
       timeEnd: null,
-      locationType: 'CONFIRMED',
       locationDetails: null,
       locationMode: 'CONFIRMED',
       locationWishArea: null,

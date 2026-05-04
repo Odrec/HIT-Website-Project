@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Trash2, User, Mail, Phone, Building, HelpCircle } from 'lucide-react'
+import { Plus, Trash2, User, Mail, Phone, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,7 +23,6 @@ import {
   type EventFormValues,
   defaultEventValues,
   eventTypeLabels,
-  locationTypeLabels,
   institutionLabels,
 } from '@/lib/validations/event'
 import {
@@ -142,7 +141,6 @@ export function EventForm({
   })
 
   const watchEventType = watch('eventType')
-  const watchLocationType = watch('locationType')
   const watchLocationMode = watch('locationMode') ?? 'CONFIRMED'
   const watchLocationWishArea = watch('locationWishArea') || ''
   const watchInstitution = watch('institution')
@@ -615,62 +613,27 @@ export function EventForm({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="locationType" className="flex items-center gap-1.5">
-                  Ortstyp <span className="text-red-500">*</span>
-                  <span
-                    title="Wird für die Gruppierung in den Broschüren- und Excel-Exports verwendet. 'Infomarkt Schloss' / 'Infomarkt CN' erscheinen in der jeweiligen Infomarkt-Übersicht, alles andere unter 'Anderer Ort'."
-                    className="cursor-help text-muted-foreground"
-                    aria-label="Hilfe zum Ortstyp"
-                  >
-                    <HelpCircle className="h-3.5 w-3.5" />
-                  </span>
-                </Label>
+                <Label htmlFor="buildingId">Standort</Label>
                 <Select
-                  value={watch('locationType')}
+                  value={watch('buildingId') || 'none'}
                   onValueChange={(value) =>
-                    setValue('locationType', value as EventFormValues['locationType'])
+                    setValue('buildingId', value === 'none' ? undefined : value)
                   }
                 >
-                  <SelectTrigger className={errors.locationType ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Ortstyp auswählen" />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Standort auswählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(locationTypeLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    <SelectItem value="none">Kein Standort</SelectItem>
+                    {buildings.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                        {b.campus && ` (${b.campus})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.locationType && (
-                  <p className="text-sm text-red-500">{errors.locationType.message}</p>
-                )}
               </div>
-
-              {watchLocationType === 'OTHER' && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="buildingId">Standort</Label>
-                  <Select
-                    value={watch('buildingId') || 'none'}
-                    onValueChange={(value) =>
-                      setValue('buildingId', value === 'none' ? undefined : value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Standort auswählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Kein Standort</SelectItem>
-                      {buildings.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>
-                          {b.name}
-                          {b.campus && ` (${b.campus})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               <div className="space-y-1.5">
                 <Label htmlFor="meetingPoint">Treffpunkt</Label>

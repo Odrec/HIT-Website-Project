@@ -21,7 +21,6 @@ const sampleEvent = {
   eventType: 'WORKSHOP',
   timeStart: '2026-11-19T10:00:00',
   timeEnd: '2026-11-19T11:00:00',
-  locationType: 'OTHER',
   locationDetails: null,
   roomRequest: null,
   meetingPoint: null,

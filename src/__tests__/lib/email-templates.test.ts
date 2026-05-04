@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { generateNewEventEmail, generateEditEventEmail, detectChanges } from '@/lib/email-templates'
-import { EventType, Institution, LocationType } from '@/types/events'
+import { EventType, Institution } from '@/types/events'
 import type { EmailEvent } from '@/lib/email-templates'
 
 // Minimal valid EmailEvent fixture.
@@ -15,7 +15,6 @@ const baseEvent: EmailEvent = {
   institution: Institution.UNI,
   timeStart: new Date(Date.UTC(2026, 10, 19, 9, 0, 0)),
   timeEnd: new Date(Date.UTC(2026, 10, 19, 9, 45, 0)),
-  locationType: LocationType.OTHER,
   building: {
     id: 'b1',
     slug: 'schloss',

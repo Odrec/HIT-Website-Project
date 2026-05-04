@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eventService } from '@/services'
 import { auth } from '@/auth'
-import { EventType, Institution, LocationType } from '@/types/events'
+import { EventType, Institution } from '@/types/events'
 import { sendEventCreatedEmail } from '@/lib/email'
 import { prisma } from '@/lib/db/prisma'
 
@@ -111,9 +111,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate required fields
-    if (!body.title || !body.eventType || !body.locationType || !body.institution) {
+    if (!body.title || !body.eventType || !body.institution) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, eventType, locationType, institution' },
+        { error: 'Missing required fields: title, eventType, institution' },
         { status: 400 }
       )
     }
@@ -122,15 +122,6 @@ export async function POST(request: NextRequest) {
     if (!Object.values(EventType).includes(body.eventType)) {
       return NextResponse.json(
         { error: `Invalid eventType. Must be one of: ${Object.values(EventType).join(', ')}` },
-        { status: 400 }
-      )
-    }
-
-    if (!Object.values(LocationType).includes(body.locationType)) {
-      return NextResponse.json(
-        {
-          error: `Invalid locationType. Must be one of: ${Object.values(LocationType).join(', ')}`,
-        },
         { status: 400 }
       )
     }

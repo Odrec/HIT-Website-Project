@@ -23,12 +23,6 @@ export enum EventType {
   INFOSTAND = 'INFOSTAND',
 }
 
-export enum LocationType {
-  INFOMARKT_SCHLOSS = 'INFOMARKT_SCHLOSS',
-  INFOMARKT_CN = 'INFOMARKT_CN',
-  OTHER = 'OTHER',
-}
-
 export interface Melder {
   id: string
   userId: string
@@ -110,7 +104,6 @@ export interface Event {
   eventType: EventType
   timeStart?: Date
   timeEnd?: Date
-  locationType: LocationType
   locationDetails?: Record<string, unknown>
   roomRequest?: string
   meetingPoint?: string
@@ -146,7 +139,6 @@ export interface CreateEventInput {
   eventType: EventType
   timeStart?: Date
   timeEnd?: Date
-  locationType: LocationType
   locationDetails?: Record<string, unknown>
   locationMode?: LocationMode
   locationWishArea?: CampusAreaCode | null

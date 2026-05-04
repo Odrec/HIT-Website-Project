@@ -59,7 +59,6 @@ interface Event {
   timeStart: string | null
   timeEnd: string | null
   institution: string
-  locationType: string
   building: { name: string } | null
   room: { name: string } | null
   studyPrograms: { studyProgram: { name: string } }[]

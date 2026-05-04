@@ -48,7 +48,6 @@ const baseEvent: EmailEvent = {
   title: 'Test Event',
   eventType: 'VORTRAG' as never,
   institution: 'UNI' as never,
-  locationType: 'OTHER',
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }

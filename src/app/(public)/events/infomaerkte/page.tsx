@@ -77,7 +77,6 @@ export default async function InfomaerktePage() {
     eventType: e.eventType,
     timeStart: e.timeStart?.toISOString() ?? '',
     timeEnd: e.timeEnd?.toISOString() ?? null,
-    locationType: e.locationType,
     institution: e.institution,
     meetingPoint: e.meetingPoint,
     photoUrl: e.photoUrl,

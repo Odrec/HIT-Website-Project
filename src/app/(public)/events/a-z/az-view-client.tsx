@@ -12,7 +12,6 @@ interface Event {
   eventType: string
   timeStart: string
   timeEnd: string | null
-  locationType: string
   locationDetails: string | null
   roomRequest: string | null
   meetingPoint: string | null
