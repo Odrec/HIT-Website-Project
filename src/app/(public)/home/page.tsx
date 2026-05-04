@@ -44,6 +44,15 @@ export default function HomePage() {
         />
         {/* Dark overlay for text legibility on top of the artwork */}
         <div className="absolute inset-0 bg-black/45 -z-0" />
+        {/* Störer (Eyecatcher) */}
+        <Image
+          src="/infotag-stoerer.svg"
+          alt="Heute schon an morgen gedacht?"
+          width={275}
+          height={278}
+          priority
+          className="absolute right-4 top-4 z-20 hidden w-32 -rotate-6 drop-shadow-xl md:block lg:right-8 lg:top-8 lg:w-44"
+        />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
           <div className="max-w-3xl">
             <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
