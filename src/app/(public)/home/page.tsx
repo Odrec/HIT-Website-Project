@@ -171,7 +171,7 @@ export default function HomePage() {
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-hit-gray-900 text-center lg:text-3xl mb-8">
-            Zwei Hochschulen – ein Informationstag
+            Zwei Hochschulen – ein Infotag
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2">
