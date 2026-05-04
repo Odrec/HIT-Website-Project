@@ -35,50 +35,46 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-hit-uni-600 via-hit-uni-500 to-hit-hs-500 text-white">
-        <div className="container mx-auto px-4 py-16 lg:py-24 relative">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div className="max-w-3xl">
-              <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Hochschul&shy;infotag 2026
-              </h1>
-              <p className="mt-6 text-lg text-white/90 max-w-2xl">
-                Entdecken Sie die Universität und Hochschule Osnabrück! Besuchen Sie Vorträge,
-                Laborführungen und Workshops zu über 200 Studiengängen.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/events">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="bg-white text-hit-uni-700 hover:bg-white/90"
-                  >
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Alle Veranstaltungen
-                  </Button>
-                </Link>
-                <Link href="/navigator">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white text-white bg-transparent hover:bg-white/10"
-                  >
-                    <Compass className="mr-2 h-5 w-5" />
-                    Studiennavigator
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            {/* Infotag Banner */}
-            <div className="hidden lg:block shrink-0">
-              <Image
-                src="/infotag-banner.png"
-                alt="Hochschul Infotag"
-                width={3508}
-                height={4961}
-                priority
-                className="w-[260px] h-auto rounded-lg shadow-2xl"
-              />
+        <Image
+          src="/infotag-banner.png"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center -z-0"
+        />
+        {/* Dark overlay for text legibility on top of the artwork */}
+        <div className="absolute inset-0 bg-black/45 -z-0" />
+        <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
+          <div className="max-w-3xl">
+            <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              Hochschul&shy;infotag 2026
+            </h1>
+            <p className="mt-6 text-lg text-white/90 max-w-2xl">
+              Entdecken Sie die Universität und Hochschule Osnabrück! Besuchen Sie Vorträge,
+              Laborführungen und Workshops zu über 200 Studiengängen.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href="/events">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white text-hit-uni-700 hover:bg-white/90"
+                >
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Alle Veranstaltungen
+                </Button>
+              </Link>
+              <Link href="/navigator">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white bg-transparent hover:bg-white/10"
+                >
+                  <Compass className="mr-2 h-5 w-5" />
+                  Studiennavigator
+                </Button>
+              </Link>
             </div>
           </div>
 
