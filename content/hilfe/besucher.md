@@ -9,7 +9,7 @@ Auf der Seite **Veranstaltungen** finden Sie die Einstiege in alle Angebote des 
 - **Studienfelder Universität** und **Studienfelder Hochschule** — die jeweiligen Studienbereiche als Kacheln. Ein Klick öffnet alle Veranstaltungen des gewählten Felds.
 - **Lehramt** — alle Lehramts-Veranstaltungen aus Universität und Hochschule auf einer Seite.
 - **Studiengänge A-Z** — alphabetisch nach Studiengang sortierte Übersicht mit Buchstaben-Sprungleiste.
-- **Infomärkte** — kuratierte Seite mit Erklärtext und allen Veranstaltungen an den Infomarkt-Standorten Schloss und Caprivi.
+- **Infomärkte** — kuratierte Seite mit Erklärtext und allen Veranstaltungen an den drei Infomarkt-Standorten Schloss (Innenstadt), SL (Westerberg) und Caprivi. Oben auf der Seite springen Sie über die Standort-Kacheln direkt zum jeweiligen Bereich.
 - **Rund ums Studium** — hochschulübergreifende Angebote (Studienberatung, Finanzierung, Auslandsstudium, …).
 - **Multiplikator\*innen-Café** — direkter Link zur entsprechenden Veranstaltung, sofern eine vom Team festgelegt ist.
 
