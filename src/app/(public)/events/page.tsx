@@ -135,7 +135,7 @@ function LandingLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="flex items-center justify-between rounded-md border border-hit-gray-200 bg-white px-4 py-3 text-sm text-hit-gray-900 transition-colors hover:border-hit-uni-300"
+      className="flex items-center justify-between rounded-md border border-hit-gray-200 border-l-4 border-l-hit-gray-400 bg-hit-gray-50 px-4 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100"
     >
       <span>{label}</span>
       <span className="text-hit-gray-400">→</span>

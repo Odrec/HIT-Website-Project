@@ -18,66 +18,18 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
-import { formatEventTime } from '@/lib/event-time'
-
-interface FeaturedEvent {
-  id: string
-  title: string
-  description: string | null
-  eventType: string
-  timeStart: string
-  institution: string
-  location: {
-    buildingName: string
-  } | null
-}
-
-const eventTypeLabels: Record<string, string> = {
-  VORTRAG: 'Vortrag',
-  LABORFUEHRUNG: 'Laborführung',
-  RUNDGANG: 'Rundgang',
-  WORKSHOP: 'Workshop',
-  ONLINE: 'Online',
-  VIDEO: 'Video',
-  INFOSTAND: 'Infostand',
-}
-
-const eventTypeColors: Record<string, string> = {
-  VORTRAG: 'bg-blue-100 text-blue-800',
-  LABORFUEHRUNG: 'bg-purple-100 text-purple-800',
-  RUNDGANG: 'bg-green-100 text-green-800',
-  WORKSHOP: 'bg-orange-100 text-orange-800',
-  ONLINE: 'bg-gray-100 text-gray-800',
-  VIDEO: 'bg-red-100 text-red-800',
-  INFOSTAND: 'bg-pink-100 text-pink-800',
-}
 
 export default function HomePage() {
-  const [featuredEvents, setFeaturedEvents] = useState<FeaturedEvent[]>([])
-  const [loading, setLoading] = useState(true)
   const [eventCount, setEventCount] = useState(0)
 
   useEffect(() => {
-    const fetchFeaturedEvents = async () => {
-      try {
-        const response = await fetch('/api/events/public?pageSize=4&sortBy=timeStart&sortOrder=asc')
-        if (response.ok) {
-          const data = await response.json()
-          setFeaturedEvents(data.events)
-          setEventCount(data.total)
-        }
-      } catch (error) {
-        console.error('Error fetching featured events:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchFeaturedEvents()
+    fetch('/api/events/public?pageSize=1')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) setEventCount(data.total)
+      })
+      .catch((error) => console.error('Error fetching event count:', error))
   }, [])
-
-  const formatTime = (dateString: string) => formatEventTime(dateString)
 
   return (
     <div className="flex flex-col">
@@ -122,10 +74,10 @@ export default function HomePage() {
               <Image
                 src="/infotag-banner.png"
                 alt="Hochschul Infotag"
-                width={815}
-                height={371}
+                width={3508}
+                height={4961}
                 priority
-                className="w-[320px] h-auto rounded-lg shadow-2xl"
+                className="w-[260px] h-auto rounded-lg shadow-2xl"
               />
             </div>
           </div>
@@ -215,105 +167,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Events */}
-      <section className="bg-hit-gray-50 py-12 lg:py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-hit-gray-900 lg:text-3xl">
-                Kommende Veranstaltungen
-              </h2>
-              <p className="mt-2 text-hit-gray-600">Entdecken Sie unsere nächsten Events</p>
-            </div>
-            <Link href="/events" className="hidden sm:block">
-              <Button variant="outline">
-                Alle anzeigen
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-6 w-full mt-2" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4 mt-2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : featuredEvents.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredEvents.map((event) => (
-                <Link key={event.id} href={`/events/${event.id}`}>
-                  <Card className="h-full transition-shadow hover:shadow-lg">
-                    <CardHeader className="pb-2">
-                      <div className="flex gap-2">
-                        <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
-                          {eventTypeLabels[event.eventType]}
-                        </Badge>
-                      </div>
-                      <CardTitle className="line-clamp-2 text-lg mt-2">{event.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {event.description && (
-                        <CardDescription className="line-clamp-2 mb-3">
-                          {event.description}
-                        </CardDescription>
-                      )}
-                      <div className="space-y-1 text-sm text-hit-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span>{formatTime(event.timeStart)} Uhr</span>
-                        </div>
-                        {event.location && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span className="line-clamp-1">{event.location.buildingName}</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <Card className="py-12 text-center">
-              <CardContent>
-                <Calendar className="mx-auto h-12 w-12 text-hit-gray-300" />
-                <h3 className="mt-4 text-lg font-medium text-hit-gray-900">
-                  Noch keine Veranstaltungen
-                </h3>
-                <p className="mt-2 text-hit-gray-600">
-                  Die Veranstaltungen werden bald veröffentlicht.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="mt-6 text-center sm:hidden">
-            <Link href="/events">
-              <Button variant="outline">
-                Alle Veranstaltungen anzeigen
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Institutions */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-hit-gray-900 text-center lg:text-3xl mb-8">
-            Zwei Hochschulen – ein Informationstag
+            Zwei Hochschulen – ein Infotag
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2">
