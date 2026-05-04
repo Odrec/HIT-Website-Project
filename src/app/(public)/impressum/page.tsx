@@ -29,7 +29,7 @@ export default function ImpressumPage() {
               <br />
               Körperschaft des öffentlichen Rechts
               <br />
-              vertreten durch den Präsidenten Prof. Dr. Dennis Zielke
+              vertreten durch den Präsidenten Prof. Dr. Alexander Schmehmann
             </p>
           </CardContent>
         </Card>
@@ -79,9 +79,7 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">
             <p>
-              Johanna Risse
-              <br />
-              Dirk Mochalski
+              Christine Kammler
               <br />
               Zentrale Studienberatung Osnabrück
               <br />
