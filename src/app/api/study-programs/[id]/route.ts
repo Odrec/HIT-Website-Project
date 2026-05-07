@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { normalizeExternalUrl } from '@/lib/url-utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -77,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         name: body.name,
         institution: body.institution,
-        url: body.url || null,
+        url: normalizeExternalUrl(body.url),
         clusters: { set: clusterIds.map((cid) => ({ id: cid })) },
       },
       include: {

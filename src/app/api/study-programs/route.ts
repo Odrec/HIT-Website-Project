@@ -8,6 +8,7 @@ import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateProgramCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { normalizeExternalUrl } from '@/lib/url-utils'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name,
         institution: body.institution,
-        url: body.url || null,
+        url: normalizeExternalUrl(body.url),
         ...(clusterIds.length > 0 && {
           clusters: { connect: clusterIds.map((id) => ({ id })) },
         }),
