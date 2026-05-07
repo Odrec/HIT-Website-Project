@@ -176,6 +176,14 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 | `EMAIL_FROM` | Sender email address | - |
 | `EMAIL_TO` | Notification recipient | `hit@zsb.os.de` |
 
+> `EMAIL_TO` is server-only and controls **where notifications are delivered**. It's separate from the public contact address shown in the site footer — set that via `NEXT_PUBLIC_CONTACT_EMAIL` below.
+
+### Public Contact Email
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Must be a `NEXT_PUBLIC_*` variable so the same value is available on the server and in the client bundle (otherwise React logs a hydration mismatch). | `hit@zsb.os.de` |
+
 ### Matomo Analytics
 
 | Variable | Description | Default |
