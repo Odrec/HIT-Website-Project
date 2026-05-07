@@ -363,52 +363,78 @@ export default function EventDetailPage() {
           )}
 
           {/* Study Programs */}
-          {event.studyPrograms.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5" />
-                  Zugehörige Studiengänge
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {event.studyPrograms.map((program) => {
-                    const badge = (
-                      <Badge
-                        key={program.id}
-                        variant="outline"
-                        className={cn('text-sm', program.url && 'hover:bg-accent cursor-pointer')}
-                      >
-                        {program.name}
-                        <span
-                          className={cn(
-                            'ml-1 text-xs',
-                            program.institution === 'UNI' ? 'text-hit-uni-500' : 'text-hit-hs-500'
-                          )}
-                        >
-                          ({program.institution === 'UNI' ? 'Uni' : 'HS'})
-                        </span>
-                        {program.url && <ExternalLink className="ml-1 h-3 w-3" />}
-                      </Badge>
-                    )
-                    return program.url ? (
-                      <a
-                        key={program.id}
-                        href={program.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {badge}
-                      </a>
-                    ) : (
-                      badge
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {event.studyPrograms.length > 0 &&
+            (() => {
+              const linkedPrograms = event.studyPrograms.filter((p) => p.url)
+              const unlinkedPrograms = event.studyPrograms.filter((p) => !p.url)
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5" />
+                      Studiengangsinformationen
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {linkedPrograms.length > 0 && (
+                      <ul className="divide-y divide-hit-gray-200">
+                        {linkedPrograms.map((program) => (
+                          <li key={program.id}>
+                            <a
+                              href={program.url!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group flex items-center justify-between gap-3 py-3 text-hit-uni-600 hover:text-hit-uni-700 hover:underline"
+                            >
+                              <span className="flex items-center gap-2">
+                                <span className="font-medium">{program.name}</span>
+                                <span
+                                  className={cn(
+                                    'text-xs',
+                                    program.institution === 'UNI'
+                                      ? 'text-hit-uni-500'
+                                      : 'text-hit-hs-500'
+                                  )}
+                                >
+                                  ({program.institution === 'UNI' ? 'Uni' : 'HS'})
+                                </span>
+                              </span>
+                              <ExternalLink className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {unlinkedPrograms.length > 0 && (
+                      <div>
+                        {linkedPrograms.length > 0 && (
+                          <h3 className="mb-2 text-sm font-semibold text-hit-gray-700">
+                            Weitere Studiengänge
+                          </h3>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          {unlinkedPrograms.map((program) => (
+                            <Badge key={program.id} variant="outline" className="text-sm">
+                              {program.name}
+                              <span
+                                className={cn(
+                                  'ml-1 text-xs',
+                                  program.institution === 'UNI'
+                                    ? 'text-hit-uni-500'
+                                    : 'text-hit-hs-500'
+                                )}
+                              >
+                                ({program.institution === 'UNI' ? 'Uni' : 'HS'})
+                              </span>
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })()}
 
           {/* Additional Info */}
           {event.additionalInfo && (
