@@ -1,5 +1,3 @@
-'use client'
-
 import { MainLayout } from '@/components/layout'
 
 interface PublicLayoutProps {
