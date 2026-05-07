@@ -183,6 +183,16 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 | `NEXT_PUBLIC_MATOMO_URL` | Matomo instance URL | - |
 | `NEXT_PUBLIC_MATOMO_SITE_ID` | Matomo site ID | - |
 
+### Homepage Hero Banner
+
+The homepage ships with two interchangeable hero backgrounds. Set the variable below to switch.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_ANIMATED_BANNER` | When `"true"`, renders the animated SVG hero (gradient + grid + slowly moving graphic elements from `public/banner/elemente_benannt.svg`). Any other value keeps the static PNG (`public/infotag-banner.png`). | `false` |
+
+> The static PNG remains the safe default until the ZSB delivers final hero assets. The animated banner respects `prefers-reduced-motion` and switches to a non-cropping fit on portrait viewports.
+
 ### Optional Variables
 
 | Variable | Description | Default |

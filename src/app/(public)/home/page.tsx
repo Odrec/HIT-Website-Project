@@ -18,6 +18,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { AnimatedHeroBanner } from '@/components/home/animated-hero-banner'
+
+const USE_ANIMATED_BANNER = process.env.NEXT_PUBLIC_ANIMATED_BANNER === 'true'
 
 export default function HomePage() {
   const [eventCount, setEventCount] = useState(0)
@@ -35,13 +38,17 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-hit-uni-600 via-hit-uni-500 to-hit-hs-500 text-white">
-        <Image
-          src="/infotag-banner.png"
-          alt=""
-          fill
-          priority
-          className="object-cover object-top -z-0"
-        />
+        {USE_ANIMATED_BANNER ? (
+          <AnimatedHeroBanner />
+        ) : (
+          <Image
+            src="/infotag-banner.png"
+            alt=""
+            fill
+            priority
+            className="object-cover object-top -z-0"
+          />
+        )}
         {/* Dark overlay for text legibility on top of the artwork */}
         <div className="absolute inset-0 bg-black/30 -z-0" />
         {/* Störer (Eyecatcher) */}
