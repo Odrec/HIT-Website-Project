@@ -59,3 +59,4 @@ jobs:
             NODE_ENV=production
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
+            NEXT_PUBLIC_ANIMATED_BANNER=${{ vars.NEXT_PUBLIC_ANIMATED_BANNER }}

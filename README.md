@@ -176,13 +176,13 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 | `EMAIL_FROM` | Sender email address | - |
 | `EMAIL_TO` | Notification recipient | `hit@zsb.os.de` |
 
-> `EMAIL_TO` is server-only and controls **where notifications are delivered**. It's separate from the public contact address shown in the site footer — set that via `NEXT_PUBLIC_CONTACT_EMAIL` below.
+> `EMAIL_TO` is server-only and controls **where notifications are delivered**. It's separate from the public contact address shown in the site footer — set that via `CONTACT_EMAIL` below.
 
 ### Public Contact Email
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Must be a `NEXT_PUBLIC_*` variable so the same value is available on the server and in the client bundle (otherwise React logs a hydration mismatch). | `hit@zsb.os.de` |
+| `CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Server-only — read at request time, so a deploy-time change to `.env` (followed by a container restart) takes effect without rebuilding the image. | `hit@zsb.os.de` |
 
 ### Matomo Analytics
 
@@ -200,6 +200,8 @@ The homepage ships with two interchangeable hero backgrounds. Set the variable b
 | `NEXT_PUBLIC_ANIMATED_BANNER` | When `"true"`, renders the animated SVG hero (gradient + grid + slowly moving graphic elements from `public/banner/elemente_benannt.svg`). Any other value keeps the static PNG (`public/infotag-banner.png`). | `false` |
 
 > The static PNG remains the safe default until the ZSB delivers final hero assets. The animated banner respects `prefers-reduced-motion` and switches to a non-cropping fit on portrait viewports.
+>
+> **Build-time variable.** `NEXT_PUBLIC_*` values are inlined into the client bundle at `npm run build`, so for the Docker image this must be set as a build-arg in CI (see `.github/workflows/docker-publish.yml`). Setting it on the runtime container (`/opt/hit-website/.env`) has no effect — the bundle has already been built.
 
 ### Optional Variables
 
