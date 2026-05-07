@@ -1,0 +1,98 @@
+.banner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #228594 0%, #2d2150 55%, #0e1424 100%);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, #228594 0%, #2d2150 55%, #0e1424 100%);
+  background-size: 60px 60px, 60px 60px, auto;
+  background-position: 0 0, 0 0, 0 0;
+}
+
+.svgContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.svgContainer svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.keep {
+  transform-origin: center;
+  transform-box: fill-box;
+  will-change: transform, opacity;
+}
+
+@keyframes wave-shift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-20px); }
+}
+@keyframes slow-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes slow-rotate-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes slow-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+@keyframes slow-fade {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+@keyframes slow-tilt {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50%      { transform: rotate(2.5deg); }
+}
+@keyframes slow-blink {
+  0%, 40%, 100% { opacity: 0.35; }
+  50%           { opacity: 1; }
+}
+@keyframes slow-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+@keyframes element-drift {
+  0%, 100% { transform: translate(0, 0); }
+  33%      { transform: translate(var(--drift-ax, 0), var(--drift-ay, 0)); }
+  66%      { transform: translate(var(--drift-bx, 0), var(--drift-by, 0)); }
+}
+
+.driftTarget {
+  animation: element-drift var(--drift-duration, 240s) ease-in-out infinite;
+  will-change: transform;
+}
+
+.waveShift     { animation: wave-shift     22s ease-in-out infinite; }
+.slowRotate    { animation: slow-rotate    45s linear      infinite; }
+.slowRotateRev { animation: slow-rotate-rev 55s linear     infinite; }
+.slowPulse     { animation: slow-pulse     10s ease-in-out infinite; }
+.slowFade      { animation: slow-fade      14s ease-in-out infinite; }
+.slowTilt      { animation: slow-tilt      12s ease-in-out infinite; }
+.slowBlink     { animation: slow-blink     10s ease-in-out infinite; }
+.slowBreathe   { animation: slow-breathe   14s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .driftTarget,
+  .waveShift,
+  .slowRotate,
+  .slowRotateRev,
+  .slowPulse,
+  .slowFade,
+  .slowTilt,
+  .slowBlink,
+  .slowBreathe {
+    animation: none !important;
+  }
+}
