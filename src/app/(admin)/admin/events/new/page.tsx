@@ -183,6 +183,7 @@ export default function NewEventPage() {
 
       {/* Form */}
       <EventForm
+        key={prefillMelderId ?? 'fresh'}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         isAdmin={session?.user?.role === 'ADMIN'}
