@@ -6,7 +6,7 @@ Willkommen beim Hochschulinfotag (HIT) 2026! Hier erfahren Sie, wie Sie die Webs
 
 Auf der Seite **Veranstaltungen** finden Sie die Einstiege in alle Angebote des HIT. Nutzen Sie die Suchleiste oben, um direkt nach Stichworten zu suchen, oder wählen Sie einen passenden Einstieg:
 
-- **Studienfelder Universität** und **Studienfelder Hochschule** — die jeweiligen Studienbereiche als Kacheln. Ein Klick öffnet alle Veranstaltungen des gewählten Felds.
+- **Studienfelder Universität** und **Studienfelder Hochschule** — die jeweiligen Studienbereiche als Kacheln. Ein Klick öffnet die Studiengänge des gewählten Felds; von dort gelangen Sie zu den Veranstaltungen eines einzelnen Studiengangs oder über die Schaltfläche **„Alle Veranstaltungen dieses Studienfelds anzeigen"** zur kompletten Liste.
 - **Lehramt** — alle Lehramts-Veranstaltungen aus Universität und Hochschule auf einer Seite.
 - **Studiengänge A-Z** — alphabetisch nach Studiengang sortierte Übersicht mit Buchstaben-Sprungleiste.
 - **Infomärkte** — kuratierte Seite mit Erklärtext und allen Veranstaltungen an den drei Infomarkt-Standorten Schloss (Innenstadt), SL (Westerberg) und Caprivi. Oben auf der Seite springen Sie über die Standort-Kacheln direkt zum jeweiligen Bereich.

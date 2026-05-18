@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { invalidateProgramCaches } from '@/lib/cache/cache-utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -59,16 +60,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
+    if (body.institution && !['UNI', 'HOCHSCHULE', 'BOTH'].includes(body.institution)) {
+      return NextResponse.json(
+        { error: 'Invalid institution. Must be UNI, HOCHSCHULE, or BOTH.' },
+        { status: 400 }
+      )
+    }
+
     const cluster = await prisma.studyProgramCluster.update({
       where: { id },
       data: {
         name: body.name,
         description: body.description || null,
+        ...(body.institution && { institution: body.institution }),
       },
       include: {
         programs: true,
       },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json(cluster)
   } catch (error) {
@@ -103,6 +114,8 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     await prisma.studyProgramCluster.delete({
       where: { id },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json({ success: true })
   } catch (error) {

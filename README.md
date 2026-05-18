@@ -25,7 +25,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 
 | Feature | Description |
 |---------|-------------|
-| **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Each entry opens its own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
+| **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Studienfeld tiles open an intermediate programs list at `/events/cluster/[id]` (mirroring the old zsb-os.de pattern); the "Alle Veranstaltungen dieses Studienfelds anzeigen" CTA from there links to `/events/cluster/[id]/all`. Other entries open their own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
 | **Schedule Builder** | Create personalized event schedules with conflict detection, travel-time warnings, 3-level priority labels (Hoch/Mittel/Niedrig), QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |

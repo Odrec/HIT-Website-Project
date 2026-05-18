@@ -54,6 +54,7 @@ interface Cluster {
   id: string
   name: string
   description: string | null
+  institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
 }
 
 interface StudyProgram {
@@ -103,6 +104,7 @@ export default function StudyProgramsPage() {
   const [clusterFormData, setClusterFormData] = useState({
     name: '',
     description: '',
+    institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
   })
 
   // Delete Dialog
@@ -218,6 +220,7 @@ export default function StudyProgramsPage() {
     setClusterFormData({
       name: '',
       description: '',
+      institution: 'UNI',
     })
     setClusterDialogOpen(true)
   }
@@ -227,6 +230,7 @@ export default function StudyProgramsPage() {
     setClusterFormData({
       name: cluster.name,
       description: cluster.description || '',
+      institution: cluster.institution,
     })
     setClusterDialogOpen(true)
   }
@@ -239,6 +243,7 @@ export default function StudyProgramsPage() {
       const body = {
         name: clusterFormData.name.trim(),
         description: clusterFormData.description.trim() || null,
+        institution: clusterFormData.institution,
       }
 
       const url = editingCluster
@@ -256,8 +261,8 @@ export default function StudyProgramsPage() {
         setClusterDialogOpen(false)
         fetchData()
       } else {
-        const error = await response.json()
-        alert(error.message || 'Fehler beim Speichern')
+        const errorData = await response.json().catch(() => ({}))
+        alert(errorData.error || errorData.message || 'Fehler beim Speichern')
       }
     } catch (error) {
       console.error('Failed to save cluster:', error)
@@ -709,6 +714,29 @@ export default function StudyProgramsPage() {
                 onChange={(e) => setClusterFormData({ ...clusterFormData, name: e.target.value })}
                 placeholder="z.B. Naturwissenschaften, Wirtschaft"
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cluster-institution">
+                Zugehörigkeit <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={clusterFormData.institution}
+                onValueChange={(v) =>
+                  setClusterFormData({
+                    ...clusterFormData,
+                    institution: v as 'UNI' | 'HOCHSCHULE' | 'BOTH',
+                  })
+                }
+              >
+                <SelectTrigger id="cluster-institution">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UNI">Universität</SelectItem>
+                  <SelectItem value="HOCHSCHULE">Hochschule</SelectItem>
+                  <SelectItem value="BOTH">Universität & Hochschule</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="clusterDescription">Beschreibung</Label>

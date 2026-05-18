@@ -55,6 +55,7 @@ export function MelderSection({
   titleOptions,
 }: MelderSectionProps) {
   const [loaded, setLoaded] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   // Edit mode is latched on mount from the initial melderId. Required because
   // the create-mode path auto-links the current user's profile, which would
   // silently overwrite the event's original Melder on edit (regression).
@@ -90,11 +91,25 @@ export function MelderSection({
 
     if (isEditMode && melderId) {
       fetch(`/api/melder/${melderId}`, { signal: controller.signal })
-        .then((res) => (res.ok ? res.json() : null))
+        .then(async (res) => {
+          if (!res.ok) {
+            setLoadError(
+              res.status === 403
+                ? 'Keine Berechtigung, das Melder-Profil zu laden.'
+                : 'Melder-Profil konnte nicht geladen werden.'
+            )
+            return null
+          }
+          return res.json()
+        })
         .then((melder) => {
           if (melder?.id) populate(melder)
         })
-        .catch(() => {})
+        .catch((err: unknown) => {
+          if (err instanceof Error && err.name !== 'AbortError') {
+            setLoadError('Melder-Profil konnte nicht geladen werden.')
+          }
+        })
         .finally(() => setLoaded(true))
     } else {
       fetch('/api/melder', { signal: controller.signal })
@@ -127,6 +142,11 @@ export function MelderSection({
             ? 'Ursprüngliche Einreicher-Daten. Nicht änderbar beim Bearbeiten.'
             : 'Wird automatisch aus Ihrem Profil ausgefüllt. Änderungen gelten nur für diese Veranstaltung.'}
         </CardDescription>
+        {loadError && (
+          <p className="mt-1 text-xs text-red-600" role="alert">
+            {loadError}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

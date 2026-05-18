@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { studyProgramService } from '@/services'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { invalidateProgramCaches } from '@/lib/cache/cache-utils'
 
 /**
  * GET /api/study-programs/clusters - List all study program clusters
@@ -52,6 +53,8 @@ export async function POST(request: NextRequest) {
         programs: true,
       },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json(cluster, { status: 201 })
   } catch (error) {
