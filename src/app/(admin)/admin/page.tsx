@@ -23,13 +23,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     async function fetchStats() {
       try {
         const [eventsRes, upcomingRes, programsRes, buildingsRes] = await Promise.all([
-          fetch('/api/events?pageSize=1'),
-          fetch('/api/events?pageSize=1&startDate=' + new Date().toISOString()),
-          fetch('/api/study-programs'),
-          fetch('/api/buildings'),
+          fetch('/api/events?pageSize=1', { signal }),
+          fetch('/api/events?pageSize=1&startDate=' + new Date().toISOString(), { signal }),
+          fetch('/api/study-programs', { signal }),
+          fetch('/api/buildings', { signal }),
         ])
 
         const eventsData = await eventsRes.json()
@@ -37,6 +40,7 @@ export default function AdminDashboard() {
         const programsData = await programsRes.json()
         const buildingsData = await buildingsRes.json()
 
+        if (signal.aborted) return
         setStats({
           totalEvents: eventsData.total || 0,
           upcomingEvents: upcomingData.total || 0,
@@ -44,13 +48,15 @@ export default function AdminDashboard() {
           totalLocations: Array.isArray(buildingsData) ? buildingsData.length : 0,
         })
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
         console.error('Error fetching stats:', error)
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     fetchStats()
+    return () => controller.abort()
   }, [])
 
   const statCards = [
