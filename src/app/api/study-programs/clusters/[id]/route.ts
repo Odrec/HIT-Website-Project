@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
+import { invalidateProgramCaches } from '@/lib/cache/cache-utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -78,6 +79,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       },
     })
 
+    await invalidateProgramCaches()
+
     return NextResponse.json(cluster)
   } catch (error) {
     console.error('Error updating cluster:', error)
@@ -111,6 +114,8 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     await prisma.studyProgramCluster.delete({
       where: { id },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json({ success: true })
   } catch (error) {
