@@ -33,6 +33,7 @@ interface CreatedEvent {
   institution: string
   timeStart: string | null
   timeEnd: string | null
+  melderId: string | null
 }
 
 function formatTime(iso: string | null): string {
@@ -46,6 +47,7 @@ export default function NewEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdEvent, setCreatedEvent] = useState<CreatedEvent | null>(null)
+  const [prefillMelderId, setPrefillMelderId] = useState<string | null>(null)
 
   const handleSubmit = async (data: EventFormValues) => {
     setIsSubmitting(true)
@@ -138,6 +140,7 @@ export default function NewEventPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
+                    setPrefillMelderId(createdEvent.melderId ?? null)
                     setCreatedEvent(null)
                     setError(null)
                   }}
@@ -183,6 +186,9 @@ export default function NewEventPage() {
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         isAdmin={session?.user?.role === 'ADMIN'}
+        initialData={
+          prefillMelderId ? ({ melderId: prefillMelderId } as Partial<EventFormValues>) : undefined
+        }
       />
     </div>
   )
