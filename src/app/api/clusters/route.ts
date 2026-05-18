@@ -32,9 +32,14 @@ export async function GET() {
       },
     })
 
+    // BOTH-institution clusters surface in both sections so the admin selector's
+    // "Universität & Hochschule" choice does something visible (a previous gap
+    // silently dropped them).
     const responseData = {
-      uni: clusters.filter((c) => c.institution === 'UNI'),
-      hochschule: clusters.filter((c) => c.institution === 'HOCHSCHULE'),
+      uni: clusters.filter((c) => c.institution === 'UNI' || c.institution === 'BOTH'),
+      hochschule: clusters.filter(
+        (c) => c.institution === 'HOCHSCHULE' || c.institution === 'BOTH'
+      ),
     }
 
     if (redisConnected) {
