@@ -59,11 +59,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 })
     }
 
+    if (body.institution && !['UNI', 'HOCHSCHULE', 'BOTH'].includes(body.institution)) {
+      return NextResponse.json(
+        { error: 'Invalid institution. Must be UNI, HOCHSCHULE, or BOTH.' },
+        { status: 400 }
+      )
+    }
+
     const cluster = await prisma.studyProgramCluster.update({
       where: { id },
       data: {
         name: body.name,
         description: body.description || null,
+        ...(body.institution && { institution: body.institution }),
       },
       include: {
         programs: true,
