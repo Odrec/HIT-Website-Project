@@ -22,34 +22,34 @@ type KeepEntry = {
 }
 
 const KEEP: Record<string, KeepEntry> = {
-  doppelstern:      { tx:  650, ty:  65, scale: 0.9,  animation: 'slow-blink',      duration:  8 },
-  u:                { tx:  440, ty:  80, scale: 0.7,  animation: 'slow-fade',       duration: 14 },
-  pfeile:           { tx:  790, ty: 110, scale: 0.55, animation: 'slow-pulse',      duration: 10 },
-  plusfeld:         { tx:  380, ty: 110, scale: 0.85, animation: 'slow-pulse',      duration:  9 },
-  wortsalat:        { tx: 1020, ty: 130, scale: 1.1,  animation: 'slow-fade',       duration: 14 },
-  tunnel:           { tx: 1340, ty: 130, scale: 0.7,  animation: 'slow-rotate-rev', duration: 60 },
-  sterne:           { tx:  220, ty: 200, scale: 0.7,  animation: 'slow-blink',      duration: 10 },
-  'spirale-eng':    { tx:  300, ty: 270, scale: 0.55, animation: 'slow-rotate',     duration: 50 },
-  wellen:           { tx:  720, ty: 247, scale: 1.15, animation: 'wave-shift',      duration: 22 },
-  halbkreise:       { tx: 1230, ty: 280, scale: 0.85, animation: 'slow-rotate',     duration: 70 },
-  'dreieck-gefuellt': { tx: 1090, ty: 350, scale: 0.85, animation: 'slow-tilt',     duration: 12 },
-  spirale:          { tx:  140, ty: 380, scale: 1.0,  animation: 'slow-rotate',     duration: 45 },
-  doppelhalbkreis:  { tx:  480, ty: 420, scale: 0.7,  animation: 'slow-rotate',     duration: 55 },
-  l:                { tx:  640, ty: 420, scale: 0.7,  animation: 'slow-fade',       duration: 12 },
-  'streifen-zebra': { tx:  790, ty: 420, scale: 0.65, animation: 'slow-pulse',      duration: 11 },
-  strahlen:         { tx:  940, ty: 410, scale: 0.7,  animation: 'slow-breathe',    duration: 14 },
-  ringe:            { tx: 1340, ty: 410, scale: 0.85, animation: 'slow-pulse',      duration: 12 },
+  doppelstern: { tx: 650, ty: 65, scale: 0.9, animation: 'slow-blink', duration: 8 },
+  u: { tx: 440, ty: 80, scale: 0.7, animation: 'slow-fade', duration: 14 },
+  pfeile: { tx: 790, ty: 110, scale: 0.55, animation: 'slow-pulse', duration: 10 },
+  plusfeld: { tx: 380, ty: 110, scale: 0.85, animation: 'slow-pulse', duration: 9 },
+  wortsalat: { tx: 1020, ty: 130, scale: 1.1, animation: 'slow-fade', duration: 14 },
+  tunnel: { tx: 1340, ty: 130, scale: 0.7, animation: 'slow-rotate-rev', duration: 60 },
+  sterne: { tx: 220, ty: 200, scale: 0.7, animation: 'slow-blink', duration: 10 },
+  'spirale-eng': { tx: 300, ty: 270, scale: 0.55, animation: 'slow-rotate', duration: 50 },
+  wellen: { tx: 720, ty: 247, scale: 1.15, animation: 'wave-shift', duration: 22 },
+  halbkreise: { tx: 1230, ty: 280, scale: 0.85, animation: 'slow-rotate', duration: 70 },
+  'dreieck-gefuellt': { tx: 1090, ty: 350, scale: 0.85, animation: 'slow-tilt', duration: 12 },
+  spirale: { tx: 140, ty: 380, scale: 1.0, animation: 'slow-rotate', duration: 45 },
+  doppelhalbkreis: { tx: 480, ty: 420, scale: 0.7, animation: 'slow-rotate', duration: 55 },
+  l: { tx: 640, ty: 420, scale: 0.7, animation: 'slow-fade', duration: 12 },
+  'streifen-zebra': { tx: 790, ty: 420, scale: 0.65, animation: 'slow-pulse', duration: 11 },
+  strahlen: { tx: 940, ty: 410, scale: 0.7, animation: 'slow-breathe', duration: 14 },
+  ringe: { tx: 1340, ty: 410, scale: 0.85, animation: 'slow-pulse', duration: 12 },
 }
 
 const ANIMATION_CLASS: Record<AnimationKey, string> = {
-  'wave-shift':      styles.waveShift,
-  'slow-rotate':     styles.slowRotate,
+  'wave-shift': styles.waveShift,
+  'slow-rotate': styles.slowRotate,
   'slow-rotate-rev': styles.slowRotateRev,
-  'slow-pulse':      styles.slowPulse,
-  'slow-fade':       styles.slowFade,
-  'slow-tilt':       styles.slowTilt,
-  'slow-blink':      styles.slowBlink,
-  'slow-breathe':    styles.slowBreathe,
+  'slow-pulse': styles.slowPulse,
+  'slow-fade': styles.slowFade,
+  'slow-tilt': styles.slowTilt,
+  'slow-blink': styles.slowBlink,
+  'slow-breathe': styles.slowBreathe,
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -148,12 +148,8 @@ export function AnimatedHeroBanner() {
       // Portrait / narrow viewports: fit the whole scene with letterboxing of the
       // gradient, so all kept elements stay visible. Landscape: cover behaviour.
       const isPortrait =
-        typeof window !== 'undefined' &&
-        window.matchMedia('(max-aspect-ratio: 1/1)').matches
-      svgEl.setAttribute(
-        'preserveAspectRatio',
-        isPortrait ? 'xMidYMid meet' : 'xMidYMid slice'
-      )
+        typeof window !== 'undefined' && window.matchMedia('(max-aspect-ratio: 1/1)').matches
+      svgEl.setAttribute('preserveAspectRatio', isPortrait ? 'xMidYMid meet' : 'xMidYMid slice')
     }
 
     let mediaQuery: MediaQueryList | null = null
