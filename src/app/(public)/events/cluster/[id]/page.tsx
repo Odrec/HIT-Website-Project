@@ -59,7 +59,7 @@ export default async function ClusterProgramsPage({ params }: { params: Promise<
             {cluster.programs.map((p) => (
               <div
                 key={p.id}
-                className={`group relative rounded-md border border-hit-gray-200 border-l-4 ${tileAccent} bg-hit-gray-50 px-4 py-3 transition-colors hover:bg-hit-gray-100`}
+                className={`group relative rounded-md border border-hit-gray-200 border-l-4 ${tileAccent} bg-hit-gray-50 px-4 py-3 transition-colors hover:bg-hit-gray-100 focus-within:bg-hit-gray-100`}
               >
                 <Link
                   href={`/events/program/${p.id}`}
