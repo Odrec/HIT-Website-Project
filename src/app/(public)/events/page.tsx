@@ -88,7 +88,7 @@ function EventsLandingContent() {
             <Link
               key={c.id}
               href={`/events/cluster/${c.id}`}
-              className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-uni-500 bg-hit-gray-50 px-4 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100"
+              className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-uni-500 bg-hit-gray-50 px-3 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100 break-words hyphens-auto sm:px-4"
             >
               {c.name}
             </Link>
@@ -105,7 +105,7 @@ function EventsLandingContent() {
             <Link
               key={c.id}
               href={`/events/cluster/${c.id}`}
-              className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-hs-500 bg-hit-gray-50 px-4 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100"
+              className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-hs-500 bg-hit-gray-50 px-3 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100 break-words hyphens-auto sm:px-4"
             >
               {c.name}
             </Link>
