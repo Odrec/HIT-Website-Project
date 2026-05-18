@@ -149,7 +149,8 @@ export interface CreateEventInput {
   institution: Institution
   isCrossProgram?: boolean
   locationHint?: string
-  melderId?: string
+  /** Pass `null` to explicitly clear the relation on update; omit or pass empty string to leave untouched. */
+  melderId?: string | null
   buildingId?: string
   roomId?: string
   lecturers?: Omit<Lecturer, 'id' | 'eventId'>[]

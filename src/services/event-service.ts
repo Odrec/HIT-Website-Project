@@ -408,7 +408,11 @@ export const eventService = {
       ...eventData,
       isCrossProgram: input.isCrossProgram ?? false,
       locationHint: input.locationHint || null,
-      ...(melderId !== undefined && { melderId: melderId || null }),
+      // Only touch melderId if a concrete value was provided. An empty string from
+      // the form means "no live value to write" — preserve the existing relation
+      // rather than nulling it. To intentionally clear, callers must pass `null`.
+      ...(typeof melderId === 'string' && melderId.length > 0 && { melderId }),
+      ...(melderId === null && { melderId: null }),
       ...(buildingId !== undefined && { buildingId: buildingId || null }),
       ...(roomId !== undefined && { roomId: roomId || null }),
       ...(locationWishArea !== undefined && { locationWishArea: locationWishArea || null }),

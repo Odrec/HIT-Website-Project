@@ -97,7 +97,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ...body,
       isCrossProgram: body.isCrossProgram ?? false,
       locationHint: body.locationHint || null,
-      melderId: body.melderId || null,
+      melderId:
+        typeof body.melderId === 'string' && body.melderId.length > 0
+          ? body.melderId
+          : body.melderId === null
+            ? null
+            : undefined,
       buildingId: body.buildingId || null,
       roomId: body.roomId || null,
       timeStart: body.timeStart ? new Date(body.timeStart) : undefined,
