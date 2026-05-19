@@ -24,11 +24,12 @@ export async function GET() {
     }
 
     const clusters = await prisma.studyProgramCluster.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       select: {
         id: true,
         name: true,
         institution: true,
+        sortOrder: true,
       },
     })
 

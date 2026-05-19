@@ -26,7 +26,9 @@ import { GET } from '@/app/api/clusters/route'
 
 describe('GET /api/clusters institution buckets', () => {
   it('places UNI clusters in the uni bucket', async () => {
-    mockFindMany.mockResolvedValue([{ id: 'u1', name: 'Uni Field', institution: 'UNI' }])
+    mockFindMany.mockResolvedValue([
+      { id: 'u1', name: 'Uni Field', institution: 'UNI', sortOrder: 0 },
+    ])
     const res = await GET()
     const body = await res.json()
     expect(body.uni).toHaveLength(1)
@@ -34,7 +36,9 @@ describe('GET /api/clusters institution buckets', () => {
   })
 
   it('places HOCHSCHULE clusters in the hochschule bucket', async () => {
-    mockFindMany.mockResolvedValue([{ id: 'h1', name: 'HS Field', institution: 'HOCHSCHULE' }])
+    mockFindMany.mockResolvedValue([
+      { id: 'h1', name: 'HS Field', institution: 'HOCHSCHULE', sortOrder: 0 },
+    ])
     const res = await GET()
     const body = await res.json()
     expect(body.uni).toHaveLength(0)
@@ -42,7 +46,9 @@ describe('GET /api/clusters institution buckets', () => {
   })
 
   it('places BOTH clusters in both buckets (regression: previously dropped)', async () => {
-    mockFindMany.mockResolvedValue([{ id: 'b1', name: 'Zentrale Angebote', institution: 'BOTH' }])
+    mockFindMany.mockResolvedValue([
+      { id: 'b1', name: 'Zentrale Angebote', institution: 'BOTH', sortOrder: 0 },
+    ])
     const res = await GET()
     const body = await res.json()
     expect(body.uni).toHaveLength(1)
@@ -53,13 +59,31 @@ describe('GET /api/clusters institution buckets', () => {
 
   it('mixes UNI, HOCHSCHULE, and BOTH correctly', async () => {
     mockFindMany.mockResolvedValue([
-      { id: 'u1', name: 'Uni', institution: 'UNI' },
-      { id: 'h1', name: 'HS', institution: 'HOCHSCHULE' },
-      { id: 'b1', name: 'Beide', institution: 'BOTH' },
+      { id: 'u1', name: 'Uni', institution: 'UNI', sortOrder: 0 },
+      { id: 'h1', name: 'HS', institution: 'HOCHSCHULE', sortOrder: 0 },
+      { id: 'b1', name: 'Beide', institution: 'BOTH', sortOrder: 0 },
     ])
     const res = await GET()
     const body = await res.json()
     expect(body.uni.map((c: { id: string }) => c.id).sort()).toEqual(['b1', 'u1'])
     expect(body.hochschule.map((c: { id: string }) => c.id).sort()).toEqual(['b1', 'h1'])
+  })
+
+  it('orders clusters by sortOrder ascending then name ascending', async () => {
+    mockFindMany.mockResolvedValue([
+      { id: 'b1', name: 'Zentrale Angebote', institution: 'BOTH', sortOrder: 0 },
+      { id: 'u2', name: 'Anglistik', institution: 'UNI', sortOrder: 5 },
+      { id: 'u1', name: 'Mathematik', institution: 'UNI', sortOrder: 5 },
+    ])
+    const res = await GET()
+    const body = await res.json()
+    // Inside the uni bucket the order should be: Zentrale Angebote (0),
+    // then Anglistik (5, alphabetical first), then Mathematik (5).
+    expect(body.uni.map((c: { name: string }) => c.name)).toEqual([
+      'Zentrale Angebote',
+      'Anglistik',
+      'Mathematik',
+    ])
+    expect(mockFindMany.mock.calls[0][0].orderBy).toEqual([{ sortOrder: 'asc' }, { name: 'asc' }])
   })
 })
