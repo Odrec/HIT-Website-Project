@@ -299,6 +299,28 @@ export function EventForm({
       }
     }
 
+    // If the form has free-form Melder data but no linked Melder id yet,
+    // upsert by email so the new event can link to a persisted Melder.
+    // In edit mode (melderId already present), MelderSection is read-only and
+    // no upsert is needed.
+    const trimmedFirst = melderData.firstName.trim()
+    const trimmedLast = melderData.lastName.trim()
+    const trimmedEmail = melderData.email.trim()
+    if (!melderId && trimmedFirst && trimmedLast && trimmedEmail && melderData.affiliation) {
+      const res = await fetch('/api/melder/upsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(melderData),
+      })
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(errBody.error || 'Melder-Profil konnte nicht gespeichert werden')
+      }
+      const upserted = await res.json()
+      formData.melderId = upserted.id
+      setMelderId(upserted.id)
+    }
+
     await onSubmit(formData as EventFormValues)
   }
 

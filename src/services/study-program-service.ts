@@ -45,9 +45,7 @@ export const studyProgramService = {
       include: {
         programs: true,
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     })
   },
 
@@ -62,7 +60,7 @@ export const studyProgramService = {
           orderBy: { name: 'asc' },
         },
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     })
 
     // Also get programs without any cluster

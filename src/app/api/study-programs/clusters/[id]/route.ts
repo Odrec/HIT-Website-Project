@@ -73,6 +73,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         name: body.name,
         description: body.description || null,
         ...(body.institution && { institution: body.institution }),
+        ...(typeof body.sortOrder === 'number' && { sortOrder: body.sortOrder }),
       },
       include: {
         programs: true,

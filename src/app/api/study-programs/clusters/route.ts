@@ -43,11 +43,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const sortOrder = typeof body.sortOrder === 'number' ? body.sortOrder : 0
+
     const cluster = await prisma.studyProgramCluster.create({
       data: {
         name: body.name,
         description: body.description || null,
         institution: body.institution,
+        sortOrder,
       },
       include: {
         programs: true,

@@ -83,11 +83,13 @@ model StudyProgramCluster {
   name        String         @db.VarChar(200)
   description String?        @db.Text
   institution Institution
+  sortOrder   Int            @default(0)
   programs    StudyProgram[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   @@index([institution])
+  @@index([sortOrder])
   @@map("study_program_clusters")
 }
 
@@ -344,8 +346,8 @@ model SharedSchedule {
 /// Reporter/submitter profile linked to a User account
 model Melder {
   id          String      @id @default(cuid())
-  userId      String      @unique
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?     @unique
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   firstName   String
   lastName    String
   title       String?
@@ -359,6 +361,7 @@ model Melder {
   updatedAt   DateTime    @updatedAt
   events      Event[]
 
+  @@index([email])
   @@map("melders")
 }
 

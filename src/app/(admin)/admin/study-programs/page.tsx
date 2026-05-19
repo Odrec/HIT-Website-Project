@@ -55,6 +55,7 @@ interface Cluster {
   name: string
   description: string | null
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+  sortOrder: number
 }
 
 interface StudyProgram {
@@ -105,6 +106,7 @@ export default function StudyProgramsPage() {
     name: '',
     description: '',
     institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
+    sortOrder: 0,
   })
 
   // Delete Dialog
@@ -221,6 +223,7 @@ export default function StudyProgramsPage() {
       name: '',
       description: '',
       institution: 'UNI',
+      sortOrder: 0,
     })
     setClusterDialogOpen(true)
   }
@@ -231,6 +234,7 @@ export default function StudyProgramsPage() {
       name: cluster.name,
       description: cluster.description || '',
       institution: cluster.institution,
+      sortOrder: cluster.sortOrder ?? 0,
     })
     setClusterDialogOpen(true)
   }
@@ -244,6 +248,7 @@ export default function StudyProgramsPage() {
         name: clusterFormData.name.trim(),
         description: clusterFormData.description.trim() || null,
         institution: clusterFormData.institution,
+        sortOrder: clusterFormData.sortOrder,
       }
 
       const url = editingCluster
@@ -737,6 +742,23 @@ export default function StudyProgramsPage() {
                   <SelectItem value="BOTH">Universität & Hochschule</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cluster-sortorder">Reihenfolge</Label>
+              <Input
+                id="cluster-sortorder"
+                type="number"
+                value={clusterFormData.sortOrder}
+                onChange={(e) =>
+                  setClusterFormData({
+                    ...clusterFormData,
+                    sortOrder: Number.parseInt(e.target.value, 10) || 0,
+                  })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Niedrigere Zahlen erscheinen weiter oben. Standard: 0.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="clusterDescription">Beschreibung</Label>
