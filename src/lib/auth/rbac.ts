@@ -126,7 +126,7 @@ export function canManageUsers(role: UserRole): boolean {
  */
 export function isEventOwner(
   userId: string,
-  event: { melder?: { userId: string } | null }
+  event: { melder?: { userId: string | null } | null }
 ): boolean {
   return event.melder?.userId === userId
 }
