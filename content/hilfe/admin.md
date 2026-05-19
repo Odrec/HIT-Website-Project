@@ -22,7 +22,9 @@ Unter **Raumzuordnung** weisen Sie Veranstaltungen bestimmten Räumen und Zeitsl
 
 ## Melder
 
-Die **Melder**-Verwaltung zeigt alle Veranstalter-Kontakte. Hier sehen Sie, wer welche Veranstaltungen gemeldet hat.
+Unter **Melder** verwalten Sie die Einreicher*innen-Profile, die Veranstaltungen am HIT angemeldet haben. Sie können neue Melder direkt anlegen (**Neuer Melder**), bestehende Einträge bearbeiten oder löschen. Die Melder werden zusätzlich automatisch angelegt, sobald Sie über das Veranstaltungsformular eine neue Person eintragen — die E-Mail-Adresse dient als eindeutige Kennung. Wird die Veranstaltung gespeichert, erscheint der Melder direkt in der Liste.
+
+Hinweis: Melder, die noch mit aktiven Veranstaltungen verknüpft sind, lassen sich nicht löschen. Passen Sie zuerst die Veranstaltungen an (etwa auf einen anderen Melder umstellen) oder löschen Sie sie.
 
 ## Studiengänge
 
@@ -43,6 +45,8 @@ Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei import
 ## Shuttle-Busse
 
 Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf der Campuskarte im Routenplaner. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
+
+Hinweise zur Bus-Begleitung: Die Hilfskraft im Bus muss nach dem Scannen des QR-Codes einmalig den **Standortzugriff** im Browser erlauben. Der Tab muss während der gesamten Schicht geöffnet bleiben — bei iOS Safari pausiert die Standortübertragung, sobald das Display gesperrt wird; bei Android Chrome läuft sie meist weiter, sobald die Berechtigung einmal erteilt wurde. Bei längeren Pausen empfiehlt sich ein erneutes Öffnen des Links.
 
 ## Editionen & Rollover
 
