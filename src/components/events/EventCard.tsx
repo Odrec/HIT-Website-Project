@@ -349,17 +349,27 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           </div>
 
           {/* Action Column */}
-          <div className="flex items-center justify-end border-t p-4 sm:w-40 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:border-l sm:border-t-0">
-            <div className="flex w-full items-center gap-2" onClick={(e) => e.preventDefault()}>
+          <div className="flex items-center justify-end border-t p-4 sm:w-56 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:border-l sm:border-t-0">
+            <div
+              className="flex w-full flex-col gap-2 sm:items-stretch"
+              onClick={(e) => e.preventDefault()}
+            >
+              <WatchlistButton
+                event={convertToEvent(event)}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              />
               <AddToScheduleButton
                 event={convertToEvent(event)}
                 variant="outline"
                 size="sm"
-                className="flex-1 sm:mb-2"
+                className="w-full"
               />
-              <WatchlistButton event={convertToEvent(event)} size="icon" className="sm:mb-2" />
             </div>
-            <span className="hidden text-xs text-hit-gray-500 sm:block">Details ansehen →</span>
+            <span className="mt-2 hidden text-xs text-hit-gray-500 sm:block">
+              Details ansehen →
+            </span>
           </div>
         </div>
       </Card>
