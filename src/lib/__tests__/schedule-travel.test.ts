@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   detectTravelWarnings,
+  detectProximity,
   travelRouteKey,
   uniqueTravelPairs,
   TRAVEL_BUFFER_MINUTES,
@@ -205,5 +206,71 @@ describe('uniqueTravelPairs', () => {
 describe('TRAVEL_BUFFER_MINUTES', () => {
   it('exports the default buffer constant', () => {
     expect(TRAVEL_BUFFER_MINUTES).toBeGreaterThan(0)
+  })
+})
+
+describe('detectProximity', () => {
+  it('returns empty when no items', () => {
+    expect(detectProximity([], new Map())).toEqual([])
+  })
+
+  it('marks a same-building consecutive pair as same-building (no route needed)', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
+    ]
+    const markers = detectProximity(items, new Map())
+    expect(markers).toHaveLength(1)
+    expect(markers[0]).toMatchObject({ kind: 'same-building', walkMinutes: 0, fromBuildingName: 'Schloss', toBuildingName: 'Schloss' })
+  })
+
+  it('marks a different-building pair within 5 min as close', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a', buildingName: 'Caprivi A' }),
+    ]
+    const markers = detectProximity(items, routesMap([['schloss', 'cn-a', 4 * 60]]))
+    expect(markers).toHaveLength(1)
+    expect(markers[0]).toMatchObject({ kind: 'close', walkMinutes: 4, fromBuildingName: 'Schloss', toBuildingName: 'Caprivi A' })
+  })
+
+  it('does NOT mark a different-building pair farther than 5 min', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a' }),
+    ]
+    expect(detectProximity(items, routesMap([['schloss', 'cn-a', 6 * 60]]))).toEqual([])
+  })
+
+  it('treats exactly 5 min as close (boundary)', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a' }),
+    ]
+    expect(detectProximity(items, routesMap([['schloss', 'cn-a', 5 * 60]]))).toHaveLength(1)
+  })
+
+  it('does NOT mark overlapping events', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T10:00', buildingSlug: 'schloss' }),
+      ev({ id: 'b', start: '2026-11-19T09:30', end: '2026-11-19T10:30', buildingSlug: 'cn-a' }),
+    ]
+    expect(detectProximity(items, routesMap([['schloss', 'cn-a', 3 * 60]]))).toEqual([])
+  })
+
+  it('skips Infostände on either side', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T16:00', buildingSlug: 'schloss', eventType: 'INFOSTAND' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a' }),
+    ]
+    expect(detectProximity(items, routesMap([['schloss', 'cn-a', 3 * 60]]))).toEqual([])
+  })
+
+  it('skips a different-building pair with no cached route', () => {
+    const items = [
+      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss' }),
+      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a' }),
+    ]
+    expect(detectProximity(items, new Map())).toEqual([])
   })
 })
