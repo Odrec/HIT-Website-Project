@@ -24,12 +24,12 @@ describe('ClusterProgramsPage', () => {
       institution: 'HOCHSCHULE',
       description: null,
       programs: [
-        { id: 'p1', name: 'Agrarwissenschaften (B.Sc.)', institution: 'HOCHSCHULE', url: null },
+        { id: 'p1', name: 'Agrarwissenschaften (B.Sc.)', institution: 'HOCHSCHULE', links: [] },
         {
           id: 'p2',
           name: 'Landschaftsarchitektur (B.Eng.)',
           institution: 'HOCHSCHULE',
-          url: 'https://hs-os.de/la',
+          links: [{ label: 'Zur Studiengang-Seite', url: 'https://hs-os.de/la' }],
         },
       ],
     })
@@ -43,7 +43,7 @@ describe('ClusterProgramsPage', () => {
       screen.getByText(/Alle Veranstaltungen dieses Studienfelds anzeigen/)
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: /Externe Studiengangs-Seite für Landschaftsarchitektur/ })
+      screen.getByRole('link', { name: /Zur Studiengang-Seite – Landschaftsarchitektur/ })
     ).toBeInTheDocument()
   })
 
