@@ -128,6 +128,15 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Building filter (by name) — used by the Lageplan "Veranstaltungen
+    // anzeigen" link to show all events at a clicked location.
+    const building = searchParams.get('building') || undefined
+    if (building) {
+      where.AND.push({
+        building: { is: { name: { equals: building, mode: 'insensitive' } } },
+      })
+    }
+
     // Cluster filter
     const clusterId = searchParams.get('clusterId')
     if (clusterId) {

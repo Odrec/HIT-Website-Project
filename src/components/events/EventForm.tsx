@@ -215,6 +215,18 @@ export function EventForm({
     }
   }, [watchIsCrossProgram, setValue])
 
+  // Infostände run all day — prefill the usual 08:30–14:00 window (still
+  // editable) the first time INFOSTAND is picked on a new event. Only fills
+  // empty fields, so a manually entered time is never overwritten, and edits
+  // of existing events keep their saved times.
+  useEffect(() => {
+    if (initialData) return
+    if (watchEventType !== 'INFOSTAND') return
+    if (!startTime) setStartTime('08:30')
+    if (!endTime) setEndTime('14:00')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchEventType])
+
   // Update melderId in form when melder changes
   useEffect(() => {
     if (melderId) {
@@ -772,13 +784,10 @@ export function EventForm({
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label>
-                          Vorname
-                          {index === 0 && <span className="text-red-500"> *</span>}
-                        </Label>
+                        <Label>Vorname</Label>
                         <Input
                           {...register(`lecturers.${index}.firstName`)}
-                          placeholder={index === 0 ? 'Max' : 'optional'}
+                          placeholder="optional"
                         />
                         {errors.lecturers?.[index]?.firstName && (
                           <p className="text-sm text-red-500">
@@ -792,9 +801,7 @@ export function EventForm({
                         </Label>
                         <Input
                           {...register(`lecturers.${index}.lastName`)}
-                          placeholder={
-                            index === 0 ? 'Mustermann' : 'z.B. Mustermann oder Mitarbeitende'
-                          }
+                          placeholder="z.B. Mustermann oder Mitarbeitende"
                         />
                         {errors.lecturers?.[index]?.lastName && (
                           <p className="text-sm text-red-500">

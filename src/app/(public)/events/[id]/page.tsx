@@ -101,16 +101,6 @@ const eventTypeLabels: Record<string, string> = {
   INFOSTAND: 'Infostand',
 }
 
-const eventTypeDescriptions: Record<string, string> = {
-  VORTRAG: 'Ein informativer Vortrag zu diesem Thema.',
-  LABORFUEHRUNG: 'Entdecken Sie unsere Labore und Forschungseinrichtungen.',
-  RUNDGANG: 'Ein geführter Rundgang durch die Einrichtungen.',
-  WORKSHOP: 'Praktische Übungen und Aktivitäten.',
-  ONLINE: 'Online verfügbare Informationen.',
-  VIDEO: 'Online verfügbares Video.',
-  INFOSTAND: 'Besuchen Sie unseren Informationsstand.',
-}
-
 const eventTypeColors: Record<string, string> = {
   VORTRAG: 'bg-blue-100 text-blue-800',
   LABORFUEHRUNG: 'bg-purple-100 text-purple-800',
@@ -303,21 +293,17 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {/* Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Beschreibung</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {event.description ? (
+          {/* Description — only rendered when the event actually has one */}
+          {event.description && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Beschreibung</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <p className="whitespace-pre-wrap text-hit-gray-700">{event.description}</p>
-              ) : (
-                <p className="text-hit-gray-500 italic">
-                  {eventTypeDescriptions[event.eventType] || 'Keine Beschreibung verfügbar.'}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Lecturers / Speakers */}
           {event.lecturers.length > 0 && (
@@ -567,11 +553,16 @@ export default function EventDetailPage() {
                 <p className="text-hit-gray-500 italic">Ort wird noch bekannt gegeben</p>
               )}
 
-              {/* Open location in Google Maps — only when we have real coordinates */}
+              {/* Open location in Google Maps — pass the building name/address so
+                  the pin is labelled instead of showing raw coordinates. */}
               {event.building?.latitude != null && event.building?.longitude != null && (
                 <Button asChild variant="outline" size="sm" className="w-full">
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${event.building.latitude},${event.building.longitude}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      [event.building.name, event.building.address, 'Osnabrück']
+                        .filter(Boolean)
+                        .join(', ')
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

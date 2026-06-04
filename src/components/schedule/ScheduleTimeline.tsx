@@ -45,6 +45,12 @@ const eventTypeColors: Record<string, string> = {
   INFOSTAND: 'bg-pink-100 text-pink-800 border-pink-200',
 }
 
+const PRIORITY_BADGE_CLASS: Record<SchedulePriority, string> = {
+  HIGH: 'bg-red-100 text-red-800 border-red-200',
+  MEDIUM: 'bg-amber-100 text-amber-800 border-amber-200',
+  LOW: 'bg-slate-100 text-slate-700 border-slate-200',
+}
+
 // Time slots for the day view (8:00 - 18:00)
 const TIME_SLOTS = Array.from({ length: 21 }, (_, i) => {
   const hour = Math.floor(i / 2) + 8
@@ -215,26 +221,71 @@ export function ScheduleTimeline({
     removeEvent(eventId)
   }
 
-  const handlePrioritySelect = (eventId: string, priority: SchedulePriority) => {
-    updatePriority(eventId, priority)
+  // Compact timeline cards can't fit the full 3-button radiogroup, so the
+  // priority is shown as a single always-visible badge that cycles
+  // Hoch → Mittel → Niedrig on click. This keeps the control visible and
+  // consistent on every card regardless of its height.
+  const cyclePriority = (eventId: string, current: SchedulePriority) => {
+    const idx = SCHEDULE_PRIORITY_ORDER.indexOf(current)
+    const next = SCHEDULE_PRIORITY_ORDER[(idx + 1) % SCHEDULE_PRIORITY_ORDER.length]
+    updatePriority(eventId, next)
   }
 
-  const renderEventCardBody = (item: TimeSlotEvent, showPriorityControls: boolean) => (
-    <CardContent className="p-0 h-full flex flex-col">
+  const renderEventCardBody = (item: TimeSlotEvent) => (
+    // Short cards clip their content (fixed height + overflow-hidden), so the
+    // title attribute exposes the full title / time / location on hover.
+    <CardContent
+      className="p-0 h-full flex flex-col"
+      title={[
+        item.scheduleEvent.event.title,
+        item.scheduleEvent.event.timeStart
+          ? formatEventTimeRange(
+              item.scheduleEvent.event.timeStart,
+              item.scheduleEvent.event.timeEnd
+            )
+          : null,
+        item.scheduleEvent.event.building
+          ? `${item.scheduleEvent.event.building.name}${
+              item.scheduleEvent.event.room?.name ? `, ${item.scheduleEvent.event.room.name}` : ''
+            }`
+          : null,
+      ]
+        .filter(Boolean)
+        .join('\n')}
+    >
       {/* Event header */}
       <div className="flex items-start justify-between gap-1">
         <div className="flex-grow min-w-0">
-          <Badge
-            variant="outline"
-            className={cn('text-xs mb-1', eventTypeColors[item.scheduleEvent.event.eventType])}
-          >
-            {eventTypeLabels[item.scheduleEvent.event.eventType]}
-          </Badge>
-          <Link
-            href={`/events/${item.scheduleEvent.event.id}`}
-            className="group/link"
-            title={item.scheduleEvent.event.title}
-          >
+          <div className="mb-1 flex flex-wrap items-center gap-1">
+            <Badge
+              variant="outline"
+              className={cn('text-xs', eventTypeColors[item.scheduleEvent.event.eventType])}
+            >
+              {eventTypeLabels[item.scheduleEvent.event.eventType]}
+            </Badge>
+            {/* Priority — single compact badge at the top so it stays visible
+                even on short cards; click cycles Hoch → Mittel → Niedrig. The
+                full radiogroup lives in the list view. */}
+            {showControls && !compact && (
+              <button
+                type="button"
+                onClick={() =>
+                  cyclePriority(item.scheduleEvent.eventId, item.scheduleEvent.priority)
+                }
+                title="Priorität ändern (Hoch / Mittel / Niedrig)"
+                aria-label={`Priorität: ${SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]} – klicken zum Ändern`}
+                className={cn(
+                  'inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-colors hover:opacity-80',
+                  PRIORITY_BADGE_CLASS[item.scheduleEvent.priority]
+                )}
+              >
+                Prio: {SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]}
+              </button>
+            )}
+          </div>
+          <Link href={`/events/${item.scheduleEvent.event.id}`} className="group/link">
+            {/* No own title attr — the card-level tooltip (title + time +
+                location) applies uniformly, including over the title text. */}
             <h4
               className={cn(
                 'font-medium line-clamp-3 break-words group-hover/link:underline',
@@ -307,41 +358,6 @@ export function ScheduleTimeline({
               </span>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Priority controls */}
-      {showControls && !compact && showPriorityControls && (
-        <div className="mt-auto pt-2 flex items-center gap-1.5 flex-wrap">
-          <span
-            className="text-xs text-muted-foreground"
-            title="Priorität: hilft dir, wichtige Termine zu markieren"
-          >
-            Prio.
-          </span>
-          <div
-            role="radiogroup"
-            aria-label="Priorität wählen"
-            className="inline-flex rounded-md border border-input overflow-hidden"
-          >
-            {SCHEDULE_PRIORITY_ORDER.map((p) => (
-              <button
-                key={p}
-                type="button"
-                role="radio"
-                aria-checked={item.scheduleEvent.priority === p}
-                onClick={() => handlePrioritySelect(item.scheduleEvent.eventId, p)}
-                className={cn(
-                  'px-1.5 py-0.5 text-[10px] font-medium transition-colors leading-tight',
-                  item.scheduleEvent.priority === p
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-background text-muted-foreground hover:bg-muted'
-                )}
-              >
-                {SCHEDULE_PRIORITY_LABELS[p]}
-              </button>
-            ))}
-          </div>
         </div>
       )}
     </CardContent>
@@ -420,7 +436,7 @@ export function ScheduleTimeline({
                     width: `calc(${columnWidth}% - 4px)`,
                   }}
                 >
-                  {renderEventCardBody(item, height >= 144)}
+                  {renderEventCardBody(item)}
                 </Card>
               )
             })}
@@ -484,7 +500,7 @@ export function ScheduleTimeline({
                           )}
                           style={{ top: `${top}px`, height: `${height - 4}px` }}
                         >
-                          {renderEventCardBody(item, height >= 144)}
+                          {renderEventCardBody(item)}
                         </Card>
                       )
                     })}
@@ -523,7 +539,7 @@ export function ScheduleTimeline({
                   key={item.scheduleEvent.id}
                   className={cn('overflow-hidden ring-2 ring-yellow-500', compact ? 'p-2' : 'p-3')}
                 >
-                  {renderEventCardBody(item, true)}
+                  {renderEventCardBody(item)}
                 </Card>
               ))}
             </div>
