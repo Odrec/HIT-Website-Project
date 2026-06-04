@@ -114,7 +114,7 @@ function EventsListContent() {
     try {
       const params = new URLSearchParams()
       params.set('page', page.toString())
-      params.set('pageSize', '20')
+      params.set('pageSize', '50')
       if (search) params.set('search', search)
       if (eventType) params.set('eventType', eventType)
       if (institution) params.set('institution', institution)
@@ -302,6 +302,40 @@ function EventsListContent() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Results summary + top pagination — mirrors the bottom controls so the
+          full list and the follow-up pages are reachable without scrolling past
+          every card. */}
+      {!loading && total > 0 && (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-gray-500">
+            {total} {total === 1 ? 'Veranstaltung' : 'Veranstaltungen'}
+            {totalPages > 1 && ` · Seite ${page} von ${totalPages}`}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Zurück
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Weiter
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Events List */}
       <Card>
