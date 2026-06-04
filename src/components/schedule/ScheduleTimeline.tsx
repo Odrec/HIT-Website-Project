@@ -87,12 +87,17 @@ export function ScheduleTimeline({
   className,
 }: ScheduleTimelineProps) {
   const { state, removeEvent, updatePriority, getConflicts } = useSchedule()
-  const travelWarnings = useScheduleTravelWarnings(state.items)
+  const { warnings: travelWarnings, proximity } = useScheduleTravelWarnings(state.items)
   const travelWarningByEventId = useMemo(() => {
     const m = new Map<string, (typeof travelWarnings)[number]>()
     for (const w of travelWarnings) m.set(w.toEvent.eventId, w)
     return m
   }, [travelWarnings])
+  const proximityByEventId = useMemo(() => {
+    const m = new Map<string, (typeof proximity)[number]>()
+    for (const p of proximity) m.set(p.toEvent.eventId, p)
+    return m
+  }, [proximity])
 
   // Get events for the selected date, split into timeline and Infostände
   const { timelineEvents, infostands } = useMemo(() => {
@@ -321,6 +326,31 @@ export function ScheduleTimeline({
               <Footprints className="h-4 w-4 text-destructive" aria-label="Knappe Reisezeit" />
             </span>
           )}
+          {(() => {
+            const prox = proximityByEventId.get(item.scheduleEvent.eventId)
+            if (!prox) return null
+            const label =
+              prox.kind === 'same-building'
+                ? 'Gleiches Gebäude'
+                : `in der Nähe · ~${prox.walkMinutes} min`
+            const title =
+              prox.kind === 'same-building'
+                ? `Gleiches Gebäude wie die vorherige Veranstaltung (${prox.toBuildingName}) – kein Fußweg nötig.`
+                : `Kurzer Fußweg (~${prox.walkMinutes} min) von ${prox.fromBuildingName} nach ${prox.toBuildingName}.`
+            return (
+              <span
+                title={title}
+                className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-1.5 py-0.5 text-[10px] font-medium text-green-700"
+              >
+                {prox.kind === 'same-building' ? (
+                  <MapPin className="h-3 w-3" aria-hidden />
+                ) : (
+                  <Footprints className="h-3 w-3" aria-hidden />
+                )}
+                <span className="whitespace-nowrap">{label}</span>
+              </span>
+            )
+          })()}
           {showControls && (
             <Button
               variant="ghost"

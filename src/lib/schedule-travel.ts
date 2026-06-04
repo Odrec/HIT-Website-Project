@@ -42,6 +42,17 @@ export interface TravelWarning {
 }
 
 export const TRAVEL_BUFFER_MINUTES = 5
+export const CLOSE_WALK_MINUTES = 5
+
+export interface ProximityMarker {
+  fromEvent: ScheduleEvent
+  toEvent: ScheduleEvent
+  fromBuildingName: string
+  toBuildingName: string
+  kind: 'same-building' | 'close'
+  /** 0 for same-building; ceil(durationSeconds/60) for a close walk */
+  walkMinutes: number
+}
 
 export function travelRouteKey(fromSlug: string, toSlug: string): string {
   return `${fromSlug}__${toSlug}`
@@ -136,4 +147,58 @@ export function uniqueTravelPairs(items: ScheduleEvent[]): { from: string; to: s
     out.push({ from: from.buildingSlug, to: to.buildingSlug })
   }
   return out
+}
+
+/**
+ * Positive counterpart to detectTravelWarnings: consecutive event pairs that are
+ * spatially close — same building, or a different building within a short walk
+ * (≤ closeMinutes). Reuses the same normalize() pre-filtering (Infostände and
+ * unresolved buildings skipped) and the same routes Map. Overlapping pairs are
+ * skipped (they're conflicts, not walks). Far pairs and pairs without a cached
+ * route produce no marker.
+ */
+export function detectProximity(
+  items: ScheduleEvent[],
+  routes: Map<string, TravelRoute>,
+  closeMinutes: number = CLOSE_WALK_MINUTES
+): ProximityMarker[] {
+  const sorted = normalize(items)
+  const markers: ProximityMarker[] = []
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const from = sorted[i]
+    const to = sorted[i + 1]
+
+    // Overlapping events are conflicts, not walks
+    if (to.start.getTime() < from.end.getTime()) continue
+
+    if (from.buildingSlug === to.buildingSlug) {
+      markers.push({
+        fromEvent: from.event,
+        toEvent: to.event,
+        fromBuildingName: from.buildingName,
+        toBuildingName: to.buildingName,
+        kind: 'same-building',
+        walkMinutes: 0,
+      })
+      continue
+    }
+
+    const route = routes.get(travelRouteKey(from.buildingSlug, to.buildingSlug))
+    if (!route) continue
+
+    const walkMinutes = Math.ceil(route.durationSeconds / 60)
+    if (walkMinutes > closeMinutes) continue
+
+    markers.push({
+      fromEvent: from.event,
+      toEvent: to.event,
+      fromBuildingName: from.buildingName,
+      toBuildingName: to.buildingName,
+      kind: 'close',
+      walkMinutes,
+    })
+  }
+
+  return markers
 }
