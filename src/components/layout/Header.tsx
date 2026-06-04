@@ -31,11 +31,12 @@ function getInitials(nameOrEmail: string): string {
 export function Header() {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { state, getConflicts } = useSchedule()
+  const { state, getConflicts, getWatchlistCount } = useSchedule()
 
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'ORGANIZER'
   const scheduleCount = state.items.length
   const conflictCount = getConflicts().length
+  const watchlistCount = getWatchlistCount()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -96,6 +97,20 @@ export function Header() {
               >
                 {conflictCount > 0 && <AlertTriangle className="h-3 w-3" />}
                 {scheduleCount}
+              </Badge>
+            )}
+          </Link>
+          <Link
+            href="/merkliste"
+            className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500 flex items-center gap-1.5"
+          >
+            Merkliste
+            {watchlistCount > 0 && (
+              <Badge
+                className="h-5 px-1.5 text-xs flex items-center gap-0.5 bg-amber-500"
+                title={`${watchlistCount} gemerkte Veranstaltung${watchlistCount > 1 ? 'en' : ''}`}
+              >
+                {watchlistCount}
               </Badge>
             )}
           </Link>
@@ -227,6 +242,18 @@ export function Header() {
               >
                 {conflictCount > 0 && <AlertTriangle className="h-3 w-3" />}
                 {scheduleCount}
+              </Badge>
+            )}
+          </Link>
+          <Link
+            href="/merkliste"
+            className="py-2 text-sm font-medium text-hit-gray-600 flex items-center gap-2"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Merkliste
+            {watchlistCount > 0 && (
+              <Badge className="h-5 px-1.5 text-xs flex items-center gap-0.5 bg-amber-500">
+                {watchlistCount}
               </Badge>
             )}
           </Link>
