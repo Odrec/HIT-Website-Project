@@ -63,7 +63,9 @@ export const eventFormSchema = z
       .optional()
       .default(''),
     photoUrl: z.url('Invalid URL').optional().or(z.literal('')).default(''),
-    institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH']),
+    institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH'], {
+      message: 'Bitte Institution auswählen',
+    }),
     lecturers: lecturerArraySchema,
     organizers: z.array(organizerSchema).default([]),
     studyProgramIds: z.array(z.string()).default([]),
@@ -98,7 +100,8 @@ export const defaultEventValues: Partial<EventFormValues> = {
   timeStart: null,
   timeEnd: null,
   locationMode: 'CONFIRMED',
-  institution: 'BOTH',
+  // No default institution — the admin must actively choose (placeholder
+  // "Institution auswählen"); avoids events defaulting to Hochschulübergreifend.
   lecturers: [],
   organizers: [],
   studyProgramIds: [],
