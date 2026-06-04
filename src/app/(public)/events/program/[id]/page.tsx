@@ -10,7 +10,12 @@ export default async function ProgramEventsPage({ params }: { params: Promise<{ 
   const { id } = await params
   const program = await prisma.studyProgram.findUnique({
     where: { id },
-    select: { id: true, name: true, institution: true, url: true },
+    select: {
+      id: true,
+      name: true,
+      institution: true,
+      links: { select: { label: true, url: true }, orderBy: { sortOrder: 'asc' } },
+    },
   })
   if (!program) notFound()
 
@@ -37,16 +42,17 @@ export default async function ProgramEventsPage({ params }: { params: Promise<{ 
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold text-hit-gray-900">{program.name}</h1>
-          {program.url && (
+          {program.links.map((link, i) => (
             <a
-              href={program.url}
+              key={i}
+              href={link.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-sm text-hit-uni-600 hover:underline"
             >
-              Zur Studiengang-Seite <ExternalLink className="h-3.5 w-3.5" />
+              {link.label} <ExternalLink className="h-3.5 w-3.5" />
             </a>
-          )}
+          ))}
         </div>
       </div>
       <EventListView staticFilters={{ studyProgramId: id }} />

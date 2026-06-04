@@ -12,7 +12,12 @@ export default async function ClusterProgramsPage({ params }: { params: Promise<
     include: {
       programs: {
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, institution: true, url: true },
+        select: {
+          id: true,
+          name: true,
+          institution: true,
+          links: { select: { label: true, url: true }, orderBy: { sortOrder: 'asc' } },
+        },
       },
     },
   })
@@ -67,17 +72,22 @@ export default async function ClusterProgramsPage({ params }: { params: Promise<
                 >
                   {p.name}
                 </Link>
-                {p.url && (
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-hit-gray-400 hover:text-hit-uni-500"
-                    aria-label={`Externe Studiengangs-Seite für ${p.name}`}
-                    title="Zur Studiengangs-Seite"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                {p.links.length > 0 && (
+                  <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5">
+                    {p.links.map((link, i) => (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-hit-gray-400 hover:text-hit-uni-500"
+                        aria-label={`${link.label} – ${p.name}`}
+                        title={link.label}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}
