@@ -15,6 +15,7 @@ export const studyProgramService = {
       where: filters?.institution ? { institution: filters.institution } : undefined,
       include: {
         clusters: true,
+        links: { orderBy: { sortOrder: 'asc' } },
       },
       orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
@@ -28,6 +29,7 @@ export const studyProgramService = {
       where: { id },
       include: {
         clusters: true,
+        links: { orderBy: { sortOrder: 'asc' } },
         events: {
           include: {
             event: true,
@@ -57,6 +59,7 @@ export const studyProgramService = {
       include: {
         programs: {
           where: institution ? { institution } : undefined,
+          include: { links: { orderBy: { sortOrder: 'asc' } } },
           orderBy: { name: 'asc' },
         },
       },
@@ -69,6 +72,7 @@ export const studyProgramService = {
         clusters: { none: {} },
         ...(institution ? { institution } : {}),
       },
+      include: { links: { orderBy: { sortOrder: 'asc' } } },
       orderBy: { name: 'asc' },
     })
 

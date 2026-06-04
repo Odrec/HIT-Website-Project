@@ -15,7 +15,8 @@ export default function AZEventsPage() {
         </Link>
         <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">Studiengänge A–Z</h1>
         <p className="mt-2 text-hit-gray-600">
-          Veranstaltungen alphabetisch nach Studiengang sortiert.
+          Alle Studiengänge alphabetisch sortiert. Auf einen Studiengang tippen, um seine
+          Veranstaltungen zu sehen.
         </p>
       </div>
       <Suspense fallback={null}>

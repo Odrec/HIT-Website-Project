@@ -12,7 +12,12 @@ export default async function ClusterProgramsPage({ params }: { params: Promise<
     include: {
       programs: {
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, institution: true, url: true },
+        select: {
+          id: true,
+          name: true,
+          institution: true,
+          links: { select: { label: true, url: true }, orderBy: { sortOrder: 'asc' } },
+        },
       },
     },
   })
@@ -59,25 +64,30 @@ export default async function ClusterProgramsPage({ params }: { params: Promise<
             {cluster.programs.map((p) => (
               <div
                 key={p.id}
-                className={`group relative rounded-md border border-hit-gray-200 border-l-4 ${tileAccent} bg-hit-gray-50 px-4 py-3 transition-colors hover:bg-hit-gray-100 focus-within:bg-hit-gray-100`}
+                className={`group flex items-center gap-2 rounded-md border border-hit-gray-200 border-l-4 ${tileAccent} bg-hit-gray-50 px-4 py-3 transition-colors hover:bg-hit-gray-100 focus-within:bg-hit-gray-100`}
               >
                 <Link
                   href={`/events/program/${p.id}`}
-                  className="block pr-8 text-sm text-hit-gray-900 break-words hyphens-auto"
+                  className="min-w-0 flex-1 text-sm text-hit-gray-900 break-words hyphens-auto"
                 >
                   {p.name}
                 </Link>
-                {p.url && (
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-hit-gray-400 hover:text-hit-uni-500"
-                    aria-label={`Externe Studiengangs-Seite für ${p.name}`}
-                    title="Zur Studiengangs-Seite"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                {p.links.length > 0 && (
+                  <div className="flex flex-shrink-0 items-center gap-1.5">
+                    {p.links.map((link) => (
+                      <a
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-hit-gray-400 hover:text-hit-uni-500"
+                        aria-label={`${link.label} – ${p.name}`}
+                        title={link.label}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

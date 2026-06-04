@@ -163,8 +163,8 @@ async function main() {
 
   const studyPrograms = await Promise.all([
     // Geistes- und Sozialwissenschaften, Sport
-    prisma.studyProgram.create({ data: { name: 'Psychologie (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
-    prisma.studyProgram.create({ data: { name: 'Soziologie (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Psychologie (B.Sc.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] }, links: { create: [{ label: 'Zur Studiengang-Seite', url: 'https://www.uni-osnabrueck.de/', sortOrder: 0 }, { label: '2-Fächer-Bachelor', url: 'https://www.uni-osnabrueck.de/', sortOrder: 1 }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Soziologie (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] }, links: { create: [{ label: 'Zur Studiengang-Seite', url: 'https://www.uni-osnabrueck.de/', sortOrder: 0 }] } } }),
     prisma.studyProgram.create({ data: { name: 'Sportwissenschaft (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[0].id }] } } }),
     prisma.studyProgram.create({ data: { name: 'Soziale Arbeit (B.A.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[0].id }] } } }),
     // Mathematik, Informatik, Naturwissenschaften

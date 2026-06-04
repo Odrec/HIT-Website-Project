@@ -101,14 +101,31 @@ model StudyProgram {
   id          String                @id @default(cuid())
   name        String                @db.VarChar(200)
   institution Institution
-  url         String?               @db.VarChar(500)
   clusters    StudyProgramCluster[]
+  links       StudyProgramLink[]
   events      EventStudyProgram[]
   createdAt   DateTime              @default(now())
   updatedAt   DateTime              @updatedAt
 
   @@index([institution])
   @@map("study_programs")
+}
+
+/// External links for a study program (Fach, 2-Fächer-Bachelor, BEU, LBS …).
+/// Replaces the former single StudyProgram.url field. Free-text label so the
+/// admin can name each link; ordered by sortOrder.
+model StudyProgramLink {
+  id        String       @id @default(cuid())
+  programId String
+  program   StudyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  label     String       @db.VarChar(120)
+  url       String       @db.VarChar(500)
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([programId])
+  @@map("study_program_links")
 }
 
 /// Academic title (Dr., Prof., M.A., ...) — admin-managed vocabulary used by

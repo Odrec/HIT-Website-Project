@@ -284,7 +284,10 @@ export async function GET(request: NextRequest) {
                   id: true,
                   name: true,
                   institution: true,
-                  url: true,
+                  links: {
+                    select: { label: true, url: true },
+                    orderBy: { sortOrder: 'asc' },
+                  },
                   clusters: {
                     select: {
                       id: true,

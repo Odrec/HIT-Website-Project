@@ -82,7 +82,7 @@ interface Event {
     id: string
     name: string
     institution: string
-    url: string | null
+    links: Array<{ label: string; url: string }>
   }>
   organizers: Array<{
     id: string
@@ -192,7 +192,7 @@ export default function EventDetailPage() {
       id: sp.id,
       name: sp.name,
       institution: sp.institution as ScheduleEvent['institution'],
-      url: sp.url ?? null,
+      links: sp.links,
     })),
     meetingPoint: e.meetingPoint ?? undefined,
     photoUrl: e.photoUrl ?? undefined,
@@ -359,8 +359,8 @@ export default function EventDetailPage() {
           {/* Study Programs */}
           {event.studyPrograms.length > 0 &&
             (() => {
-              const linkedPrograms = event.studyPrograms.filter((p) => p.url)
-              const unlinkedPrograms = event.studyPrograms.filter((p) => !p.url)
+              const linkedPrograms = event.studyPrograms.filter((p) => p.links.length > 0)
+              const unlinkedPrograms = event.studyPrograms.filter((p) => p.links.length === 0)
               return (
                 <Card>
                   <CardHeader>
@@ -373,28 +373,35 @@ export default function EventDetailPage() {
                     {linkedPrograms.length > 0 && (
                       <ul className="divide-y divide-hit-gray-200">
                         {linkedPrograms.map((program) => (
-                          <li key={program.id}>
-                            <a
-                              href={program.url!}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex items-center justify-between gap-3 py-3 text-hit-uni-600 hover:text-hit-uni-700 hover:underline"
-                            >
-                              <span className="flex items-center gap-2">
-                                <span className="font-medium">{program.name}</span>
-                                <span
-                                  className={cn(
-                                    'text-xs',
-                                    program.institution === 'UNI'
-                                      ? 'text-hit-uni-500'
-                                      : 'text-hit-hs-500'
-                                  )}
-                                >
-                                  ({program.institution === 'UNI' ? 'Uni' : 'HS'})
-                                </span>
+                          <li key={program.id} className="py-3">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{program.name}</span>
+                              <span
+                                className={cn(
+                                  'text-xs',
+                                  program.institution === 'UNI'
+                                    ? 'text-hit-uni-500'
+                                    : 'text-hit-hs-500'
+                                )}
+                              >
+                                ({program.institution === 'UNI' ? 'Uni' : 'HS'})
                               </span>
-                              <ExternalLink className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
-                            </a>
+                            </div>
+                            <ul className="mt-1.5 space-y-1">
+                              {program.links.map((link, i) => (
+                                <li key={i}>
+                                  <a
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group inline-flex items-center gap-1.5 text-sm text-hit-uni-600 hover:text-hit-uni-700 hover:underline"
+                                  >
+                                    {link.label}
+                                    <ExternalLink className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
                           </li>
                         ))}
                       </ul>
