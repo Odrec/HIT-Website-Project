@@ -24,6 +24,9 @@ const eventTypeColors: Record<string, string> = {
   ONLINE: 'bg-gray-100 text-gray-800',
   VIDEO: 'bg-red-100 text-red-800',
   INFOSTAND: 'bg-pink-100 text-pink-800',
+  SCHNUPPER: 'bg-teal-100 text-teal-800',
+  INTERAKTION: 'bg-indigo-100 text-indigo-800',
+  SONSTIGES: 'bg-slate-100 text-slate-700',
 }
 
 export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarProps) {

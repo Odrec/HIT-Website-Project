@@ -28,6 +28,9 @@ enum EventType {
   ONLINE
   VIDEO
   INFOSTAND
+  SCHNUPPER
+  INTERAKTION
+  SONSTIGES
 }
 
 /// How the building/room for an event is captured on the form.

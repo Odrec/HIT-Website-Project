@@ -21,6 +21,9 @@ export enum EventType {
   ONLINE = 'ONLINE',
   VIDEO = 'VIDEO',
   INFOSTAND = 'INFOSTAND',
+  SCHNUPPER = 'SCHNUPPER',
+  INTERAKTION = 'INTERAKTION',
+  SONSTIGES = 'SONSTIGES',
 }
 
 export interface Melder {

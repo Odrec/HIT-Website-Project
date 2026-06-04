@@ -132,6 +132,9 @@ function formatEventType(type: EventType): string {
     ONLINE: 'Online',
     VIDEO: 'Video',
     INFOSTAND: 'Infostand',
+    SCHNUPPER: 'Schnupperveranstaltung',
+    INTERAKTION: 'Interaktion',
+    SONSTIGES: 'Sonstiges',
   }
   return map[type] ?? String(type)
 }

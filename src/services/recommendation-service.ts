@@ -447,6 +447,9 @@ export const recommendationService = {
       ONLINE: 'Online-Veranstaltungen',
       VIDEO: 'Videos',
       INFOSTAND: 'Infostände',
+      SCHNUPPER: 'Schnupperveranstaltungen',
+      INTERAKTION: 'Interaktionen',
+      SONSTIGES: 'Sonstiges',
     }
 
     for (const type of Object.keys(byType)) {

@@ -48,6 +48,8 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   ONLINE: 'Online',
   VIDEO: 'Video',
   INFOSTAND: 'Infostand',
+  SCHNUPPER: 'Schnupperveranstaltung',
+  INTERAKTION: 'Interaktion',
   // kept for backwards compat / task spec
   FUEHRUNG: 'Führung',
   BERATUNG: 'Beratung',

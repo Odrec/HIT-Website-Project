@@ -16,6 +16,8 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   FUEHRUNG: 'Laborführung',
   BERATUNG: 'Beratung',
   INFOSTAND: 'Infostand',
+  SCHNUPPER: 'Schnupperveranstaltung',
+  INTERAKTION: 'Interaktion',
   RUNDGANG: 'Rundgang',
   SONSTIGES: 'Sonstiges',
 }
