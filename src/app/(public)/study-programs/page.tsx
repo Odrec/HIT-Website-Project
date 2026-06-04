@@ -26,7 +26,7 @@ interface StudyProgram {
   id: string
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
-  url: string | null
+  links: Array<{ label: string; url: string }>
   clusters: Cluster[]
 }
 
@@ -245,16 +245,21 @@ export default function StudyProgramsPage() {
                             >
                               {program.name}
                             </Link>
-                            {program.url && (
-                              <a
-                                href={program.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-green-700 flex-shrink-0"
-                                title="Zur Studiengang-Seite"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
+                            {program.links.length > 0 && (
+                              <div className="flex flex-shrink-0 items-center gap-1.5">
+                                {program.links.map((link, i) => (
+                                  <a
+                                    key={i}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-green-700"
+                                    title={link.label}
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </a>
+                                ))}
+                              </div>
                             )}
                             <Badge
                               variant="outline"
