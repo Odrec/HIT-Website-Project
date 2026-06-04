@@ -139,8 +139,8 @@ export default function TravelWarnings({
                         </span>
                       </div>
                       <p className="text-red-600 font-medium">
-                        Mindestens {formatTime(Math.abs(analysis.timeMargin))} verlieren, wenn Sie
-                        beide besuchen
+                        Diese Veranstaltungen überschneiden sich zeitlich – eine vollständige
+                        Teilnahme an beiden ist nicht möglich.
                       </p>
                     </>
                   ) : (
@@ -159,11 +159,12 @@ export default function TravelWarnings({
 
                       {analysis.timeMargin < 0 ? (
                         <p className="text-red-600 font-medium">
-                          {formatTime(Math.abs(analysis.timeMargin))} zu wenig
+                          Der Fußweg dauert länger als die Pause dazwischen –{' '}
+                          {formatTime(Math.abs(analysis.timeMargin))} zu wenig.
                         </p>
                       ) : analysis.status === 'tight' ? (
                         <p className="text-yellow-700 font-medium">
-                          {formatTime(analysis.timeMargin)} Puffer
+                          Knappe Zeit – nur {formatTime(analysis.timeMargin)} Puffer für den Fußweg.
                         </p>
                       ) : null}
                     </>
