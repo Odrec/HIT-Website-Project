@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
+import { WatchlistButton } from '@/components/schedule/WatchlistButton'
 import type { Event } from '@/types/events'
 
 interface EventCardProps {
@@ -167,7 +168,17 @@ export function EventCard({ event, viewMode }: EventCardProps) {
         href={`/events/${event.id}`}
         onClick={() => trackEvent('event', 'detail-open', event.title)}
       >
-        <Card className="h-full transition-shadow hover:shadow-lg">
+        <Card className="relative h-full transition-shadow hover:shadow-lg">
+          <div
+            className="absolute right-2 top-2 z-10"
+            onClick={(e) => e.preventDefault()}
+          >
+            <WatchlistButton
+              event={convertToEvent(event)}
+              size="icon"
+              className="h-8 w-8 bg-white/90 shadow-sm backdrop-blur hover:bg-white"
+            />
+          </div>
           {/* Optional photo */}
           {event.photoUrl && (
             <div className="relative h-40 overflow-hidden rounded-t-lg">
@@ -342,12 +353,20 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
           {/* Action Column */}
           <div className="flex items-center justify-end border-t p-4 sm:w-40 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:border-l sm:border-t-0">
-            <div className="w-full" onClick={(e) => e.preventDefault()}>
+            <div
+              className="flex w-full items-center gap-2"
+              onClick={(e) => e.preventDefault()}
+            >
               <AddToScheduleButton
                 event={convertToEvent(event)}
                 variant="outline"
                 size="sm"
-                className="w-full sm:mb-2"
+                className="flex-1 sm:mb-2"
+              />
+              <WatchlistButton
+                event={convertToEvent(event)}
+                size="icon"
+                className="sm:mb-2"
               />
             </div>
             <span className="hidden text-xs text-hit-gray-500 sm:block">Details ansehen →</span>
