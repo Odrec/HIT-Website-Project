@@ -32,6 +32,9 @@ const eventTypeLabels: Record<string, string> = {
   ONLINE: 'Online',
   VIDEO: 'Video',
   INFOSTAND: 'Infostand',
+  SCHNUPPER: 'Schnupperveranstaltung',
+  INTERAKTION: 'Interaktion',
+  SONSTIGES: 'Sonstiges',
 }
 
 // Event type badge colors
@@ -43,6 +46,9 @@ const eventTypeColors: Record<string, string> = {
   ONLINE: 'bg-gray-100 text-gray-800 border-gray-200',
   VIDEO: 'bg-red-100 text-red-800 border-red-200',
   INFOSTAND: 'bg-pink-100 text-pink-800 border-pink-200',
+  SCHNUPPER: 'bg-teal-100 text-teal-800 border-teal-200',
+  INTERAKTION: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  SONSTIGES: 'bg-slate-100 text-slate-700 border-slate-200',
 }
 
 const PRIORITY_BADGE_CLASS: Record<SchedulePriority, string> = {

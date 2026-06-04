@@ -48,6 +48,9 @@ const eventTypeColors: Record<string, string> = {
   ONLINE: 'bg-gray-500',
   VIDEO: 'bg-red-500',
   INFOSTAND: 'bg-pink-500',
+  SCHNUPPER: 'bg-teal-500',
+  INTERAKTION: 'bg-indigo-500',
+  SONSTIGES: 'bg-slate-500',
 }
 
 const eventTypeLabels: Record<string, string> = {
@@ -58,6 +61,9 @@ const eventTypeLabels: Record<string, string> = {
   ONLINE: 'Online',
   VIDEO: 'Video',
   INFOSTAND: 'Infostand',
+  SCHNUPPER: 'Schnupperveranstaltung',
+  INTERAKTION: 'Interaktion',
+  SONSTIGES: 'Sonstiges',
 }
 
 // Time slots for the HIT event (8:00 - 18:00)

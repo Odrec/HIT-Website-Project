@@ -37,9 +37,9 @@ const baseEvent: EmailEvent = {
     email: 'mueller@uos.de',
     phone: null,
     affiliation: 'UNI' as never,
-    fakultaet: null,
-    fachbereich: null,
+    organisationseinheit: null,
     room: null,
+    adresse: null,
   },
   lecturers: [
     {

@@ -18,8 +18,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
   }
   const body = await request.json()
-  const { firstName, lastName, title, email, phone, affiliation, fakultaet, fachbereich, room } =
-    body
+  const {
+    firstName,
+    lastName,
+    title,
+    email,
+    phone,
+    affiliation,
+    organisationseinheit,
+    room,
+    adresse,
+  } = body
 
   if (!firstName || !lastName || !email || !affiliation) {
     return NextResponse.json(
@@ -41,9 +50,9 @@ export async function POST(request: Request) {
       email: email.trim(),
       phone: phone?.trim() || null,
       affiliation,
-      fakultaet: fakultaet?.trim() || null,
-      fachbereich: fachbereich?.trim() || null,
+      organisationseinheit: organisationseinheit?.trim() || null,
       room: room?.trim() || null,
+      adresse: adresse?.trim() || null,
     },
     update: {
       firstName: firstName.trim(),
@@ -52,9 +61,9 @@ export async function POST(request: Request) {
       email: email.trim(),
       phone: phone?.trim() || null,
       affiliation,
-      fakultaet: fakultaet?.trim() || null,
-      fachbereich: fachbereich?.trim() || null,
+      organisationseinheit: organisationseinheit?.trim() || null,
       room: room?.trim() || null,
+      adresse: adresse?.trim() || null,
     },
   })
   return NextResponse.json(melder)

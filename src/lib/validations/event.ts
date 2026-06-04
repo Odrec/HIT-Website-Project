@@ -118,6 +118,9 @@ export const eventTypeLabels: Record<string, string> = {
   ONLINE: 'Online',
   VIDEO: 'Video',
   INFOSTAND: 'Infostand',
+  SCHNUPPER: 'Schnupperveranstaltung',
+  INTERAKTION: 'Interaktion',
+  SONSTIGES: 'Sonstiges',
 }
 
 // Institution labels for display

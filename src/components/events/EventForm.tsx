@@ -173,20 +173,21 @@ export function EventForm({
             : []
         )
 
-        // Pre-fill date from settings if no initial data
-        if (settingsData?.hitDate && !initialData?.timeStart) {
+        // The event date is set centrally by the active edition — never per
+        // event — so nobody can accidentally pick a different day. Always use
+        // the edition's hitDate, both for new events and when editing.
+        if (settingsData?.hitDate) {
           const hitDate = new Date(settingsData.hitDate)
-          const formatted = hitDate.toISOString().split('T')[0]
-          setDateStr(formatted)
+          setDateStr(hitDate.toISOString().split('T')[0])
         }
 
-        // If editing, extract date/time from initialData. Event timestamps
-        // are stored as Berlin wall-clock values whose UTC components carry
-        // the Y/M/D/H/M — read UTC parts so the form prefill is independent
-        // of the admin's browser timezone. See src/lib/event-time.ts.
+        // If editing, prefill only the times from initialData (the date stays
+        // the edition date). Event timestamps are stored as Berlin wall-clock
+        // values whose UTC components carry the H/M — read UTC parts so the
+        // prefill is independent of the admin's browser timezone. See
+        // src/lib/event-time.ts.
         if (initialData?.timeStart) {
           const start = new Date(initialData.timeStart)
-          setDateStr(start.toISOString().split('T')[0])
           setStartTime(
             `${start.getUTCHours().toString().padStart(2, '0')}:${start.getUTCMinutes().toString().padStart(2, '0')}`
           )
@@ -510,34 +511,26 @@ export function EventForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {isAdmin ? (
-                <div className="space-y-1.5">
-                  <Label htmlFor="eventDate">
-                    Datum <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="eventDate"
-                    type="date"
-                    value={dateStr}
-                    onChange={(e) => setDateStr(e.target.value)}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-1.5">
-                  <Label>Datum</Label>
-                  <p className="text-sm text-gray-700">
-                    {dateStr
-                      ? new Date(`${dateStr}T00:00:00Z`).toLocaleDateString('de-DE', {
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          timeZone: 'UTC',
-                        })
-                      : 'Wird von der Administration festgelegt'}
-                  </p>
-                </div>
-              )}
+              {/* The date is fixed centrally by the active edition — not chosen
+                  per event — so nobody picks a wrong day by accident. */}
+              <div className="space-y-1.5">
+                <Label>Datum</Label>
+                <p className="text-sm text-gray-700">
+                  {dateStr
+                    ? new Date(`${dateStr}T00:00:00Z`).toLocaleDateString('de-DE', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'UTC',
+                      })
+                    : 'Wird zentral über die aktive Edition festgelegt'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Das Datum gilt zentral für die gesamte Edition
+                  {isAdmin ? ' (änderbar unter Verwaltung → Editionen).' : '.'}
+                </p>
+              </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <TimeGridPicker value={startTime} onChange={setStartTime} label="Beginn" required />
                 <TimeGridPicker value={endTime} onChange={setEndTime} label="Ende" required />

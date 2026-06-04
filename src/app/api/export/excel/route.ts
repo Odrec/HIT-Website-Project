@@ -55,9 +55,9 @@ const MELDER_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'E-Mail', key: 'email', width: 30 },
   { header: 'Telefon', key: 'telefon', width: 20 },
   { header: 'Institution', key: 'institution', width: 15 },
-  { header: 'Fakultät', key: 'fakultaet', width: 25 },
-  { header: 'Fachbereich', key: 'fachbereich', width: 25 },
+  { header: 'Fakultät/Fachbereich/Institution', key: 'organisationseinheit', width: 30 },
   { header: 'Raum', key: 'raum', width: 15 },
+  { header: 'Adresse', key: 'adresse', width: 30 },
   { header: 'Anz. Veranstaltungen', key: 'anzahlVeranstaltungen', width: 20 },
 ]
 

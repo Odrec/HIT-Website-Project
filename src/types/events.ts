@@ -21,6 +21,9 @@ export enum EventType {
   ONLINE = 'ONLINE',
   VIDEO = 'VIDEO',
   INFOSTAND = 'INFOSTAND',
+  SCHNUPPER = 'SCHNUPPER',
+  INTERAKTION = 'INTERAKTION',
+  SONSTIGES = 'SONSTIGES',
 }
 
 export interface Melder {
@@ -32,9 +35,9 @@ export interface Melder {
   email: string
   phone: string | null
   affiliation: Affiliation
-  fakultaet: string | null
-  fachbereich: string | null
+  organisationseinheit: string | null
   room: string | null
+  adresse: string | null
 }
 
 export interface Building {

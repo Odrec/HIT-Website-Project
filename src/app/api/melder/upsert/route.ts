@@ -21,8 +21,17 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}))
-  const { firstName, lastName, title, email, phone, affiliation, fakultaet, fachbereich, room } =
-    body
+  const {
+    firstName,
+    lastName,
+    title,
+    email,
+    phone,
+    affiliation,
+    organisationseinheit,
+    room,
+    adresse,
+  } = body
 
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !affiliation) {
     return NextResponse.json(
@@ -47,9 +56,9 @@ export async function POST(request: NextRequest) {
     email: normalizedEmail,
     phone: phone?.trim() || null,
     affiliation,
-    fakultaet: fakultaet?.trim() || null,
-    fachbereich: fachbereich?.trim() || null,
+    organisationseinheit: organisationseinheit?.trim() || null,
     room: room?.trim() || null,
+    adresse: adresse?.trim() || null,
   }
 
   if (existing) {
