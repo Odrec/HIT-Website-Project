@@ -322,7 +322,9 @@ export const eventService = {
       data: {
         ...eventData,
         edition: { connect: { id: activeEditionId } },
-        isCrossProgram: input.isCrossProgram ?? false,
+        // Hochschulübergreifend (BOTH) events are external/cross-institution
+        // and always belong to "Rund ums Studium".
+        isCrossProgram: input.institution === 'BOTH' ? true : (input.isCrossProgram ?? false),
         locationHint: input.locationHint || null,
         locationWishArea: locationWishArea || null,
         ...(locationDetails !== undefined && {
@@ -406,7 +408,8 @@ export const eventService = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
       ...eventData,
-      isCrossProgram: input.isCrossProgram ?? false,
+      // BOTH (Hochschulübergreifend) is always "Rund ums Studium".
+      isCrossProgram: input.institution === 'BOTH' ? true : (input.isCrossProgram ?? false),
       locationHint: input.locationHint || null,
       // Only touch melderId if a concrete value was provided. An empty string from
       // the form means "no live value to write" — preserve the existing relation

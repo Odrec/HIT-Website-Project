@@ -68,7 +68,7 @@ const institutionLabels: Record<string, string> = {
 const institutionColors: Record<string, string> = {
   UNI: 'bg-hit-uni-light text-hit-uni border-hit-uni/20',
   HOCHSCHULE: 'bg-hit-hs-light text-hit-hs border-hit-hs/20',
-  BOTH: 'bg-gradient-to-r from-hit-uni-light to-hit-hs-light text-gray-800 border-gray-300',
+  BOTH: 'bg-gray-100 text-gray-600 border-gray-300',
 }
 
 export function ScheduleEventCard({

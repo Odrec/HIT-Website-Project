@@ -83,7 +83,7 @@ const institutionColors: Record<string, string> = {
   UNI: 'bg-hit-uni-100 text-hit-uni-700',
   HS: 'bg-hit-hs-100 text-hit-hs-700',
   HOCHSCHULE: 'bg-hit-hs-100 text-hit-hs-700',
-  BOTH: 'bg-gradient-to-r from-hit-uni-100 to-hit-hs-100 text-hit-gray-700',
+  BOTH: 'bg-gray-100 text-gray-600',
 }
 
 // Helper to convert EventCard event to Event type for schedule

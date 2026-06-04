@@ -201,7 +201,7 @@ function EventsListContent() {
     const colors: Record<string, string> = {
       UNI: 'bg-hit-uni-500 text-white',
       HOCHSCHULE: 'bg-hit-hs-500 text-white',
-      BOTH: 'bg-gradient-to-r from-hit-uni-500 to-hit-hs-500 text-white',
+      BOTH: 'bg-gray-500 text-white',
     }
     return colors[inst] || 'bg-gray-100 text-gray-800'
   }

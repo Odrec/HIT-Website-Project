@@ -216,6 +216,14 @@ export function EventForm({
     }
   }, [watchIsCrossProgram, setValue])
 
+  // Hochschulübergreifend (BOTH) events are external/cross-institution and
+  // always count as "Rund ums Studium" — force and lock the flag.
+  useEffect(() => {
+    if (watchInstitution === 'BOTH') {
+      setValue('isCrossProgram', true)
+    }
+  }, [watchInstitution, setValue])
+
   // Infostände run all day — prefill the usual 08:30–14:00 window (still
   // editable) the first time INFOSTAND is picked on a new event. Only fills
   // empty fields, so a manually entered time is never overwritten, and edits
@@ -493,9 +501,15 @@ export function EventForm({
                   id="isCrossProgram"
                   checked={watch('isCrossProgram')}
                   onCheckedChange={(checked) => setValue('isCrossProgram', checked as boolean)}
+                  disabled={watchInstitution === 'BOTH'}
                 />
                 <Label htmlFor="isCrossProgram">Rund ums Studium</Label>
               </div>
+              {watchInstitution === 'BOTH' && (
+                <p className="text-xs text-muted-foreground">
+                  Hochschulübergreifende Veranstaltungen zählen automatisch zu „Rund ums Studium“.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
