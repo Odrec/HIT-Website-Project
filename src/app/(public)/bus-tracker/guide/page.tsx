@@ -40,6 +40,7 @@ function GuideTrackingContent() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [heartbeatWarning, setHeartbeatWarning] = useState(false)
   const [online, setOnline] = useState(true)
+  const [opPause, setOpPause] = useState<{ until: string | null } | null>(null)
 
   const watchIdRef = useRef<number | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -170,6 +171,29 @@ function GuideTrackingContent() {
     )
   }, [sendPosition, resetHeartbeat])
 
+  const callPause = useCallback(
+    async (body: { mode: 'until'; minutes: number } | { mode: 'open' } | { mode: 'resume' }) => {
+      try {
+        const res = await fetch('/api/bus-positions/pause', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${tokenRef.current}`,
+          },
+          body: JSON.stringify(body),
+        })
+        if (!res.ok) return false
+        const data = await res.json()
+        if (body.mode === 'resume') setOpPause(null)
+        else setOpPause({ until: data.pausedUntil ?? null })
+        return true
+      } catch {
+        return false
+      }
+    },
+    []
+  )
+
   const stopTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current)
@@ -185,6 +209,22 @@ function GuideTrackingContent() {
     setStatus('idle')
     setHeartbeatWarning(false)
   }, [])
+
+  const handlePause = useCallback(
+    async (mode: { mode: 'until'; minutes: number } | { mode: 'open' }) => {
+      stopTracking()
+      await callPause(mode)
+    },
+    [stopTracking, callPause]
+  )
+
+  const handleResume = useCallback(async () => {
+    const ok = await callPause({ mode: 'resume' })
+    if (ok) startTracking()
+  }, [callPause, startTracking])
+
+  const formatHM = (iso: string) =>
+    new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
   // Re-acquire position when page becomes visible again
   useEffect(() => {
@@ -250,7 +290,7 @@ function GuideTrackingContent() {
   const statusLabel = {
     idle: 'Bereit',
     active: 'Aktiv',
-    paused: 'Pausiert',
+    paused: 'Kein Standort',
     error: 'Fehler',
   }
 
@@ -277,18 +317,66 @@ function GuideTrackingContent() {
               </Badge>
             </div>
 
-            {status === 'idle' || status === 'paused' ? (
-              <Button
-                onClick={startTracking}
-                className="w-full h-16 text-lg bg-green-600 hover:bg-green-700"
-              >
-                <MapPin className="mr-2 h-6 w-6" />
-                Tracking starten
-              </Button>
+            {opPause ? (
+              <div className="space-y-4">
+                <div className="rounded-lg bg-amber-100 p-4 text-center">
+                  <p className="text-lg font-bold text-amber-800">
+                    {opPause.until ? `Pause bis ${formatHM(opPause.until)}` : 'Pausiert'}
+                  </p>
+                  <p className="mt-1 text-sm text-amber-700">
+                    Das Tracking ist angehalten. Tippe auf &bdquo;Weiter&ldquo;, wenn es weitergeht.
+                  </p>
+                </div>
+                <Button
+                  onClick={handleResume}
+                  className="w-full h-16 text-lg bg-green-600 hover:bg-green-700"
+                >
+                  <MapPin className="mr-2 h-6 w-6" />
+                  Weiter
+                </Button>
+              </div>
             ) : (
-              <Button onClick={stopTracking} variant="destructive" className="w-full h-16 text-lg">
-                Tracking stoppen
-              </Button>
+              <>
+                {status === 'idle' || status === 'paused' ? (
+                  <Button
+                    onClick={startTracking}
+                    className="w-full h-16 text-lg bg-green-600 hover:bg-green-700"
+                  >
+                    <MapPin className="mr-2 h-6 w-6" />
+                    Tracking starten
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={stopTracking}
+                    variant="destructive"
+                    className="w-full h-16 text-lg"
+                  >
+                    Tracking stoppen
+                  </Button>
+                )}
+
+                <div className="space-y-2">
+                  <p className="text-center text-sm text-hit-gray-500">Pause einlegen</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[15, 30, 45].map((m) => (
+                      <Button
+                        key={m}
+                        variant="outline"
+                        onClick={() => handlePause({ mode: 'until', minutes: m })}
+                      >
+                        +{m} min
+                      </Button>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handlePause({ mode: 'open' })}
+                  >
+                    Pause (offen)
+                  </Button>
+                </div>
+              </>
             )}
 
             <div className="flex items-center justify-center gap-2 text-sm">
