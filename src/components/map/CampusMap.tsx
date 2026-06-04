@@ -388,9 +388,11 @@ export default function CampusMap({
               const colors = ['#dc2626', '#2563eb', '#16a34a']
               const color = colors[(bus.number - 1) % colors.length]
 
+              const bg = bus.paused ? '#f59e0b' : bus.stale ? '#9ca3af' : color
+              const dim = bus.stale && !bus.paused ? 'opacity:0.5;' : ''
               const busIcon = leaflet.divIcon({
                 className: 'custom-marker',
-                html: `<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;background-color:${bus.stale ? '#9ca3af' : color};${bus.stale ? 'opacity:0.5;' : ''}">🚌${bus.number}</div>`,
+                html: `<div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;background-color:${bg};${dim}">${bus.paused ? '⏸' : '🚌' + bus.number}</div>`,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20],
               })
@@ -404,7 +406,13 @@ export default function CampusMap({
                   <Popup>
                     <div className="min-w-[150px]">
                       <h3 className="font-bold">{bus.name}</h3>
-                      {bus.stale ? (
+                      {bus.paused ? (
+                        <p className="text-sm text-amber-600 mt-1">
+                          {bus.pausedUntil
+                            ? `Pause bis ${new Date(bus.pausedUntil).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+                            : 'Pausiert'}
+                        </p>
+                      ) : bus.stale ? (
                         <p className="text-sm text-red-600 mt-1">Keine aktuelle Position</p>
                       ) : (
                         <p className="text-sm text-gray-500 mt-1">

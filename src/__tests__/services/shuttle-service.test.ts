@@ -29,6 +29,9 @@ import {
   createShuttleBus,
   deleteShuttleBus,
   regenerateToken,
+  isBusPaused,
+  setBusPause,
+  resumeBus,
 } from '@/services/shuttle-service'
 
 describe('shuttle-service', () => {
@@ -100,6 +103,8 @@ describe('shuttle-service', () => {
           id: 'bus1',
           number: 1,
           name: 'Bus 1',
+          pausedUntil: null,
+          pausedIndefinitely: false,
           position: {
             latitude: 52.27,
             longitude: 8.04,
@@ -115,6 +120,8 @@ describe('shuttle-service', () => {
       expect(result).toHaveLength(1)
       expect(result[0].number).toBe(1)
       expect(result[0].latitude).toBe(52.27)
+      expect(result[0].paused).toBe(false)
+      expect(result[0].pausedUntil).toBeNull()
       expect(mockFindMany).toHaveBeenCalledWith({
         where: { active: true },
         include: { position: true },
@@ -171,6 +178,48 @@ describe('shuttle-service', () => {
       expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: 'bus1' },
         data: { token: expect.any(String) },
+      })
+    })
+  })
+
+  describe('isBusPaused', () => {
+    it('true when indefinitely paused', () => {
+      expect(isBusPaused({ pausedUntil: null, pausedIndefinitely: true })).toBe(true)
+    })
+    it('true when pausedUntil is in the future', () => {
+      expect(
+        isBusPaused({ pausedUntil: new Date(Date.now() + 60_000), pausedIndefinitely: false })
+      ).toBe(true)
+    })
+    it('false when pausedUntil is in the past', () => {
+      expect(
+        isBusPaused({ pausedUntil: new Date(Date.now() - 60_000), pausedIndefinitely: false })
+      ).toBe(false)
+    })
+    it('false when not paused', () => {
+      expect(isBusPaused({ pausedUntil: null, pausedIndefinitely: false })).toBe(false)
+    })
+  })
+
+  describe('setBusPause', () => {
+    it('updates pausedUntil + pausedIndefinitely', async () => {
+      mockUpdate.mockResolvedValue({ id: 'bus1' })
+      const until = new Date('2026-11-19T12:00:00Z')
+      await setBusPause('bus1', { until, indefinite: false })
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 'bus1' },
+        data: { pausedUntil: until, pausedIndefinitely: false },
+      })
+    })
+  })
+
+  describe('resumeBus', () => {
+    it('clears the pause', async () => {
+      mockUpdate.mockResolvedValue({ id: 'bus1' })
+      await resumeBus('bus1')
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 'bus1' },
+        data: { pausedUntil: null, pausedIndefinitely: false },
       })
     })
   })

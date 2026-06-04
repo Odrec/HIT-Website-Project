@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { toggleShuttleBus, deleteShuttleBus } from '@/services/shuttle-service'
+import { toggleShuttleBus, deleteShuttleBus, resumeBus } from '@/services/shuttle-service'
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,12 +11,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const { id } = await params
     const body = await request.json()
-    const { active } = body
 
+    if (body.resume === true) {
+      const bus = await resumeBus(id)
+      return NextResponse.json(bus)
+    }
+
+    const { active } = body
     if (typeof active !== 'boolean') {
       return NextResponse.json({ error: 'active (boolean) is required' }, { status: 400 })
     }
-
     const bus = await toggleShuttleBus(id, active)
     return NextResponse.json(bus)
   } catch (error) {

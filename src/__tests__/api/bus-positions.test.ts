@@ -36,6 +36,8 @@ describe('Bus Positions API', () => {
           speed: null,
           updatedAt: '2026-11-19T10:30:00Z',
           stale: false,
+          paused: false,
+          pausedUntil: null,
         },
       ])
 
