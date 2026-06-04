@@ -135,5 +135,5 @@ export const eventTypeLabels: Record<string, string> = {
 export const institutionLabels: Record<string, string> = {
   UNI: 'Universität',
   HOCHSCHULE: 'Hochschule',
-  BOTH: 'Beide',
+  BOTH: 'Hochschulübergreifend',
 }

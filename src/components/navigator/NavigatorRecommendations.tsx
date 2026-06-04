@@ -56,7 +56,7 @@ export function NavigatorRecommendations({
       case 'HOCHSCHULE':
         return 'Hochschule'
       case 'BOTH':
-        return 'Uni & HS'
+        return 'Hochschulübergreifend'
       default:
         return institution
     }

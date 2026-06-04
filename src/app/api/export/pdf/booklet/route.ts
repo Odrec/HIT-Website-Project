@@ -208,11 +208,11 @@ function formatTime(date: Date | null): string {
 function formatInstitutionLabel(institution: string): string {
   switch (institution) {
     case 'UNI':
-      return 'Uni'
+      return 'Universität'
     case 'HOCHSCHULE':
-      return 'HS'
+      return 'Hochschule'
     case 'BOTH':
-      return 'Beide'
+      return 'Hochschulübergreifend'
     default:
       return String(institution)
   }
