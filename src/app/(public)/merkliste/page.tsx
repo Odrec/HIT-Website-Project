@@ -49,8 +49,8 @@ export default function MerklistePage() {
           )}
         </div>
         <p className="mt-2 text-hit-gray-600">
-          Gemerkte Veranstaltungen. Mit „Zum Stundenplan" übernimmst du eine Veranstaltung in
-          deinen Stundenplan – sie verschwindet dann aus der Merkliste.
+          Gemerkte Veranstaltungen. Mit &bdquo;Zum Stundenplan&ldquo; übernimmst du eine
+          Veranstaltung in deinen Stundenplan &ndash; sie verschwindet dann aus der Merkliste.
         </p>
       </div>
 
@@ -61,7 +61,7 @@ export default function MerklistePage() {
             Deine Merkliste ist noch leer
           </h2>
           <p className="mt-2 text-hit-gray-600">
-            Tippe bei einer Veranstaltung auf „Merken", um sie hier zu sammeln.
+            Tippe bei einer Veranstaltung auf &bdquo;Merken&ldquo;, um sie hier zu sammeln.
           </p>
           <Link href="/events" className="mt-4 inline-block">
             <Button variant="uni">Veranstaltungen entdecken</Button>

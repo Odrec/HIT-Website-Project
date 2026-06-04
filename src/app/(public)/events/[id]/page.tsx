@@ -460,10 +460,7 @@ export default function EventDetailPage() {
           <Card>
             <CardContent className="pt-6 space-y-3">
               <div className="space-y-2">
-                <AddToScheduleButton
-                  event={convertToScheduleEvent(event)}
-                  className="w-full"
-                />
+                <AddToScheduleButton event={convertToScheduleEvent(event)} className="w-full" />
                 <WatchlistButton
                   event={convertToScheduleEvent(event)}
                   variant="outline"
