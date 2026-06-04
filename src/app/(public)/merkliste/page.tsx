@@ -4,9 +4,7 @@ import Link from 'next/link'
 import { Bookmark, ArrowLeft, Trash2 } from 'lucide-react'
 import { useSchedule } from '@/contexts/schedule-context'
 import { EventCard } from '@/components/events/EventCard'
-import { AddToScheduleButton } from '@/components/schedule/AddToScheduleButton'
 import { Button } from '@/components/ui/button'
-import type { Event } from '@/types/events'
 
 export default function MerklistePage() {
   const { state, clearWatchlist } = useSchedule()
@@ -103,14 +101,10 @@ export default function MerklistePage() {
                 : null,
               room: e.room ? { id: e.room.id, name: e.room.name } : null,
             }
-            return (
-              <div key={item.eventId} className="flex flex-col gap-2">
-                <EventCard event={cardEvent} viewMode="list" />
-                <div className="flex justify-end">
-                  <AddToScheduleButton event={e as Event} variant="default" size="sm" />
-                </div>
-              </div>
-            )
+            // The list-view EventCard already renders both "Zum Stundenplan"
+            // (promote — moves it out of the Merkliste) and the Merken toggle
+            // (remove), so no extra action buttons are needed here.
+            return <EventCard key={item.eventId} event={cardEvent} viewMode="list" />
           })}
         </div>
       )}

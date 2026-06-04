@@ -191,7 +191,7 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
           <CardHeader className="pb-2">
             {/* Title - primary, prominent */}
-            <h3 className="line-clamp-2 text-base font-semibold leading-tight text-hit-gray-900">
+            <h3 className="line-clamp-2 pr-8 text-base font-semibold leading-tight text-hit-gray-900">
               {event.title}
             </h3>
 
