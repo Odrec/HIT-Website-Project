@@ -216,22 +216,56 @@ describe('detectProximity', () => {
 
   it('marks a same-building consecutive pair as same-building (no route needed)', () => {
     const items = [
-      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
-      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
+      ev({
+        id: 'a',
+        start: '2026-11-19T09:00',
+        end: '2026-11-19T09:45',
+        buildingSlug: 'schloss',
+        buildingName: 'Schloss',
+      }),
+      ev({
+        id: 'b',
+        start: '2026-11-19T10:00',
+        end: '2026-11-19T10:45',
+        buildingSlug: 'schloss',
+        buildingName: 'Schloss',
+      }),
     ]
     const markers = detectProximity(items, new Map())
     expect(markers).toHaveLength(1)
-    expect(markers[0]).toMatchObject({ kind: 'same-building', walkMinutes: 0, fromBuildingName: 'Schloss', toBuildingName: 'Schloss' })
+    expect(markers[0]).toMatchObject({
+      kind: 'same-building',
+      walkMinutes: 0,
+      fromBuildingName: 'Schloss',
+      toBuildingName: 'Schloss',
+    })
   })
 
   it('marks a different-building pair within 5 min as close', () => {
     const items = [
-      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T09:45', buildingSlug: 'schloss', buildingName: 'Schloss' }),
-      ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a', buildingName: 'Caprivi A' }),
+      ev({
+        id: 'a',
+        start: '2026-11-19T09:00',
+        end: '2026-11-19T09:45',
+        buildingSlug: 'schloss',
+        buildingName: 'Schloss',
+      }),
+      ev({
+        id: 'b',
+        start: '2026-11-19T10:00',
+        end: '2026-11-19T10:45',
+        buildingSlug: 'cn-a',
+        buildingName: 'Caprivi A',
+      }),
     ]
     const markers = detectProximity(items, routesMap([['schloss', 'cn-a', 4 * 60]]))
     expect(markers).toHaveLength(1)
-    expect(markers[0]).toMatchObject({ kind: 'close', walkMinutes: 4, fromBuildingName: 'Schloss', toBuildingName: 'Caprivi A' })
+    expect(markers[0]).toMatchObject({
+      kind: 'close',
+      walkMinutes: 4,
+      fromBuildingName: 'Schloss',
+      toBuildingName: 'Caprivi A',
+    })
   })
 
   it('does NOT mark a different-building pair farther than 5 min', () => {
@@ -260,7 +294,13 @@ describe('detectProximity', () => {
 
   it('skips Infostände on either side', () => {
     const items = [
-      ev({ id: 'a', start: '2026-11-19T09:00', end: '2026-11-19T16:00', buildingSlug: 'schloss', eventType: 'INFOSTAND' }),
+      ev({
+        id: 'a',
+        start: '2026-11-19T09:00',
+        end: '2026-11-19T16:00',
+        buildingSlug: 'schloss',
+        eventType: 'INFOSTAND',
+      }),
       ev({ id: 'b', start: '2026-11-19T10:00', end: '2026-11-19T10:45', buildingSlug: 'cn-a' }),
     ]
     expect(detectProximity(items, routesMap([['schloss', 'cn-a', 3 * 60]]))).toEqual([])
