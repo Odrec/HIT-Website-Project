@@ -192,6 +192,30 @@ const styles = StyleSheet.create({
     color: CYAN,
     marginBottom: 4,
   },
+  tocHeading: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 18,
+    marginBottom: 16,
+  },
+  tocSectionLabel: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 12,
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  tocItem: {
+    fontSize: 10,
+    color: DARK_GRAY,
+    marginLeft: 12,
+    marginBottom: 2,
+  },
+  institutionLabel: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 9,
+    color: GRAY,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
 })
 
 // ---------------------------------------------------------------------------
@@ -290,6 +314,40 @@ function renderEventEntry(event: any) {
   )
 }
 
+function institutionLabel(institution: string): string {
+  switch (institution) {
+    case 'HOCHSCHULE':
+      return 'Hochschule'
+    case 'UNI':
+      return 'Universität'
+    case 'BOTH':
+      return 'Hochschulübergreifend'
+    default:
+      return String(institution)
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function renderTwoColumnEvents(events: any[]) {
+  const leftEvents = events.filter((_, i) => i % 2 === 0)
+  const rightEvents = events.filter((_, i) => i % 2 === 1)
+  return h(
+    View,
+    { style: styles.columnsContainer },
+    h(View, { style: styles.column }, ...leftEvents.map(renderEventEntry)),
+    h(View, { style: styles.column }, ...rightEvents.map(renderEventEntry))
+  )
+}
+
+function pageFooter() {
+  return h(Text, {
+    style: styles.pageFooter,
+    render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
+      `Seite ${pageNumber} / ${totalPages}`,
+    fixed: true,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // GET handler
 // ---------------------------------------------------------------------------
@@ -306,75 +364,97 @@ export async function GET() {
     const uosLogoBase64 = `data:image/svg+xml;base64,${readFileSync(uosLogoPath).toString('base64')}`
     const hsLogoBase64 = `data:image/svg+xml;base64,${readFileSync(hsLogoPath).toString('base64')}`
 
-    const { clustered, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
+    const { clusterGroups, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
 
-    // -- Build pages --
+    // Group cluster groups into institution sections, preserving order.
+    const sections: { label: string; groups: typeof clusterGroups }[] = []
+    for (const g of clusterGroups) {
+      const label = institutionLabel(g.institution)
+      let section = sections.find((s) => s.label === label)
+      if (!section) {
+        section = { label, groups: [] }
+        sections.push(section)
+      }
+      section.groups.push(g)
+    }
 
     const contentPages: React.ReactElement[] = []
 
-    // Clustered event pages
-    for (const [clusterName, clusterData] of Object.entries(clustered)) {
-      const events = clusterData.events
-      const leftEvents = events.filter((_, i) => i % 2 === 0)
-      const rightEvents = events.filter((_, i) => i % 2 === 1)
-
-      contentPages.push(
-        h(
-          Page,
-          { size: 'A4', style: styles.page, key: `cluster-${clusterName}` },
-          h(Text, { style: styles.clusterHeader }, clusterName),
-          h(
-            View,
-            { style: styles.columnsContainer },
-            h(View, { style: styles.column }, ...leftEvents.map(renderEventEntry)),
-            h(View, { style: styles.column }, ...rightEvents.map(renderEventEntry))
-          ),
-          h(Text, {
-            style: styles.pageFooter,
-            render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-              `Seite ${pageNumber} / ${totalPages}`,
-            fixed: true,
-          })
-        )
-      )
-    }
-
-    // Cross-program events page
+    // --- Table of contents (outline, no page numbers) ---
+    const tocChildren: React.ReactElement[] = [
+      h(Text, { style: styles.tocHeading, key: 'toc-h' }, 'Inhaltsverzeichnis'),
+    ]
     if (crossProgram.length > 0) {
-      const leftEvents = crossProgram.filter((_, i) => i % 2 === 0)
-      const rightEvents = crossProgram.filter((_, i) => i % 2 === 1)
+      tocChildren.push(
+        h(Text, { style: styles.tocSectionLabel, key: 'toc-rus' }, 'Rund ums Studium')
+      )
+    }
+    for (const section of sections) {
+      tocChildren.push(
+        h(Text, { style: styles.tocSectionLabel, key: `toc-sec-${section.label}` }, section.label)
+      )
+      for (const g of section.groups) {
+        tocChildren.push(
+          h(Text, { style: styles.tocItem, key: `toc-item-${section.label}-${g.name}` }, g.name)
+        )
+      }
+    }
+    if (infoMarkets.length > 0) {
+      tocChildren.push(h(Text, { style: styles.tocSectionLabel, key: 'toc-im' }, 'Infom\u00E4rkte'))
+    }
+    tocChildren.push(
+      h(Text, { style: styles.tocSectionLabel, key: 'toc-links' }, 'N\u00FCtzliche Links')
+    )
 
+    contentPages.push(
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'toc', bookmark: 'Inhaltsverzeichnis' },
+        ...tocChildren,
+        pageFooter()
+      )
+    )
+
+    // --- Rund ums Studium (cross-program) ---
+    if (crossProgram.length > 0) {
       contentPages.push(
         h(
           Page,
-          { size: 'A4', style: styles.page, key: 'cross-program' },
-          h(
-            Text,
-            { style: styles.sectionHeader },
-            'Studiengangs\u00FCbergreifende Veranstaltungen'
-          ),
-          h(
-            View,
-            { style: styles.columnsContainer },
-            h(View, { style: styles.column }, ...leftEvents.map(renderEventEntry)),
-            h(View, { style: styles.column }, ...rightEvents.map(renderEventEntry))
-          ),
-          h(Text, {
-            style: styles.pageFooter,
-            render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-              `Seite ${pageNumber} / ${totalPages}`,
-            fixed: true,
-          })
+          { size: 'A4', style: styles.page, key: 'rund-ums-studium', bookmark: 'Rund ums Studium' },
+          h(Text, { style: styles.sectionHeader }, 'Rund ums Studium'),
+          renderTwoColumnEvents(crossProgram),
+          pageFooter()
         )
       )
     }
 
-    // Info markets page
+    // --- Institution sections \u2192 Studienfeld pages ---
+    for (const section of sections) {
+      for (const g of section.groups) {
+        contentPages.push(
+          h(
+            Page,
+            {
+              size: 'A4',
+              style: styles.page,
+              key: `cluster-${section.label}-${g.name}`,
+              bookmark: `${section.label}: ${g.name}`,
+            },
+            h(Text, { style: styles.institutionLabel }, section.label),
+            h(Text, { style: styles.clusterHeader }, g.name),
+            renderTwoColumnEvents(g.events),
+            pageFooter()
+          )
+        )
+      }
+    }
+
+    // --- Info markets ---
     if (infoMarkets.length > 0) {
       contentPages.push(
         h(
           Page,
-          { size: 'A4', style: styles.page, key: 'info-markets' },
+          { size: 'A4', style: styles.page, key: 'info-markets', bookmark: 'Infom\u00E4rkte' },
           h(Text, { style: styles.sectionHeader }, 'Infom\u00E4rkte'),
           ...infoMarkets.map((market) =>
             h(
@@ -384,31 +464,21 @@ export async function GET() {
               h(Text, { style: styles.infoMarketLocation }, market.location)
             )
           ),
-          h(Text, {
-            style: styles.pageFooter,
-            render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-              `Seite ${pageNumber} / ${totalPages}`,
-            fixed: true,
-          })
+          pageFooter()
         )
       )
     }
 
-    // Links page
+    // --- Links ---
     contentPages.push(
       h(
         Page,
-        { size: 'A4', style: styles.page, key: 'links' },
+        { size: 'A4', style: styles.page, key: 'links', bookmark: 'N\u00FCtzliche Links' },
         h(Text, { style: styles.sectionHeader }, 'N\u00FCtzliche Links'),
         h(Text, { style: styles.linkText }, 'www.zsb-os.de'),
         h(Text, { style: styles.linkText }, 'www.uni-osnabrueck.de'),
         h(Text, { style: styles.linkText }, 'www.hs-osnabrueck.de'),
-        h(Text, {
-          style: styles.pageFooter,
-          render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-            `Seite ${pageNumber} / ${totalPages}`,
-          fixed: true,
-        })
+        pageFooter()
       )
     )
 

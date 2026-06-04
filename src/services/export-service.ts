@@ -219,6 +219,95 @@ export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableE
 
 type ProgramGroupable = SortableEvent
 
+type BookletClusterInfo = { name: string; institution: Institution; sortOrder: number }
+
+type BookletEventShape = {
+  isCrossProgram: boolean
+  timeStart: Date | string | null
+  studyPrograms: { studyProgram: { clusters: BookletClusterInfo[] } }[]
+}
+
+export interface BookletClusterGroup<T> {
+  name: string
+  institution: Institution
+  sortOrder: number
+  events: T[]
+}
+
+const BOOKLET_INSTITUTION_RANK: Record<string, number> = { HOCHSCHULE: 0, UNI: 1, BOTH: 2 }
+
+/**
+ * Split events for the booklet into crossProgram (Rund ums Studium) and cluster
+ * groups. Cluster groups are ordered by institution (Hochschule → Universität →
+ * BOTH), then cluster.sortOrder, then name. Events within each group are
+ * time-sorted (earlier first, no-time last). An event in multiple clusters
+ * appears in each group; a non-cross event with no cluster goes to "Ohne
+ * Studienfeld" (ranked last).
+ */
+export function groupEventsForBooklet<T extends BookletEventShape>(
+  events: T[]
+): { crossProgram: T[]; clusterGroups: BookletClusterGroup<T>[] } {
+  const byTime = (a: T, b: T) => timeValue(a.timeStart) - timeValue(b.timeStart)
+
+  const crossProgram = events.filter((e) => e.isCrossProgram).sort(byTime)
+
+  const groups = new Map<string, BookletClusterGroup<T>>()
+  const NO_FIELD = 'Ohne Studienfeld'
+
+  for (const event of events) {
+    if (event.isCrossProgram) continue
+
+    const infos: BookletClusterInfo[] = []
+    for (const sp of event.studyPrograms) {
+      for (const c of sp.studyProgram.clusters) infos.push(c)
+    }
+
+    if (infos.length === 0) {
+      const g =
+        groups.get(NO_FIELD) ??
+        (groups
+          .set(NO_FIELD, {
+            name: NO_FIELD,
+            institution: 'UNI' as Institution,
+            sortOrder: Number.MAX_SAFE_INTEGER,
+            events: [],
+          })
+          .get(NO_FIELD) as BookletClusterGroup<T>)
+      g.events.push(event)
+      continue
+    }
+
+    const seen = new Set<string>()
+    for (const info of infos) {
+      if (seen.has(info.name)) continue
+      seen.add(info.name)
+      const g =
+        groups.get(info.name) ??
+        (groups
+          .set(info.name, {
+            name: info.name,
+            institution: info.institution,
+            sortOrder: info.sortOrder,
+            events: [],
+          })
+          .get(info.name) as BookletClusterGroup<T>)
+      g.events.push(event)
+    }
+  }
+
+  const clusterGroups = Array.from(groups.values())
+  for (const g of clusterGroups) g.events.sort(byTime)
+  clusterGroups.sort((a, b) => {
+    const ra = BOOKLET_INSTITUTION_RANK[a.institution] ?? 9
+    const rb = BOOKLET_INSTITUTION_RANK[b.institution] ?? 9
+    if (ra !== rb) return ra - rb
+    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
+    return a.name.localeCompare(b.name, 'de')
+  })
+
+  return { crossProgram, clusterGroups }
+}
+
 /**
  * Group events by study-program name. An event linked to N programs appears
  * under each. Events with no program go under "Ohne Studiengang". Each group is
@@ -556,47 +645,8 @@ export const exportService = {
       }),
     ])
 
-    const crossProgram: typeof events = []
-    const clustered: Record<string, { events: typeof events }> = {}
-
-    for (const event of events) {
-      if (event.isCrossProgram) {
-        crossProgram.push(event)
-        continue
-      }
-
-      const clusterNames = new Set<string>()
-      for (const esp of event.studyPrograms) {
-        for (const cluster of esp.studyProgram.clusters) {
-          clusterNames.add(cluster.name)
-        }
-      }
-      if (clusterNames.size === 0) {
-        clusterNames.add('Ohne Studienfeld')
-      }
-
-      for (const name of clusterNames) {
-        if (!clustered[name]) clustered[name] = { events: [] }
-        clustered[name].events.push(event)
-      }
-    }
-
-    // Sort within clusters
-    for (const key of Object.keys(clustered)) {
-      clustered[key].events.sort((a, b) => a.title.localeCompare(b.title, 'de'))
-    }
-
-    // Sort cluster keys
-    const sortedClustered: Record<string, { events: typeof events }> = {}
-    for (const key of Object.keys(clustered).sort((a, b) => a.localeCompare(b, 'de'))) {
-      sortedClustered[key] = clustered[key]
-    }
-
-    return {
-      clustered: sortedClustered,
-      crossProgram,
-      infoMarkets,
-    }
+    const { crossProgram, clusterGroups } = groupEventsForBooklet(events)
+    return { crossProgram, clusterGroups, infoMarkets }
   },
 
   /**
