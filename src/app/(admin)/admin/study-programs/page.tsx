@@ -158,10 +158,8 @@ export default function StudyProgramsPage() {
   // Only offer the Studienfelder that belong to the program's institution
   // (cross-institution "BOTH" clusters always fit). Prevents mis-assigning a
   // Uni programme to a Hochschule field and vice versa.
-  const clusterFitsInstitution = (
-    cluster: Cluster,
-    institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
-  ) => institution === 'BOTH' || cluster.institution === 'BOTH' || cluster.institution === institution
+  const clusterFitsInstitution = (cluster: Cluster, institution: 'UNI' | 'HOCHSCHULE' | 'BOTH') =>
+    institution === 'BOTH' || cluster.institution === 'BOTH' || cluster.institution === institution
 
   const visibleClusters = clusters.filter((c) =>
     clusterFitsInstitution(c, programFormData.institution)
