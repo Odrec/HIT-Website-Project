@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { compareByTimeClusterProgram, firstClusterName, compareByBuildingRoomTime } from '@/services/export-service'
+import {
+  compareByTimeClusterProgram,
+  firstClusterName,
+  compareByBuildingRoomTime,
+} from '@/services/export-service'
 
 const ev = (timeStart: string | null, programs: Array<[string, string[]]>) => ({
   timeStart,

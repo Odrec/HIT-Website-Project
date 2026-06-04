@@ -224,9 +224,7 @@ type ProgramGroupable = SortableEvent
  * under each. Events with no program go under "Ohne Studiengang". Each group is
  * time-sorted; the returned object is ordered by program name.
  */
-export function groupEventsByProgram<T extends ProgramGroupable>(
-  events: T[]
-): Record<string, T[]> {
+export function groupEventsByProgram<T extends ProgramGroupable>(events: T[]): Record<string, T[]> {
   const result: Record<string, T[]> = {}
   for (const event of events) {
     const names = new Set<string>()
@@ -309,7 +307,10 @@ export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
     }
   }
 
-  const join = (s: Set<string>) => Array.from(s).sort((a, b) => a.localeCompare(b, 'de')).join(', ')
+  const join = (s: Set<string>) =>
+    Array.from(s)
+      .sort((a, b) => a.localeCompare(b, 'de'))
+      .join(', ')
 
   return Array.from(byPerson.values())
     .map((acc) => ({
