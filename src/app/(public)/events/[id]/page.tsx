@@ -553,11 +553,16 @@ export default function EventDetailPage() {
                 <p className="text-hit-gray-500 italic">Ort wird noch bekannt gegeben</p>
               )}
 
-              {/* Open location in Google Maps — only when we have real coordinates */}
+              {/* Open location in Google Maps — pass the building name/address so
+                  the pin is labelled instead of showing raw coordinates. */}
               {event.building?.latitude != null && event.building?.longitude != null && (
                 <Button asChild variant="outline" size="sm" className="w-full">
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${event.building.latitude},${event.building.longitude}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      [event.building.name, event.building.address, 'Osnabrück']
+                        .filter(Boolean)
+                        .join(', ')
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

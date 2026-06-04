@@ -9,6 +9,7 @@ import { EventListView } from '@/components/events/EventListView'
 function SearchContent() {
   const params = useSearchParams()
   const q = params.get('q') ?? ''
+  const building = params.get('building') ?? ''
   return (
     <>
       <div className="mb-8">
@@ -18,10 +19,16 @@ function SearchContent() {
         >
           <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">Suchergebnisse</h1>
-        {q && <p className="mt-2 text-hit-gray-600">Treffer für &bdquo;{q}&ldquo;</p>}
+        <h1 className="mt-2 text-3xl font-bold text-hit-gray-900">
+          {building ? `Veranstaltungen: ${building}` : 'Suchergebnisse'}
+        </h1>
+        {!building && q && <p className="mt-2 text-hit-gray-600">Treffer für &bdquo;{q}&ldquo;</p>}
       </div>
-      <EventListView initialSearch={q} />
+      {building ? (
+        <EventListView staticFilters={{ building }} />
+      ) : (
+        <EventListView initialSearch={q} />
+      )}
     </>
   )
 }

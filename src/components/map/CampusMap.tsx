@@ -223,9 +223,12 @@ export default function CampusMap({
                         )}
                       </div>
                       {building.eventCount !== undefined && building.eventCount > 0 && (
-                        <p className="mt-2 text-sm">
-                          <strong>{building.eventCount}</strong> Veranstaltung(en)
-                        </p>
+                        <a
+                          href={`/events/search?building=${encodeURIComponent(building.name)}`}
+                          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-hit-uni-600 hover:underline"
+                        >
+                          <strong>{building.eventCount}</strong> Veranstaltung(en) anzeigen →
+                        </a>
                       )}
                     </div>
                   </Popup>

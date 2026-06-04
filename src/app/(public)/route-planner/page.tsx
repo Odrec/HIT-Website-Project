@@ -659,8 +659,12 @@ export default function RoutePlannerPage() {
                               diesem Standort
                             </p>
                             <Button asChild variant="link" className="p-0 h-auto mt-1">
-                              <Link href={`/events?building=${selectedBuilding.name}`}>
-                                Events anzeigen
+                              <Link
+                                href={`/events/search?building=${encodeURIComponent(
+                                  selectedBuilding.name
+                                )}`}
+                              >
+                                Veranstaltungen anzeigen
                                 <ChevronRight className="h-4 w-4 ml-1" />
                               </Link>
                             </Button>
