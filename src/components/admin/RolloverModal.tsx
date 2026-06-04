@@ -81,12 +81,11 @@ export function RolloverModal({ currentActiveYear, open, onOpenChange }: Props) 
         <div className="space-y-4">
           <div>
             <Label>Jahr</Label>
-            <Input
-              type="number"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              min={currentActiveYear + 1}
-            />
+            <Input type="number" value={year} onChange={(e) => setYear(e.target.value)} />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Muss eindeutig sein. Für eine Testübernahme darf auch eine andere (z. B. niedrigere)
+              Jahreszahl verwendet werden.
+            </p>
           </div>
           <div>
             <Label>HIT-Datum</Label>
