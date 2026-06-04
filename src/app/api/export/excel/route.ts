@@ -14,6 +14,7 @@ const VALID_VIEWS = [
   'events-time',
   'events-room',
   'events-building',
+  'events-studiengang',
   'melders',
   'lecturers',
   'infomaerkte',
@@ -27,6 +28,7 @@ const FILENAME_MAP: Record<ViewType, string> = {
   'events-time': 'veranstaltungen-zeit',
   'events-room': 'veranstaltungen-raum',
   'events-building': 'veranstaltungen-gebaeude',
+  'events-studiengang': 'veranstaltungen-studiengang',
   melders: 'melder',
   lecturers: 'dozierende',
   infomaerkte: 'infomaerkte',
@@ -185,6 +187,16 @@ export async function GET(request: NextRequest) {
         for (const [building, rows] of Object.entries(grouped)) {
           const sheet = workbook.addWorksheet(sanitizeSheetName(building))
           addTitleAndHeaders(sheet, `HIT – ${building}`, EVENT_COLUMNS)
+          addDataRows(sheet, rows)
+        }
+        break
+      }
+
+      case 'events-studiengang': {
+        const grouped = await exportService.eventsByStudyProgram()
+        for (const [program, rows] of Object.entries(grouped)) {
+          const sheet = workbook.addWorksheet(sanitizeSheetName(program))
+          addTitleAndHeaders(sheet, `HIT – ${program}`, EVENT_COLUMNS)
           addDataRows(sheet, rows)
         }
         break
