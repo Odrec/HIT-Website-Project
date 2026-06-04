@@ -496,6 +496,8 @@ async function main() {
         title: 'Campusführung Westerberg',
         description: 'Rundgang über den Westerberg-Campus mit Besuch der wichtigsten Gebäude.',
         eventType: EventType.RUNDGANG, institution: Institution.BOTH,
+        // Hochschulübergreifend (BOTH) → always "Rund ums Studium".
+        isCrossProgram: true,
         timeStart: new Date(`${D}T10:00:00`), timeEnd: new Date(`${D}T11:00:00`),
         buildingId: buildings['avz'].id,
         meetingPoint: 'Vor dem AVZ-Haupteingang',

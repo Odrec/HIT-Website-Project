@@ -90,10 +90,9 @@ export async function GET(request: NextRequest) {
       if (institution === 'BOTH') {
         where.AND.push({ institution: 'BOTH' })
       } else {
-        const mappedInstitution = mapInstitution(institution)
-        where.AND.push({
-          OR: [{ institution: mappedInstitution }, { institution: 'BOTH' }],
-        })
+        // Exact match: Hochschulübergreifend (BOTH) events are external and
+        // surface under "Rund ums Studium", not under the Uni/HS event lists.
+        where.AND.push({ institution: mapInstitution(institution) })
       }
     }
 
