@@ -3,7 +3,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
-import { normalizeExternalUrl } from '@/lib/url-utils'
+import { normalizeLinksInput } from '@/lib/study-program-links'
+import { invalidateProgramCaches } from '@/lib/cache/cache-utils'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -73,18 +74,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ? body.clusterIds.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
       : []
 
+    const links = normalizeLinksInput(body.links)
+
     const program = await prisma.studyProgram.update({
       where: { id },
       data: {
         name: body.name,
         institution: body.institution,
-        url: normalizeExternalUrl(body.url),
         clusters: { set: clusterIds.map((cid) => ({ id: cid })) },
+        links: {
+          deleteMany: {},
+          create: links,
+        },
       },
       include: {
         clusters: true,
+        links: { orderBy: { sortOrder: 'asc' } },
       },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json(program)
   } catch (error) {

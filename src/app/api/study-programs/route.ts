@@ -8,7 +8,7 @@ import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateProgramCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
-import { normalizeExternalUrl } from '@/lib/url-utils'
+import { normalizeLinksInput } from '@/lib/study-program-links'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
@@ -102,17 +102,22 @@ export async function POST(request: NextRequest) {
       ? body.clusterIds.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
       : []
 
+    const links = normalizeLinksInput(body.links)
+
     const program = await prisma.studyProgram.create({
       data: {
         name: body.name,
         institution: body.institution,
-        url: normalizeExternalUrl(body.url),
         ...(clusterIds.length > 0 && {
           clusters: { connect: clusterIds.map((id) => ({ id })) },
+        }),
+        ...(links.length > 0 && {
+          links: { create: links },
         }),
       },
       include: {
         clusters: true,
+        links: { orderBy: { sortOrder: 'asc' } },
       },
     })
 
