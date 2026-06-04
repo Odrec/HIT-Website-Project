@@ -30,6 +30,7 @@ export interface TimeConflict {
 export interface ScheduleState {
   items: ScheduleEvent[]
   conflicts: TimeConflict[]
+  watchlist: ScheduleEvent[]
   isLoaded: boolean
 }
 
@@ -41,6 +42,10 @@ type ScheduleAction =
   | { type: 'CLEAR_SCHEDULE' }
   | { type: 'SET_CONFLICTS'; payload: TimeConflict[] }
   | { type: 'PATCH_EVENTS'; payload: Array<{ eventId: string; event: Event }> }
+  | { type: 'LOAD_WATCHLIST'; payload: ScheduleEvent[] }
+  | { type: 'ADD_WATCHLIST'; payload: ScheduleEvent }
+  | { type: 'REMOVE_WATCHLIST'; payload: string }
+  | { type: 'CLEAR_WATCHLIST' }
 
 interface ScheduleContextType {
   state: ScheduleState
@@ -80,7 +85,7 @@ function detectConflicts(items: ScheduleEvent[]): TimeConflict[] {
   }))
 }
 
-function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
+export function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
   switch (action.type) {
     case 'LOAD_SCHEDULE': {
       const conflicts = detectConflicts(action.payload)
@@ -98,6 +103,7 @@ function scheduleReducer(state: ScheduleState, action: ScheduleAction): Schedule
         ...state,
         items: newItems,
         conflicts,
+        watchlist: state.watchlist.filter((w) => w.eventId !== action.payload.eventId),
       }
     }
     case 'REMOVE_EVENT': {
@@ -146,14 +152,44 @@ function scheduleReducer(state: ScheduleState, action: ScheduleAction): Schedule
         conflicts,
       }
     }
+    case 'LOAD_WATCHLIST': {
+      return {
+        ...state,
+        watchlist: action.payload,
+      }
+    }
+    case 'ADD_WATCHLIST': {
+      // Mutual exclusivity: an event lives in at most one list.
+      const newItems = state.items.filter((item) => item.eventId !== action.payload.eventId)
+      const alreadyWatched = state.watchlist.some((w) => w.eventId === action.payload.eventId)
+      return {
+        ...state,
+        items: newItems,
+        conflicts: detectConflicts(newItems),
+        watchlist: alreadyWatched ? state.watchlist : [...state.watchlist, action.payload],
+      }
+    }
+    case 'REMOVE_WATCHLIST': {
+      return {
+        ...state,
+        watchlist: state.watchlist.filter((w) => w.eventId !== action.payload),
+      }
+    }
+    case 'CLEAR_WATCHLIST': {
+      return {
+        ...state,
+        watchlist: [],
+      }
+    }
     default:
       return state
   }
 }
 
-const initialState: ScheduleState = {
+export const initialState: ScheduleState = {
   items: [],
   conflicts: [],
+  watchlist: [],
   isLoaded: false,
 }
 
