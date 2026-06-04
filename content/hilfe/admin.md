@@ -8,13 +8,15 @@ Das Dashboard zeigt eine Übersicht: Anzahl der Veranstaltungen, Gebäude, Studi
 
 ## Veranstaltungen verwalten
 
-Unter **Veranstaltungen** sehen und verwalten Sie alle gemeldeten Events. Sie können Veranstaltungen erstellen, bearbeiten und löschen. Nutzen Sie die Suche und Filter, um schnell bestimmte Einträge zu finden.
+Unter **Veranstaltungen** sehen und verwalten Sie alle gemeldeten Events. Sie können Veranstaltungen erstellen, bearbeiten und löschen. Nutzen Sie die Suche und Filter, um schnell bestimmte Einträge zu finden; die Trefferzahl und die Blätter-Schaltflächen finden Sie sowohl über als auch unter der Liste.
+
+Im Veranstaltungsformular wählen Sie u. a. den **Veranstaltungstyp** (Vortrag, Laborführung, Rundgang, Workshop, Online, Video, Infostand, Schnupperveranstaltung, Interaktion, Sonstiges) und die **Institution** (muss aktiv gewählt werden). Das **Datum** wird zentral über die aktive Edition vorgegeben (siehe „Editionen & Rollover") und lässt sich nicht pro Veranstaltung ändern. Wählen Sie als Institution **Hochschulübergreifend**, gilt die Veranstaltung automatisch als externes Angebot der Kategorie **Rund ums Studium** und erscheint nicht in den Uni-/Hochschul-Listen. Für Infostände sind 08:30–14:00 Uhr voreingetragen (änderbar).
 
 ## Gebäude & Räume
 
 Unter **Gebäude** verwalten Sie alle Campus-Gebäude mit Räumen, Adressen und Koordinaten. Diese Daten werden im Routenplaner, in der Kartenansicht und bei der Raumzuordnung verwendet. Jedes Gebäude kann Kurzname, Campus-Zuordnung, GPS-Koordinaten und Barrierefreiheit-Infos enthalten.
 
-**Wichtig:** GPS-Koordinaten (Breitengrad und Längengrad) sind **erforderlich**, damit Veranstaltungen in diesem Gebäude im Routenplaner und auf der Campuskarte angezeigt werden. Fehlen die Koordinaten, werden die zugehörigen Veranstaltungen stillschweigend aus der Routenberechnung entfernt — sie bleiben im persönlichen Zeitplan der Besucher sichtbar, erscheinen aber nicht in der Routenplaner-Liste. Prüfen Sie die Koordinaten nach dem Anlegen eines neuen Gebäudes.
+**Wichtig:** GPS-Koordinaten (Breitengrad und Längengrad) sind **erforderlich**, damit Veranstaltungen in diesem Gebäude im Routenplaner und auf dem Lageplan angezeigt werden. Fehlen die Koordinaten, werden die zugehörigen Veranstaltungen stillschweigend aus der Routenberechnung entfernt — sie bleiben im persönlichen Stundenplan der Besucher sichtbar, erscheinen aber nicht in der Routenplaner-Liste. Prüfen Sie die Koordinaten nach dem Anlegen eines neuen Gebäudes.
 
 ## Raumzuordnungen
 
@@ -24,11 +26,13 @@ Unter **Raumzuordnung** weisen Sie Veranstaltungen bestimmten Räumen und Zeitsl
 
 Unter **Melder** verwalten Sie die Einreicher*innen-Profile, die Veranstaltungen am HIT angemeldet haben. Sie können neue Melder direkt anlegen (**Neuer Melder**), bestehende Einträge bearbeiten oder löschen. Die Melder werden zusätzlich automatisch angelegt, sobald Sie über das Veranstaltungsformular eine neue Person eintragen — die E-Mail-Adresse dient als eindeutige Kennung. Wird die Veranstaltung gespeichert, erscheint der Melder direkt in der Liste.
 
+Im Melder-Profil hängen die abgefragten Felder von der **Zugehörigkeit** ab: Hochschule → *Fakultät*, Universität → *Fachbereich*, Beide bzw. Extern → *Institution* (ein gemeinsames Feld). Externe Melder geben statt eines Raums eine **Adresse** an.
+
 Hinweis: Melder, die noch mit aktiven Veranstaltungen verknüpft sind, lassen sich nicht löschen. Passen Sie zuerst die Veranstaltungen an (etwa auf einen anderen Melder umstellen) oder löschen Sie sie.
 
 ## Studiengänge
 
-Verwalten Sie die Studiengangsliste unter **Studiengänge**. Jeder Eintrag enthält Name, Institution (Uni/HS), Fachbereich und den Link zur offiziellen Seite.
+Verwalten Sie die Studiengangsliste unter **Studiengänge**. Jeder Eintrag enthält Name, Institution (Universität/Hochschule), die Zuordnung zu Studienfeldern und **einen oder mehrere benannte Links** zu den offiziellen Seiten (z. B. Fach, 2-Fächer-Bachelor, BEU, Lehramt). Beim Zuordnen werden nur die Studienfelder der gewählten Institution angeboten.
 
 ## Studienfelder (Cluster)
 
@@ -40,13 +44,13 @@ Unter **Benutzer** verwalten Sie die Zugänge. Es gibt drei Rollen: **Admin** (V
 
 ## Import / Export
 
-Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei importieren oder exportieren. Unterstützte Formate: Excel (.xlsx), PDF und HTML.
+Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei importieren oder exportieren. Verfügbar sind mehrere Excel-Ansichten (A-Z, nach Zeit, nach Raum, nach Studiengang, Melder, Dozierende, Infomärkte) sowie eine **Gesamtmappe** mit einer Gesamtübersicht als erstem Blatt; außerdem die PDF-Programmbroschüre (mit Inhaltsverzeichnis) und ein HTML-Backup.
 
 ## Shuttle-Busse
 
-Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf der Campuskarte im Routenplaner. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
+Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf dem Lageplan im Routenplaner. Pausiert ein Bus, zeigt die Admin-Liste **„Pausiert bis HH:MM"** und der Bus erscheint auf der Karte gedämpft; über **„Pause aufheben"** beenden Sie eine Pause vorzeitig. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
 
-Hinweise zur Bus-Begleitung: Die Hilfskraft im Bus muss nach dem Scannen des QR-Codes einmalig den **Standortzugriff** im Browser erlauben. Der Tab muss während der gesamten Schicht geöffnet bleiben — bei iOS Safari pausiert die Standortübertragung, sobald das Display gesperrt wird; bei Android Chrome läuft sie meist weiter, sobald die Berechtigung einmal erteilt wurde. Bei längeren Pausen empfiehlt sich ein erneutes Öffnen des Links.
+Hinweise zur Bus-Begleitung: Die Hilfskraft im Bus muss nach dem Scannen des QR-Codes einmalig den **Standortzugriff** im Browser erlauben. Der Tab muss während der gesamten Schicht geöffnet bleiben — bei iOS Safari pausiert die Standortübertragung, sobald das Display gesperrt wird; bei Android Chrome läuft sie meist weiter, sobald die Berechtigung einmal erteilt wurde. Bei längeren Pausen empfiehlt sich ein erneutes Öffnen des Links. Für geplante Pausen kann die Hilfskraft auf der Tracking-Seite **„Pause bis …"** wählen (z. B. +15/+30/+45 Minuten oder offen) — das Tracking ruht dann sichtbar, **„Weiter"** nimmt es wieder auf. Zuverlässiges Tracking im Hintergrund (gesperrtes Display, andere App im Vordergrund) ist im Browser technisch nicht garantiert.
 
 ## Editionen & Rollover
 
@@ -56,7 +60,7 @@ Jede HIT wird als eigene **Edition** verwaltet. Immer genau eine Edition ist akt
 
 **Neue Edition starten (Rollover):** Auf der aktiven Edition auf **Neue Edition starten** klicken. Im Dialog:
 
-1. Jahr eingeben (vorausgefüllt mit dem Folgejahr)
+1. Jahr eingeben (vorausgefüllt mit dem Folgejahr; es genügt eine **eindeutige** Jahreszahl — für eine Testübernahme ist auch eine andere, z. B. niedrigere Zahl möglich)
 2. HIT-Datum angeben
 3. Einsendeschluss optional setzen
 4. Checkbox **Alle Veranstaltungen übernehmen** aktiv lassen, um die Veranstaltungen der aktuellen Edition als Entwürfe ins Prüfstand zu kopieren
