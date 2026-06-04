@@ -76,7 +76,7 @@ export function AddToScheduleButton({
       ) : (
         <>
           <CalendarPlus className="h-4 w-4 mr-2" />
-          {showLabel && <span>Zum Stundenplan</span>}
+          {showLabel && <span>In den Stundenplan</span>}
         </>
       )}
     </Button>
