@@ -9,11 +9,13 @@ import type { EventRow, MelderRow, LecturerRow, InfomarktRow } from '@/services/
 // ---------------------------------------------------------------------------
 
 const VALID_VIEWS = [
+  'all-combined',
   'events-az',
   'events-cluster',
   'events-time',
   'events-room',
   'events-building',
+  'events-studiengang',
   'melders',
   'lecturers',
   'infomaerkte',
@@ -22,11 +24,13 @@ const VALID_VIEWS = [
 type ViewType = (typeof VALID_VIEWS)[number]
 
 const FILENAME_MAP: Record<ViewType, string> = {
+  'all-combined': 'gesamtmappe',
   'events-az': 'veranstaltungen-az',
   'events-cluster': 'veranstaltungen-cluster',
   'events-time': 'veranstaltungen-zeit',
   'events-room': 'veranstaltungen-raum',
   'events-building': 'veranstaltungen-gebaeude',
+  'events-studiengang': 'veranstaltungen-studiengang',
   melders: 'melder',
   lecturers: 'dozierende',
   infomaerkte: 'infomaerkte',
@@ -66,9 +70,11 @@ const LECTURER_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'Titel', key: 'titel', width: 15 },
   { header: 'E-Mail', key: 'email', width: 30 },
   { header: 'Institution', key: 'institution', width: 15 },
-  { header: 'Veranstaltung', key: 'veranstaltung', width: 35 },
-  { header: 'Gebäude', key: 'gebaeude', width: 20 },
-  { header: 'Raum', key: 'raum', width: 15 },
+  { header: 'Studiengänge', key: 'studiengaenge', width: 40 },
+  { header: 'Studienfeld', key: 'studienfeld', width: 30 },
+  { header: 'Fakultät/Fachbereich', key: 'organisationseinheit', width: 30 },
+  { header: 'Raum', key: 'raum', width: 18 },
+  { header: 'Anz. Veranstaltungen', key: 'anzahlVeranstaltungen', width: 20 },
 ]
 
 const INFOMARKT_COLUMNS: Partial<ExcelJS.Column>[] = [
@@ -154,6 +160,38 @@ export async function GET(request: NextRequest) {
     const workbook = new ExcelJS.Workbook()
 
     switch (view) {
+      case 'all-combined': {
+        const [gesamt, az, time, room, melderRows, lecturerRows, infomarkt] = await Promise.all([
+          exportService.eventsByTime(),
+          exportService.eventsAZ(),
+          exportService.eventsByTime(),
+          exportService.eventsByRoomFlat(),
+          exportService.melders(),
+          exportService.lecturers(),
+          exportService.infomaerkte(),
+        ])
+
+        const addSheet = (
+          name: string,
+          title: string,
+          columns: Partial<ExcelJS.Column>[],
+          rows: (EventRow | MelderRow | LecturerRow | InfomarktRow)[]
+        ) => {
+          const sheet = workbook.addWorksheet(name)
+          addTitleAndHeaders(sheet, title, columns)
+          addDataRows(sheet, rows)
+        }
+
+        addSheet('Gesamtansicht', 'HIT – Gesamtansicht', EVENT_COLUMNS, gesamt)
+        addSheet('Veranstaltungen A-Z', 'HIT – Veranstaltungen A-Z', EVENT_COLUMNS, az)
+        addSheet('Nach Zeit', 'HIT – Veranstaltungen nach Zeit', EVENT_COLUMNS, time)
+        addSheet('Nach Raum', 'HIT – Veranstaltungen nach Raum', EVENT_COLUMNS, room)
+        addSheet('Melder', 'HIT – Melder', MELDER_COLUMNS, melderRows)
+        addSheet('Dozierende', 'HIT – Dozierende', LECTURER_COLUMNS, lecturerRows)
+        addSheet('Infomärkte', 'HIT – Infomärkte', INFOMARKT_COLUMNS, infomarkt)
+        break
+      }
+
       case 'events-az': {
         const data = await exportService.eventsAZ()
         const sheet = workbook.addWorksheet('Veranstaltungen A-Z')
@@ -190,27 +228,21 @@ export async function GET(request: NextRequest) {
         break
       }
 
-      case 'events-room': {
-        const grouped = await exportService.eventsByRoom()
-        for (const [building, rooms] of Object.entries(grouped)) {
-          const sheet = workbook.addWorksheet(sanitizeSheetName(building))
-          addTitleAndHeaders(sheet, `HIT – ${building}`, EVENT_COLUMNS)
-
-          let isFirstRoom = true
-          for (const [room, rows] of Object.entries(rooms)) {
-            // Blank separator row between rooms (not before the first)
-            if (!isFirstRoom) {
-              sheet.addRow([])
-            }
-            isFirstRoom = false
-
-            // Room subheader row (bold italic)
-            const subheaderRow = sheet.addRow([room])
-            subheaderRow.font = { bold: true, italic: true }
-
-            addDataRows(sheet, rows)
-          }
+      case 'events-studiengang': {
+        const grouped = await exportService.eventsByStudyProgram()
+        for (const [program, rows] of Object.entries(grouped)) {
+          const sheet = workbook.addWorksheet(sanitizeSheetName(program))
+          addTitleAndHeaders(sheet, `HIT – ${program}`, EVENT_COLUMNS)
+          addDataRows(sheet, rows)
         }
+        break
+      }
+
+      case 'events-room': {
+        const data = await exportService.eventsByRoomFlat()
+        const sheet = workbook.addWorksheet('Nach Raum')
+        addTitleAndHeaders(sheet, 'HIT – Veranstaltungen nach Raum', EVENT_COLUMNS)
+        addDataRows(sheet, data)
         break
       }
 

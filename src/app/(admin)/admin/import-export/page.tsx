@@ -386,6 +386,12 @@ export default function ImportExportPage() {
             <h2 className="text-lg font-semibold">Excel-Exporte</h2>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <ExportCard
+                title="Gesamtmappe (alle Ansichten)"
+                description="Eine Excel-Datei mit Gesamtansicht als erstem Blatt"
+                icon={FileSpreadsheet}
+                href="/api/export/excel?view=all-combined"
+              />
+              <ExportCard
                 title="Veranstaltungen A-Z"
                 description="Alle Veranstaltungen alphabetisch sortiert"
                 icon={FileSpreadsheet}
@@ -396,6 +402,12 @@ export default function ImportExportPage() {
                 description="Veranstaltungen gruppiert nach Studienfeld"
                 icon={GraduationCap}
                 href="/api/export/excel?view=events-cluster"
+              />
+              <ExportCard
+                title="Nach Studiengang"
+                description="Je ein Tabellenblatt pro Studiengang"
+                icon={GraduationCap}
+                href="/api/export/excel?view=events-studiengang"
               />
               <ExportCard
                 title="Nach Zeit"
