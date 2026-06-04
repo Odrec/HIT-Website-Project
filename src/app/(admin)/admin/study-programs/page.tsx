@@ -62,7 +62,7 @@ interface StudyProgram {
   id: string
   name: string
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
-  url: string | null
+  links: Array<{ label: string; url: string }>
   clusters: Cluster[]
   createdAt: string
   updatedAt: string
@@ -94,7 +94,7 @@ export default function StudyProgramsPage() {
   const [programFormData, setProgramFormData] = useState({
     name: '',
     institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
-    url: '',
+    links: [] as Array<{ label: string; url: string }>,
     clusterIds: [] as string[],
   })
 
@@ -173,7 +173,7 @@ export default function StudyProgramsPage() {
     setProgramFormData({
       name: '',
       institution: 'UNI',
-      url: '',
+      links: [],
       clusterIds: [],
     })
     setProgramDialogOpen(true)
@@ -184,7 +184,7 @@ export default function StudyProgramsPage() {
     setProgramFormData({
       name: program.name,
       institution: program.institution,
-      url: program.url || '',
+      links: program.links.map((l) => ({ label: l.label, url: l.url })),
       clusterIds: program.clusters.map((c) => c.id),
     })
     setProgramDialogOpen(true)
@@ -198,7 +198,9 @@ export default function StudyProgramsPage() {
       const body = {
         name: programFormData.name.trim(),
         institution: programFormData.institution,
-        url: programFormData.url.trim() || null,
+        links: programFormData.links
+          .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
+          .filter((l) => l.url),
         clusterIds: programFormData.clusterIds,
       }
 
@@ -423,16 +425,16 @@ export default function StudyProgramsPage() {
                           <div className="flex items-center gap-2">
                             <GraduationCap className="h-4 w-4 text-muted-foreground" />
                             {program.name}
-                            {program.url && (
-                              <a
-                                href={program.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground"
-                                title={program.url}
+                            {program.links.length > 0 && (
+                              <span
+                                className="inline-flex items-center gap-0.5 text-muted-foreground"
+                                title={program.links.map((l) => l.label).join(', ')}
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
+                                {program.links.length > 1 && (
+                                  <span className="text-xs">{program.links.length}</span>
+                                )}
+                              </span>
                             )}
                           </div>
                         </TableCell>
@@ -651,17 +653,74 @@ export default function StudyProgramsPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="programUrl">Website-Link</Label>
-              <Input
-                id="programUrl"
-                type="url"
-                value={programFormData.url}
-                onChange={(e) => setProgramFormData({ ...programFormData, url: e.target.value })}
-                placeholder="https://www.uni-osnabrueck.de/studiengang/..."
-              />
+              <Label>Website-Links</Label>
               <p className="text-xs text-muted-foreground">
-                Link zur Studiengang-Seite der Uni/Hochschule (optional)
+                Beschriftete Links zur Studiengang-Seite der Uni/Hochschule (Fach,
+                2-Fächer-Bachelor, BEU, LBS …). Reihenfolge = Anzeigereihenfolge.
               </p>
+              <div className="space-y-2">
+                {programFormData.links.map((link, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      aria-label={`Link-Bezeichnung ${index + 1}`}
+                      className="w-1/3"
+                      value={link.label}
+                      onChange={(e) =>
+                        setProgramFormData((prev) => ({
+                          ...prev,
+                          links: prev.links.map((l, i) =>
+                            i === index ? { ...l, label: e.target.value } : l
+                          ),
+                        }))
+                      }
+                      placeholder="Bezeichnung"
+                    />
+                    <Input
+                      aria-label={`Link-URL ${index + 1}`}
+                      className="flex-1"
+                      type="url"
+                      value={link.url}
+                      onChange={(e) =>
+                        setProgramFormData((prev) => ({
+                          ...prev,
+                          links: prev.links.map((l, i) =>
+                            i === index ? { ...l, url: e.target.value } : l
+                          ),
+                        }))
+                      }
+                      placeholder="https://..."
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setProgramFormData((prev) => ({
+                          ...prev,
+                          links: prev.links.filter((_, i) => i !== index),
+                        }))
+                      }
+                      aria-label={`Link ${index + 1} entfernen`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setProgramFormData((prev) => ({
+                      ...prev,
+                      links: [...prev.links, { label: '', url: '' }],
+                    }))
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Link hinzufügen
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Studienfelder</Label>
