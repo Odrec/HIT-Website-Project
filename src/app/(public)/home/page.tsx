@@ -19,11 +19,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AnimatedHeroBanner } from '@/components/home/animated-hero-banner'
+import { formatEventDateLong } from '@/lib/event-time'
 
 const USE_ANIMATED_BANNER = process.env.NEXT_PUBLIC_ANIMATED_BANNER === 'true'
 
 export default function HomePage() {
   const [eventCount, setEventCount] = useState(0)
+  // Full HIT date comes from the active edition (changes per edition) —
+  // never hardcode it here.
+  const [hitDateLabel, setHitDateLabel] = useState('')
 
   useEffect(() => {
     fetch('/api/events/public?pageSize=1')
@@ -32,6 +36,15 @@ export default function HomePage() {
         if (data) setEventCount(data.total)
       })
       .catch((error) => console.error('Error fetching event count:', error))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/editions/active')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.hitDate) setHitDateLabel(formatEventDateLong(data.hitDate))
+      })
+      .catch((error) => console.error('Error fetching HIT date:', error))
   }, [])
 
   return (
@@ -62,7 +75,12 @@ export default function HomePage() {
         />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
           <div className="max-w-3xl">
-            <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">November 2026</Badge>
+            {hitDateLabel && (
+              <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">
+                <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                {hitDateLabel}
+              </Badge>
+            )}
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Hochschul&shy;infotag 2026
             </h1>
