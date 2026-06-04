@@ -574,11 +574,17 @@ async function main() {
   // ==========================================================================
   console.log('🔗 Linking infostands to markets...')
 
-  await Promise.all([
-    prisma.eventInformationMarket.create({ data: { eventId: events[18].id, marketId: infoMarkets[1].id } }),
-    prisma.eventInformationMarket.create({ data: { eventId: events[19].id, marketId: infoMarkets[0].id } }),
-    prisma.eventInformationMarket.create({ data: { eventId: events[20].id, marketId: infoMarkets[1].id } }),
-  ])
+  // events[19] is already linked to infoMarkets[0] inline at creation, so use
+  // createMany + skipDuplicates to keep re-linking the same (event, market)
+  // pair a no-op instead of a unique-constraint error (keeps the seed idempotent).
+  await prisma.eventInformationMarket.createMany({
+    data: [
+      { eventId: events[18].id, marketId: infoMarkets[1].id },
+      { eventId: events[19].id, marketId: infoMarkets[0].id },
+      { eventId: events[20].id, marketId: infoMarkets[1].id },
+    ],
+    skipDuplicates: true,
+  })
 
   // ==========================================================================
   // Create Lecturers
@@ -620,7 +626,7 @@ async function main() {
   // ==========================================================================
   console.log('📋 Creating sample schedule...')
 
-  const schedule = await prisma.userSchedule.create({
+  await prisma.userSchedule.create({
     data: {
       editionId,
       userId: adminUser.id,
