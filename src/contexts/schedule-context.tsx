@@ -57,9 +57,15 @@ interface ScheduleContextType {
   getEventCount: () => number
   getConflicts: () => TimeConflict[]
   getScheduleUrl: () => string
+  addToWatchlist: (event: Event) => void
+  removeFromWatchlist: (eventId: string) => void
+  isInWatchlist: (eventId: string) => boolean
+  getWatchlistCount: () => number
+  clearWatchlist: () => void
 }
 
 const STORAGE_KEY = 'hit-schedule'
+const WATCHLIST_STORAGE_KEY = 'hit-watchlist'
 
 // Migrate older localStorage entries that stored priority as a number
 // (1 = important, 2+ = less important) to the new 3-level enum.
@@ -71,6 +77,38 @@ function normalizeStoredPriority(value: unknown): SchedulePriority {
     return 'LOW'
   }
   return DEFAULT_SCHEDULE_PRIORITY
+}
+
+// Restore a stored array of schedule/watchlist entries: JSON dates → Date,
+// legacy numeric priority → enum. Shared by both the schedule and watchlist
+// load effects so the deserialization lives in one place.
+function reviveScheduleEvents(parsed: unknown): ScheduleEvent[] {
+  if (!Array.isArray(parsed)) return []
+  return parsed.map(
+    (item: {
+      id: string
+      eventId: string
+      event: Event & {
+        timeStart?: string
+        timeEnd?: string
+        createdAt: string
+        updatedAt: string
+      }
+      priority: SchedulePriority | number
+      addedAt: string
+    }) => ({
+      ...item,
+      priority: normalizeStoredPriority(item.priority),
+      addedAt: new Date(item.addedAt),
+      event: {
+        ...item.event,
+        timeStart: item.event.timeStart ? new Date(item.event.timeStart) : undefined,
+        timeEnd: item.event.timeEnd ? new Date(item.event.timeEnd) : undefined,
+        createdAt: new Date(item.event.createdAt),
+        updatedAt: new Date(item.event.updatedAt),
+      },
+    })
+  )
 }
 
 // Detect conflicts between schedule items. Delegates to the shared detector
@@ -202,42 +240,24 @@ interface ScheduleProviderProps {
 export function ScheduleProvider({ children }: ScheduleProviderProps) {
   const [state, dispatch] = useReducer(scheduleReducer, initialState)
 
-  // Load schedule from localStorage on mount
+  // Load schedule + watchlist from localStorage on mount.
   useEffect(() => {
     try {
+      const storedWatch = localStorage.getItem(WATCHLIST_STORAGE_KEY)
+      dispatch({
+        type: 'LOAD_WATCHLIST',
+        payload: storedWatch ? reviveScheduleEvents(JSON.parse(storedWatch)) : [],
+      })
+    } catch {
+      console.error('Failed to load watchlist from localStorage')
+      dispatch({ type: 'LOAD_WATCHLIST', payload: [] })
+    }
+    try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        // Restore dates from JSON strings
-        const items: ScheduleEvent[] = parsed.map(
-          (item: {
-            id: string
-            eventId: string
-            event: Event & {
-              timeStart?: string
-              timeEnd?: string
-              createdAt: string
-              updatedAt: string
-            }
-            priority: SchedulePriority | number
-            addedAt: string
-          }) => ({
-            ...item,
-            priority: normalizeStoredPriority(item.priority),
-            addedAt: new Date(item.addedAt),
-            event: {
-              ...item.event,
-              timeStart: item.event.timeStart ? new Date(item.event.timeStart) : undefined,
-              timeEnd: item.event.timeEnd ? new Date(item.event.timeEnd) : undefined,
-              createdAt: new Date(item.event.createdAt),
-              updatedAt: new Date(item.event.updatedAt),
-            },
-          })
-        )
-        dispatch({ type: 'LOAD_SCHEDULE', payload: items })
-      } else {
-        dispatch({ type: 'LOAD_SCHEDULE', payload: [] })
-      }
+      dispatch({
+        type: 'LOAD_SCHEDULE',
+        payload: stored ? reviveScheduleEvents(JSON.parse(stored)) : [],
+      })
     } catch {
       console.error('Failed to load schedule from localStorage')
       dispatch({ type: 'LOAD_SCHEDULE', payload: [] })
@@ -254,6 +274,17 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       }
     }
   }, [state.items, state.isLoaded])
+
+  // Persist watchlist whenever it changes.
+  useEffect(() => {
+    if (state.isLoaded) {
+      try {
+        localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(state.watchlist))
+      } catch {
+        console.error('Failed to save watchlist to localStorage')
+      }
+    }
+  }, [state.watchlist, state.isLoaded])
 
   // One-time self-healing migration: events added before the EventCard slug fix
   // were saved with `event.building.slug = ''`, which suppresses travel-time
@@ -348,6 +379,36 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     return `/schedule?share=${encoded}`
   }, [state.items])
 
+  const addToWatchlist = useCallback(
+    (event: Event) => {
+      if (state.watchlist.some((w) => w.eventId === event.id)) return
+      const watchEvent: ScheduleEvent = {
+        id: `watch-${event.id}-${Date.now()}`,
+        eventId: event.id,
+        event,
+        priority: DEFAULT_SCHEDULE_PRIORITY,
+        addedAt: new Date(),
+      }
+      dispatch({ type: 'ADD_WATCHLIST', payload: watchEvent })
+    },
+    [state.watchlist]
+  )
+
+  const removeFromWatchlist = useCallback((eventId: string) => {
+    dispatch({ type: 'REMOVE_WATCHLIST', payload: eventId })
+  }, [])
+
+  const isInWatchlist = useCallback(
+    (eventId: string) => state.watchlist.some((w) => w.eventId === eventId),
+    [state.watchlist]
+  )
+
+  const getWatchlistCount = useCallback(() => state.watchlist.length, [state.watchlist])
+
+  const clearWatchlist = useCallback(() => {
+    dispatch({ type: 'CLEAR_WATCHLIST' })
+  }, [])
+
   const value = useMemo(
     () => ({
       state,
@@ -359,6 +420,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       getEventCount,
       getConflicts,
       getScheduleUrl,
+      addToWatchlist,
+      removeFromWatchlist,
+      isInWatchlist,
+      getWatchlistCount,
+      clearWatchlist,
     }),
     [
       state,
@@ -370,6 +436,11 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       getEventCount,
       getConflicts,
       getScheduleUrl,
+      addToWatchlist,
+      removeFromWatchlist,
+      isInWatchlist,
+      getWatchlistCount,
+      clearWatchlist,
     ]
   )
 
