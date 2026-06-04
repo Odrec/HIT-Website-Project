@@ -191,26 +191,10 @@ export async function GET(request: NextRequest) {
       }
 
       case 'events-room': {
-        const grouped = await exportService.eventsByRoom()
-        for (const [building, rooms] of Object.entries(grouped)) {
-          const sheet = workbook.addWorksheet(sanitizeSheetName(building))
-          addTitleAndHeaders(sheet, `HIT – ${building}`, EVENT_COLUMNS)
-
-          let isFirstRoom = true
-          for (const [room, rows] of Object.entries(rooms)) {
-            // Blank separator row between rooms (not before the first)
-            if (!isFirstRoom) {
-              sheet.addRow([])
-            }
-            isFirstRoom = false
-
-            // Room subheader row (bold italic)
-            const subheaderRow = sheet.addRow([room])
-            subheaderRow.font = { bold: true, italic: true }
-
-            addDataRows(sheet, rows)
-          }
-        }
+        const data = await exportService.eventsByRoomFlat()
+        const sheet = workbook.addWorksheet('Nach Raum')
+        addTitleAndHeaders(sheet, 'HIT – Veranstaltungen nach Raum', EVENT_COLUMNS)
+        addDataRows(sheet, data)
         break
       }
 

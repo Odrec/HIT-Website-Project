@@ -195,6 +195,26 @@ export function compareByTimeClusterProgram(a: SortableEvent, b: SortableEvent):
   return firstProgramName(a).localeCompare(firstProgramName(b), 'de')
 }
 
+type RoomSortableEvent = SortableEvent & {
+  building?: { name: string } | null
+  room?: { name: string; building?: { name: string } | null } | null
+}
+
+export function eventBuildingName(e: RoomSortableEvent): string {
+  return e.building?.name ?? e.room?.building?.name ?? ''
+}
+
+/** Sort comparator: building name, then room name, then time. */
+export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableEvent): number {
+  const ba = eventBuildingName(a)
+  const bb = eventBuildingName(b)
+  if (ba !== bb) return ba.localeCompare(bb, 'de')
+  const ra = a.room?.name ?? ''
+  const rb = b.room?.name ?? ''
+  if (ra !== rb) return ra.localeCompare(rb, 'de')
+  return compareByTimeClusterProgram(a, b)
+}
+
 // ---------------------------------------------------------------------------
 // Shared data fetching
 // ---------------------------------------------------------------------------
@@ -231,6 +251,14 @@ export const exportService = {
   async eventsByTime(): Promise<EventRow[]> {
     const events = await fetchAllEvents()
     return [...events].sort(compareByTimeClusterProgram).map(eventToRow)
+  },
+
+  /**
+   * All events as flat rows, sorted by building, then room, then time.
+   */
+  async eventsByRoomFlat(): Promise<EventRow[]> {
+    const events = await fetchAllEvents()
+    return [...events].sort(compareByBuildingRoomTime).map(eventToRow)
   },
 
   /**
@@ -295,42 +323,6 @@ export const exportService = {
     const sorted: Record<string, EventRow[]> = {}
     for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
       sorted[key] = result[key]
-    }
-    return sorted
-  },
-
-  /**
-   * Events grouped by building then room.
-   * "Ohne Gebäude"/"Ohne Raum" for missing values.
-   */
-  async eventsByRoom(): Promise<Record<string, Record<string, EventRow[]>>> {
-    const events = await fetchAllEvents()
-    const result: Record<string, Record<string, EventRow[]>> = {}
-
-    for (const event of events) {
-      const buildingName = event.building?.name ?? event.room?.building?.name ?? 'Ohne Gebäude'
-      const roomName = event.room?.name ?? 'Ohne Raum'
-      const row = eventToRow(event)
-
-      if (!result[buildingName]) result[buildingName] = {}
-      if (!result[buildingName][roomName]) result[buildingName][roomName] = []
-      result[buildingName][roomName].push(row)
-    }
-
-    // Sort within each room group
-    for (const building of Object.keys(result)) {
-      for (const room of Object.keys(result[building])) {
-        result[building][room].sort((a, b) => a.titel.localeCompare(b.titel, 'de'))
-      }
-    }
-
-    // Sort by building key, then by room key
-    const sorted: Record<string, Record<string, EventRow[]>> = {}
-    for (const bKey of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
-      sorted[bKey] = {}
-      for (const rKey of Object.keys(result[bKey]).sort((a, b) => a.localeCompare(b, 'de'))) {
-        sorted[bKey][rKey] = result[bKey][rKey]
-      }
     }
     return sorted
   },
