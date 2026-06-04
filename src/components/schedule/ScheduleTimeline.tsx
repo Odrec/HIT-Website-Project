@@ -232,7 +232,27 @@ export function ScheduleTimeline({
   }
 
   const renderEventCardBody = (item: TimeSlotEvent) => (
-    <CardContent className="p-0 h-full flex flex-col">
+    // Short cards clip their content (fixed height + overflow-hidden), so the
+    // title attribute exposes the full title / time / location on hover.
+    <CardContent
+      className="p-0 h-full flex flex-col"
+      title={[
+        item.scheduleEvent.event.title,
+        item.scheduleEvent.event.timeStart
+          ? formatEventTimeRange(
+              item.scheduleEvent.event.timeStart,
+              item.scheduleEvent.event.timeEnd
+            )
+          : null,
+        item.scheduleEvent.event.building
+          ? `${item.scheduleEvent.event.building.name}${
+              item.scheduleEvent.event.room?.name ? `, ${item.scheduleEvent.event.room.name}` : ''
+            }`
+          : null,
+      ]
+        .filter(Boolean)
+        .join('\n')}
+    >
       {/* Event header */}
       <div className="flex items-start justify-between gap-1">
         <div className="flex-grow min-w-0">
@@ -263,11 +283,9 @@ export function ScheduleTimeline({
               </button>
             )}
           </div>
-          <Link
-            href={`/events/${item.scheduleEvent.event.id}`}
-            className="group/link"
-            title={item.scheduleEvent.event.title}
-          >
+          <Link href={`/events/${item.scheduleEvent.event.id}`} className="group/link">
+            {/* No own title attr — the card-level tooltip (title + time +
+                location) applies uniformly, including over the title text. */}
             <h4
               className={cn(
                 'font-medium line-clamp-3 break-words group-hover/link:underline',
@@ -342,7 +360,6 @@ export function ScheduleTimeline({
           )}
         </div>
       )}
-
     </CardContent>
   )
 
