@@ -17,7 +17,7 @@ function RecommendationsPageContent() {
           Empfehlungen für dich
         </h1>
         <p className="text-muted-foreground mt-2">
-          Personalisierte Veranstaltungsempfehlungen basierend auf deinem Zeitplan und deinen
+          Personalisierte Veranstaltungsempfehlungen basierend auf deinem Stundenplan und deinen
           Interessen
         </p>
       </div>
@@ -29,7 +29,7 @@ function RecommendationsPageContent() {
             <Sparkles className="h-4 w-4 mr-2" />
             Empfehlungen
           </TabsTrigger>
-          <TabsTrigger value="analysis">Zeitplan-Analyse</TabsTrigger>
+          <TabsTrigger value="analysis">Stundenplan-Analyse</TabsTrigger>
           <TabsTrigger value="info">
             <Info className="h-4 w-4 mr-2" />
             So funktioniert&apos;s
@@ -99,7 +99,7 @@ function RecommendationsPageContent() {
                     <div>
                       <p className="font-medium text-foreground">Keine Überschneidung</p>
                       <p className="text-sm text-muted-foreground">
-                        Veranstaltungen ohne zeitliche Konflikte mit deinem bestehenden Zeitplan
+                        Veranstaltungen ohne zeitliche Konflikte mit deinem bestehenden Stundenplan
                         erhalten Bonuspunkte.
                       </p>
                     </div>
@@ -119,7 +119,7 @@ function RecommendationsPageContent() {
                     <div>
                       <p className="font-medium text-foreground">Vielfalt</p>
                       <p className="text-sm text-muted-foreground">
-                        Veranstaltungstypen, die noch nicht in deinem Zeitplan vertreten sind,
+                        Veranstaltungstypen, die noch nicht in deinem Stundenplan vertreten sind,
                         erhalten einen kleinen Bonus für mehr Abwechslung.
                       </p>
                     </div>
@@ -158,8 +158,8 @@ function RecommendationsPageContent() {
                   angezeigt, damit du schnell die für dich relevanten Bereiche findest.
                 </p>
                 <p>
-                  Die Zeitplan-Analyse zeigt dir außerdem Lücken, Konflikte und
-                  Optimierungsvorschläge für deinen bestehenden Zeitplan.
+                  Die Stundenplan-Analyse zeigt dir außerdem Lücken, Konflikte und
+                  Optimierungsvorschläge für deinen bestehenden Stundenplan.
                 </p>
               </CardContent>
             </Card>
@@ -170,7 +170,7 @@ function RecommendationsPageContent() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 <p>
-                  Deine Interessen und dein Zeitplan werden nur lokal in deinem Browser gespeichert.
+                  Deine Interessen und dein Stundenplan werden nur lokal in deinem Browser gespeichert.
                   Es werden keine persönlichen Daten an den Server übermittelt — die Empfehlungen
                   werden anhand anonymer Kriterien berechnet.
                 </p>

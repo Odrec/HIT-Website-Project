@@ -42,7 +42,7 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
   }
 
   const handleClear = () => {
-    if (confirm('Möchtest du wirklich alle Events aus deinem Zeitplan entfernen?')) {
+    if (confirm('Möchtest du wirklich alle Events aus deinem Stundenplan entfernen?')) {
       clearSchedule()
     }
   }
@@ -64,7 +64,7 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Mein Zeitplan</h2>
+            <h2 className="text-lg font-semibold">Mein Stundenplan</h2>
             {state.items.length > 0 && <Badge variant="secondary">{state.items.length}</Badge>}
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -77,9 +77,9 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
           {state.items.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Dein Zeitplan ist leer</p>
+              <p className="text-muted-foreground">Dein Stundenplan ist leer</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Füge Events hinzu, um deinen persönlichen Zeitplan zu erstellen
+                Füge Events hinzu, um deinen persönlichen Stundenplan zu erstellen
               </p>
               <Button asChild className="mt-4">
                 <Link href="/events">Events durchsuchen</Link>
@@ -168,7 +168,7 @@ export function ScheduleSidebar({ isOpen, onClose, className }: ScheduleSidebarP
                 </Button>
                 <Button asChild className="flex-1">
                   <Link href="/schedule" onClick={onClose}>
-                    Zeitplan anzeigen
+                    Stundenplan anzeigen
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -205,7 +205,7 @@ export function ScheduleFloatingButton({ onClick, className }: ScheduleFloatingB
       )}
     >
       <Calendar className="h-5 w-5 mr-2" />
-      <span>Zeitplan</span>
+      <span>Stundenplan</span>
       <Badge variant={hasConflicts ? 'destructive' : 'secondary'} className="ml-2">
         {state.items.length}
       </Badge>

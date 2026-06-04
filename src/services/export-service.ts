@@ -113,6 +113,7 @@ function formatInstitution(institution: Institution | Affiliation): string {
     case 'HOCHSCHULE':
       return 'Hochschule'
     case 'BOTH':
+      return 'Hochschulübergreifend'
     case 'BEIDE':
       return 'Beide'
     case 'EXTERN':

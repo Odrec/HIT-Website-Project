@@ -354,10 +354,10 @@ export function ScheduleTimeline({
         <p className="text-muted-foreground">
           {selectedDate
             ? `Keine Events für ${formatEventDateLong(selectedDate)}`
-            : 'Noch keine Events in deinem Zeitplan'}
+            : 'Noch keine Events in deinem Stundenplan'}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          Füge Events hinzu, um deinen persönlichen Zeitplan zu erstellen
+          Füge Events hinzu, um deinen persönlichen Stundenplan zu erstellen
         </p>
       </div>
     )

@@ -105,7 +105,7 @@ export default function DatenschutzPage() {
             <h4 className="font-semibold">Lokale Speicherung (localStorage)</h4>
             <p>
               Diese Website verwendet die lokale Speicherung (localStorage) Ihres Browsers, um Ihren
-              persönlichen Zeitplan zu speichern. Diese Daten werden ausschließlich lokal auf Ihrem
+              persönlichen Stundenplan zu speichern. Diese Daten werden ausschließlich lokal auf Ihrem
               Gerät gespeichert und nicht an unsere Server übermittelt.
             </p>
           </CardContent>
@@ -125,7 +125,7 @@ export default function DatenschutzPage() {
             <ul>
               <li>Aufgerufene Seiten und Zeitpunkt des Zugriffs</li>
               <li>Gerätetyp (Desktop, Mobil, Tablet), Browser und Betriebssystem</li>
-              <li>Anonymisierte Nutzungsdaten (z.B. Filterverwendung, Zeitplanaktionen)</li>
+              <li>Anonymisierte Nutzungsdaten (z.B. Filterverwendung, Stundenplanaktionen)</li>
             </ul>
             <h4 className="font-semibold">Keine Cookies</h4>
             <p>

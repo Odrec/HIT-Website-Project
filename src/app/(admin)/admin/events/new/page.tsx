@@ -23,7 +23,8 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 const INSTITUTION_LABELS: Record<string, string> = {
   UNI: 'Universität Osnabrück',
   HS: 'Hochschule Osnabrück',
-  BOTH: 'Universität & Hochschule Osnabrück',
+  HOCHSCHULE: 'Hochschule Osnabrück',
+  BOTH: 'Hochschulübergreifend',
 }
 
 interface CreatedEvent {

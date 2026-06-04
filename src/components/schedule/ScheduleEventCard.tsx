@@ -56,7 +56,7 @@ const eventTypeColors: Record<string, string> = {
 const institutionLabels: Record<string, string> = {
   UNI: 'Universität',
   HOCHSCHULE: 'Hochschule',
-  BOTH: 'Beide',
+  BOTH: 'Hochschulübergreifend',
 }
 
 const institutionColors: Record<string, string> = {
