@@ -17,7 +17,7 @@ export default function RouteInfo({ route, className = '' }: RouteInfoProps) {
       <Card className={className}>
         <CardContent className="pt-4">
           <p className="text-gray-500 text-center py-4">
-            Keine Route berechnet. Fügen Sie Veranstaltungen zu Ihrem Zeitplan hinzu.
+            Keine Route berechnet. Fügen Sie Veranstaltungen zu Ihrem Stundenplan hinzu.
           </p>
         </CardContent>
       </Card>

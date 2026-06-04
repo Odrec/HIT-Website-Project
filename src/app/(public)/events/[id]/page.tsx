@@ -574,7 +574,7 @@ export default function EventDetailPage() {
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Auf Karte anzeigen
+                    Auf dem Lageplan anzeigen
                   </a>
                 </Button>
               )}

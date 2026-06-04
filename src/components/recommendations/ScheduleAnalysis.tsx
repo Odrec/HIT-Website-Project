@@ -142,7 +142,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
       <Card>
         <CardContent className="pt-6 text-center text-gray-500">
           <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>Füge Veranstaltungen zu deinem Zeitplan hinzu, um eine Analyse zu sehen.</p>
+          <p>Füge Veranstaltungen zu deinem Stundenplan hinzu, um eine Analyse zu sehen.</p>
         </CardContent>
       </Card>
     )
@@ -153,7 +153,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
       <Card>
         <CardContent className="pt-6 text-center">
           <RefreshCw className="h-8 w-8 mx-auto mb-4 animate-spin text-blue-500" />
-          <p className="text-gray-600">Analysiere deinen Zeitplan...</p>
+          <p className="text-gray-600">Analysiere deinen Stundenplan...</p>
         </CardContent>
       </Card>
     )
@@ -182,7 +182,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Zeitplan-Bewertung
+            Stundenplan-Bewertung
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -193,14 +193,14 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
             <div className="flex-1">
               <Progress value={analysis.currentScore} className="h-3" />
               <p className="text-sm text-gray-500 mt-1">
-                {analysis.currentScore >= 80 && 'Ausgezeichneter Zeitplan!'}
+                {analysis.currentScore >= 80 && 'Ausgezeichneter Stundenplan!'}
                 {analysis.currentScore >= 60 &&
                   analysis.currentScore < 80 &&
-                  'Guter Zeitplan mit Verbesserungspotenzial'}
+                  'Guter Stundenplan mit Verbesserungspotenzial'}
                 {analysis.currentScore >= 40 &&
                   analysis.currentScore < 60 &&
-                  'Zeitplan könnte optimiert werden'}
-                {analysis.currentScore < 40 && 'Zeitplan benötigt Überarbeitung'}
+                  'Stundenplan könnte optimiert werden'}
+                {analysis.currentScore < 40 && 'Stundenplan benötigt Überarbeitung'}
               </p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
         <Card className="border-green-200 bg-green-50">
           <CardContent className="pt-6 flex items-center gap-3">
             <CheckCircle className="h-6 w-6 text-green-600" />
-            <span className="text-green-800">Keine Zeitkonflikte in deinem Zeitplan</span>
+            <span className="text-green-800">Keine Zeitkonflikte in deinem Stundenplan</span>
           </CardContent>
         </Card>
       )}

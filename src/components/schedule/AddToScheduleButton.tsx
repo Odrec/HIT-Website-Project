@@ -34,14 +34,14 @@ export function AddToScheduleButton({
       trackEvent('schedule', 'remove', event.title)
       toast({
         title: 'Entfernt',
-        description: `"${event.title}" wurde aus deinem Zeitplan entfernt.`,
+        description: `"${event.title}" wurde aus deinem Stundenplan entfernt.`,
       })
     } else {
       addEvent(event)
       trackEvent('schedule', 'add', event.title)
       toast({
         title: 'Hinzugefügt',
-        description: `"${event.title}" wurde zu deinem Zeitplan hinzugefügt.`,
+        description: `"${event.title}" wurde zu deinem Stundenplan hinzugefügt.`,
       })
     }
   }
@@ -53,7 +53,7 @@ export function AddToScheduleButton({
         size="icon"
         onClick={handleClick}
         className={cn(inSchedule && 'bg-green-100 text-green-700 hover:bg-green-200', className)}
-        title={inSchedule ? 'Aus Zeitplan entfernen' : 'Zum Zeitplan hinzufügen'}
+        title={inSchedule ? 'Aus Stundenplan entfernen' : 'Zum Stundenplan hinzufügen'}
       >
         {inSchedule ? <CalendarCheck className="h-4 w-4" /> : <CalendarPlus className="h-4 w-4" />}
       </Button>
@@ -70,13 +70,13 @@ export function AddToScheduleButton({
       {inSchedule ? (
         <>
           <CalendarCheck className="h-4 w-4 mr-2" />
-          {showLabel && <span>Im Zeitplan</span>}
+          {showLabel && <span>Im Stundenplan</span>}
           <Check className="h-4 w-4 ml-1" />
         </>
       ) : (
         <>
           <CalendarPlus className="h-4 w-4 mr-2" />
-          {showLabel && <span>Zum Zeitplan</span>}
+          {showLabel && <span>Zum Stundenplan</span>}
         </>
       )}
     </Button>

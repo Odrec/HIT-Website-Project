@@ -352,7 +352,7 @@ export default function RoutePlannerPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Mein Zeitplan
+                Mein Stundenplan
                 {warningCount > 0 && (
                   <Badge variant="destructive">{warningCount} Warnung(en)</Badge>
                 )}
@@ -362,7 +362,7 @@ export default function RoutePlannerPage() {
               {state.items.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>Ihr Zeitplan ist leer.</p>
+                  <p>Ihr Stundenplan ist leer.</p>
                   <Button asChild className="mt-4" variant="outline">
                     <Link href="/events">Events durchsuchen</Link>
                   </Button>
@@ -501,7 +501,7 @@ export default function RoutePlannerPage() {
                         {googleMapsTruncated && (
                           <p className="text-xs text-muted-foreground italic px-1">
                             Google Maps unterstützt nur bis zu {GOOGLE_MAPS_MAX_STOPS} Stationen —
-                            nur die ersten {GOOGLE_MAPS_MAX_STOPS} Ihres Zeitplans werden
+                            nur die ersten {GOOGLE_MAPS_MAX_STOPS} Ihres Stundenplans werden
                             übernommen.
                           </p>
                         )}
@@ -511,7 +511,7 @@ export default function RoutePlannerPage() {
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/schedule">
                         <Calendar className="h-4 w-4 mr-2" />
-                        Zeitplan bearbeiten
+                        Stundenplan bearbeiten
                       </Link>
                     </Button>
                   </div>

@@ -209,11 +209,11 @@ export default function CampusMap({
                           }}
                         >
                           {building.campus === 'schloss'
-                            ? 'Schloss (Uni)'
+                            ? 'Schloss (Universität)'
                             : building.campus === 'westerberg'
-                              ? 'Westerberg (Uni)'
+                              ? 'Westerberg (Universität)'
                               : building.campus === 'caprivi'
-                                ? 'Caprivi (HS)'
+                                ? 'Caprivi (Hochschule)'
                                 : 'Sonstige'}
                         </span>
                         {building.hasAccessibility && (

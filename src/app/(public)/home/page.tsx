@@ -169,7 +169,7 @@ export default function HomePage() {
                     <MapPin className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-hit-gray-900">Campusplan</h3>
+                    <h3 className="font-medium text-hit-gray-900">Lageplan</h3>
                     <p className="text-sm text-hit-gray-600">Orientierung finden</p>
                   </div>
                 </CardContent>
@@ -220,7 +220,7 @@ export default function HomePage() {
                     variant="outline"
                     className="w-full text-hit-uni-700 border-hit-uni-300 hover:bg-hit-uni-50"
                   >
-                    Uni-Veranstaltungen
+                    Veranstaltungen der Universität
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -260,7 +260,7 @@ export default function HomePage() {
                     variant="outline"
                     className="w-full text-hit-hs-700 border-hit-hs-300 hover:bg-hit-hs-50"
                   >
-                    HS-Veranstaltungen
+                    Veranstaltungen der Hochschule
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>

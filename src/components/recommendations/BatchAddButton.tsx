@@ -107,7 +107,7 @@ export function BatchAddButton({ recommendations, onComplete }: BatchAddButtonPr
         <DialogHeader>
           <DialogTitle>Mehrere Veranstaltungen hinzufügen</DialogTitle>
           <DialogDescription>
-            Wähle die Veranstaltungen aus, die du zu deinem Zeitplan hinzufügen möchtest.
+            Wähle die Veranstaltungen aus, die du zu deinem Stundenplan hinzufügen möchtest.
           </DialogDescription>
         </DialogHeader>
 

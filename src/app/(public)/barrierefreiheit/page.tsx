@@ -44,11 +44,11 @@ export default function BarrierefreiheitPage() {
             <p>Die folgenden Inhalte sind aus den genannten Gründen nicht barrierefrei:</p>
             <ul>
               <li>
-                Die interaktive Campuskarte (Leaflet) ist möglicherweise nicht vollständig mit
+                Der interaktive Lageplan (Leaflet) ist möglicherweise nicht vollständig mit
                 Screenreadern bedienbar.
               </li>
               <li>
-                Der visuelle Zeitplan (Timeline-Ansicht) bietet eine alternative Listenansicht für
+                Der visuelle Stundenplan (Timeline-Ansicht) bietet eine alternative Listenansicht für
                 Screenreader-Nutzer.
               </li>
               <li>PDF-Dokumente sind möglicherweise nicht vollständig barrierefrei.</li>

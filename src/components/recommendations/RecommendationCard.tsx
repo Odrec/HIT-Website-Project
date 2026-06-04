@@ -164,7 +164,7 @@ export function RecommendationCard({
           {isScheduled ? (
             <Button variant="outline" size="sm" disabled className="flex-1">
               <CheckCircle className="h-4 w-4 mr-2" />
-              Im Zeitplan
+              Im Stundenplan
             </Button>
           ) : (
             <Button

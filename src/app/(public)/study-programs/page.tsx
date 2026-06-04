@@ -128,10 +128,10 @@ export default function StudyProgramsPage() {
           {/* Stats */}
           <div className="mt-8 flex flex-wrap gap-4">
             <div className="rounded-lg bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <span className="font-semibold">{uniCount}</span> Uni-Studiengänge
+              <span className="font-semibold">{uniCount}</span> Studiengänge der Universität
             </div>
             <div className="rounded-lg bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <span className="font-semibold">{hsCount}</span> HS-Studiengänge
+              <span className="font-semibold">{hsCount}</span> Studiengänge der Hochschule
             </div>
             <div className="rounded-lg bg-white/10 px-4 py-2 backdrop-blur-sm">
               <span className="font-semibold">{Object.keys(groupedPrograms).length}</span>{' '}

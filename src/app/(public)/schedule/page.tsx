@@ -138,7 +138,7 @@ function SchedulePageContent() {
       })
       .then(async (payload) => {
         toast({
-          title: 'Geteilter Zeitplan',
+          title: 'Geteilter Stundenplan',
           description: `${payload.eventIds.length} Veranstaltungen werden geladen...`,
         })
         await fetchSharedEvents(payload.eventIds, payload.editionId)
@@ -149,15 +149,15 @@ function SchedulePageContent() {
           })
         }
         toast({
-          title: 'Zeitplan geladen',
-          description: 'Der geteilte Zeitplan wurde erfolgreich geladen.',
+          title: 'Stundenplan geladen',
+          description: 'Der geteilte Stundenplan wurde erfolgreich geladen.',
         })
       })
       .catch(() => {
         toast({
           variant: 'destructive',
           title: 'Fehler',
-          description: 'Der geteilte Zeitplan konnte nicht geladen werden.',
+          description: 'Der geteilte Stundenplan konnte nicht geladen werden.',
         })
       })
       .finally(() => {
@@ -325,10 +325,10 @@ function SchedulePageContent() {
 
   const handleClearSchedule = () => {
     if (pastEdition) return
-    if (confirm('Möchtest du wirklich alle Events aus deinem Zeitplan entfernen?')) {
+    if (confirm('Möchtest du wirklich alle Events aus deinem Stundenplan entfernen?')) {
       clearSchedule()
       toast({
-        title: 'Zeitplan geleert',
+        title: 'Stundenplan geleert',
         description: 'Alle Events wurden entfernt.',
       })
     }
@@ -369,10 +369,10 @@ function SchedulePageContent() {
     // Generate iCal content
     let ical = 'BEGIN:VCALENDAR\r\n'
     ical += 'VERSION:2.0\r\n'
-    ical += 'PRODID:-//HIT Osnabrück//Zeitplan//DE\r\n'
+    ical += 'PRODID:-//HIT Osnabrück//Stundenplan//DE\r\n'
     ical += 'CALSCALE:GREGORIAN\r\n'
     ical += 'METHOD:PUBLISH\r\n'
-    ical += 'X-WR-CALNAME:HIT 2026 Zeitplan\r\n'
+    ical += 'X-WR-CALNAME:HIT 2026 Stundenplan\r\n'
 
     state.items.forEach((item) => {
       if (item.event.timeStart && item.event.timeEnd) {
@@ -419,7 +419,7 @@ function SchedulePageContent() {
 
     toast({
       title: 'Kalender exportiert',
-      description: 'Dein Zeitplan wurde als iCal-Datei exportiert.',
+      description: 'Dein Stundenplan wurde als iCal-Datei exportiert.',
     })
   }
 
@@ -454,7 +454,7 @@ function SchedulePageContent() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <Calendar className="h-8 w-8 text-primary" />
-              Mein Zeitplan
+              Mein Stundenplan
             </h1>
             <HelpLink href="/hilfe/besucher#stundenplan" />
           </div>
@@ -508,12 +508,12 @@ function SchedulePageContent() {
           className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 mb-6 print:hidden"
           role="note"
         >
-          So füllst du deinen Zeitplan: Öffne die{' '}
+          So füllst du deinen Stundenplan: Öffne die{' '}
           <Link href="/events" className="font-medium underline hover:no-underline">
             Veranstaltungssuche
           </Link>
           , wähle dort die Veranstaltungen aus, die dich interessieren, und füge sie über „Zum
-          Zeitplan hinzufügen“ hinzu. Sie erscheinen anschließend hier auf dieser Seite.
+          Stundenplan hinzufügen“ hinzu. Sie erscheinen anschließend hier auf dieser Seite.
         </div>
       )}
 
@@ -522,9 +522,9 @@ function SchedulePageContent() {
         <Card className="text-center py-16">
           <CardContent>
             <CalendarPlus className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Dein Zeitplan ist leer</h2>
+            <h2 className="text-xl font-semibold mb-2">Dein Stundenplan ist leer</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Durchsuche die Events und füge sie zu deinem persönlichen Zeitplan hinzu, um deinen
+              Durchsuche die Events und füge sie zu deinem persönlichen Stundenplan hinzu, um deinen
               HIT-Tag zu planen.
             </p>
             <Button asChild>
@@ -722,7 +722,7 @@ function SchedulePageContent() {
             onClick={() => setShowAnalysis(!showAnalysis)}
           >
             <BarChart3 className="h-4 w-4 mr-2" />
-            Zeitplan-Analyse
+            Stundenplan-Analyse
             {showAnalysis ? (
               <ChevronUp className="h-4 w-4 ml-2" />
             ) : (
@@ -844,7 +844,7 @@ function SchedulePageContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 print:hidden">
           <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Zeitplan teilen</h3>
+              <h3 className="text-lg font-semibold">Stundenplan teilen</h3>
               <Button variant="ghost" size="sm" onClick={() => setShareData(null)}>
                 <X className="h-4 w-4" />
               </Button>
@@ -880,7 +880,7 @@ function SchedulePageContent() {
       {/* Print-only full schedule */}
       <div className="hidden print:block print-schedule">
         <div className="text-center mb-6 pb-3 border-b-2 border-black">
-          <h2 className="text-xl font-bold m-0">Mein HIT 2026 Zeitplan</h2>
+          <h2 className="text-xl font-bold m-0">Mein HIT 2026 Stundenplan</h2>
           <p className="text-sm text-gray-600 m-0">
             Hochschulinfotag &mdash;{' '}
             {selectedDate ? formatEventDateDMY(selectedDate) : '19. November 2026'}

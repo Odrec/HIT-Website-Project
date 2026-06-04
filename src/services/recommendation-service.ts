@@ -296,7 +296,7 @@ export const recommendationService = {
         score += 10
         reasons.push({
           type: 'no_conflict',
-          description: 'Keine Überschneidung mit deinem Zeitplan',
+          description: 'Keine Überschneidung mit deinem Stundenplan',
           weight: 0.1,
         })
       }
@@ -320,7 +320,7 @@ export const recommendationService = {
         score += 5
         reasons.push({
           type: 'diversity',
-          description: 'Bietet Abwechslung zu deinem Zeitplan',
+          description: 'Bietet Abwechslung zu deinem Stundenplan',
           weight: 0.05,
         })
       }
@@ -839,7 +839,7 @@ export const recommendationService = {
         reasons: [
           {
             type: 'popularity' as const,
-            description: `${popularity?.addToScheduleCount || 0} Mal zum Zeitplan hinzugefügt`,
+            description: `${popularity?.addToScheduleCount || 0} Mal zum Stundenplan hinzugefügt`,
             weight: 1,
           },
         ],
