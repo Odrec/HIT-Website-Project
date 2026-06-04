@@ -2,24 +2,31 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
+  detectProximity,
   detectTravelWarnings,
   travelRouteKey,
   uniqueTravelPairs,
+  type ProximityMarker,
   type TravelRoute,
   type TravelWarning,
 } from '@/lib/schedule-travel'
 import type { ScheduleEvent } from '@/contexts/schedule-context'
 
+export interface ScheduleTravelInfo {
+  warnings: TravelWarning[]
+  proximity: ProximityMarker[]
+}
+
 /**
  * Fetches walking-route durations for the current schedule and returns the
  * list of consecutive event pairs whose gap is too short to walk between
- * different buildings.
+ * different buildings, plus proximity markers for close pairs.
  *
  * Routes are fetched lazily, on demand, and cached in component state — once
  * a pair is fetched it stays in memory for the page's lifetime so re-renders
  * don't refetch.
  */
-export function useScheduleTravelWarnings(items: ScheduleEvent[]): TravelWarning[] {
+export function useScheduleTravelWarnings(items: ScheduleEvent[]): ScheduleTravelInfo {
   const [routes, setRoutes] = useState<Map<string, TravelRoute>>(new Map())
 
   // Stable serialization of the pairs we need so the effect doesn't refire on
@@ -80,5 +87,12 @@ export function useScheduleTravelWarnings(items: ScheduleEvent[]): TravelWarning
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pairsKey])
 
-  return useMemo(() => detectTravelWarnings(items, routes), [items, routes])
+  return useMemo(() => {
+    const warnings = detectTravelWarnings(items, routes)
+    const warnedToIds = new Set(warnings.map((w) => w.toEvent.eventId))
+    const proximity = detectProximity(items, routes).filter(
+      (p) => !warnedToIds.has(p.toEvent.eventId)
+    )
+    return { warnings, proximity }
+  }, [items, routes])
 }
