@@ -29,9 +29,9 @@ export interface MelderRow {
   email: string
   telefon: string
   institution: string
-  fakultaet: string
-  fachbereich: string
+  organisationseinheit: string
   raum: string
+  adresse: string
   anzahlVeranstaltungen: number
 }
 
@@ -319,9 +319,9 @@ export const exportService = {
       email: m.email,
       telefon: m.phone ?? '',
       institution: formatInstitution(m.affiliation),
-      fakultaet: m.fakultaet ?? '',
-      fachbereich: m.fachbereich ?? '',
+      organisationseinheit: m.organisationseinheit ?? '',
       raum: m.room ?? '',
+      adresse: m.adresse ?? '',
       anzahlVeranstaltungen: m._count.events,
     }))
   },

@@ -39,7 +39,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Affiliation } from '@/types/events'
-import { affiliationLabels, MelderFormData } from '@/lib/validations/melder'
+import {
+  affiliationLabels,
+  organisationseinheitLabel,
+  MelderFormData,
+} from '@/lib/validations/melder'
 
 interface MelderUser {
   id: string
@@ -56,9 +60,9 @@ interface Melder {
   email: string
   phone: string | null
   affiliation: Affiliation
-  fakultaet: string | null
-  fachbereich: string | null
+  organisationseinheit: string | null
   room: string | null
+  adresse: string | null
   createdAt: string
   updatedAt: string
   user: MelderUser
@@ -79,9 +83,9 @@ const emptyFormData: MelderFormData = {
   email: '',
   phone: '',
   affiliation: 'UNI',
-  fakultaet: '',
-  fachbereich: '',
+  organisationseinheit: '',
   room: '',
+  adresse: '',
 }
 
 export default function MeldersPage() {
@@ -131,9 +135,9 @@ export default function MeldersPage() {
       email: melder.email,
       phone: melder.phone || '',
       affiliation: melder.affiliation,
-      fakultaet: melder.fakultaet || '',
-      fachbereich: melder.fachbereich || '',
+      organisationseinheit: melder.organisationseinheit || '',
       room: melder.room || '',
+      adresse: melder.adresse || '',
     })
     setDialogOpen(true)
   }
@@ -151,9 +155,9 @@ export default function MeldersPage() {
         email: formData.email.trim(),
         phone: formData.phone?.trim() || null,
         affiliation: formData.affiliation,
-        fakultaet: formData.fakultaet?.trim() || null,
-        fachbereich: formData.fachbereich?.trim() || null,
+        organisationseinheit: formData.organisationseinheit?.trim() || null,
         room: formData.room?.trim() || null,
+        adresse: formData.adresse?.trim() || null,
       }
       const response = await fetch('/api/melder/upsert', {
         method: 'POST',
@@ -257,8 +261,7 @@ export default function MeldersPage() {
                       <TableHead>Name</TableHead>
                       <TableHead>E-Mail</TableHead>
                       <TableHead>Zugehörigkeit</TableHead>
-                      <TableHead>Fakultät</TableHead>
-                      <TableHead>Fachbereich</TableHead>
+                      <TableHead>Fakultät/Fachbereich/Institution</TableHead>
                       <TableHead>Veranstaltungen</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
@@ -280,8 +283,7 @@ export default function MeldersPage() {
                             {affiliationLabels[melder.affiliation] ?? melder.affiliation}
                           </Badge>
                         </TableCell>
-                        <TableCell>{melder.fakultaet || '-'}</TableCell>
-                        <TableCell>{melder.fachbereich || '-'}</TableCell>
+                        <TableCell>{melder.organisationseinheit || '-'}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">{melder._count.events}</Badge>
                         </TableCell>
@@ -338,18 +340,27 @@ export default function MeldersPage() {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <p className="text-muted-foreground">{melder.email}</p>
-                  {melder.fakultaet && (
+                  {melder.organisationseinheit && (
                     <p>
-                      <span className="font-medium">Fakultät: </span>
-                      {melder.fakultaet}
+                      <span className="font-medium">
+                        {organisationseinheitLabel(melder.affiliation)}:{' '}
+                      </span>
+                      {melder.organisationseinheit}
                     </p>
                   )}
-                  {melder.fachbereich && (
-                    <p>
-                      <span className="font-medium">Fachbereich: </span>
-                      {melder.fachbereich}
-                    </p>
-                  )}
+                  {melder.affiliation === 'EXTERN'
+                    ? melder.adresse && (
+                        <p>
+                          <span className="font-medium">Adresse: </span>
+                          {melder.adresse}
+                        </p>
+                      )
+                    : melder.room && (
+                        <p>
+                          <span className="font-medium">Raum: </span>
+                          {melder.room}
+                        </p>
+                      )}
                   <div className="flex items-center gap-2 pt-1">
                     <span className="text-muted-foreground">Veranstaltungen:</span>
                     <Badge variant="secondary">{melder._count.events}</Badge>
@@ -474,29 +485,36 @@ export default function MeldersPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="melder-fakultaet">Fakultät</Label>
+                <Label htmlFor="melder-unit">
+                  {organisationseinheitLabel(formData.affiliation)}
+                </Label>
                 <Input
-                  id="melder-fakultaet"
-                  value={formData.fakultaet}
-                  onChange={(e) => setFormData({ ...formData, fakultaet: e.target.value })}
+                  id="melder-unit"
+                  value={formData.organisationseinheit}
+                  onChange={(e) =>
+                    setFormData({ ...formData, organisationseinheit: e.target.value })
+                  }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="melder-fachbereich">Fachbereich</Label>
-                <Input
-                  id="melder-fachbereich"
-                  value={formData.fachbereich}
-                  onChange={(e) => setFormData({ ...formData, fachbereich: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="melder-room">Raum</Label>
-              <Input
-                id="melder-room"
-                value={formData.room}
-                onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-              />
+              {formData.affiliation === 'EXTERN' ? (
+                <div className="space-y-2">
+                  <Label htmlFor="melder-adresse">Adresse</Label>
+                  <Input
+                    id="melder-adresse"
+                    value={formData.adresse}
+                    onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="melder-room">Raum</Label>
+                  <Input
+                    id="melder-room"
+                    value={formData.room}
+                    onChange={(e) => setFormData({ ...formData, room: e.target.value })}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

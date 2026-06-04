@@ -357,9 +357,13 @@ model Melder {
   email       String
   phone       String?
   affiliation Affiliation
-  fakultaet   String?
-  fachbereich String?
-  room        String?
+  // Single organizational-unit field, relabelled per affiliation in the UI
+  // (Fakultät for Hochschule, Fachbereich for Universität, Institution for
+  // Beide/Extern). Replaces the former fakultaet/fachbereich pair.
+  organisationseinheit String?
+  room                 String?
+  // Used instead of room when affiliation is EXTERN (external organisers).
+  adresse              String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   events      Event[]

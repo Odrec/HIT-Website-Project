@@ -33,9 +33,9 @@ const baseBody = {
   email: 'anja.siemer@zsb.os.de',
   phone: null,
   affiliation: 'UNI',
-  fakultaet: null,
-  fachbereich: null,
+  organisationseinheit: null,
   room: null,
+  adresse: null,
 }
 
 function makeRequest(body: unknown) {

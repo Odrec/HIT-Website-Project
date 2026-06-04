@@ -11,9 +11,9 @@ export const melderFormSchema = z.object({
   affiliation: z.enum(affiliationValues, {
     message: 'Zugehörigkeit ist erforderlich',
   }),
-  fakultaet: z.string().max(200).optional().or(z.literal('')),
-  fachbereich: z.string().max(200).optional().or(z.literal('')),
+  organisationseinheit: z.string().max(200).optional().or(z.literal('')),
   room: z.string().max(100).optional().or(z.literal('')),
+  adresse: z.string().max(300).optional().or(z.literal('')),
 })
 
 export type MelderFormData = z.infer<typeof melderFormSchema>
@@ -23,4 +23,20 @@ export const affiliationLabels: Record<string, string> = {
   HOCHSCHULE: 'Hochschule',
   BEIDE: 'Beide',
   EXTERN: 'Extern',
+}
+
+/**
+ * Label for the single organizational-unit field, which depends on the
+ * selected affiliation: Fakultät at the Hochschule, Fachbereich at the
+ * Universität, Institution otherwise.
+ */
+export function organisationseinheitLabel(affiliation: string): string {
+  switch (affiliation) {
+    case 'HOCHSCHULE':
+      return 'Fakultät / Institution'
+    case 'UNI':
+      return 'Fachbereich / Institution'
+    default:
+      return 'Institution'
+  }
 }

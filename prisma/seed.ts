@@ -230,8 +230,7 @@ async function main() {
       email: 'thomas.mueller@uni-osnabrueck.de',
       phone: '+49 541 969-2480',
       affiliation: Affiliation.UNI,
-      fakultaet: 'Mathematik/Informatik',
-      fachbereich: 'Institut für Informatik',
+      organisationseinheit: 'Fachbereich Mathematik/Informatik',
       room: '69/325',
     },
   })

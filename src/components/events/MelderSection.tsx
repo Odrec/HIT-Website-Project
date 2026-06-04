@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { affiliationLabels } from '@/lib/validations/melder'
+import { affiliationLabels, organisationseinheitLabel } from '@/lib/validations/melder'
 
 export interface MelderData {
   firstName: string
@@ -20,9 +20,9 @@ export interface MelderData {
   email: string
   phone: string
   affiliation: string
-  fakultaet: string
-  fachbereich: string
+  organisationseinheit: string
   room: string
+  adresse: string
 }
 
 export const defaultMelderData: MelderData = {
@@ -32,9 +32,9 @@ export const defaultMelderData: MelderData = {
   email: '',
   phone: '',
   affiliation: '',
-  fakultaet: '',
-  fachbereich: '',
+  organisationseinheit: '',
   room: '',
+  adresse: '',
 }
 
 interface MelderSectionProps {
@@ -72,9 +72,9 @@ export function MelderSection({
       email?: string | null
       phone?: string | null
       affiliation?: string | null
-      fakultaet?: string | null
-      fachbereich?: string | null
+      organisationseinheit?: string | null
       room?: string | null
+      adresse?: string | null
     }) => {
       onChange({
         firstName: melder.firstName || '',
@@ -83,9 +83,9 @@ export function MelderSection({
         email: melder.email || '',
         phone: melder.phone || '',
         affiliation: melder.affiliation || '',
-        fakultaet: melder.fakultaet || '',
-        fachbereich: melder.fachbereich || '',
+        organisationseinheit: melder.organisationseinheit || '',
         room: melder.room || '',
+        adresse: melder.adresse || '',
       })
     }
 
@@ -232,34 +232,40 @@ export function MelderSection({
             </Select>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Fakultät</Label>
-            <Input
-              value={value.fakultaet}
-              onChange={(e) => updateField('fakultaet', e.target.value)}
-              readOnly={readOnly}
-            />
+        {/* The organizational-unit field is relabelled by affiliation, and
+            external organisers get an address instead of a room. The fields
+            only appear once an affiliation has been chosen. */}
+        {value.affiliation && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>{organisationseinheitLabel(value.affiliation)}</Label>
+              <Input
+                value={value.organisationseinheit}
+                onChange={(e) => updateField('organisationseinheit', e.target.value)}
+                readOnly={readOnly}
+              />
+            </div>
+            {value.affiliation === 'EXTERN' ? (
+              <div className="space-y-1.5">
+                <Label>Adresse</Label>
+                <Input
+                  value={value.adresse}
+                  onChange={(e) => updateField('adresse', e.target.value)}
+                  readOnly={readOnly}
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <Label>Raum</Label>
+                <Input
+                  value={value.room}
+                  onChange={(e) => updateField('room', e.target.value)}
+                  readOnly={readOnly}
+                />
+              </div>
+            )}
           </div>
-          <div className="space-y-1.5">
-            <Label>Fachbereich</Label>
-            <Input
-              value={value.fachbereich}
-              onChange={(e) => updateField('fachbereich', e.target.value)}
-              readOnly={readOnly}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Raum</Label>
-            <Input
-              value={value.room}
-              onChange={(e) => updateField('room', e.target.value)}
-              readOnly={readOnly}
-            />
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   )
