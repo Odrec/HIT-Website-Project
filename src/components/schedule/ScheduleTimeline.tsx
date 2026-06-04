@@ -236,12 +236,33 @@ export function ScheduleTimeline({
       {/* Event header */}
       <div className="flex items-start justify-between gap-1">
         <div className="flex-grow min-w-0">
-          <Badge
-            variant="outline"
-            className={cn('text-xs mb-1', eventTypeColors[item.scheduleEvent.event.eventType])}
-          >
-            {eventTypeLabels[item.scheduleEvent.event.eventType]}
-          </Badge>
+          <div className="mb-1 flex flex-wrap items-center gap-1">
+            <Badge
+              variant="outline"
+              className={cn('text-xs', eventTypeColors[item.scheduleEvent.event.eventType])}
+            >
+              {eventTypeLabels[item.scheduleEvent.event.eventType]}
+            </Badge>
+            {/* Priority — single compact badge at the top so it stays visible
+                even on short cards; click cycles Hoch → Mittel → Niedrig. The
+                full radiogroup lives in the list view. */}
+            {showControls && !compact && (
+              <button
+                type="button"
+                onClick={() =>
+                  cyclePriority(item.scheduleEvent.eventId, item.scheduleEvent.priority)
+                }
+                title="Priorität ändern (Hoch / Mittel / Niedrig)"
+                aria-label={`Priorität: ${SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]} – klicken zum Ändern`}
+                className={cn(
+                  'inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-colors hover:opacity-80',
+                  PRIORITY_BADGE_CLASS[item.scheduleEvent.priority]
+                )}
+              >
+                Prio: {SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]}
+              </button>
+            )}
+          </div>
           <Link
             href={`/events/${item.scheduleEvent.event.id}`}
             className="group/link"
@@ -322,24 +343,6 @@ export function ScheduleTimeline({
         </div>
       )}
 
-      {/* Priority — single compact badge, always shown, click cycles
-          Hoch → Mittel → Niedrig (the full radiogroup lives in the list view). */}
-      {showControls && !compact && (
-        <div className="mt-auto pt-2">
-          <button
-            type="button"
-            onClick={() => cyclePriority(item.scheduleEvent.eventId, item.scheduleEvent.priority)}
-            title="Priorität ändern (Hoch / Mittel / Niedrig)"
-            aria-label={`Priorität: ${SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]} – klicken zum Ändern`}
-            className={cn(
-              'inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium leading-tight transition-colors hover:opacity-80',
-              PRIORITY_BADGE_CLASS[item.scheduleEvent.priority]
-            )}
-          >
-            Prio: {SCHEDULE_PRIORITY_LABELS[item.scheduleEvent.priority]}
-          </button>
-        </div>
-      )}
     </CardContent>
   )
 
