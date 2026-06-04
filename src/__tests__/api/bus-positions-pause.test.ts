@@ -5,14 +5,21 @@ vi.mock('@/services/shuttle-service', () => ({
   validateGuideToken: vi.fn(),
   setBusPause: vi.fn(),
   resumeBus: vi.fn(),
+  getGuideBusState: vi.fn(),
 }))
 
-import { POST } from '@/app/api/bus-positions/pause/route'
-import { validateGuideToken, setBusPause, resumeBus } from '@/services/shuttle-service'
+import { GET, POST } from '@/app/api/bus-positions/pause/route'
+import {
+  validateGuideToken,
+  setBusPause,
+  resumeBus,
+  getGuideBusState,
+} from '@/services/shuttle-service'
 
 const mockValidate = vi.mocked(validateGuideToken)
 const mockSet = vi.mocked(setBusPause)
 const mockResume = vi.mocked(resumeBus)
+const mockGetState = vi.mocked(getGuideBusState)
 
 const req = (body: unknown, auth = 'Bearer valid') =>
   new NextRequest('http://localhost/api/bus-positions/pause', {
@@ -22,6 +29,41 @@ const req = (body: unknown, auth = 'Bearer valid') =>
   })
 
 const bus = { id: 'bus1', number: 1, name: 'Bus 1', active: true }
+
+describe('GET /api/bus-positions/pause', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const getReq = (auth?: string) =>
+    new NextRequest('http://localhost/api/bus-positions/pause', {
+      headers: auth ? { Authorization: auth } : {},
+    })
+
+  it('401 without auth header', async () => {
+    expect((await GET(getReq())).status).toBe(401)
+  })
+
+  it('401 with invalid token', async () => {
+    mockGetState.mockResolvedValue(null)
+    expect((await GET(getReq('Bearer bad'))).status).toBe(401)
+  })
+
+  it('returns busName + pause state for a valid token', async () => {
+    mockGetState.mockResolvedValue({
+      busName: 'Bus 1',
+      paused: true,
+      pausedUntil: '2026-11-19T12:00:00.000Z',
+    })
+    const res = await GET(getReq('Bearer valid'))
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data).toMatchObject({
+      ok: true,
+      busName: 'Bus 1',
+      paused: true,
+      pausedUntil: '2026-11-19T12:00:00.000Z',
+    })
+  })
+})
 
 describe('POST /api/bus-positions/pause', () => {
   beforeEach(() => vi.clearAllMocks())

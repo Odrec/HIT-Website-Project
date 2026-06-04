@@ -19,6 +19,28 @@ export async function validateGuideToken(token: string) {
   return bus
 }
 
+/**
+ * Current state for a guide's bus (by token): name + live pause state. Used by
+ * the guide page on mount to re-hydrate the pause UI after a reload.
+ */
+export async function getGuideBusState(token: string) {
+  const bus = await prisma.shuttleBus.findUnique({
+    where: { token },
+    select: {
+      name: true,
+      active: true,
+      pausedUntil: true,
+      pausedIndefinitely: true,
+    },
+  })
+  if (!bus || !bus.active) return null
+  return {
+    busName: bus.name,
+    paused: isBusPaused(bus),
+    pausedUntil: bus.pausedUntil ? bus.pausedUntil.toISOString() : null,
+  }
+}
+
 export async function updateBusPosition(busId: string, position: BusPositionUpdate) {
   await prisma.busPosition.upsert({
     where: { busId },

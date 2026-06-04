@@ -51,17 +51,12 @@ function GuideTrackingContent() {
     tokenRef.current = token
   }, [token])
 
-  // Validate token on mount
+  // Validate token + re-hydrate pause state on mount (survives a page reload).
   useEffect(() => {
     if (!token) return
 
-    fetch('/api/bus-positions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({}),
+    fetch('/api/bus-positions/pause', {
+      headers: { Authorization: `Bearer ${token}` },
     }).then(async (res) => {
       if (res.status === 401) {
         setError('Ungültiger Link. Bitte kontaktieren Sie den Admin für einen neuen QR-Code.')
@@ -69,9 +64,19 @@ function GuideTrackingContent() {
       } else if (res.ok) {
         const data = await res.json()
         if (data.busName) setBusName(data.busName)
+        if (data.paused) setOpPause({ until: data.pausedUntil ?? null })
       }
     })
   }, [token])
+
+  // Auto-clear a timed pause in the guide UI when its end time passes, so the
+  // guide isn't left on the "Pause bis …" screen after the window elapses.
+  useEffect(() => {
+    if (!opPause?.until) return
+    const ms = new Date(opPause.until).getTime() - Date.now()
+    const timer = setTimeout(() => setOpPause(null), Math.max(0, ms))
+    return () => clearTimeout(timer)
+  }, [opPause])
 
   const resetHeartbeat = useCallback(() => {
     setHeartbeatWarning(false)

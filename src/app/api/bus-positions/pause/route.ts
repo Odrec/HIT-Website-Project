@@ -1,5 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateGuideToken, setBusPause, resumeBus } from '@/services/shuttle-service'
+import {
+  validateGuideToken,
+  setBusPause,
+  resumeBus,
+  getGuideBusState,
+} from '@/services/shuttle-service'
+
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const state = await getGuideBusState(authHeader.slice(7))
+    if (!state) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ ok: true, ...state })
+  } catch (error) {
+    console.error('Error fetching guide bus state:', error)
+    return NextResponse.json({ error: 'Failed to fetch state' }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
