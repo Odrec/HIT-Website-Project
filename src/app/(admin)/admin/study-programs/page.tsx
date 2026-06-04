@@ -155,6 +155,18 @@ export default function StudyProgramsPage() {
     )
   })
 
+  // Only offer the Studienfelder that belong to the program's institution
+  // (cross-institution "BOTH" clusters always fit). Prevents mis-assigning a
+  // Uni programme to a Hochschule field and vice versa.
+  const clusterFitsInstitution = (
+    cluster: Cluster,
+    institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+  ) => institution === 'BOTH' || cluster.institution === 'BOTH' || cluster.institution === institution
+
+  const visibleClusters = clusters.filter((c) =>
+    clusterFitsInstitution(c, programFormData.institution)
+  )
+
   // Study Program handlers
   const openCreateProgramDialog = () => {
     setEditingProgram(null)
@@ -601,7 +613,16 @@ export default function StudyProgramsPage() {
               <Select
                 value={programFormData.institution}
                 onValueChange={(value: 'UNI' | 'HOCHSCHULE' | 'BOTH') =>
-                  setProgramFormData({ ...programFormData, institution: value })
+                  setProgramFormData((prev) => ({
+                    ...prev,
+                    institution: value,
+                    // Drop any selected Studienfeld that no longer fits the
+                    // newly chosen institution.
+                    clusterIds: prev.clusterIds.filter((id) => {
+                      const c = clusters.find((cl) => cl.id === id)
+                      return !c || clusterFitsInstitution(c, value)
+                    }),
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -649,12 +670,12 @@ export default function StudyProgramsPage() {
                 jedem.
               </p>
               <div className="space-y-2 rounded-md border p-3">
-                {clusters.length === 0 ? (
+                {visibleClusters.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    Noch keine Studienfelder vorhanden
+                    Keine Studienfelder für diese Institution vorhanden
                   </p>
                 ) : (
-                  clusters.map((cluster) => {
+                  visibleClusters.map((cluster) => {
                     const checked = programFormData.clusterIds.includes(cluster.id)
                     return (
                       <label
