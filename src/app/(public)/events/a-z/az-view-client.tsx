@@ -55,6 +55,7 @@ export function AZViewClient() {
             key={t.value}
             variant={filter === t.value ? 'default' : 'outline'}
             size="sm"
+            aria-pressed={filter === t.value}
             onClick={() => setFilter(t.value)}
           >
             {t.label}

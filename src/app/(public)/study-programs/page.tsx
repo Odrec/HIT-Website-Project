@@ -247,13 +247,14 @@ export default function StudyProgramsPage() {
                             </Link>
                             {program.links.length > 0 && (
                               <div className="flex flex-shrink-0 items-center gap-1.5">
-                                {program.links.map((link, i) => (
+                                {program.links.map((link) => (
                                   <a
-                                    key={i}
+                                    key={link.url}
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-muted-foreground hover:text-green-700"
+                                    aria-label={`${link.label} – ${program.name}`}
                                     title={link.label}
                                   >
                                     <ExternalLink className="h-4 w-4" />
