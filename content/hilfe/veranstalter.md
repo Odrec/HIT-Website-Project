@@ -8,7 +8,7 @@ Melden Sie sich über die Schaltfläche **„Anmelden"** oben rechts mit Ihren Z
 
 ## Veranstaltung erstellen
 
-Klicken Sie im Admin-Bereich auf **Veranstaltungen → Neue Veranstaltung**. Füllen Sie die Felder aus: Titel, Beschreibung, Datum und Uhrzeit, Veranstaltungsort und Kategorie. Speichern Sie die Veranstaltung — Sie erhalten eine Bestätigung per E-Mail.
+Klicken Sie im Admin-Bereich auf **Veranstaltungen → Neue Veranstaltung**. Füllen Sie die Felder aus: Titel, Beschreibung, Uhrzeit, Veranstaltungsort, Veranstaltungstyp und Institution. Das **Datum** ist durch die aktive HIT-Edition vorgegeben und muss nicht eingetragen werden. Speichern Sie die Veranstaltung — Sie erhalten eine Bestätigung per E-Mail.
 
 ## Veranstaltung bearbeiten
 

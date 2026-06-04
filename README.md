@@ -26,14 +26,14 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | Feature | Description |
 |---------|-------------|
 | **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Studienfeld tiles open an intermediate programs list at `/events/cluster/[id]` (mirroring the old zsb-os.de pattern); the "Alle Veranstaltungen dieses Studienfelds anzeigen" CTA from there links to `/events/cluster/[id]/all`. Other entries open their own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
-| **Schedule Builder** | Create personalized event schedules with conflict detection, travel-time warnings, 3-level priority labels (Hoch/Mittel/Niedrig), QR code/short link sharing, Google Calendar integration |
+| **Merkliste & Schedule Builder** | Loose **Merkliste** (watchlist) to collect events before committing, then a personal **Stundenplan** with conflict detection, travel-time + spatial-proximity warnings, 3-level priority labels (Hoch/Mittel/Niedrig), QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |
-| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page, visitors see live markers and official Zeichen 224 bus stop icons on campus map |
+| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page (with a timed "Pause bis …" status), visitors see live markers and official Zeichen 224 bus stop icons on the campus map |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
 | **Admin Interface** | Manage events, programs, locations, users, room assignments, and site settings (HIT date, submission deadline) |
 | **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
-| **Data Export** | Excel exports (8 views), CSV import/export, PDF program booklet, HTML backup, iCal export |
+| **Data Export** | Excel exports (per-view sheets — A-Z, time, room, Studiengang, Melder, Dozierende, Infomärkte — plus a combined workbook with an overview sheet first), CSV import/export, PDF program booklet with table of contents, HTML backup, iCal export |
 | **Email Notifications** | Automatic email to HIT team on event create/edit with change detection |
 | **Analytics** | Cookieless Matomo tracking with custom events (schedule, search, filters) |
 | **Legal Pages** | Impressum, Datenschutz (with Matomo disclosure), Barrierefreiheit (BITV 2.0) |
