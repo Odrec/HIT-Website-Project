@@ -6,7 +6,11 @@ const ev = (
   opts: {
     cross?: boolean
     time?: string | null
-    clusters?: Array<{ name: string; institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'; sortOrder: number }>
+    clusters?: Array<{
+      name: string
+      institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
+      sortOrder: number
+    }>
   } = {}
 ) => ({
   id,
@@ -16,7 +20,11 @@ const ev = (
 })
 
 const uni = (name: string, sortOrder: number) => ({ name, institution: 'UNI' as const, sortOrder })
-const hs = (name: string, sortOrder: number) => ({ name, institution: 'HOCHSCHULE' as const, sortOrder })
+const hs = (name: string, sortOrder: number) => ({
+  name,
+  institution: 'HOCHSCHULE' as const,
+  sortOrder,
+})
 
 describe('groupEventsForBooklet', () => {
   it('separates cross-program events', () => {
