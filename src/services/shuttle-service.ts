@@ -1,6 +1,14 @@
 import { prisma } from '@/lib/db/prisma'
 import type { BusPositionUpdate, BusPositionResponse } from '@/types/shuttle'
 
+export function isBusPaused(
+  bus: { pausedUntil: Date | null; pausedIndefinitely: boolean },
+  now: number = Date.now()
+): boolean {
+  if (bus.pausedIndefinitely) return true
+  return bus.pausedUntil != null && bus.pausedUntil.getTime() > now
+}
+
 export async function validateGuideToken(token: string) {
   const bus = await prisma.shuttleBus.findUnique({
     where: { token },
@@ -51,6 +59,8 @@ export async function getAllBusPositions(): Promise<BusPositionResponse[]> {
       speed: bus.position!.speed,
       updatedAt: bus.position!.updatedAt.toISOString(),
       stale: now - bus.position!.updatedAt.getTime() > STALE_THRESHOLD_MS,
+      paused: isBusPaused(bus, now),
+      pausedUntil: bus.pausedUntil ? bus.pausedUntil.toISOString() : null,
     }))
 }
 
@@ -91,5 +101,22 @@ export async function toggleShuttleBus(id: string, active: boolean) {
   return prisma.shuttleBus.update({
     where: { id },
     data: { active },
+  })
+}
+
+export async function setBusPause(
+  id: string,
+  { until, indefinite }: { until: Date | null; indefinite: boolean }
+) {
+  return prisma.shuttleBus.update({
+    where: { id },
+    data: { pausedUntil: until, pausedIndefinitely: indefinite },
+  })
+}
+
+export async function resumeBus(id: string) {
+  return prisma.shuttleBus.update({
+    where: { id },
+    data: { pausedUntil: null, pausedIndefinitely: false },
   })
 }

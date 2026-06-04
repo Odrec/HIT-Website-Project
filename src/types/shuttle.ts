@@ -18,6 +18,8 @@ export interface BusPositionResponse {
   speed: number | null
   updatedAt: string
   stale: boolean
+  paused: boolean
+  pausedUntil: string | null
 }
 
 export interface BusPositionsResponse {
@@ -38,6 +40,8 @@ export interface ShuttleBusAdmin {
   number: number
   token: string
   active: boolean
+  pausedUntil: string | null
+  pausedIndefinitely: boolean
   position: {
     latitude: number
     longitude: number
