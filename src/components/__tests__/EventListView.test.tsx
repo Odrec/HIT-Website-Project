@@ -2,9 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { EventListView } from '../events/EventListView'
 
-// AddToScheduleButton requires ScheduleProvider context — mock it away for unit tests
+// AddToScheduleButton / WatchlistButton require ScheduleProvider context — mock them away for unit tests
 vi.mock('@/components/schedule/AddToScheduleButton', () => ({
   AddToScheduleButton: () => null,
+}))
+vi.mock('@/components/schedule/WatchlistButton', () => ({
+  WatchlistButton: () => null,
 }))
 
 const mockFetch = vi.fn()
