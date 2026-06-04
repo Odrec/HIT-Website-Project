@@ -68,9 +68,11 @@ const LECTURER_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'Titel', key: 'titel', width: 15 },
   { header: 'E-Mail', key: 'email', width: 30 },
   { header: 'Institution', key: 'institution', width: 15 },
-  { header: 'Veranstaltung', key: 'veranstaltung', width: 35 },
-  { header: 'Gebäude', key: 'gebaeude', width: 20 },
-  { header: 'Raum', key: 'raum', width: 15 },
+  { header: 'Studiengänge', key: 'studiengaenge', width: 40 },
+  { header: 'Studienfeld', key: 'studienfeld', width: 30 },
+  { header: 'Fakultät/Fachbereich', key: 'organisationseinheit', width: 30 },
+  { header: 'Raum', key: 'raum', width: 18 },
+  { header: 'Anz. Veranstaltungen', key: 'anzahlVeranstaltungen', width: 20 },
 ]
 
 const INFOMARKT_COLUMNS: Partial<ExcelJS.Column>[] = [

@@ -40,9 +40,11 @@ export interface LecturerRow {
   titel: string
   email: string
   institution: string
-  veranstaltung: string
-  gebaeude: string
+  studiengaenge: string
+  studienfeld: string
+  organisationseinheit: string
   raum: string
+  anzahlVeranstaltungen: number
 }
 
 export interface InfomarktRow {
@@ -244,6 +246,86 @@ export function groupEventsByProgram<T extends ProgramGroupable>(
   return sorted
 }
 
+type LecturerRecord = {
+  firstName: string
+  lastName: string
+  title: string | null
+  email: string | null
+  affiliation: Affiliation | null
+  event: {
+    id: string
+    melder: { organisationseinheit: string | null } | null
+    room: { name: string } | null
+    building: { name: string } | null
+    studyPrograms: { studyProgram: { name: string; clusters: { name: string }[] } }[]
+  }
+}
+
+/** Dedupe lecturer-per-event records into one row per person (email, else name+title). */
+export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
+  type Acc = {
+    firstName: string
+    lastName: string
+    title: string | null
+    email: string | null
+    affiliation: Affiliation | null
+    programs: Set<string>
+    clusters: Set<string>
+    rooms: Set<string>
+    eventIds: Set<string>
+    organisationseinheit: string
+  }
+  const byPerson = new Map<string, Acc>()
+
+  for (const r of records) {
+    const key = r.email
+      ? `email:${r.email.toLowerCase()}`
+      : `name:${r.firstName}|${r.lastName}|${r.title ?? ''}`
+    let acc = byPerson.get(key)
+    if (!acc) {
+      acc = {
+        firstName: r.firstName,
+        lastName: r.lastName,
+        title: r.title,
+        email: r.email,
+        affiliation: r.affiliation,
+        programs: new Set(),
+        clusters: new Set(),
+        rooms: new Set(),
+        eventIds: new Set(),
+        organisationseinheit: '',
+      }
+      byPerson.set(key, acc)
+    }
+    acc.eventIds.add(r.event.id)
+    if (!acc.organisationseinheit && r.event.melder?.organisationseinheit) {
+      acc.organisationseinheit = r.event.melder.organisationseinheit
+    }
+    const roomName = r.event.room?.name
+    if (roomName) acc.rooms.add(roomName)
+    for (const sp of r.event.studyPrograms) {
+      acc.programs.add(sp.studyProgram.name)
+      for (const c of sp.studyProgram.clusters) acc.clusters.add(c.name)
+    }
+  }
+
+  const join = (s: Set<string>) => Array.from(s).sort((a, b) => a.localeCompare(b, 'de')).join(', ')
+
+  return Array.from(byPerson.values())
+    .map((acc) => ({
+      name: [acc.firstName, acc.lastName].filter(Boolean).join(' '),
+      titel: acc.title ?? '',
+      email: acc.email ?? '',
+      institution: acc.affiliation ? formatInstitution(acc.affiliation) : '',
+      studiengaenge: join(acc.programs),
+      studienfeld: join(acc.clusters),
+      organisationseinheit: acc.organisationseinheit,
+      raum: join(acc.rooms),
+      anzahlVeranstaltungen: acc.eventIds.size,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
+}
+
 // ---------------------------------------------------------------------------
 // Shared data fetching
 // ---------------------------------------------------------------------------
@@ -398,32 +480,25 @@ export const exportService = {
   },
 
   /**
-   * All Lecturer records with their event's building/room.
+   * All Lecturer records aggregated per person with org-unit from Melder.
    */
   async lecturers(): Promise<LecturerRow[]> {
     const editionId = await getActiveEditionId()
-    const lecturers = await prisma.lecturer.findMany({
+    const records = await prisma.lecturer.findMany({
       where: { event: { editionId, reviewStatus: 'PUBLISHED' } },
       include: {
         event: {
           include: {
+            melder: true,
             building: true,
             room: { include: { building: true } },
+            studyPrograms: { include: { studyProgram: { include: { clusters: true } } } },
           },
         },
       },
       orderBy: { lastName: 'asc' },
     })
-
-    return lecturers.map((l) => ({
-      name: [l.firstName, l.lastName].filter(Boolean).join(' '),
-      titel: l.title ?? '',
-      email: l.email ?? '',
-      institution: l.affiliation ? formatInstitution(l.affiliation) : '',
-      veranstaltung: l.event.title,
-      gebaeude: l.event.building?.name ?? l.event.room?.building?.name ?? '',
-      raum: l.event.room?.name ?? '',
-    }))
+    return aggregateLecturers(records)
   },
 
   /**
