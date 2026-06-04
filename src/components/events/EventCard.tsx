@@ -176,26 +176,26 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           )}
 
           <CardHeader className="pb-2">
-            {/* Study Programs - PRIMARY, displayed large */}
+            {/* Title - primary, prominent */}
+            <h3 className="line-clamp-2 text-base font-semibold leading-tight text-hit-gray-900">
+              {event.title}
+            </h3>
+
+            {/* Study Programs - secondary, smaller */}
             {event.studyPrograms.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="mt-1 flex flex-wrap gap-1.5">
                 {event.studyPrograms.slice(0, 2).map((sp) => (
-                  <span key={sp.id} className="text-sm font-semibold text-hit-uni-600">
+                  <span key={sp.id} className="text-xs font-medium text-hit-uni-600">
                     {sp.name}
                   </span>
                 ))}
                 {event.studyPrograms.length > 2 && (
-                  <span className="text-sm font-semibold text-hit-gray-400">
+                  <span className="text-xs font-medium text-hit-gray-400">
                     +{event.studyPrograms.length - 2} weitere
                   </span>
                 )}
               </div>
             )}
-
-            {/* Title - secondary, smaller */}
-            <h3 className="mt-1 line-clamp-2 text-sm text-hit-gray-700 leading-tight">
-              {event.title}
-            </h3>
 
             <div className="mt-2 flex flex-wrap gap-1.5">
               <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
@@ -265,13 +265,16 @@ export function EventCard({ event, viewMode }: EventCardProps) {
 
           {/* Main Content */}
           <div className="flex-1 p-4 sm:p-6">
-            {/* Study Programs - PRIMARY, displayed prominently */}
+            {/* Title - primary, prominent */}
+            <h3 className="text-lg font-semibold text-hit-gray-900">{event.title}</h3>
+
+            {/* Study Programs - secondary, smaller */}
             {event.studyPrograms.length > 0 && (
-              <div className="flex items-start gap-2">
-                <GraduationCap className="mt-0.5 h-5 w-5 flex-shrink-0 text-hit-uni-500" />
+              <div className="mt-1 flex items-start gap-1.5">
+                <GraduationCap className="mt-0.5 h-4 w-4 flex-shrink-0 text-hit-uni-500" />
                 <div className="flex flex-wrap gap-x-2 gap-y-0.5">
                   {event.studyPrograms.map((sp, i) => (
-                    <span key={sp.id} className="text-base font-semibold text-hit-uni-700">
+                    <span key={sp.id} className="text-sm font-medium text-hit-uni-600">
                       {sp.name}
                       {i < event.studyPrograms.length - 1 ? ',' : ''}
                     </span>
@@ -279,9 +282,6 @@ export function EventCard({ event, viewMode }: EventCardProps) {
                 </div>
               </div>
             )}
-
-            {/* Title - secondary, smaller */}
-            <h3 className="mt-1 text-sm text-hit-gray-700">{event.title}</h3>
 
             <div className="mt-2 flex flex-wrap items-start gap-2">
               <Badge className={cn('text-xs', eventTypeColors[event.eventType])}>
