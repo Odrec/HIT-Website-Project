@@ -154,6 +154,48 @@ function eventToRow(event: EventWithRelations): EventRow {
 }
 
 // ---------------------------------------------------------------------------
+// Pure ordering / grouping helpers (exported for unit testing)
+// ---------------------------------------------------------------------------
+
+type SortableEvent = {
+  timeStart: Date | string | null
+  studyPrograms: { studyProgram: { name: string; clusters: { name: string }[] } }[]
+}
+
+function timeValue(t: Date | string | null): number {
+  if (!t) return Number.POSITIVE_INFINITY
+  const ms = new Date(t).getTime()
+  return Number.isNaN(ms) ? Number.POSITIVE_INFINITY : ms
+}
+
+/** Alphabetically-first Studienfeld (cluster) name across the event's programs. */
+export function firstClusterName(e: SortableEvent): string {
+  const names = e.studyPrograms
+    .flatMap((sp) => sp.studyProgram.clusters.map((c) => c.name))
+    .sort((a, b) => a.localeCompare(b, 'de'))
+  return names[0] ?? ''
+}
+
+/** Alphabetically-first Studiengang (program) name for the event. */
+export function firstProgramName(e: SortableEvent): string {
+  const names = e.studyPrograms
+    .map((sp) => sp.studyProgram.name)
+    .sort((a, b) => a.localeCompare(b, 'de'))
+  return names[0] ?? ''
+}
+
+/** Sort comparator: time asc (nulls last), then Studienfeld, then Studiengang. */
+export function compareByTimeClusterProgram(a: SortableEvent, b: SortableEvent): number {
+  const ta = timeValue(a.timeStart)
+  const tb = timeValue(b.timeStart)
+  if (ta !== tb) return ta - tb
+  const ca = firstClusterName(a)
+  const cb = firstClusterName(b)
+  if (ca !== cb) return ca.localeCompare(cb, 'de')
+  return firstProgramName(a).localeCompare(firstProgramName(b), 'de')
+}
+
+// ---------------------------------------------------------------------------
 // Shared data fetching
 // ---------------------------------------------------------------------------
 
@@ -187,13 +229,8 @@ export const exportService = {
    * All events sorted by timeStart, returned as flat rows.
    */
   async eventsByTime(): Promise<EventRow[]> {
-    const editionId = await getActiveEditionId()
-    const events = await prisma.event.findMany({
-      where: { editionId, reviewStatus: 'PUBLISHED' },
-      include: eventInclude,
-      orderBy: { timeStart: 'asc' },
-    })
-    return events.map(eventToRow)
+    const events = await fetchAllEvents()
+    return [...events].sort(compareByTimeClusterProgram).map(eventToRow)
   },
 
   /**
