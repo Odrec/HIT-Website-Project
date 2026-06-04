@@ -48,8 +48,8 @@ export default function BarrierefreiheitPage() {
                 Screenreadern bedienbar.
               </li>
               <li>
-                Der visuelle Stundenplan (Timeline-Ansicht) bietet eine alternative Listenansicht für
-                Screenreader-Nutzer.
+                Der visuelle Stundenplan (Timeline-Ansicht) bietet eine alternative Listenansicht
+                für Screenreader-Nutzer.
               </li>
               <li>PDF-Dokumente sind möglicherweise nicht vollständig barrierefrei.</li>
             </ul>

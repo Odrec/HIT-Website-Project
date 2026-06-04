@@ -170,9 +170,9 @@ function RecommendationsPageContent() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 <p>
-                  Deine Interessen und dein Stundenplan werden nur lokal in deinem Browser gespeichert.
-                  Es werden keine persönlichen Daten an den Server übermittelt — die Empfehlungen
-                  werden anhand anonymer Kriterien berechnet.
+                  Deine Interessen und dein Stundenplan werden nur lokal in deinem Browser
+                  gespeichert. Es werden keine persönlichen Daten an den Server übermittelt — die
+                  Empfehlungen werden anhand anonymer Kriterien berechnet.
                 </p>
               </CardContent>
             </Card>

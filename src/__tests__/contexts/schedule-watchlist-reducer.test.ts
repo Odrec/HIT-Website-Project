@@ -56,7 +56,9 @@ describe('scheduleReducer — watchlist', () => {
   it('REMOVE_WATCHLIST and CLEAR_WATCHLIST empty the list', () => {
     const e = makeScheduleEvent(makeEvent())
     const added = scheduleReducer(initialState, { type: 'ADD_WATCHLIST', payload: e })
-    expect(scheduleReducer(added, { type: 'REMOVE_WATCHLIST', payload: e.eventId }).watchlist).toHaveLength(0)
+    expect(
+      scheduleReducer(added, { type: 'REMOVE_WATCHLIST', payload: e.eventId }).watchlist
+    ).toHaveLength(0)
     expect(scheduleReducer(added, { type: 'CLEAR_WATCHLIST' }).watchlist).toHaveLength(0)
   })
 
