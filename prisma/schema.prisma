@@ -467,7 +467,9 @@ model ShuttleBus {
   name      String // e.g. "Bus 1"
   number    Int          @unique
   token     String       @unique
-  active    Boolean      @default(true)
+  active             Boolean      @default(true)
+  pausedUntil        DateTime?
+  pausedIndefinitely Boolean      @default(false)
   position  BusPosition?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
