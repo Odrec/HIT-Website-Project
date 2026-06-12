@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { auth } from '@/auth'
 import { normalizeLinksInput } from '@/lib/study-program-links'
+import { normalizeLehramtInput } from '@/lib/lehramt'
 import { invalidateProgramCaches } from '@/lib/cache/cache-utils'
 
 interface RouteParams {
@@ -76,20 +77,38 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const links = normalizeLinksInput(body.links)
 
+    const lehramt = normalizeLehramtInput(body, id)
+    if (!lehramt.ok) {
+      return NextResponse.json({ error: lehramt.error }, { status: 400 })
+    }
+
     const program = await prisma.studyProgram.update({
       where: { id },
       data: {
         name: body.name,
         institution: body.institution,
+        lehramtTyp: lehramt.value.lehramtTyp,
+        isBeruflicheFachrichtung: lehramt.value.isBeruflicheFachrichtung,
         clusters: { set: clusterIds.map((cid) => ({ id: cid })) },
         links: {
           deleteMany: {},
           create: links,
         },
+        unterrichtsfaecher: {
+          deleteMany: {},
+          create: lehramt.value.unterrichtsfachIds.map((fachId, i) => ({
+            fachId,
+            sortOrder: i,
+          })),
+        },
       },
       include: {
         clusters: true,
         links: { orderBy: { sortOrder: 'asc' } },
+        unterrichtsfaecher: {
+          include: { fach: { select: { id: true, name: true } } },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
     })
 

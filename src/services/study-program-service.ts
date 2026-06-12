@@ -16,6 +16,10 @@ export const studyProgramService = {
       include: {
         clusters: true,
         links: { orderBy: { sortOrder: 'asc' } },
+        unterrichtsfaecher: {
+          include: { fach: { select: { id: true, name: true } } },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
       orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
