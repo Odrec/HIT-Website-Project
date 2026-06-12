@@ -49,6 +49,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { LEHRAMT_TYP_LABELS, LEHRAMT_TYP_VALUES } from '@/lib/lehramt'
 
 interface Cluster {
   id: string
@@ -64,6 +65,9 @@ interface StudyProgram {
   institution: 'UNI' | 'HOCHSCHULE' | 'BOTH'
   links: Array<{ label: string; url: string }>
   clusters: Cluster[]
+  lehramtTyp: 'GRUND_HAUPT_REAL' | 'GYMNASIUM' | 'BERUFSBILDEND' | null
+  isBeruflicheFachrichtung: boolean
+  unterrichtsfaecher: Array<{ fach: { id: string; name: string } }>
   createdAt: string
   updatedAt: string
 }
@@ -96,6 +100,9 @@ export default function StudyProgramsPage() {
     institution: 'UNI' as 'UNI' | 'HOCHSCHULE' | 'BOTH',
     links: [] as Array<{ label: string; url: string }>,
     clusterIds: [] as string[],
+    lehramtTyp: '' as '' | 'GRUND_HAUPT_REAL' | 'GYMNASIUM' | 'BERUFSBILDEND',
+    isBeruflicheFachrichtung: false,
+    unterrichtsfachIds: [] as string[],
   })
 
   // Cluster Dialog
@@ -173,6 +180,9 @@ export default function StudyProgramsPage() {
       institution: 'UNI',
       links: [],
       clusterIds: [],
+      lehramtTyp: '',
+      isBeruflicheFachrichtung: false,
+      unterrichtsfachIds: [],
     })
     setProgramDialogOpen(true)
   }
@@ -184,6 +194,9 @@ export default function StudyProgramsPage() {
       institution: program.institution,
       links: program.links.map((l) => ({ label: l.label, url: l.url })),
       clusterIds: program.clusters.map((c) => c.id),
+      lehramtTyp: program.lehramtTyp ?? '',
+      isBeruflicheFachrichtung: program.isBeruflicheFachrichtung,
+      unterrichtsfachIds: (program.unterrichtsfaecher ?? []).map((u) => u.fach.id),
     })
     setProgramDialogOpen(true)
   }
@@ -200,6 +213,9 @@ export default function StudyProgramsPage() {
           .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
           .filter((l) => l.url),
         clusterIds: programFormData.clusterIds,
+        lehramtTyp: programFormData.lehramtTyp || null,
+        isBeruflicheFachrichtung: programFormData.isBeruflicheFachrichtung,
+        unterrichtsfachIds: programFormData.unterrichtsfachIds,
       }
 
       const url = editingProgram
@@ -759,6 +775,92 @@ export default function StudyProgramsPage() {
                   })
                 )}
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lehramtTyp">Lehramt</Label>
+              <p className="text-xs text-muted-foreground">
+                Klassifiziert den Studiengang für die Lehramt-Seite. Bei Lehramt an berufsbildenden
+                Schulen kann der Studiengang zusätzlich als berufliche Fachrichtung markiert werden.
+              </p>
+              <Select
+                value={programFormData.lehramtTyp || 'NONE'}
+                onValueChange={(value: string) =>
+                  setProgramFormData((prev) => ({
+                    ...prev,
+                    lehramtTyp: value === 'NONE' ? '' : (value as typeof prev.lehramtTyp),
+                    // Fachrichtung + Unterrichtsfächer only make sense for BBS
+                    ...(value !== 'BERUFSBILDEND'
+                      ? { isBeruflicheFachrichtung: false, unterrichtsfachIds: [] }
+                      : {}),
+                  }))
+                }
+              >
+                <SelectTrigger id="lehramtTyp">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">Kein Lehramt</SelectItem>
+                  {LEHRAMT_TYP_VALUES.map((typ) => (
+                    <SelectItem key={typ} value={typ}>
+                      {LEHRAMT_TYP_LABELS[typ]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {programFormData.lehramtTyp === 'BERUFSBILDEND' && (
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={programFormData.isBeruflicheFachrichtung}
+                    onChange={(e) =>
+                      setProgramFormData((prev) => ({
+                        ...prev,
+                        isBeruflicheFachrichtung: e.target.checked,
+                        ...(e.target.checked ? {} : { unterrichtsfachIds: [] }),
+                      }))
+                    }
+                  />
+                  <span>Berufliche Fachrichtung</span>
+                </label>
+              )}
+              {programFormData.lehramtTyp === 'BERUFSBILDEND' &&
+                programFormData.isBeruflicheFachrichtung && (
+                  <div className="space-y-2">
+                    <Label>Allgemeinbildende Unterrichtsfächer</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Fächer, die mit dieser Fachrichtung kombiniert werden können.
+                    </p>
+                    <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border p-3">
+                      {studyPrograms
+                        .filter((p) => p.id !== editingProgram?.id && !p.isBeruflicheFachrichtung)
+                        .map((p) => {
+                          const checked = programFormData.unterrichtsfachIds.includes(p.id)
+                          return (
+                            <label
+                              key={p.id}
+                              className="flex cursor-pointer items-center gap-2 text-sm"
+                            >
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4"
+                                checked={checked}
+                                onChange={(e) =>
+                                  setProgramFormData((prev) => ({
+                                    ...prev,
+                                    unterrichtsfachIds: e.target.checked
+                                      ? [...prev.unterrichtsfachIds, p.id]
+                                      : prev.unterrichtsfachIds.filter((id) => id !== p.id),
+                                  }))
+                                }
+                              />
+                              <span>{p.name}</span>
+                            </label>
+                          )
+                        })}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
           <DialogFooter>

@@ -9,6 +9,7 @@ import { cacheGet, cacheSet, invalidateProgramCaches } from '@/lib/cache/cache-u
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
 import { normalizeLinksInput } from '@/lib/study-program-links'
+import { normalizeLehramtInput } from '@/lib/lehramt'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
@@ -104,20 +105,39 @@ export async function POST(request: NextRequest) {
 
     const links = normalizeLinksInput(body.links)
 
+    const lehramt = normalizeLehramtInput(body)
+    if (!lehramt.ok) {
+      return NextResponse.json({ error: lehramt.error }, { status: 400 })
+    }
+
     const program = await prisma.studyProgram.create({
       data: {
         name: body.name,
         institution: body.institution,
+        lehramtTyp: lehramt.value.lehramtTyp,
+        isBeruflicheFachrichtung: lehramt.value.isBeruflicheFachrichtung,
         ...(clusterIds.length > 0 && {
           clusters: { connect: clusterIds.map((id) => ({ id })) },
         }),
         ...(links.length > 0 && {
           links: { create: links },
         }),
+        ...(lehramt.value.unterrichtsfachIds.length > 0 && {
+          unterrichtsfaecher: {
+            create: lehramt.value.unterrichtsfachIds.map((fachId, i) => ({
+              fachId,
+              sortOrder: i,
+            })),
+          },
+        }),
       },
       include: {
         clusters: true,
         links: { orderBy: { sortOrder: 'asc' } },
+        unterrichtsfaecher: {
+          include: { fach: { select: { id: true, name: true } } },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
     })
 

@@ -152,28 +152,30 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Lehramt combined filter — union of UNI "Lehramt" and HS "Lehramt an berufsbildenden Schulen".
-    // NOTE: clusters are looked up by exact name. If either name is changed in the seed/admin,
-    // update both sides here too — otherwise the filter silently returns zero results.
+    // Lehramt filters — based on StudyProgram.lehramtTyp (no more fragile
+    // exact-name cluster lookup).
+    // lehramtCombined=true  → any event of any Lehramt program.
+    // lehramtTyp=<enum>     → events of programs with that sub-field;
+    //   excludeFachrichtungen=true additionally drops berufliche
+    //   Fachrichtungen (used for the BBS general section).
     const lehramtCombined = searchParams.get('lehramtCombined')
     if (lehramtCombined === 'true') {
-      const lehramtClusters = await prisma.studyProgramCluster.findMany({
-        where: {
-          OR: [
-            { institution: 'UNI', name: 'Lehramt' },
-            { institution: 'HOCHSCHULE', name: 'Lehramt an berufsbildenden Schulen' },
-          ],
+      where.AND.push({
+        studyPrograms: {
+          some: { studyProgram: { lehramtTyp: { not: null } } },
         },
-        select: { id: true },
       })
-      const lehramtIds = lehramtClusters.map((c) => c.id)
+    }
+
+    const lehramtTyp = searchParams.get('lehramtTyp')
+    if (lehramtTyp && ['GRUND_HAUPT_REAL', 'GYMNASIUM', 'BERUFSBILDEND'].includes(lehramtTyp)) {
+      const excludeFachrichtungen = searchParams.get('excludeFachrichtungen') === 'true'
       where.AND.push({
         studyPrograms: {
           some: {
             studyProgram: {
-              clusters: {
-                some: { id: { in: lehramtIds } },
-              },
+              lehramtTyp: lehramtTyp as 'GRUND_HAUPT_REAL' | 'GYMNASIUM' | 'BERUFSBILDEND',
+              ...(excludeFachrichtungen ? { isBeruflicheFachrichtung: false } : {}),
             },
           },
         },

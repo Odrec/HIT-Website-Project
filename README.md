@@ -25,7 +25,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 
 | Feature | Description |
 |---------|-------------|
-| **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Studienfeld tiles open an intermediate programs list at `/events/cluster/[id]` (mirroring the old zsb-os.de pattern); the "Alle Veranstaltungen dieses Studienfelds anzeigen" CTA from there links to `/events/cluster/[id]/all`. Other entries open their own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
+| **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Studienfeld tiles open an intermediate programs list at `/events/cluster/[id]` (mirroring the old zsb-os.de pattern); the "Alle Veranstaltungen dieses Studienfelds anzeigen" CTA from there links to `/events/cluster/[id]/all`. The Lehramt page mirrors the old zsb-os.de structure: an intro text followed by accordions for the sub-fields (Grund-, Haupt- und Realschulen, Gymnasien, berufsbildende Schulen) — including one accordion per berufliche Fachrichtung with its events, external program links, and combinable allgemeinbildende Unterrichtsfächer. Other entries open their own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
 | **Merkliste & Schedule Builder** | Loose **Merkliste** (watchlist) to collect events before committing, then a personal **Stundenplan** with conflict detection, travel-time + spatial-proximity warnings, 3-level priority labels (Hoch/Mittel/Niedrig), QR code/short link sharing, Google Calendar integration |
 | **Study Navigator** | AI-powered study program recommendations using OpenAI/Gemini/vLLM |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |
@@ -265,7 +265,7 @@ After running the seed script:
 | Endpoint | Method | Description | Cache |
 |----------|--------|-------------|-------|
 | `/api/health` | GET | Liveness check for the container healthcheck | No |
-| `/api/events/public` | GET | List all public events (paginated). Supports `clusterId` and `lehramtCombined=true` filters used by event sub-routes | 5 min |
+| `/api/events/public` | GET | List all public events (paginated). Supports `clusterId`, `lehramtCombined=true` (any program with a `lehramtTyp`), `lehramtTyp=<enum>`, and `excludeFachrichtungen=true` filters used by event sub-routes | 5 min |
 | `/api/events/public/[id]` | GET | Get single event details | 5 min |
 | `/api/clusters` | GET | List `StudyProgramCluster` rows grouped by institution (`{ uni: [...], hochschule: [...] }`) | No |
 | `/api/multiplikator-cafe` | GET | Currently configured Multiplikator\*innen-Café event id from the active edition (`{ eventId: string \| null }`) | No |

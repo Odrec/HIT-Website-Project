@@ -34,6 +34,8 @@ Hinweis: Melder, die noch mit aktiven Veranstaltungen verknüpft sind, lassen si
 
 Verwalten Sie die Studiengangsliste unter **Studiengänge**. Jeder Eintrag enthält Name, Institution (Universität/Hochschule), die Zuordnung zu Studienfeldern und **einen oder mehrere benannte Links** zu den offiziellen Seiten (z. B. Fach, 2-Fächer-Bachelor, BEU, Lehramt). Beim Zuordnen werden nur die Studienfelder der gewählten Institution angeboten.
 
+Im Dialog finden Sie außerdem einen Block **Lehramt**: Wählen Sie über den **Lehramt-Typ**, ob der Studiengang zu *Kein Lehramt*, *Lehramt an Grund-, Haupt- und Realschulen*, *Lehramt an Gymnasien* oder *Lehramt an berufsbildenden Schulen* gehört. Nur bei *Lehramt an berufsbildenden Schulen* erscheint die Checkbox **Berufliche Fachrichtung**; ist sie gesetzt, können Sie über die Liste **Allgemeinbildende Unterrichtsfächer** auswählen, mit welchen allgemeinbildenden Fächern die Fachrichtung kombinierbar ist. Diese Klassifikation steuert, in welchem Bereich der öffentlichen Lehramt-Seite der Studiengang und seine Veranstaltungen erscheinen.
+
 ## Studienfelder (Cluster)
 
 Die Studienfelder sind in zwei Gruppen aufgeteilt: **Universität** (6 Cluster, inkl. Lehramt) und **Hochschule** (7 Cluster). Beim Anlegen eines neuen Clusters müssen Sie über das Pflichtfeld **Institution** angeben, zu welcher Hochschule das Cluster gehört (`UNI` oder `HOCHSCHULE`) — die öffentliche Einstiegsseite zeigt die beiden Gruppen getrennt mit Farbakzent (Uni-Rot, HS-Blau). Die Studiengänge werden den Clustern in der Studiengangs-Verwaltung zugeordnet.
