@@ -189,10 +189,27 @@ async function main() {
     prisma.studyProgram.create({ data: { name: 'Musik/Musikwissenschaft (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[4].id }] } } }),
     prisma.studyProgram.create({ data: { name: 'Textiles Gestalten (B.A.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[4].id }] } } }),
     // Lehramt
-    prisma.studyProgram.create({ data: { name: 'Lehramt Grundschule', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Haupt-/Realschule', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Gymnasium', institution: Institution.UNI, clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Grundschule', institution: Institution.UNI, lehramtTyp: 'GRUND_HAUPT_REAL', clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Haupt-/Realschule', institution: Institution.UNI, lehramtTyp: 'GRUND_HAUPT_REAL', clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt Gymnasium', institution: Institution.UNI, lehramtTyp: 'GYMNASIUM', clusters: { connect: [{ id: clusters[5].id }] } } }),
   ])
+
+  // Berufliche Fachrichtung sample with allgemeinbildende Unterrichtsfächer
+  await prisma.studyProgram.create({
+    data: {
+      name: 'Ökotrophologie (Berufliche Bildung)',
+      institution: Institution.UNI,
+      lehramtTyp: 'BERUFSBILDEND',
+      isBeruflicheFachrichtung: true,
+      clusters: { connect: [{ id: clusters[5].id }] },
+      unterrichtsfaecher: {
+        create: [
+          { fachId: studyPrograms[15].id, sortOrder: 0 }, // Germanistik/Deutsch
+          { fachId: studyPrograms[16].id, sortOrder: 1 }, // Anglistik/Englisch
+        ],
+      },
+    },
+  })
 
   // ==========================================================================
   // Create Information Markets
