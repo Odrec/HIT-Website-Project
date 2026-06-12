@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import React from 'react'
-import ReactPDF from '@react-pdf/renderer'
+import ReactPDF, { type TextProps } from '@react-pdf/renderer'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { auth } from '@/auth'
@@ -209,6 +209,23 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginBottom: 2,
   },
+  tocRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 2,
+  },
+  tocRowLeader: {
+    flex: 1,
+    borderBottomWidth: 0.5,
+    borderBottomColor: LIGHT_GRAY,
+    borderBottomStyle: 'dotted',
+    marginHorizontal: 4,
+    marginBottom: 2,
+  },
+  tocPageNumber: {
+    fontSize: 10,
+    color: DARK_GRAY,
+  },
   institutionLabel: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 9,
@@ -348,6 +365,201 @@ function pageFooter() {
   })
 }
 
+/**
+ * Invisible marker whose render callback reports the page number this
+ * element landed on. Used in pass 1 to learn each section's start page;
+ * kept in pass 2 (callback absent) so both passes lay out identically.
+ */
+function pageMarker(key: string, collect?: (key: string, page: number) => void) {
+  return h(Text, {
+    key: `marker-${key}`,
+    style: { fontSize: 0.1 },
+    render: ({ pageNumber }: { pageNumber: number }) => {
+      collect?.(key, pageNumber)
+      return ''
+    },
+  })
+}
+
+/** One TOC line: title, dotted leader, page number (blank in pass 1). */
+function tocRow(
+  key: string,
+  title: string,
+  style: TextProps['style'],
+  tocPages: Record<string, number> | null
+) {
+  const page = tocPages?.[key]
+  return h(
+    View,
+    { style: styles.tocRow, key: `toc-${key}` },
+    h(Text, { style }, title),
+    h(View, { style: styles.tocRowLeader }),
+    h(Text, { style: styles.tocPageNumber }, page ? String(page) : '')
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Document assembly
+// ---------------------------------------------------------------------------
+
+function buildDoc(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: { clusterGroups: any[]; crossProgram: any[]; infoMarkets: any[] },
+  logos: { uos: string; hs: string },
+  tocPages: Record<string, number> | null,
+  collect?: (key: string, page: number) => void
+): React.ReactElement {
+  const { clusterGroups, crossProgram, infoMarkets } = data
+
+  // Group cluster groups into institution sections, preserving order.
+  const sections: { label: string; groups: typeof clusterGroups }[] = []
+  for (const g of clusterGroups) {
+    const label = institutionLabel(g.institution)
+    let section = sections.find((s) => s.label === label)
+    if (!section) {
+      section = { label, groups: [] }
+      sections.push(section)
+    }
+    section.groups.push(g)
+  }
+
+  const contentPages: React.ReactElement[] = []
+
+  // --- Table of contents ---
+  const tocChildren: React.ReactElement[] = [
+    h(Text, { style: styles.tocHeading, key: 'toc-h' }, 'Inhaltsverzeichnis'),
+  ]
+  if (crossProgram.length > 0) {
+    tocChildren.push(
+      tocRow('rund-ums-studium', 'Rund ums Studium', styles.tocSectionLabel, tocPages)
+    )
+  }
+  for (const section of sections) {
+    tocChildren.push(
+      h(Text, { style: styles.tocSectionLabel, key: `toc-sec-${section.label}` }, section.label)
+    )
+    for (const g of section.groups) {
+      tocChildren.push(
+        tocRow(`cluster-${section.label}-${g.name}`, g.name, styles.tocItem, tocPages)
+      )
+    }
+  }
+  if (infoMarkets.length > 0) {
+    tocChildren.push(tocRow('infomaerkte', 'Infomärkte', styles.tocSectionLabel, tocPages))
+  }
+  tocChildren.push(tocRow('links', 'Nützliche Links', styles.tocSectionLabel, tocPages))
+
+  contentPages.push(
+    h(
+      Page,
+      { size: 'A4', style: styles.page, key: 'toc', bookmark: 'Inhaltsverzeichnis' },
+      ...tocChildren,
+      pageFooter()
+    )
+  )
+
+  // --- Rund ums Studium (cross-program) ---
+  if (crossProgram.length > 0) {
+    contentPages.push(
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'rund-ums-studium', bookmark: 'Rund ums Studium' },
+        pageMarker('rund-ums-studium', collect),
+        h(Text, { style: styles.sectionHeader }, 'Rund ums Studium'),
+        renderTwoColumnEvents(crossProgram),
+        pageFooter()
+      )
+    )
+  }
+
+  // --- Institution sections → Studienfeld pages ---
+  for (const section of sections) {
+    for (const g of section.groups) {
+      contentPages.push(
+        h(
+          Page,
+          {
+            size: 'A4',
+            style: styles.page,
+            key: `cluster-${section.label}-${g.name}`,
+            bookmark: `${section.label}: ${g.name}`,
+          },
+          pageMarker(`cluster-${section.label}-${g.name}`, collect),
+          h(Text, { style: styles.institutionLabel }, section.label),
+          h(Text, { style: styles.clusterHeader }, g.name),
+          renderTwoColumnEvents(g.events),
+          pageFooter()
+        )
+      )
+    }
+  }
+
+  // --- Info markets ---
+  if (infoMarkets.length > 0) {
+    contentPages.push(
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'info-markets', bookmark: 'Infomärkte' },
+        pageMarker('infomaerkte', collect),
+        h(Text, { style: styles.sectionHeader }, 'Infomärkte'),
+        ...infoMarkets.map((market) =>
+          h(
+            View,
+            { style: styles.infoMarketEntry, key: market.id },
+            h(Text, { style: styles.infoMarketName }, market.name),
+            h(Text, { style: styles.infoMarketLocation }, market.location)
+          )
+        ),
+        pageFooter()
+      )
+    )
+  }
+
+  // --- Links ---
+  contentPages.push(
+    h(
+      Page,
+      { size: 'A4', style: styles.page, key: 'links', bookmark: 'Nützliche Links' },
+      pageMarker('links', collect),
+      h(Text, { style: styles.sectionHeader }, 'Nützliche Links'),
+      h(Text, { style: styles.linkText }, 'www.zsb-os.de'),
+      h(Text, { style: styles.linkText }, 'www.uni-osnabrueck.de'),
+      h(Text, { style: styles.linkText }, 'www.hs-osnabrueck.de'),
+      pageFooter()
+    )
+  )
+
+  // -- Assemble document --
+
+  return h(
+    Document,
+    null,
+    // Cover page
+    h(
+      Page,
+      { size: 'A4', style: styles.page, key: 'cover' },
+      h(
+        View,
+        { style: styles.coverContainer },
+        h(
+          View,
+          { style: styles.logoRow },
+          h(PDFImage, { src: logos.uos, style: { height: 30 } }),
+          h(PDFImage, { src: logos.hs, style: { height: 30 } }),
+          h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung')
+        ),
+        h(Text, { style: styles.coverTitle }, 'Hochschulinfotag'),
+        h(Text, { style: styles.coverSubtitle }, 'Programm'),
+        h(Text, { style: styles.coverDate }, '19. November 2026'),
+        h(Text, { style: styles.coverFooter }, 'www.zsb-os.de')
+      ),
+      pageFooter()
+    ),
+    // Content pages
+    ...contentPages
+  )
+}
+
 // ---------------------------------------------------------------------------
 // GET handler
 // ---------------------------------------------------------------------------
@@ -364,163 +576,26 @@ export async function GET() {
     const uosLogoBase64 = `data:image/svg+xml;base64,${readFileSync(uosLogoPath).toString('base64')}`
     const hsLogoBase64 = `data:image/svg+xml;base64,${readFileSync(hsLogoPath).toString('base64')}`
 
-    const { clusterGroups, crossProgram, infoMarkets } = await exportService.eventsForBooklet()
+    const data = await exportService.eventsForBooklet()
+    const logos = { uos: uosLogoBase64, hs: hsLogoBase64 }
 
-    // Group cluster groups into institution sections, preserving order.
-    const sections: { label: string; groups: typeof clusterGroups }[] = []
-    for (const g of clusterGroups) {
-      const label = institutionLabel(g.institution)
-      let section = sections.find((s) => s.label === label)
-      if (!section) {
-        section = { label, groups: [] }
-        sections.push(section)
-      }
-      section.groups.push(g)
+    // Pass 1: discover which page each section starts on. First write wins
+    // in case react-pdf evaluates a render callback more than once.
+    const sectionPages: Record<string, number> = {}
+    const collect = (key: string, page: number) => {
+      if (!(key in sectionPages)) sectionPages[key] = page
     }
-
-    const contentPages: React.ReactElement[] = []
-
-    // --- Table of contents (outline, no page numbers) ---
-    const tocChildren: React.ReactElement[] = [
-      h(Text, { style: styles.tocHeading, key: 'toc-h' }, 'Inhaltsverzeichnis'),
-    ]
-    if (crossProgram.length > 0) {
-      tocChildren.push(
-        h(Text, { style: styles.tocSectionLabel, key: 'toc-rus' }, 'Rund ums Studium')
-      )
-    }
-    for (const section of sections) {
-      tocChildren.push(
-        h(Text, { style: styles.tocSectionLabel, key: `toc-sec-${section.label}` }, section.label)
-      )
-      for (const g of section.groups) {
-        tocChildren.push(
-          h(Text, { style: styles.tocItem, key: `toc-item-${section.label}-${g.name}` }, g.name)
-        )
-      }
-    }
-    if (infoMarkets.length > 0) {
-      tocChildren.push(h(Text, { style: styles.tocSectionLabel, key: 'toc-im' }, 'Infom\u00E4rkte'))
-    }
-    tocChildren.push(
-      h(Text, { style: styles.tocSectionLabel, key: 'toc-links' }, 'N\u00FCtzliche Links')
-    )
-
-    contentPages.push(
-      h(
-        Page,
-        { size: 'A4', style: styles.page, key: 'toc', bookmark: 'Inhaltsverzeichnis' },
-        ...tocChildren,
-        pageFooter()
-      )
-    )
-
-    // --- Rund ums Studium (cross-program) ---
-    if (crossProgram.length > 0) {
-      contentPages.push(
-        h(
-          Page,
-          { size: 'A4', style: styles.page, key: 'rund-ums-studium', bookmark: 'Rund ums Studium' },
-          h(Text, { style: styles.sectionHeader }, 'Rund ums Studium'),
-          renderTwoColumnEvents(crossProgram),
-          pageFooter()
-        )
-      )
-    }
-
-    // --- Institution sections \u2192 Studienfeld pages ---
-    for (const section of sections) {
-      for (const g of section.groups) {
-        contentPages.push(
-          h(
-            Page,
-            {
-              size: 'A4',
-              style: styles.page,
-              key: `cluster-${section.label}-${g.name}`,
-              bookmark: `${section.label}: ${g.name}`,
-            },
-            h(Text, { style: styles.institutionLabel }, section.label),
-            h(Text, { style: styles.clusterHeader }, g.name),
-            renderTwoColumnEvents(g.events),
-            pageFooter()
-          )
-        )
-      }
-    }
-
-    // --- Info markets ---
-    if (infoMarkets.length > 0) {
-      contentPages.push(
-        h(
-          Page,
-          { size: 'A4', style: styles.page, key: 'info-markets', bookmark: 'Infom\u00E4rkte' },
-          h(Text, { style: styles.sectionHeader }, 'Infom\u00E4rkte'),
-          ...infoMarkets.map((market) =>
-            h(
-              View,
-              { style: styles.infoMarketEntry, key: market.id },
-              h(Text, { style: styles.infoMarketName }, market.name),
-              h(Text, { style: styles.infoMarketLocation }, market.location)
-            )
-          ),
-          pageFooter()
-        )
-      )
-    }
-
-    // --- Links ---
-    contentPages.push(
-      h(
-        Page,
-        { size: 'A4', style: styles.page, key: 'links', bookmark: 'N\u00FCtzliche Links' },
-        h(Text, { style: styles.sectionHeader }, 'N\u00FCtzliche Links'),
-        h(Text, { style: styles.linkText }, 'www.zsb-os.de'),
-        h(Text, { style: styles.linkText }, 'www.uni-osnabrueck.de'),
-        h(Text, { style: styles.linkText }, 'www.hs-osnabrueck.de'),
-        pageFooter()
-      )
-    )
-
-    // -- Assemble document --
-
-    const doc = h(
-      Document,
-      null,
-      // Cover page
-      h(
-        Page,
-        { size: 'A4', style: styles.page, key: 'cover' },
-        h(
-          View,
-          { style: styles.coverContainer },
-          h(
-            View,
-            { style: styles.logoRow },
-            h(PDFImage, { src: uosLogoBase64, style: { height: 30 } }),
-            h(PDFImage, { src: hsLogoBase64, style: { height: 30 } }),
-            h(Text, { style: styles.logoZSB }, 'Zentrale Studienberatung')
-          ),
-          h(Text, { style: styles.coverTitle }, 'Hochschulinfotag'),
-          h(Text, { style: styles.coverSubtitle }, 'Programm'),
-          h(Text, { style: styles.coverDate }, '19. November 2026'),
-          h(Text, { style: styles.coverFooter }, 'www.zsb-os.de')
-        ),
-        h(Text, {
-          style: styles.pageFooter,
-          render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-            `Seite ${pageNumber} / ${totalPages}`,
-          fixed: true,
-        })
-      ),
-      // Content pages
-      ...contentPages
-    )
-
-    // -- Render to buffer --
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfStream = await ReactPDF.renderToStream(doc as any)
+    const passOneStream = await ReactPDF.renderToStream(buildDoc(data, logos, null, collect) as any)
+    for await (const _chunk of passOneStream) {
+      // drain \u2014 pass 1 output is discarded
+    }
+
+    // Pass 2: same document with the discovered page numbers in the TOC.
+    // TOC rows have identical height with and without numbers, so
+    // pagination does not shift between passes.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pdfStream = await ReactPDF.renderToStream(buildDoc(data, logos, sectionPages) as any)
     const chunks: Uint8Array[] = []
     for await (const chunk of pdfStream) {
       chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)

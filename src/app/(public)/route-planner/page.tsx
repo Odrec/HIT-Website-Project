@@ -540,7 +540,7 @@ export default function RoutePlannerPage() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <MapIcon className="h-5 w-5" />
-                    Campus Karte
+                    Lageplan
                   </CardTitle>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Button

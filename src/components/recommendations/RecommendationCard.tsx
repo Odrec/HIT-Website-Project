@@ -136,15 +136,20 @@ export function RecommendationCard({
           </div>
         )}
 
-        {/* Match Reasons */}
-        <div className="space-y-1">
-          {reasons.slice(0, 3).map((reason, idx) => (
-            <div key={idx} className="flex items-center text-sm text-green-700">
-              <Star className="h-3 w-3 mr-2 text-green-500" />
-              {reason.description}
-            </div>
-          ))}
-        </div>
+        {/* Match Reasons — why this event is recommended */}
+        {reasons.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Empfehlung basiert auf:
+            </p>
+            {reasons.slice(0, 3).map((reason, idx) => (
+              <div key={idx} className="flex items-center text-sm text-green-700">
+                <Star className="h-3 w-3 mr-2 text-green-500" />
+                {reason.description}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Study Programs */}
         {event.studyPrograms && event.studyPrograms.length > 0 && (

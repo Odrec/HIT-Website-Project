@@ -258,7 +258,7 @@ export function Header() {
             )}
           </Link>
           <Link
-            href="/programs"
+            href="/study-programs"
             className="py-2 text-sm font-medium text-hit-gray-600"
             onClick={() => setMobileMenuOpen(false)}
           >

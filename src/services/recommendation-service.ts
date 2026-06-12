@@ -5,6 +5,7 @@ import { EventType, Institution } from '@/types/events'
 import { formatEventTime } from '@/lib/event-time'
 import { eventPairOverlapMinutes } from '@/lib/schedule-conflicts'
 import { getActiveEditionId } from '@/lib/active-edition'
+import { withFallbackReason } from '@/lib/recommendation-reasons'
 import type { Event } from '@/types/events'
 import type {
   RecommendationContext,
@@ -371,7 +372,7 @@ export const recommendationService = {
       recommendations.push({
         event,
         score: Math.min(100, Math.max(0, score)),
-        reasons,
+        reasons: withFallbackReason(reasons),
         conflictsWithSchedule,
         conflictingEventIds,
         travelTimeFromPrevious,

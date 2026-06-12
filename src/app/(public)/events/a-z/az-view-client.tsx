@@ -15,8 +15,8 @@ import {
 
 const TOGGLES: Array<{ value: AZInstitution; label: string }> = [
   { value: 'all', label: 'Alle Studiengänge A-Z' },
-  { value: 'UNI', label: 'Studiengänge Universität A-Z' },
   { value: 'HOCHSCHULE', label: 'Studiengänge Hochschule A-Z' },
+  { value: 'UNI', label: 'Studiengänge Universität A-Z' },
 ]
 
 export function AZViewClient() {
