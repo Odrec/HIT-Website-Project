@@ -80,6 +80,21 @@ function EventsLandingContent() {
       </form>
 
       <section className="mb-8">
+        <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <LandingLink href="/events/lehramt" label="Lehramt" />
+          <LandingLink href="/events/a-z" label="Studiengänge A-Z" />
+          <LandingLink href="/events/infomaerkte" label="Infomärkte" />
+          <LandingLink href="/events/rund-ums-studium" label="Rund ums Studium" />
+          {shouldShowMultiplikatorCafeLink(multiplikatorCafe.eventId) && (
+            <LandingLink
+              href={`/events/${multiplikatorCafe.eventId}`}
+              label="Multiplikator*innen-Café"
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="mb-8">
         <h2 className="mb-3 border-b-2 border-hit-uni-500 pb-1 text-sm font-bold uppercase tracking-wide text-hit-uni-600">
           Studienfelder · Universität
         </h2>
@@ -110,21 +125,6 @@ function EventsLandingContent() {
               {c.name}
             </Link>
           ))}
-        </div>
-      </section>
-
-      <section>
-        <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-          <LandingLink href="/events/lehramt" label="Lehramt" />
-          <LandingLink href="/events/a-z" label="Studiengänge A-Z" />
-          <LandingLink href="/events/infomaerkte" label="Infomärkte" />
-          <LandingLink href="/events/rund-ums-studium" label="Rund ums Studium" />
-          {shouldShowMultiplikatorCafeLink(multiplikatorCafe.eventId) && (
-            <LandingLink
-              href={`/events/${multiplikatorCafe.eventId}`}
-              label="Multiplikator*innen-Café"
-            />
-          )}
         </div>
       </section>
     </>
