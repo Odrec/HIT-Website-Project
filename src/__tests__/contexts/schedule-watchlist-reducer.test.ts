@@ -67,4 +67,28 @@ describe('scheduleReducer — watchlist', () => {
     const added = scheduleReducer(initialState, { type: 'ADD_WATCHLIST', payload: e })
     expect(scheduleReducer(added, { type: 'CLEAR_SCHEDULE' }).watchlist).toHaveLength(1)
   })
+
+  it('PRUNE_MISSING removes the given ids from both the schedule and the watchlist', () => {
+    const scheduled = makeScheduleEvent(makeEvent())
+    const watched = makeScheduleEvent(makeEvent())
+    const kept = makeScheduleEvent(makeEvent())
+    let state = scheduleReducer(initialState, { type: 'ADD_EVENT', payload: scheduled })
+    state = scheduleReducer(state, { type: 'ADD_EVENT', payload: kept })
+    state = scheduleReducer(state, { type: 'ADD_WATCHLIST', payload: watched })
+
+    const pruned = scheduleReducer(state, {
+      type: 'PRUNE_MISSING',
+      payload: [scheduled.eventId, watched.eventId],
+    })
+
+    expect(pruned.items.map((i) => i.eventId)).toEqual([kept.eventId])
+    expect(pruned.watchlist).toHaveLength(0)
+  })
+
+  it('PRUNE_MISSING leaves lists untouched when no ids match', () => {
+    const e = makeScheduleEvent(makeEvent())
+    const state = scheduleReducer(initialState, { type: 'ADD_EVENT', payload: e })
+    const pruned = scheduleReducer(state, { type: 'PRUNE_MISSING', payload: ['nonexistent'] })
+    expect(pruned.items.map((i) => i.eventId)).toEqual([e.eventId])
+  })
 })

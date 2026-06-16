@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import { EventType, Institution } from '@/types/events'
 import { formatEventTime } from '@/lib/event-time'
 import { eventPairOverlapMinutes } from '@/lib/schedule-conflicts'
-import { getActiveEditionId } from '@/lib/active-edition'
+import { getActiveEditionId, getActiveEdition } from '@/lib/active-edition'
 import { withFallbackReason } from '@/lib/recommendation-reasons'
 import type { Event } from '@/types/events'
 import type {
@@ -179,13 +179,20 @@ export const recommendationService = {
     } = filters
 
     // Build query to fetch candidate events
-    const editionId = await getActiveEditionId()
+    const edition = await getActiveEdition()
+    const editionId = edition.id
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { editionId, reviewStatus: 'PUBLISHED' }
 
-    // Exclude already scheduled events
-    if (scheduledEventIds.length > 0) {
-      where.id = { notIn: scheduledEventIds }
+    // Never recommend the Multiplikator*innen-Café — it is not open to pupils
+    const baseExcludedIds = edition.multiplikatorCafeEventId
+      ? [edition.multiplikatorCafeEventId]
+      : []
+
+    // Exclude already scheduled events (plus the always-excluded Café)
+    const excludedIds = [...baseExcludedIds, ...scheduledEventIds]
+    if (excludedIds.length > 0) {
+      where.id = { notIn: excludedIds }
     }
 
     // Exclude dismissed events
@@ -820,7 +827,8 @@ export const recommendationService = {
       return []
     }
 
-    const eventIds = sortedPopularity.map((p) => p.eventId)
+    const cafeId = (await getActiveEdition()).multiplikatorCafeEventId
+    const eventIds = sortedPopularity.map((p) => p.eventId).filter((id) => id !== cafeId)
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
       where: { id: { in: eventIds }, editionId, reviewStatus: 'PUBLISHED' },
@@ -868,10 +876,12 @@ export const recommendationService = {
     const minStart = new Date(Math.min(...timeSlots.map((s) => new Date(s.start).getTime())))
     const maxEnd = new Date(Math.max(...timeSlots.map((s) => new Date(s.end).getTime())))
 
+    const cafeId = (await getActiveEdition()).multiplikatorCafeEventId
+    const excludedIds = cafeId ? [...excludeEventIds, cafeId] : excludeEventIds
     const editionId = await getActiveEditionId()
     const events = await prisma.event.findMany({
       where: {
-        id: excludeEventIds.length > 0 ? { notIn: excludeEventIds } : undefined,
+        id: excludedIds.length > 0 ? { notIn: excludedIds } : undefined,
         timeStart: { gte: minStart },
         timeEnd: { lte: maxEnd },
         editionId,

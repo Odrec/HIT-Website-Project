@@ -42,6 +42,7 @@ type ScheduleAction =
   | { type: 'CLEAR_SCHEDULE' }
   | { type: 'SET_CONFLICTS'; payload: TimeConflict[] }
   | { type: 'PATCH_EVENTS'; payload: Array<{ eventId: string; event: Event }> }
+  | { type: 'PRUNE_MISSING'; payload: string[] }
   | { type: 'LOAD_WATCHLIST'; payload: ScheduleEvent[] }
   | { type: 'ADD_WATCHLIST'; payload: ScheduleEvent }
   | { type: 'REMOVE_WATCHLIST'; payload: string }
@@ -190,6 +191,17 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
         conflicts,
       }
     }
+    case 'PRUNE_MISSING': {
+      const missing = new Set(action.payload)
+      const newItems = state.items.filter((item) => !missing.has(item.eventId))
+      const newWatchlist = state.watchlist.filter((w) => !missing.has(w.eventId))
+      return {
+        ...state,
+        items: newItems,
+        conflicts: detectConflicts(newItems),
+        watchlist: newWatchlist,
+      }
+    }
     case 'LOAD_WATCHLIST': {
       return {
         ...state,
@@ -286,34 +298,50 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     }
   }, [state.watchlist, state.isLoaded])
 
-  // One-time self-healing migration: events added before the EventCard slug fix
-  // were saved with `event.building.slug = ''`, which suppresses travel-time
-  // warnings on the schedule timeline. On load, refetch any item whose stored
-  // building lacks a slug and patch it back into state + localStorage.
+  // On load, reconcile every stored schedule + watchlist item against the
+  // public API (active edition, PUBLISHED only):
+  //  - 200  → patch the stored event with fresh data. This also self-heals
+  //           events saved before the EventCard slug fix (building.slug = ''),
+  //           which previously suppressed travel-time warnings.
+  //  - 404  → the event is no longer published in the active edition (e.g. it
+  //           was rolled over and now sits only in the Prüfstand, or belongs to
+  //           an archived edition). Prune it so stale prior-year entries don't
+  //           linger in the Stundenplan/Merkliste and confuse returning visitors.
+  //  - other (network error, 5xx) → leave untouched; never prune on a transient
+  //           failure.
+  // Shared cross-edition schedules at /s/[code] are server-rendered and do not
+  // use this localStorage state, so they are unaffected.
   useEffect(() => {
     if (!state.isLoaded) return
-    const stale = state.items.filter(
-      (item) => item.event.building != null && !item.event.building.slug
+    const idsToCheck = Array.from(
+      new Set([...state.items, ...state.watchlist].map((item) => item.eventId))
     )
-    if (stale.length === 0) return
+    if (idsToCheck.length === 0) return
 
     let cancelled = false
     Promise.all(
-      stale.map(async (item) => {
+      idsToCheck.map(async (eventId) => {
         try {
-          const res = await fetch(`/api/events/public/${item.eventId}`)
-          if (!res.ok) return null
+          const res = await fetch(`/api/events/public/${eventId}`)
+          if (res.status === 404) {
+            return { eventId, status: 'missing' as const }
+          }
+          if (!res.ok) return { eventId, status: 'skip' as const }
           const data = (await res.json()) as { event?: Event }
-          if (!data.event) return null
-          return { eventId: item.eventId, event: data.event }
+          if (!data.event) return { eventId, status: 'skip' as const }
+          return { eventId, status: 'ok' as const, event: data.event }
         } catch {
-          return null
+          return { eventId, status: 'skip' as const }
         }
       })
     ).then((results) => {
       if (cancelled) return
-      const patches = results.filter((r): r is { eventId: string; event: Event } => r !== null)
+      const patches = results
+        .filter((r): r is { eventId: string; status: 'ok'; event: Event } => r.status === 'ok')
+        .map(({ eventId, event }) => ({ eventId, event }))
+      const missing = results.filter((r) => r.status === 'missing').map((r) => r.eventId)
       if (patches.length > 0) dispatch({ type: 'PATCH_EVENTS', payload: patches })
+      if (missing.length > 0) dispatch({ type: 'PRUNE_MISSING', payload: missing })
     })
 
     return () => {
