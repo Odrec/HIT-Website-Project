@@ -5,9 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Calendar,
-  Search,
-  Clock,
-  MapPin,
   GraduationCap,
   Compass,
   ArrowRight,
@@ -130,69 +127,6 @@ export default function HomePage() {
               <div className="text-3xl font-bold">1</div>
               <div className="text-sm text-white/80">Tag</div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Actions */}
-      <section className="border-b bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Link href="/events" className="group">
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-hit-uni-100 text-hit-uni-600 group-hover:bg-hit-uni-200 transition-colors">
-                    <Search className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-hit-gray-900">Veranstaltungen suchen</h3>
-                    <p className="text-sm text-hit-gray-600">Alle Events durchsuchen</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/schedule" className="group">
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-hit-hs-100 text-hit-hs-600 group-hover:bg-hit-hs-200 transition-colors">
-                    <Clock className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-hit-gray-900">Stundenplan erstellen</h3>
-                    <p className="text-sm text-hit-gray-600">Ihren Tag planen</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/study-programs" className="group">
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
-                    <GraduationCap className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-hit-gray-900">Studiengänge</h3>
-                    <p className="text-sm text-hit-gray-600">Alle Programme entdecken</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/route-planner" className="group">
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition-colors">
-                    <MapPin className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-hit-gray-900">Lageplan</h3>
-                    <p className="text-sm text-hit-gray-600">Orientierung finden</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
           </div>
         </div>
       </section>

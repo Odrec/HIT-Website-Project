@@ -53,7 +53,3 @@ Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf dem Lagepl
 ## Shuttle-Busse
 
 Am HIT-Tag fahren **Shuttle-Busse** zwischen den Campusstandorten. Im Routenplaner können Sie über die Schaltfläche **„Shuttle-Busse"** die Live-Positionen der Busse auf der Karte anzeigen. Die Busstandorte werden automatisch alle 10 Sekunden aktualisiert. Die Haltestellen sind mit dem offiziellen Haltestellenzeichen (grünes „H") auf der Karte markiert.
-
-## Studiengänge
-
-Durchsuchen Sie alle Studiengänge der Universität und Hochschule Osnabrück. Filtern Sie nach Institution. Zu jedem Studiengang können ein oder mehrere offizielle Links hinterlegt sein (z. B. das Fach selbst, der 2-Fächer-Bachelor oder der Lehramts-Studiengang).
