@@ -258,13 +258,6 @@ export function Header() {
             )}
           </Link>
           <Link
-            href="/study-programs"
-            className="py-2 text-sm font-medium text-hit-gray-600"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Studiengänge
-          </Link>
-          <Link
             href="/navigator"
             className="py-2 text-sm font-medium text-hit-gray-600"
             onClick={() => setMobileMenuOpen(false)}
