@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
     if (lehramtCombined === 'true') {
       where.AND.push({
         studyPrograms: {
-          some: { studyProgram: { lehramtTyp: { not: null } } },
+          some: { studyProgram: { lehramtTypen: { isEmpty: false } } },
         },
       })
     }
@@ -174,7 +174,9 @@ export async function GET(request: NextRequest) {
         studyPrograms: {
           some: {
             studyProgram: {
-              lehramtTyp: lehramtTyp as 'GRUND_HAUPT_REAL' | 'GYMNASIUM' | 'BERUFSBILDEND',
+              lehramtTypen: {
+                has: lehramtTyp as 'GRUND_HAUPT_REAL' | 'GYMNASIUM' | 'BERUFSBILDEND',
+              },
               ...(excludeFachrichtungen ? { isBeruflicheFachrichtung: false } : {}),
             },
           },

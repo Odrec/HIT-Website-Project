@@ -18,6 +18,14 @@ interface MultiplikatorCafe {
   eventId: string | null
 }
 
+// The two Lehramt Studienfelder route to the dedicated grey Lehramt page
+// instead of the generic cluster programs grid; the HS one jumps to its section.
+function clusterHref(c: Cluster): string {
+  if (c.name === 'Lehramt') return '/events/lehramt'
+  if (c.name === 'Lehramt an berufsbildenden Schulen') return '/events/lehramt#berufsbildend'
+  return `/events/cluster/${c.id}`
+}
+
 function EventsLandingContent() {
   const router = useRouter()
   const [uniClusters, setUniClusters] = useState<Cluster[]>([])
@@ -102,7 +110,7 @@ function EventsLandingContent() {
           {uniClusters.map((c) => (
             <Link
               key={c.id}
-              href={`/events/cluster/${c.id}`}
+              href={clusterHref(c)}
               className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-uni-500 bg-hit-gray-50 px-3 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100 break-words hyphens-auto sm:px-4"
             >
               {c.name}
@@ -119,7 +127,7 @@ function EventsLandingContent() {
           {hsClusters.map((c) => (
             <Link
               key={c.id}
-              href={`/events/cluster/${c.id}`}
+              href={clusterHref(c)}
               className="block rounded-md border border-hit-gray-200 border-l-4 border-l-hit-hs-500 bg-hit-gray-50 px-3 py-3 text-sm text-hit-gray-900 transition-colors hover:bg-hit-gray-100 break-words hyphens-auto sm:px-4"
             >
               {c.name}

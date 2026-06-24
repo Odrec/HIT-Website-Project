@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name,
         institution: body.institution,
-        lehramtTyp: lehramt.value.lehramtTyp,
+        lehramtTypen: lehramt.value.lehramtTypen,
+        isLehramtStudiengang: lehramt.value.isLehramtStudiengang,
         isBeruflicheFachrichtung: lehramt.value.isBeruflicheFachrichtung,
         ...(clusterIds.length > 0 && {
           clusters: { connect: clusterIds.map((id) => ({ id })) },
@@ -122,22 +123,10 @@ export async function POST(request: NextRequest) {
         ...(links.length > 0 && {
           links: { create: links },
         }),
-        ...(lehramt.value.unterrichtsfachIds.length > 0 && {
-          unterrichtsfaecher: {
-            create: lehramt.value.unterrichtsfachIds.map((fachId, i) => ({
-              fachId,
-              sortOrder: i,
-            })),
-          },
-        }),
       },
       include: {
         clusters: true,
         links: { orderBy: { sortOrder: 'asc' } },
-        unterrichtsfaecher: {
-          include: { fach: { select: { id: true, name: true } } },
-          orderBy: { sortOrder: 'asc' },
-        },
       },
     })
 
