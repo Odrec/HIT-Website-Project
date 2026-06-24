@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const links = normalizeLinksInput(body.links)
 
-    const lehramt = normalizeLehramtInput(body, id)
+    const lehramt = normalizeLehramtInput(body)
     if (!lehramt.ok) {
       return NextResponse.json({ error: lehramt.error }, { status: 400 })
     }
@@ -87,28 +87,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         name: body.name,
         institution: body.institution,
-        lehramtTyp: lehramt.value.lehramtTyp,
+        lehramtTypen: lehramt.value.lehramtTypen,
+        isLehramtStudiengang: lehramt.value.isLehramtStudiengang,
         isBeruflicheFachrichtung: lehramt.value.isBeruflicheFachrichtung,
         clusters: { set: clusterIds.map((cid) => ({ id: cid })) },
         links: {
           deleteMany: {},
           create: links,
         },
-        unterrichtsfaecher: {
-          deleteMany: {},
-          create: lehramt.value.unterrichtsfachIds.map((fachId, i) => ({
-            fachId,
-            sortOrder: i,
-          })),
-        },
       },
       include: {
         clusters: true,
         links: { orderBy: { sortOrder: 'asc' } },
-        unterrichtsfaecher: {
-          include: { fach: { select: { id: true, name: true } } },
-          orderBy: { sortOrder: 'asc' },
-        },
       },
     })
 

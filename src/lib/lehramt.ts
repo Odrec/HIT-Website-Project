@@ -12,95 +12,117 @@ export const LEHRAMT_TYP_LABELS: Record<LehramtTypValue, string> = {
 }
 
 export interface NormalizedLehramtInput {
-  lehramtTyp: LehramtTypValue | null
+  lehramtTypen: LehramtTypValue[]
+  isLehramtStudiengang: boolean
   isBeruflicheFachrichtung: boolean
-  unterrichtsfachIds: string[]
 }
 
 export type LehramtInputResult =
   | { ok: true; value: NormalizedLehramtInput }
   | { ok: false; error: string }
 
-export function normalizeLehramtInput(
-  body: {
-    lehramtTyp?: unknown
-    isBeruflicheFachrichtung?: unknown
-    unterrichtsfachIds?: unknown
-  },
-  selfId?: string
-): LehramtInputResult {
-  const rawTyp = body.lehramtTyp
-  if (rawTyp === undefined || rawTyp === null || rawTyp === '') {
-    if (body.isBeruflicheFachrichtung === true) {
-      return {
-        ok: false,
-        error: 'Berufliche Fachrichtung erfordert Lehramt an berufsbildenden Schulen',
-      }
-    }
-    return {
-      ok: true,
-      value: { lehramtTyp: null, isBeruflicheFachrichtung: false, unterrichtsfachIds: [] },
+export function normalizeLehramtInput(body: {
+  lehramtTypen?: unknown
+  isLehramtStudiengang?: unknown
+  isBeruflicheFachrichtung?: unknown
+}): LehramtInputResult {
+  const rawTypen = Array.isArray(body.lehramtTypen) ? body.lehramtTypen : []
+  const lehramtTypen = [
+    ...new Set(rawTypen.filter((v): v is LehramtTypValue => typeof v === 'string')),
+  ]
+  for (const typ of lehramtTypen) {
+    if (!LEHRAMT_TYP_VALUES.includes(typ)) {
+      return { ok: false, error: 'Ungültige Schulform' }
     }
   }
 
-  if (!LEHRAMT_TYP_VALUES.includes(rawTyp as LehramtTypValue)) {
-    return { ok: false, error: 'Ungültiger Lehramt-Typ' }
-  }
-  const lehramtTyp = rawTyp as LehramtTypValue
+  const isLehramtStudiengang = body.isLehramtStudiengang === true
+  const isBeruflicheFachrichtung = body.isBeruflicheFachrichtung === true
 
-  const isFachrichtung = body.isBeruflicheFachrichtung === true
-  if (isFachrichtung && lehramtTyp !== 'BERUFSBILDEND') {
+  if ((isLehramtStudiengang || isBeruflicheFachrichtung) && lehramtTypen.length === 0) {
+    return { ok: false, error: 'Bitte mindestens eine Schulform auswählen' }
+  }
+
+  if (isBeruflicheFachrichtung && !lehramtTypen.includes('BERUFSBILDEND')) {
     return {
       ok: false,
       error: 'Berufliche Fachrichtung erfordert Lehramt an berufsbildenden Schulen',
     }
   }
 
-  const rawIds = Array.isArray(body.unterrichtsfachIds) ? body.unterrichtsfachIds : []
-  const unterrichtsfachIds = [
-    ...new Set(
-      rawIds.filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== selfId)
-    ),
-  ]
-  if (unterrichtsfachIds.length > 0 && !isFachrichtung) {
+  if (isLehramtStudiengang && isBeruflicheFachrichtung) {
     return {
       ok: false,
-      error: 'Unterrichtsfächer können nur einer beruflichen Fachrichtung zugeordnet werden',
+      error: 'Ein Lehramts-Studiengang kann keine berufliche Fachrichtung sein',
     }
   }
 
-  return {
-    ok: true,
-    value: { lehramtTyp, isBeruflicheFachrichtung: isFachrichtung, unterrichtsfachIds },
-  }
+  return { ok: true, value: { lehramtTypen, isLehramtStudiengang, isBeruflicheFachrichtung } }
 }
 
 export interface LehramtProgramLike {
   id: string
   name: string
-  lehramtTyp: LehramtTypValue | null
+  lehramtTypen: LehramtTypValue[]
+  isLehramtStudiengang: boolean
   isBeruflicheFachrichtung: boolean
 }
 
-export interface GroupedLehramtPrograms<T extends LehramtProgramLike> {
-  ghr: T[]
-  gymnasium: T[]
-  bbsGeneral: T[]
+/** GHR / Gymnasium: the dedicated Lehramt-Studiengang plus its Unterrichtsfächer. */
+export interface SchulformGroup<T> {
+  lehramtStudiengang: T | null
+  faecher: T[]
+}
+
+/** Berufsschullehramt: Studiengang, berufliche Fachrichtungen, allgemeinbildende Fächer. */
+export interface BerufsschulGroup<T> {
+  lehramtStudiengang: T | null
   fachrichtungen: T[]
+  allgemeinbildend: T[]
+}
+
+export interface GroupedLehramtPrograms<T extends LehramtProgramLike> {
+  ghr: SchulformGroup<T>
+  gymnasium: SchulformGroup<T>
+  berufsbildend: BerufsschulGroup<T>
 }
 
 export function groupLehramtPrograms<T extends LehramtProgramLike>(
   programs: T[]
 ): GroupedLehramtPrograms<T> {
   const byName = (a: T, b: T) => a.name.localeCompare(b.name, 'de')
+  const has = (p: T, typ: LehramtTypValue) => p.lehramtTypen.includes(typ)
+
+  // The dedicated Lehramt-Studiengang for a Schulform; deterministic if an admin
+  // mistakenly flags more than one (picks the first by name).
+  const studiengang = (typ: LehramtTypValue): T | null =>
+    programs.filter((p) => p.isLehramtStudiengang && has(p, typ)).sort(byName)[0] ?? null
+
+  // Unterrichtsfächer for an allgemeinbildende Schulform (never the Studiengang).
+  const faecher = (typ: LehramtTypValue): T[] =>
+    programs.filter((p) => has(p, typ) && !p.isLehramtStudiengang).sort(byName)
+
   return {
-    ghr: programs.filter((p) => p.lehramtTyp === 'GRUND_HAUPT_REAL').sort(byName),
-    gymnasium: programs.filter((p) => p.lehramtTyp === 'GYMNASIUM').sort(byName),
-    bbsGeneral: programs
-      .filter((p) => p.lehramtTyp === 'BERUFSBILDEND' && !p.isBeruflicheFachrichtung)
-      .sort(byName),
-    fachrichtungen: programs
-      .filter((p) => p.lehramtTyp === 'BERUFSBILDEND' && p.isBeruflicheFachrichtung)
-      .sort(byName),
+    ghr: {
+      lehramtStudiengang: studiengang('GRUND_HAUPT_REAL'),
+      faecher: faecher('GRUND_HAUPT_REAL'),
+    },
+    gymnasium: {
+      lehramtStudiengang: studiengang('GYMNASIUM'),
+      faecher: faecher('GYMNASIUM'),
+    },
+    berufsbildend: {
+      lehramtStudiengang: studiengang('BERUFSBILDEND'),
+      fachrichtungen: programs
+        .filter(
+          (p) => has(p, 'BERUFSBILDEND') && p.isBeruflicheFachrichtung && !p.isLehramtStudiengang
+        )
+        .sort(byName),
+      allgemeinbildend: programs
+        .filter(
+          (p) => has(p, 'BERUFSBILDEND') && !p.isBeruflicheFachrichtung && !p.isLehramtStudiengang
+        )
+        .sort(byName),
+    },
   }
 }

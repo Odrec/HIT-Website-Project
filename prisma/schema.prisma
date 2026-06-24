@@ -75,8 +75,8 @@ enum Affiliation {
 }
 
 /// Sub-classification of Lehramt study programs (Binnendifferenzierung).
-/// NULL = not a Lehramt program. Programs with BERUFSBILDEND may additionally
-/// be flagged as berufliche Fachrichtung and carry Unterrichtsfächer links.
+/// A program carries zero or more values in `lehramtTypen` (empty = not a Lehramt
+/// program). A single Unterrichtsfach is assigned to several Schulformen at once.
 enum LehramtTyp {
   GRUND_HAUPT_REAL
   GYMNASIUM
@@ -107,37 +107,24 @@ model StudyProgramCluster {
 
 /// Study program offered by Uni or Hochschule
 model StudyProgram {
-  id                       String                        @id @default(cuid())
-  name                     String                        @db.VarChar(200)
+  id                       String                @id @default(cuid())
+  name                     String                @db.VarChar(200)
   institution              Institution
-  lehramtTyp               LehramtTyp?
-  isBeruflicheFachrichtung Boolean                       @default(false)
+  /// Schulformen this program belongs to (empty = not a Lehramt program). A
+  /// single Unterrichtsfach is tagged with several Schulformen at once.
+  lehramtTypen             LehramtTyp[]
+  /// The one dedicated "Lehramt-Studiengang" per Schulform (not an Unterrichtsfach);
+  /// its events are listed first in that Schulform's section on the Lehramt page.
+  isLehramtStudiengang     Boolean               @default(false)
+  isBeruflicheFachrichtung Boolean               @default(false)
   clusters                 StudyProgramCluster[]
   links                    StudyProgramLink[]
   events                   EventStudyProgram[]
-  unterrichtsfaecher       StudyProgramUnterrichtsfach[] @relation("FachrichtungFaecher")
-  alsUnterrichtsfachVon    StudyProgramUnterrichtsfach[] @relation("FachVerwendungen")
-  createdAt                DateTime                      @default(now())
-  updatedAt                DateTime                      @updatedAt
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
 
   @@index([institution])
-  @@index([lehramtTyp])
   @@map("study_programs")
-}
-
-/// Allgemeinbildende Unterrichtsfächer assigned to a berufliche Fachrichtung
-/// (both sides are StudyProgram rows). Drives the per-Fachrichtung subject
-/// lists on the public Lehramt page.
-model StudyProgramUnterrichtsfach {
-  fachrichtungId String
-  fachId         String
-  sortOrder      Int          @default(0)
-  fachrichtung   StudyProgram @relation("FachrichtungFaecher", fields: [fachrichtungId], references: [id], onDelete: Cascade)
-  fach           StudyProgram @relation("FachVerwendungen", fields: [fachId], references: [id], onDelete: Cascade)
-
-  @@id([fachrichtungId, fachId])
-  @@index([fachId])
-  @@map("study_program_unterrichtsfaecher")
 }
 
 /// External links for a study program (Fach, 2-Fächer-Bachelor, BEU, LBS …).

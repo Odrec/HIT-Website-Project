@@ -188,28 +188,22 @@ async function main() {
     prisma.studyProgram.create({ data: { name: 'Evangelische Theologie/Religion (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[4].id }] } } }),
     prisma.studyProgram.create({ data: { name: 'Musik/Musikwissenschaft (B.A.)', institution: Institution.UNI, clusters: { connect: [{ id: clusters[4].id }] } } }),
     prisma.studyProgram.create({ data: { name: 'Textiles Gestalten (B.A.)', institution: Institution.HOCHSCHULE, clusters: { connect: [{ id: clusters[4].id }] } } }),
-    // Lehramt
-    prisma.studyProgram.create({ data: { name: 'Lehramt Grundschule', institution: Institution.UNI, lehramtTyp: 'GRUND_HAUPT_REAL', clusters: { connect: [{ id: clusters[5].id }] } } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Haupt-/Realschule', institution: Institution.UNI, lehramtTyp: 'GRUND_HAUPT_REAL', clusters: { connect: [{ id: clusters[5].id }] } } }),
-    prisma.studyProgram.create({ data: { name: 'Lehramt Gymnasium', institution: Institution.UNI, lehramtTyp: 'GYMNASIUM', clusters: { connect: [{ id: clusters[5].id }] } } }),
+    // Lehramt-Studiengänge — one dedicated Studiengang per Schulform (not a Fach).
+    // Kept at indices 21–23 because the Infostand-Lehramt event maps to them.
+    prisma.studyProgram.create({ data: { name: 'Lehramt an Grund-, Haupt- und Realschulen', institution: Institution.UNI, lehramtTypen: ['GRUND_HAUPT_REAL'], isLehramtStudiengang: true, clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt an Gymnasien', institution: Institution.UNI, lehramtTypen: ['GYMNASIUM'], isLehramtStudiengang: true, clusters: { connect: [{ id: clusters[5].id }] } } }),
+    prisma.studyProgram.create({ data: { name: 'Lehramt an berufsbildenden Schulen', institution: Institution.HOCHSCHULE, lehramtTypen: ['BERUFSBILDEND'], isLehramtStudiengang: true } }),
   ])
 
-  // Berufliche Fachrichtung sample with allgemeinbildende Unterrichtsfächer
-  await prisma.studyProgram.create({
-    data: {
-      name: 'Ökotrophologie (Berufliche Bildung)',
-      institution: Institution.UNI,
-      lehramtTyp: 'BERUFSBILDEND',
-      isBeruflicheFachrichtung: true,
-      clusters: { connect: [{ id: clusters[5].id }] },
-      unterrichtsfaecher: {
-        create: [
-          { fachId: studyPrograms[15].id, sortOrder: 0 }, // Germanistik/Deutsch
-          { fachId: studyPrograms[16].id, sortOrder: 1 }, // Anglistik/Englisch
-        ],
-      },
-    },
-  })
+  // Unterrichtsfächer (each tagged with several Schulformen) and berufliche
+  // Fachrichtungen that drive the Lehramt-page lists.
+  await Promise.all([
+    prisma.studyProgram.create({ data: { name: 'Mathematik', institution: Institution.UNI, lehramtTypen: ['GRUND_HAUPT_REAL', 'GYMNASIUM', 'BERUFSBILDEND'] } }),
+    prisma.studyProgram.create({ data: { name: 'Deutsch', institution: Institution.UNI, lehramtTypen: ['GRUND_HAUPT_REAL', 'GYMNASIUM', 'BERUFSBILDEND'] } }),
+    prisma.studyProgram.create({ data: { name: 'Englisch', institution: Institution.UNI, lehramtTypen: ['GYMNASIUM', 'BERUFSBILDEND'] } }),
+    prisma.studyProgram.create({ data: { name: 'Ökotrophologie', institution: Institution.HOCHSCHULE, lehramtTypen: ['BERUFSBILDEND'], isBeruflicheFachrichtung: true } }),
+    prisma.studyProgram.create({ data: { name: 'Elektrotechnik (berufl. Fachrichtung)', institution: Institution.HOCHSCHULE, lehramtTypen: ['BERUFSBILDEND'], isBeruflicheFachrichtung: true } }),
+  ])
 
   // ==========================================================================
   // Create Information Markets
