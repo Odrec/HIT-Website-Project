@@ -4,7 +4,7 @@ import Link from 'next/link'
  * Footer component with institutional links and information
  */
 export function Footer() {
-  const contactEmail = process.env.CONTACT_EMAIL || 'hit@zsb.os.de'
+  const contactEmail = process.env.CONTACT_EMAIL || 'hit@zsb-os.de'
   return (
     <footer className="border-t bg-hit-gray-50">
       <div className="container mx-auto px-4 py-8">

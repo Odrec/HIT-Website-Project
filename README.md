@@ -174,7 +174,7 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 | `SMTP_USER` | SMTP username | - |
 | `SMTP_PASS` | SMTP password | - |
 | `EMAIL_FROM` | Sender email address | - |
-| `EMAIL_TO` | Notification recipient | `hit@zsb.os.de` |
+| `EMAIL_TO` | Notification recipient | `hit@zsb-os.de` |
 
 > `EMAIL_TO` is server-only and controls **where notifications are delivered**. It's separate from the public contact address shown in the site footer — set that via `CONTACT_EMAIL` below.
 
@@ -182,7 +182,7 @@ The AI-powered Study Navigator supports OpenAI, Google Gemini, or any OpenAI-com
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Server-only — read at request time, so a deploy-time change to `.env` (followed by a container restart) takes effect without rebuilding the image. | `hit@zsb.os.de` |
+| `CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Server-only — read at request time, so a deploy-time change to `.env` (followed by a container restart) takes effect without rebuilding the image. | `hit@zsb-os.de` |
 
 ### Matomo Analytics
 
