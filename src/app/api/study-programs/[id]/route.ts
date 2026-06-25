@@ -127,28 +127,20 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     // Check if program exists
     const existing = await prisma.studyProgram.findUnique({
       where: { id },
-      include: {
-        events: true,
-      },
     })
     if (!existing) {
       return NextResponse.json({ error: 'Study program not found' }, { status: 404 })
     }
 
-    // Check if program is used by events
-    if (existing.events && existing.events.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'Cannot delete study program - it is used by events',
-          message: `Dieser Studiengang wird von ${existing.events.length} Veranstaltung(en) verwendet und kann nicht gelöscht werden.`,
-        },
-        { status: 400 }
-      )
-    }
-
+    // Deleting a program only removes the program and its event *links*
+    // (EventStudyProgram cascades on delete) — the events themselves stay and
+    // keep all their other Studiengang associations. So a program that is still
+    // linked to events can be deleted; the links are simply cleared.
     await prisma.studyProgram.delete({
       where: { id },
     })
+
+    await invalidateProgramCaches()
 
     return NextResponse.json({ success: true })
   } catch (error) {
