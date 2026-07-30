@@ -502,3 +502,15 @@ model BusPosition {
   speed     Float?
   updatedAt DateTime   @updatedAt
 }
+
+/// Admin-editable text overrides for fixed slots on public pages.
+/// Only overrides live here — the shipped defaults are in
+/// src/lib/content-slots.ts, so an empty table renders the site correctly.
+model ContentText {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@map("content_texts")
+}
