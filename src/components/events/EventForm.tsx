@@ -403,7 +403,7 @@ export function EventForm({
           )}
         </div>
       )}
-      <fieldset disabled={isLocked || false}>
+      <fieldset disabled={isLocked || false} className="min-w-0">
         {/* Row 1: Melder + Veranstaltungsinfo */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Section 1: Melder-Profil */}
@@ -736,7 +736,7 @@ export function EventForm({
           {/* Section 6: Dozierende */}
           <Card className="border-l-4 border-l-[#22c55e]">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between text-base">
+              <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
                 <span>Dozierende</span>
                 <Button
                   type="button"
@@ -921,7 +921,7 @@ export function EventForm({
         {/* Organizers (kept as-is) */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between text-base">
+            <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
               <span>Ansprechpersonen (intern)</span>
               <Button
                 type="button"

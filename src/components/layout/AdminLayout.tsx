@@ -244,7 +244,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-white px-4 lg:hidden">
           <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen">
