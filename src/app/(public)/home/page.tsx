@@ -1,6 +1,3 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -16,33 +13,35 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AnimatedHeroBanner } from '@/components/home/animated-hero-banner'
+import { HitCountdown } from '@/components/home/HitCountdown'
 import { formatEventDateLong } from '@/lib/event-time'
+import { getActiveEdition } from '@/lib/active-edition'
+import { getContentTexts } from '@/lib/content-texts'
+import { prisma } from '@/lib/db/prisma'
 
 const USE_ANIMATED_BANNER = process.env.NEXT_PUBLIC_ANIMATED_BANNER === 'true'
 
-export default function HomePage() {
-  const [eventCount, setEventCount] = useState(0)
-  // Full HIT date comes from the active edition (changes per edition) —
-  // never hardcode it here.
-  const [hitDateLabel, setHitDateLabel] = useState('')
+// The countdown is day-precision; an hour is short enough that it is never
+// visibly stale and long enough to keep the homepage cheap.
+export const revalidate = 3600
 
-  useEffect(() => {
-    fetch('/api/events/public?pageSize=1')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data) setEventCount(data.total)
-      })
-      .catch((error) => console.error('Error fetching event count:', error))
-  }, [])
+export default async function HomePage() {
+  // getActiveEdition() throws when no edition is ACTIVE (e.g. a fresh
+  // database before an admin activates one) — the homepage must still
+  // render in that case, just without the date badge/countdown/count.
+  const [edition, texts] = await Promise.all([
+    getActiveEdition().catch(() => null),
+    getContentTexts(),
+  ])
 
-  useEffect(() => {
-    fetch('/api/editions/active')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.hitDate) setHitDateLabel(formatEventDateLong(data.hitDate))
+  // Same filter the public events API uses.
+  const eventCount = edition
+    ? await prisma.event.count({
+        where: { editionId: edition.id, reviewStatus: 'PUBLISHED' },
       })
-      .catch((error) => console.error('Error fetching HIT date:', error))
-  }, [])
+    : 0
+
+  const hitDateLabel = edition?.hitDate ? formatEventDateLong(edition.hitDate) : ''
 
   return (
     <div className="flex flex-col">
@@ -72,19 +71,19 @@ export default function HomePage() {
         />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
           <div className="max-w-3xl">
-            {hitDateLabel && (
-              <Badge className="mb-4 bg-white/20 text-white hover:bg-white/30">
-                <Calendar className="mr-1.5 h-3.5 w-3.5" />
-                {hitDateLabel}
-              </Badge>
-            )}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {hitDateLabel && (
+                <Badge className="bg-white/20 text-white hover:bg-white/30">
+                  <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                  {hitDateLabel}
+                </Badge>
+              )}
+              <HitCountdown hitDate={edition?.hitDate ?? null} />
+            </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Hochschul&shy;infotag 2026
+              {texts['home.hero.title']}
             </h1>
-            <p className="mt-6 text-lg text-white/90 max-w-2xl">
-              Entdecken Sie die Universität und Hochschule Osnabrück! Besuchen Sie Vorträge,
-              Laborführungen und Workshops zu über 200 Studiengängen.
-            </p>
+            <p className="mt-6 text-lg text-white/90 max-w-2xl">{texts['home.hero.subtitle']}</p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="/events">
                 <Button
@@ -113,19 +112,19 @@ export default function HomePage() {
           <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:mt-16">
             <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{eventCount || '100+'}</div>
-              <div className="text-sm text-white/80">Veranstaltungen</div>
+              <div className="text-sm text-white/80">{texts['home.stats.events.label']}</div>
             </div>
             <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">200+</div>
-              <div className="text-sm text-white/80">Studiengänge</div>
+              <div className="text-3xl font-bold">{texts['home.stats.programs.value']}</div>
+              <div className="text-sm text-white/80">{texts['home.stats.programs.label']}</div>
             </div>
             <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">2</div>
-              <div className="text-sm text-white/80">Hochschulen</div>
+              <div className="text-3xl font-bold">{texts['home.stats.institutions.value']}</div>
+              <div className="text-sm text-white/80">{texts['home.stats.institutions.label']}</div>
             </div>
             <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">1</div>
-              <div className="text-sm text-white/80">Tag</div>
+              <div className="text-3xl font-bold">{texts['home.stats.days.value']}</div>
+              <div className="text-sm text-white/80">{texts['home.stats.days.label']}</div>
             </div>
           </div>
         </div>
@@ -135,7 +134,7 @@ export default function HomePage() {
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-hit-gray-900 text-center lg:text-3xl mb-8">
-            Zwei Hochschulen – ein Infotag
+            {texts['home.institutions.heading']}
           </h2>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -148,7 +147,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <CardTitle className="text-hit-uni-700">Universität Osnabrück</CardTitle>
-                    <CardDescription>Forschung und Lehre seit 1974</CardDescription>
+                    <CardDescription>{texts['home.uni.subtitle']}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -156,15 +155,15 @@ export default function HomePage() {
                 <ul className="space-y-2 text-sm text-hit-gray-600">
                   <li className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4 text-hit-uni-500" />
-                    <span>100+ Studiengänge</span>
+                    <span>{texts['home.uni.bullet.programs']}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-hit-uni-500" />
-                    <span>14.000+ Studierende</span>
+                    <span>{texts['home.uni.bullet.students']}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-hit-uni-500" />
-                    <span>Exzellente Forschung</span>
+                    <span>{texts['home.uni.bullet.extra']}</span>
                   </li>
                 </ul>
                 <Link href="/events?institution=UNI" className="block mt-4">
@@ -188,7 +187,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <CardTitle className="text-hit-hs-700">Hochschule Osnabrück</CardTitle>
-                    <CardDescription>Praxisnah studieren seit 1971</CardDescription>
+                    <CardDescription>{texts['home.hs.subtitle']}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -196,15 +195,15 @@ export default function HomePage() {
                 <ul className="space-y-2 text-sm text-hit-gray-600">
                   <li className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4 text-hit-hs-500" />
-                    <span>100+ Studiengänge</span>
+                    <span>{texts['home.hs.bullet.programs']}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-hit-hs-500" />
-                    <span>13.000+ Studierende</span>
+                    <span>{texts['home.hs.bullet.students']}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-hit-hs-500" />
-                    <span>Praxisnahe Ausbildung</span>
+                    <span>{texts['home.hs.bullet.extra']}</span>
                   </li>
                 </ul>
                 <Link href="/events?institution=HS" className="block mt-4">
