@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Calendar, Grid3X3, List, Search, Filter, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Pagination } from '@/components/ui/pagination'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
 import { EventCalendarView } from '@/components/events/EventCalendarView'
@@ -306,26 +307,13 @@ export function EventListView({
             ))}
           </div>
           {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                Zurück
-              </Button>
-              <span className="px-4 text-sm text-hit-gray-600">
-                Seite {page} von {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                Weiter
-              </Button>
+            <div className="mt-8">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                totalItems={totalEvents}
+                onPageChange={setPage}
+              />
             </div>
           )}
         </>
