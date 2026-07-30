@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateBuildingCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { compareDe } from '@/lib/sort-de'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
@@ -33,6 +34,12 @@ export async function GET() {
       include: { rooms: { orderBy: { name: 'asc' } } },
       orderBy: { name: 'asc' },
     })
+
+    // Postgres runs a C collation, so order in German here.
+    buildings.sort((a, b) => compareDe(a.name, b.name))
+    for (const building of buildings) {
+      building.rooms.sort((a, b) => compareDe(a.name, b.name))
+    }
 
     if (redisConnected) {
       await cacheSet(cacheKey, buildings, CacheTTL.BUILDINGS)

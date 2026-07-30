@@ -6,7 +6,9 @@ import { compareDe, compareDeBy } from '@/lib/sort-de'
 
 // Postgres sorts enum columns by declaration order (see `enum Institution` in
 // prisma/schema.prisma: UNI, HOCHSCHULE, BOTH), not alphabetically. This rank
-// map reproduces that declaration order in application code.
+// map reproduces that declaration order in application code. Deliberately
+// UNI-first — distinct from BOOKLET_INSTITUTION_RANK in export-service.ts
+// (HOCHSCHULE-first, a booklet layout choice). Do not "harmonise" the two.
 const INSTITUTION_RANK: Record<string, number> = { UNI: 0, HOCHSCHULE: 1, BOTH: 2 }
 
 /**

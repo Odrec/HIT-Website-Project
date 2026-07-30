@@ -6,6 +6,7 @@ import { de } from 'date-fns/locale'
 import type { EventType, Institution } from '@/generated/prisma/client/enums'
 import { formatEventTime } from '@/lib/event-time'
 import { getActiveEditionId } from '@/lib/active-edition'
+import { compareDe } from '@/lib/sort-de'
 
 // ---------------------------------------------------------------------------
 // Event include shape
@@ -100,7 +101,7 @@ function generateHtml(events: EventWithRelations[], generatedAt: Date): string {
       const studiengaenge = esc(
         event.studyPrograms
           .map((esp) => esp.studyProgram.name)
-          .sort()
+          .sort(compareDe)
           .join(', ')
       )
 

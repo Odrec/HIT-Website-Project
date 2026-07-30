@@ -2,6 +2,8 @@
 // Used by the study-programs API (input validation), the admin form and
 // the public /events/lehramt page (grouping).
 
+import { compareDe } from '@/lib/sort-de'
+
 export const LEHRAMT_TYP_VALUES = ['GRUND_HAUPT_REAL', 'GYMNASIUM', 'BERUFSBILDEND'] as const
 export type LehramtTypValue = (typeof LEHRAMT_TYP_VALUES)[number]
 
@@ -90,7 +92,7 @@ export interface GroupedLehramtPrograms<T extends LehramtProgramLike> {
 export function groupLehramtPrograms<T extends LehramtProgramLike>(
   programs: T[]
 ): GroupedLehramtPrograms<T> {
-  const byName = (a: T, b: T) => a.name.localeCompare(b.name, 'de')
+  const byName = (a: T, b: T) => compareDe(a.name, b.name)
   const has = (p: T, typ: LehramtTypValue) => p.lehramtTypen.includes(typ)
 
   // The dedicated Lehramt-Studiengang for a Schulform; deterministic if an admin

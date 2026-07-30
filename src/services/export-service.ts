@@ -239,6 +239,9 @@ export interface BookletClusterGroup<T> {
   events: T[]
 }
 
+// Deliberately HOCHSCHULE-first — a booklet layout choice, distinct from
+// INSTITUTION_RANK in study-program-service.ts (UNI-first, reproducing the
+// Postgres enum declaration order). Do not "harmonise" the two.
 const BOOKLET_INSTITUTION_RANK: Record<string, number> = { HOCHSCHULE: 0, UNI: 1, BOTH: 2 }
 
 /**
@@ -709,6 +712,9 @@ export const exportService = {
       }),
     ])
 
+    // Postgres runs a C collation, so order in German here.
+    infoMarkets.sort((a, b) => compareDe(a.name, b.name))
+
     const { crossProgram, clusterGroups } = groupEventsForBooklet(events)
     return { crossProgram, clusterGroups, infoMarkets }
   },
@@ -739,10 +745,18 @@ export const exportService = {
    * All buildings with their rooms, for dropdown population.
    */
   async buildingsWithRooms() {
-    return prisma.building.findMany({
+    const buildings = await prisma.building.findMany({
       include: { rooms: { orderBy: { name: 'asc' } } },
       orderBy: { name: 'asc' },
     })
+
+    // Postgres runs a C collation, so order in German here.
+    buildings.sort((a, b) => compareDe(a.name, b.name))
+    for (const building of buildings) {
+      building.rooms.sort((a, b) => compareDe(a.name, b.name))
+    }
+
+    return buildings
   },
 }
 
