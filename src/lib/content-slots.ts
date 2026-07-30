@@ -14,7 +14,7 @@ export interface ContentSlot {
   multiline?: boolean
 }
 
-export const CONTENT_SLOTS: readonly ContentSlot[] = [
+export const CONTENT_SLOTS = [
   // --- Hero ---------------------------------------------------------------
   {
     key: 'home.hero.title',
@@ -130,7 +130,7 @@ export const CONTENT_SLOTS: readonly ContentSlot[] = [
     group: 'Startseite – Hochschulen',
     default: 'Praxisnahe Ausbildung',
   },
-] as const
+] as const satisfies readonly ContentSlot[]
 
 export type ContentSlotKey = (typeof CONTENT_SLOTS)[number]['key']
 

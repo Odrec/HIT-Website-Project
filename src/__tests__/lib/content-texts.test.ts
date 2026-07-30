@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CONTENT_SLOTS, CONTENT_DEFAULTS } from '@/lib/content-slots'
+import { CONTENT_SLOTS, CONTENT_DEFAULTS, type ContentSlotKey } from '@/lib/content-slots'
 import { mergeContentTexts } from '@/lib/content-texts'
 
 describe('CONTENT_SLOTS', () => {
@@ -16,6 +16,15 @@ describe('CONTENT_SLOTS', () => {
 
   it('ships the corrected Studierende figure for the Universität', () => {
     expect(CONTENT_DEFAULTS['home.uni.bullet.students']).toBe('13.000+ Studierende')
+  })
+
+  it('narrows ContentSlotKey to a literal union, rejecting unknown keys at compile time', () => {
+    // @ts-expect-error - 'not.a.slot' is not one of the 18 literal keys in CONTENT_SLOTS
+    const bogus: ContentSlotKey = 'not.a.slot'
+    // Runtime assertion keeps the variable used and documents the intent; the real
+    // guarantee is the @ts-expect-error above, which fails the build if TS stops
+    // rejecting this assignment (i.e. if ContentSlotKey widens back to `string`).
+    expect(bogus).toBe('not.a.slot')
   })
 })
 
