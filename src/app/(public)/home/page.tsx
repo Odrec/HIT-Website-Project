@@ -30,7 +30,10 @@ export default async function HomePage() {
   // database before an admin activates one) — the homepage must still
   // render in that case, just without the date badge/countdown/count.
   const [edition, texts] = await Promise.all([
-    getActiveEdition().catch(() => null),
+    getActiveEdition().catch((error) => {
+      console.error('Homepage: no active edition or lookup failed', error)
+      return null
+    }),
     getContentTexts(),
   ])
 

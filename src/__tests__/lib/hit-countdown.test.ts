@@ -17,9 +17,12 @@ describe('daysUntilHit', () => {
     expect(daysUntilHit(hit, new Date('2026-11-20T08:00:00Z'))).toBe(-1)
   })
 
-  it('counts calendar days, not 24-hour blocks, across a DST boundary', () => {
-    // 2026-10-25 is the European DST switch; a naive ms/86400000 division
-    // would yield 25.04 days here and floor to the wrong day.
+  it('counts calendar days, not 24-hour blocks, near a DST-adjacent date', () => {
+    // `now` is 23:00 and `hit` is 00:00 — a naive ms/86400000 division would
+    // see only ~25.04 real hours-as-days between them and floor to 25 instead
+    // of 26. This pins the time-of-day skew across the month boundary, not
+    // the DST switch itself (Date.UTC arithmetic is timezone-agnostic and
+    // never observes DST).
     expect(daysUntilHit(hit, new Date('2026-10-24T23:00:00Z'))).toBe(26)
   })
 

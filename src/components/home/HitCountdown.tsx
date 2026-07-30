@@ -4,9 +4,12 @@ import { Badge } from '@/components/ui/badge'
 /**
  * Whole calendar days from `now` until the HIT.
  *
- * Both dates carry Berlin wall-clock in their UTC components (the DB column is
- * `timestamp without time zone`), so the difference is taken from UTC date
- * parts only. Dividing milliseconds would be off by one across a DST switch.
+ * `hitDate` carries Berlin wall-clock in its UTC components (the DB column is
+ * `timestamp without time zone`), so both dates are truncated to their UTC
+ * date parts (`startOfDay`) before subtracting. That makes the result a whole
+ * number of calendar days regardless of the time of day either Date carries —
+ * a raw millisecond diff would drift by the time-of-day skew between the two
+ * inputs (e.g. one supplied at 23:00, the other at 00:00).
  */
 export function daysUntilHit(hitDate: Date, now: Date): number {
   const startOfDay = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
