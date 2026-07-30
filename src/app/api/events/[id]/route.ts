@@ -134,22 +134,46 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * DELETE /api/events/[id] - Delete an event (requires authentication)
+ * DELETE /api/events/[id] - Delete an event.
+ *
+ * Authorization mirrors PUT: admins unrestricted, organizers may delete their
+ * own event until the submission deadline. Every Event relation is
+ * onDelete: Cascade or SetNull, so no relation blocks the delete.
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
-    // Check authentication
     const session = await auth()
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 })
+    if (!session) {
+      return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
+    }
+
+    const { role, id: userId } = session.user
+
+    if (role !== 'ADMIN' && role !== 'ORGANIZER') {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
     }
 
     const { id } = await params
 
-    // Check if event exists
     const existing = await eventService.getById(id)
     if (!existing) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    // Ownership and deadline checks for non-admin users
+    if (role !== 'ADMIN') {
+      const { isDeadlinePassed } = await import('@/services/edition-service')
+      if (await isDeadlinePassed()) {
+        return NextResponse.json(
+          { error: 'Anmeldefrist abgelaufen. Löschen nur durch Administratoren möglich.' },
+          { status: 403 }
+        )
+      }
+
+      const { isEventOwner } = await import('@/lib/auth/rbac')
+      if (!isEventOwner(userId, existing)) {
+        return NextResponse.json({ error: 'Nur eigene Veranstaltungen löschbar.' }, { status: 403 })
+      }
     }
 
     await eventService.delete(id)
@@ -157,6 +181,9 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting event:', error)
-    return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Veranstaltung konnte nicht gelöscht werden.' },
+      { status: 500 }
+    )
   }
 }

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import type { EventType, Institution, Affiliation } from '@/generated/prisma/client/enums'
 import { formatEventTime } from '@/lib/event-time'
 import { getActiveEditionId } from '@/lib/active-edition'
+import { compareDe } from '@/lib/sort-de'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,6 +46,12 @@ export interface LecturerRow {
   organisationseinheit: string
   raum: string
   anzahlVeranstaltungen: number
+}
+
+/** One row per (Studiengang × Veranstaltung) pair, used by the Studiengang export. */
+export interface StudyProgramEventRow extends EventRow {
+  studiengang: string
+  studienfeld: string
 }
 
 export interface InfomarktRow {
@@ -91,7 +98,7 @@ const eventInclude = {
 function formatStudyPrograms(event: EventWithRelations): string {
   return event.studyPrograms
     .map((esp) => esp.studyProgram.name)
-    .sort()
+    .sort(compareDe)
     .join(', ')
 }
 
@@ -174,15 +181,13 @@ function timeValue(t: Date | string | null): number {
 export function firstClusterName(e: SortableEvent): string {
   const names = e.studyPrograms
     .flatMap((sp) => sp.studyProgram.clusters.map((c) => c.name))
-    .sort((a, b) => a.localeCompare(b, 'de'))
+    .sort(compareDe)
   return names[0] ?? ''
 }
 
 /** Alphabetically-first Studiengang (program) name for the event. */
 export function firstProgramName(e: SortableEvent): string {
-  const names = e.studyPrograms
-    .map((sp) => sp.studyProgram.name)
-    .sort((a, b) => a.localeCompare(b, 'de'))
+  const names = e.studyPrograms.map((sp) => sp.studyProgram.name).sort(compareDe)
   return names[0] ?? ''
 }
 
@@ -193,8 +198,8 @@ export function compareByTimeClusterProgram(a: SortableEvent, b: SortableEvent):
   if (ta !== tb) return ta - tb
   const ca = firstClusterName(a)
   const cb = firstClusterName(b)
-  if (ca !== cb) return ca.localeCompare(cb, 'de')
-  return firstProgramName(a).localeCompare(firstProgramName(b), 'de')
+  if (ca !== cb) return compareDe(ca, cb)
+  return compareDe(firstProgramName(a), firstProgramName(b))
 }
 
 type RoomSortableEvent = SortableEvent & {
@@ -210,14 +215,12 @@ export function eventBuildingName(e: RoomSortableEvent): string {
 export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableEvent): number {
   const ba = eventBuildingName(a)
   const bb = eventBuildingName(b)
-  if (ba !== bb) return ba.localeCompare(bb, 'de')
+  if (ba !== bb) return compareDe(ba, bb)
   const ra = a.room?.name ?? ''
   const rb = b.room?.name ?? ''
-  if (ra !== rb) return ra.localeCompare(rb, 'de')
+  if (ra !== rb) return compareDe(ra, rb)
   return compareByTimeClusterProgram(a, b)
 }
-
-type ProgramGroupable = SortableEvent
 
 type BookletClusterInfo = { name: string; institution: Institution; sortOrder: number }
 
@@ -234,6 +237,9 @@ export interface BookletClusterGroup<T> {
   events: T[]
 }
 
+// Deliberately HOCHSCHULE-first — a booklet layout choice, distinct from
+// INSTITUTION_RANK in study-program-service.ts (UNI-first, reproducing the
+// Postgres enum declaration order). Do not "harmonise" the two.
 const BOOKLET_INSTITUTION_RANK: Record<string, number> = { HOCHSCHULE: 0, UNI: 1, BOTH: 2 }
 
 /**
@@ -302,32 +308,25 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
     const rb = BOOKLET_INSTITUTION_RANK[b.institution] ?? 9
     if (ra !== rb) return ra - rb
     if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
-    return a.name.localeCompare(b.name, 'de')
+    return compareDe(a.name, b.name)
   })
 
   return { crossProgram, clusterGroups }
 }
 
 /**
- * Group events by study-program name. An event linked to N programs appears
- * under each. Events with no program go under "Ohne Studiengang". Each group is
- * time-sorted; the returned object is ordered by program name.
+ * Group flat Studiengang rows by their programme name, keys ordered in German.
+ * Row order inside a group is preserved from the already-sorted input.
  */
-export function groupEventsByProgram<T extends ProgramGroupable>(events: T[]): Record<string, T[]> {
-  const result: Record<string, T[]> = {}
-  for (const event of events) {
-    const names = new Set<string>()
-    for (const sp of event.studyPrograms) names.add(sp.studyProgram.name)
-    if (names.size === 0) names.add('Ohne Studiengang')
-    for (const name of names) {
-      ;(result[name] ??= []).push(event)
-    }
+export function groupFlatRowsByProgram(
+  rows: StudyProgramEventRow[]
+): Record<string, StudyProgramEventRow[]> {
+  const result: Record<string, StudyProgramEventRow[]> = {}
+  for (const r of rows) {
+    ;(result[r.studiengang] ??= []).push(r)
   }
-  for (const key of Object.keys(result)) {
-    result[key].sort(compareByTimeClusterProgram)
-  }
-  const sorted: Record<string, T[]> = {}
-  for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+  const sorted: Record<string, StudyProgramEventRow[]> = {}
+  for (const key of Object.keys(result).sort(compareDe)) {
     sorted[key] = result[key]
   }
   return sorted
@@ -396,10 +395,7 @@ export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
     }
   }
 
-  const join = (s: Set<string>) =>
-    Array.from(s)
-      .sort((a, b) => a.localeCompare(b, 'de'))
-      .join(', ')
+  const join = (s: Set<string>) => Array.from(s).sort(compareDe).join(', ')
 
   return Array.from(byPerson.values())
     .map((acc) => ({
@@ -413,7 +409,7 @@ export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
       raum: join(acc.rooms),
       anzahlVeranstaltungen: acc.eventIds.size,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
+    .sort((a, b) => compareDe(a.name, b.name))
 }
 
 // ---------------------------------------------------------------------------
@@ -463,16 +459,47 @@ export const exportService = {
   },
 
   /**
-   * Events grouped by study-program name, each group time-sorted, as flat rows.
+   * Flat Studiengang view: one row per (Studiengang × Veranstaltung) pair,
+   * carrying the programme's Studienfeld(er). An event linked to N programmes
+   * yields N rows; events without a programme land under "Ohne Studiengang".
+   *
+   * Feeds both the "Gesamtliste" sheet and the per-programme sheets, so the two
+   * can never disagree.
    */
-  async eventsByStudyProgram(): Promise<Record<string, EventRow[]>> {
+  async eventsByStudyProgramFlat(): Promise<StudyProgramEventRow[]> {
     const events = await fetchAllEvents()
-    const grouped = groupEventsByProgram(events)
-    const out: Record<string, EventRow[]> = {}
-    for (const [name, evs] of Object.entries(grouped)) {
-      out[name] = evs.map(eventToRow)
+    const rows: StudyProgramEventRow[] = []
+
+    for (const event of events) {
+      const base = eventToRow(event)
+
+      if (event.studyPrograms.length === 0) {
+        rows.push({ ...base, studiengang: 'Ohne Studiengang', studienfeld: '' })
+        continue
+      }
+
+      for (const esp of event.studyPrograms) {
+        rows.push({
+          ...base,
+          studiengang: esp.studyProgram.name,
+          studienfeld: esp.studyProgram.clusters
+            .map((c) => c.name)
+            .sort(compareDe)
+            .join(', '),
+        })
+      }
     }
-    return out
+
+    rows.sort(
+      (a, b) =>
+        compareDe(a.studiengang, b.studiengang) ||
+        // uhrzeit is "HH:MM – HH:MM"; a plain lexicographic compare is already
+        // chronological. compareDe is deliberately not used here because its
+        // numeric:true option would reorder the digits and break the time sort.
+        a.uhrzeit.localeCompare(b.uhrzeit) ||
+        compareDe(a.titel, b.titel)
+    )
+    return rows
   },
 
   /**
@@ -505,12 +532,12 @@ export const exportService = {
 
     // Sort within each cluster
     for (const key of Object.keys(result)) {
-      result[key].sort((a, b) => a.titel.localeCompare(b.titel, 'de'))
+      result[key].sort((a, b) => compareDe(a.titel, b.titel))
     }
 
     // Return sorted by key
     const sorted: Record<string, EventRow[]> = {}
-    for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+    for (const key of Object.keys(result).sort(compareDe)) {
       sorted[key] = result[key]
     }
     return sorted
@@ -531,11 +558,11 @@ export const exportService = {
     }
 
     for (const key of Object.keys(result)) {
-      result[key].sort((a, b) => a.titel.localeCompare(b.titel, 'de'))
+      result[key].sort((a, b) => compareDe(a.titel, b.titel))
     }
 
     const sorted: Record<string, EventRow[]> = {}
-    for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+    for (const key of Object.keys(result).sort(compareDe)) {
       sorted[key] = result[key]
     }
     return sorted
@@ -619,7 +646,7 @@ export const exportService = {
       institution: formatInstitution(r.event.institution),
       studiengaenge: r.event.studyPrograms
         .map((esp) => esp.studyProgram.name)
-        .sort()
+        .sort(compareDe)
         .join(', '),
       dozent: r.event.lecturers
         .map((l) => [l.title, l.firstName, l.lastName].filter(Boolean).join(' '))
@@ -644,6 +671,9 @@ export const exportService = {
         orderBy: { name: 'asc' },
       }),
     ])
+
+    // Postgres runs a C collation, so order in German here.
+    infoMarkets.sort((a, b) => compareDe(a.name, b.name))
 
     const { crossProgram, clusterGroups } = groupEventsForBooklet(events)
     return { crossProgram, clusterGroups, infoMarkets }
@@ -675,10 +705,18 @@ export const exportService = {
    * All buildings with their rooms, for dropdown population.
    */
   async buildingsWithRooms() {
-    return prisma.building.findMany({
+    const buildings = await prisma.building.findMany({
       include: { rooms: { orderBy: { name: 'asc' } } },
       orderBy: { name: 'asc' },
     })
+
+    // Postgres runs a C collation, so order in German here.
+    buildings.sort((a, b) => compareDe(a.name, b.name))
+    for (const building of buildings) {
+      building.rooms.sort((a, b) => compareDe(a.name, b.name))
+    }
+
+    return buildings
   },
 }
 

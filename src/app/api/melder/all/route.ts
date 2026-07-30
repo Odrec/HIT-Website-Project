@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
+import { compareDe } from '@/lib/sort-de'
 
 export async function GET() {
   const session = await auth()
@@ -14,5 +15,14 @@ export async function GET() {
     },
     orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
   })
+
+  // Postgres runs a C collation, so order in German here (matches
+  // /api/melder/options, the direct sibling of this list).
+  melders.sort(
+    (a, b) =>
+      compareDe(a.lastName ?? '', b.lastName ?? '') ||
+      compareDe(a.firstName ?? '', b.firstName ?? '')
+  )
+
   return NextResponse.json(melders)
 }

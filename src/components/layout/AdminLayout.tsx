@@ -20,6 +20,7 @@ import {
   Bus,
   BadgeCheck,
   ClipboardCheck,
+  Type,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -66,6 +67,12 @@ const sidebarItems = [
     title: 'Titel',
     href: '/admin/titles',
     icon: BadgeCheck,
+    adminOnly: true,
+  },
+  {
+    title: 'Texte',
+    href: '/admin/texte',
+    icon: Type,
     adminOnly: true,
   },
   {
@@ -237,7 +244,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-white px-4 lg:hidden">
           <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen">

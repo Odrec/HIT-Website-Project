@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 import { cacheGet, cacheSet } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { compareDe } from '@/lib/sort-de'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=600, stale-while-revalidate=1800'
 
@@ -32,6 +33,10 @@ export async function GET() {
         sortOrder: true,
       },
     })
+
+    // Postgres runs a C collation. sortOrder stays primary; only the name
+    // tie-break is re-done in German here.
+    clusters.sort((a, b) => a.sortOrder - b.sortOrder || compareDe(a.name, b.name))
 
     // BOTH-institution clusters surface in both sections so the admin selector's
     // "Universität & Hochschule" choice does something visible (a previous gap

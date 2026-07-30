@@ -117,13 +117,6 @@ function LoginForm() {
             ← Zurück zur Startseite
           </Link>
         </div>
-
-        {/* Development hint */}
-        <div className="mt-6 rounded-lg bg-gray-100 p-3 text-xs text-gray-500">
-          <p className="font-medium">Entwickler-Hinweis:</p>
-          <p>E-Mail: admin@zsb-os.de</p>
-          <p>Passwort: admin123</p>
-        </div>
       </CardContent>
     </Card>
   )

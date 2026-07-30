@@ -6,6 +6,7 @@ import path from 'path'
 import { auth } from '@/auth'
 import { exportService } from '@/services/export-service'
 import { formatEventTime } from '@/lib/event-time'
+import { compareDe } from '@/lib/sort-de'
 
 const { Document, Page, Text, View, StyleSheet, Image: PDFImage } = ReactPDF
 
@@ -302,7 +303,7 @@ function renderEventEntry(event: any) {
   const programs = event.studyPrograms
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .map((esp: any) => esp.studyProgram.name)
-    .sort()
+    .sort(compareDe)
     .join(', ')
 
   const description = event.description

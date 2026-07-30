@@ -16,4 +16,4 @@ Unter **Veranstaltungen** im Admin-Bereich sehen Sie Ihre eigenen Einträge. Kli
 
 ## Eigene Veranstaltungen verwalten
 
-Sie sehen ausschließlich Ihre eigenen Veranstaltungen in der Liste. Zum Löschen wenden Sie sich bitte an das HIT-Team (hit@zsb-os.de).
+Sie sehen ausschließlich Ihre eigenen Veranstaltungen in der Liste. Sie können eine eigene Veranstaltung selbst löschen — über das **„…"-Menü** in der Liste oder die Schaltfläche **Löschen** auf der Bearbeiten-Seite —, solange die Anmeldefrist noch nicht abgelaufen ist. Nach Ablauf der Anmeldefrist ist das Löschen nur noch durch eine Administratorin oder einen Administrator möglich; wenden Sie sich in diesem Fall an das HIT-Team (hit@zsb-os.de).

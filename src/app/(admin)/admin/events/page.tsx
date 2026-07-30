@@ -13,8 +13,6 @@ import {
   Pencil,
   Copy,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
   Calendar,
   MapPin,
   GraduationCap,
@@ -22,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Pagination } from '@/components/ui/pagination'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -97,6 +96,7 @@ function EventsListContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // Fetch deadline status for organizers
   useEffect(() => {
@@ -156,21 +156,42 @@ function EventsListContent() {
     }
   }
 
+  // Single place to open/close the delete dialog so `deleteError` can never
+  // leak into a later open — every close path (Abbrechen, overlay/Escape via
+  // onOpenChange, success) and open path (row menu) routes through these.
+  const openDeleteDialog = (evt: Event) => {
+    setEventToDelete(evt)
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setDeleteError(null)
+  }
+
   const handleDelete = async () => {
     if (!eventToDelete) return
 
     setDeleting(true)
+    setDeleteError(null)
     try {
       const res = await fetch(`/api/events/${eventToDelete.id}`, {
         method: 'DELETE',
       })
       if (res.ok) {
-        setDeleteDialogOpen(false)
+        closeDeleteDialog()
         setEventToDelete(null)
         fetchEvents()
+        return
       }
+      // Without this the dialog used to fail silently and deletion looked
+      // like it simply did not exist.
+      const body = await res.json().catch(() => null)
+      setDeleteError(body?.error || 'Veranstaltung konnte nicht gelöscht werden.')
     } catch (error) {
       console.error('Error deleting event:', error)
+      setDeleteError('Netzwerkfehler. Bitte erneut versuchen.')
     } finally {
       setDeleting(false)
     }
@@ -307,34 +328,20 @@ function EventsListContent() {
           full list and the follow-up pages are reachable without scrolling past
           every card. */}
       {!loading && total > 0 && (
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500">
+        <>
+          <p className="text-sm text-gray-500 mb-4">
             {total} {total === 1 ? 'Veranstaltung' : 'Veranstaltungen'}
-            {totalPages > 1 && ` · Seite ${page} von ${totalPages}`}
           </p>
           {totalPages > 1 && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Zurück
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                Weiter
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={total}
+              hideSummary
+              onPageChange={setPage}
+            />
           )}
-        </div>
+        </>
       )}
 
       {/* Events List */}
@@ -449,10 +456,7 @@ function EventsListContent() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-red-600"
-                          onClick={() => {
-                            setEventToDelete(event)
-                            setDeleteDialogOpen(true)
-                          }}
+                          onClick={() => openDeleteDialog(event)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Löschen
@@ -468,36 +472,13 @@ function EventsListContent() {
       </Card>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Seite {page} von {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Zurück
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              Weiter
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} totalItems={total} onPageChange={setPage} />
 
       {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => (open ? setDeleteDialogOpen(true) : closeDeleteDialog())}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Veranstaltung löschen</DialogTitle>
@@ -506,12 +487,13 @@ function EventsListContent() {
               löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
+          {deleteError && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {deleteError}
+            </p>
+          )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
-            >
+            <Button variant="outline" onClick={closeDeleteDialog} disabled={deleting}>
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>

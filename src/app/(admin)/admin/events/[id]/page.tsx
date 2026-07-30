@@ -4,8 +4,17 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { ChevronLeft, Loader2, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, Loader2, CheckCircle2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { EventForm } from '@/components/events/EventForm'
 import type { EventFormValues } from '@/lib/validations/event'
 import { Affiliation } from '@/types/events'
@@ -47,6 +56,7 @@ interface EventData {
   }[]
   studyPrograms: { studyProgramId: string }[]
   infoMarkets: { marketId: string }[]
+  melder: { userId: string | null } | null
   sourceEventId: string | null
   sourceEvent: {
     id: string
@@ -66,6 +76,14 @@ export default function EditEventPage() {
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
+  const isOrganizer = session?.user?.role === 'ORGANIZER'
+  const [deadlinePassed, setDeadlinePassed] = useState(false)
+
+  // Delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
   useEffect(() => {
     async function fetchEvent() {
       try {
@@ -84,6 +102,56 @@ export default function EditEventPage() {
 
     fetchEvent()
   }, [id])
+
+  // Fetch deadline status for organizers — same source as the events list page.
+  useEffect(() => {
+    if (!isOrganizer) return
+    fetch('/api/settings/deadline')
+      .then((r) => r.json())
+      .then((info) => {
+        setDeadlinePassed(info.passed)
+      })
+      .catch(() => {})
+  }, [isOrganizer])
+
+  const isOwner = event?.melder?.userId === session?.user?.id
+  const canDelete = session?.user?.role === 'ADMIN' || (isOwner && !deadlinePassed)
+
+  // Single place to open/close the delete dialog so `deleteError` can never
+  // leak into a later open — every close path (Abbrechen, overlay/Escape via
+  // onOpenChange) and the open path (the trigger button) routes through these.
+  const openDeleteDialog = () => {
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setDeleteError(null)
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const res = await fetch(`/api/events/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        router.push('/admin/events')
+        return
+      }
+      // Without this the dialog used to fail silently and deletion looked
+      // like it simply did not exist.
+      const body = await res.json().catch(() => null)
+      setDeleteError(body?.error || 'Veranstaltung konnte nicht gelöscht werden.')
+    } catch (err) {
+      console.error('Error deleting event:', err)
+      setDeleteError('Netzwerkfehler. Bitte erneut versuchen.')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const handleSubmit = async (data: EventFormValues) => {
     setIsSubmitting(true)
@@ -244,6 +312,53 @@ export default function EditEventPage() {
         isAdmin={session?.user?.role === 'ADMIN'}
         sourceEvent={sourceEventProp}
       />
+
+      {canDelete && (
+        <Card className="mt-6 border-red-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-red-700">Veranstaltung löschen</CardTitle>
+            <CardDescription className="text-xs">
+              Die Veranstaltung wird endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht
+              werden.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="destructive" onClick={openDeleteDialog}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Veranstaltung löschen
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Delete Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => (open ? setDeleteDialogOpen(true) : closeDeleteDialog())}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Veranstaltung löschen</DialogTitle>
+            <DialogDescription>
+              Sind Sie sicher, dass Sie die Veranstaltung <strong>{event.title}</strong> löschen
+              möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {deleteError}
+            </p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={closeDeleteDialog} disabled={deleting}>
+              Abbrechen
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Löschen...' : 'Löschen'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

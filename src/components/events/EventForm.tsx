@@ -100,6 +100,12 @@ export function EventForm({
   // Melder state (not part of form schema, display-only)
   const [melderData, setMelderData] = useState<MelderData>(defaultMelderData)
   const [melderId, setMelderId] = useState<string | null>((initialData?.melderId as string) || null)
+  // Latched on mount, exactly like MelderSection's former isEditMode. Required
+  // because the create-mode path auto-links the current user's profile, which
+  // would silently overwrite the event's original Melder on edit (regression).
+  // MelderSection receives this as `readOnly` so there is a single source of
+  // truth shared with the persist guard below.
+  const [isMelderReadOnly] = useState(() => Boolean(initialData?.melderId))
 
   // Date/time separate state for combining on submit
   const [dateStr, setDateStr] = useState('')
@@ -236,11 +242,12 @@ export function EventForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchEventType])
 
-  // Update melderId in form when melder changes
+  // Update melderId in form when melder changes. Must track unconditionally
+  // (including the empty string from "Neue Melder*in anlegen") — otherwise a
+  // reset after an auto-fill/pick leaves the RHF field carrying the stale id
+  // while the visible fields are blank. The schema allows '' (see event.ts).
   useEffect(() => {
-    if (melderId) {
-      setValue('melderId', melderId)
-    }
+    setValue('melderId', melderId ?? '')
   }, [melderId, setValue])
 
   // "Dozent 1 = Melder_in" — opt-in shortcut. When checked, mirror the Melder
@@ -320,14 +327,20 @@ export function EventForm({
       }
     }
 
-    // If the form has free-form Melder data but no linked Melder id yet,
-    // upsert by email so the new event can link to a persisted Melder.
-    // In edit mode (melderId already present), MelderSection is read-only and
-    // no upsert is needed.
+    // Persist whenever the section was editable. In edit mode MelderSection is
+    // read-only and the event keeps its original Melder untouched; otherwise
+    // upsert-by-email lands on the picked record, so a correction applies to
+    // all of that person's events.
     const trimmedFirst = melderData.firstName.trim()
     const trimmedLast = melderData.lastName.trim()
     const trimmedEmail = melderData.email.trim()
-    if (!melderId && trimmedFirst && trimmedLast && trimmedEmail && melderData.affiliation) {
+    if (
+      !isMelderReadOnly &&
+      trimmedFirst &&
+      trimmedLast &&
+      trimmedEmail &&
+      melderData.affiliation
+    ) {
       const res = await fetch('/api/melder/upsert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -390,7 +403,7 @@ export function EventForm({
           )}
         </div>
       )}
-      <fieldset disabled={isLocked || false}>
+      <fieldset disabled={isLocked || false} className="min-w-0">
         {/* Row 1: Melder + Veranstaltungsinfo */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Section 1: Melder-Profil */}
@@ -400,6 +413,8 @@ export function EventForm({
             melderId={melderId}
             onMelderIdChange={setMelderId}
             titleOptions={titleOptions}
+            canPickExisting={isAdmin}
+            readOnly={isMelderReadOnly}
           />
 
           {/* Section 2: Veranstaltungsinfo */}
@@ -721,7 +736,7 @@ export function EventForm({
           {/* Section 6: Dozierende */}
           <Card className="border-l-4 border-l-[#22c55e]">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between text-base">
+              <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
                 <span>Dozierende</span>
                 <Button
                   type="button"
@@ -906,7 +921,7 @@ export function EventForm({
         {/* Organizers (kept as-is) */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between text-base">
+            <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
               <span>Ansprechpersonen (intern)</span>
               <Button
                 type="button"
