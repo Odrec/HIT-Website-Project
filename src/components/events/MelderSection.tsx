@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -69,6 +69,12 @@ export function MelderSection({
 }: MelderSectionProps) {
   const [loaded, setLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  // Set as soon as the user picks or resets, so the in-flight own-profile
+  // auto-fill fetch (below) can tell it arrived too late and must not
+  // overwrite what the user already chose. A ref (not state) because it must
+  // be readable synchronously inside the fetch's .then() callback without
+  // retriggering the effect.
+  const userInteractedRef = useRef(false)
 
   const populateFrom = (melder: {
     firstName?: string | null
@@ -99,11 +105,13 @@ export function MelderSection({
   // this does NOT turn the fields read-only — the editor can still correct
   // them, and EventForm's upsert-by-email then updates the linked record.
   const handlePickExisting = (melder: MelderOption) => {
+    userInteractedRef.current = true
     onMelderIdChange(melder.id)
     populateFrom(melder)
   }
 
   const handleResetMelder = () => {
+    userInteractedRef.current = true
     onMelderIdChange('')
     onChange({ ...defaultMelderData })
   }
@@ -162,6 +170,11 @@ export function MelderSection({
       fetch('/api/melder', { signal: controller.signal })
         .then((res) => res.json())
         .then((melder) => {
+          // The admin may have picked an existing Melder*in or clicked "Neue
+          // Melder*in anlegen" while this request was still in flight. Once
+          // that happens, applying the own-profile auto-fill would silently
+          // overwrite their choice, so bail out instead.
+          if (userInteractedRef.current) return
           if (melder?.id) {
             onMelderIdChange(melder.id)
             populate(melder)

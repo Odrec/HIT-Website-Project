@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2, User, Mail, Phone, Building } from 'lucide-react'
@@ -97,8 +96,6 @@ export function EventForm({
       .then(setDeadlineInfo)
       .catch(console.error)
   }, [])
-
-  const { data: session } = useSession()
 
   // Melder state (not part of form schema, display-only)
   const [melderData, setMelderData] = useState<MelderData>(defaultMelderData)
@@ -245,11 +242,12 @@ export function EventForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchEventType])
 
-  // Update melderId in form when melder changes
+  // Update melderId in form when melder changes. Must track unconditionally
+  // (including the empty string from "Neue Melder*in anlegen") — otherwise a
+  // reset after an auto-fill/pick leaves the RHF field carrying the stale id
+  // while the visible fields are blank. The schema allows '' (see event.ts).
   useEffect(() => {
-    if (melderId) {
-      setValue('melderId', melderId)
-    }
+    setValue('melderId', melderId ?? '')
   }, [melderId, setValue])
 
   // "Dozent 1 = Melder_in" — opt-in shortcut. When checked, mirror the Melder
@@ -415,7 +413,7 @@ export function EventForm({
             melderId={melderId}
             onMelderIdChange={setMelderId}
             titleOptions={titleOptions}
-            canPickExisting={session?.user?.role === 'ADMIN'}
+            canPickExisting={isAdmin}
             readOnly={isMelderReadOnly}
           />
 
