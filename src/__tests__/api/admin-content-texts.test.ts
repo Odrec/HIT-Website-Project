@@ -4,9 +4,10 @@ const mockAuth = vi.fn()
 const mockFindMany = vi.fn()
 const mockUpsert = vi.fn()
 const mockDeleteMany = vi.fn()
+const mockRevalidatePath = vi.fn()
 
 vi.mock('@/auth', () => ({ auth: () => mockAuth() }))
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('next/cache', () => ({ revalidatePath: (...a: unknown[]) => mockRevalidatePath(...a) }))
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
     contentText: {
@@ -73,6 +74,8 @@ describe('/api/admin/content-texts', () => {
       create: { key: 'home.hero.title', value: 'Neuer Titel', updatedBy: 'a1' },
       update: { value: 'Neuer Titel', updatedBy: 'a1' },
     })
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/home')
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/')
   })
 
   it('DELETE resets a slot to its default', async () => {
@@ -83,5 +86,7 @@ describe('/api/admin/content-texts', () => {
     })
     expect((await DELETE(req as never)).status).toBe(200)
     expect(mockDeleteMany).toHaveBeenCalledWith({ where: { key: 'home.hero.title' } })
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/home')
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/')
   })
 })
