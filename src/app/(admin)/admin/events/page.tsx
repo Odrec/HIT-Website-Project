@@ -97,6 +97,7 @@ function EventsListContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // Fetch deadline status for organizers
   useEffect(() => {
@@ -160,6 +161,7 @@ function EventsListContent() {
     if (!eventToDelete) return
 
     setDeleting(true)
+    setDeleteError(null)
     try {
       const res = await fetch(`/api/events/${eventToDelete.id}`, {
         method: 'DELETE',
@@ -168,9 +170,15 @@ function EventsListContent() {
         setDeleteDialogOpen(false)
         setEventToDelete(null)
         fetchEvents()
+        return
       }
+      // Without this the dialog used to fail silently and deletion looked
+      // like it simply did not exist.
+      const body = await res.json().catch(() => null)
+      setDeleteError(body?.error || 'Veranstaltung konnte nicht gelöscht werden.')
     } catch (error) {
       console.error('Error deleting event:', error)
+      setDeleteError('Netzwerkfehler. Bitte erneut versuchen.')
     } finally {
       setDeleting(false)
     }
@@ -497,7 +505,13 @@ function EventsListContent() {
       )}
 
       {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) setDeleteError(null)
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Veranstaltung löschen</DialogTitle>
@@ -506,6 +520,11 @@ function EventsListContent() {
               löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
+          {deleteError && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {deleteError}
+            </p>
+          )}
           <DialogFooter>
             <Button
               variant="outline"
