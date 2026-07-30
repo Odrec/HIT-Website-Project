@@ -222,8 +222,6 @@ export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableE
   return compareByTimeClusterProgram(a, b)
 }
 
-type ProgramGroupable = SortableEvent
-
 type BookletClusterInfo = { name: string; institution: Institution; sortOrder: number }
 
 type BookletEventShape = {
@@ -314,31 +312,6 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
   })
 
   return { crossProgram, clusterGroups }
-}
-
-/**
- * Group events by study-program name. An event linked to N programs appears
- * under each. Events with no program go under "Ohne Studiengang". Each group is
- * time-sorted; the returned object is ordered by program name.
- */
-export function groupEventsByProgram<T extends ProgramGroupable>(events: T[]): Record<string, T[]> {
-  const result: Record<string, T[]> = {}
-  for (const event of events) {
-    const names = new Set<string>()
-    for (const sp of event.studyPrograms) names.add(sp.studyProgram.name)
-    if (names.size === 0) names.add('Ohne Studiengang')
-    for (const name of names) {
-      ;(result[name] ??= []).push(event)
-    }
-  }
-  for (const key of Object.keys(result)) {
-    result[key].sort(compareByTimeClusterProgram)
-  }
-  const sorted: Record<string, T[]> = {}
-  for (const key of Object.keys(result).sort(compareDe)) {
-    sorted[key] = result[key]
-  }
-  return sorted
 }
 
 /**
@@ -483,19 +456,6 @@ export const exportService = {
   async eventsByRoomFlat(): Promise<EventRow[]> {
     const events = await fetchAllEvents()
     return [...events].sort(compareByBuildingRoomTime).map(eventToRow)
-  },
-
-  /**
-   * Events grouped by study-program name, each group time-sorted, as flat rows.
-   */
-  async eventsByStudyProgram(): Promise<Record<string, EventRow[]>> {
-    const events = await fetchAllEvents()
-    const grouped = groupEventsByProgram(events)
-    const out: Record<string, EventRow[]> = {}
-    for (const [name, evs] of Object.entries(grouped)) {
-      out[name] = evs.map(eventToRow)
-    }
-    return out
   },
 
   /**

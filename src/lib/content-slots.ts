@@ -137,5 +137,3 @@ export type ContentSlotKey = (typeof CONTENT_SLOTS)[number]['key']
 export const CONTENT_DEFAULTS: Record<string, string> = Object.fromEntries(
   CONTENT_SLOTS.map((s) => [s.key, s.default])
 )
-
-export const CONTENT_GROUPS: string[] = Array.from(new Set(CONTENT_SLOTS.map((s) => s.group)))
