@@ -117,6 +117,19 @@ export default function EditEventPage() {
   const isOwner = event?.melder?.userId === session?.user?.id
   const canDelete = session?.user?.role === 'ADMIN' || (isOwner && !deadlinePassed)
 
+  // Single place to open/close the delete dialog so `deleteError` can never
+  // leak into a later open — every close path (Abbrechen, overlay/Escape via
+  // onOpenChange) and the open path (the trigger button) routes through these.
+  const openDeleteDialog = () => {
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setDeleteError(null)
+  }
+
   const handleDelete = async () => {
     setDeleting(true)
     setDeleteError(null)
@@ -310,7 +323,7 @@ export default function EditEventPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+            <Button variant="destructive" onClick={openDeleteDialog}>
               <Trash2 className="mr-2 h-4 w-4" />
               Veranstaltung löschen
             </Button>
@@ -321,10 +334,7 @@ export default function EditEventPage() {
       {/* Delete Dialog */}
       <Dialog
         open={deleteDialogOpen}
-        onOpenChange={(open) => {
-          setDeleteDialogOpen(open)
-          if (!open) setDeleteError(null)
-        }}
+        onOpenChange={(open) => (open ? setDeleteDialogOpen(true) : closeDeleteDialog())}
       >
         <DialogContent>
           <DialogHeader>
@@ -340,11 +350,7 @@ export default function EditEventPage() {
             </p>
           )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
-            >
+            <Button variant="outline" onClick={closeDeleteDialog} disabled={deleting}>
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>

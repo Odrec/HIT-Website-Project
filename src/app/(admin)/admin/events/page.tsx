@@ -157,6 +157,20 @@ function EventsListContent() {
     }
   }
 
+  // Single place to open/close the delete dialog so `deleteError` can never
+  // leak into a later open — every close path (Abbrechen, overlay/Escape via
+  // onOpenChange, success) and open path (row menu) routes through these.
+  const openDeleteDialog = (evt: Event) => {
+    setEventToDelete(evt)
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setDeleteError(null)
+  }
+
   const handleDelete = async () => {
     if (!eventToDelete) return
 
@@ -167,7 +181,7 @@ function EventsListContent() {
         method: 'DELETE',
       })
       if (res.ok) {
-        setDeleteDialogOpen(false)
+        closeDeleteDialog()
         setEventToDelete(null)
         fetchEvents()
         return
@@ -457,10 +471,7 @@ function EventsListContent() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-red-600"
-                          onClick={() => {
-                            setEventToDelete(event)
-                            setDeleteDialogOpen(true)
-                          }}
+                          onClick={() => openDeleteDialog(event)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Löschen
@@ -507,10 +518,7 @@ function EventsListContent() {
       {/* Delete Dialog */}
       <Dialog
         open={deleteDialogOpen}
-        onOpenChange={(open) => {
-          setDeleteDialogOpen(open)
-          if (!open) setDeleteError(null)
-        }}
+        onOpenChange={(open) => (open ? setDeleteDialogOpen(true) : closeDeleteDialog())}
       >
         <DialogContent>
           <DialogHeader>
@@ -526,11 +534,7 @@ function EventsListContent() {
             </p>
           )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={deleting}
-            >
+            <Button variant="outline" onClick={closeDeleteDialog} disabled={deleting}>
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
