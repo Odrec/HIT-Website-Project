@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { affiliationLabels, organisationseinheitLabel } from '@/lib/validations/melder'
+import { MelderPicker, type MelderOption } from '@/components/events/MelderPicker'
 
 export interface MelderData {
   firstName: string
@@ -43,6 +44,16 @@ interface MelderSectionProps {
   melderId: string | null
   onMelderIdChange: (id: string) => void
   titleOptions?: string[]
+  /** Show the "existing Melder*in" picker. ADMIN only — see /api/melder/options. */
+  canPickExisting?: boolean
+  /**
+   * Latched on mount from the initial melderId, by EventForm. Required
+   * because the create-mode path auto-links the current user's profile,
+   * which would silently overwrite the event's original Melder on edit
+   * (regression). EventForm computes this once and reuses it for the
+   * persist guard, so there is a single source of truth.
+   */
+  readOnly?: boolean
 }
 
 const MELDER_TITLE_DATALIST_ID = 'melder-title-suggestions'
@@ -53,13 +64,49 @@ export function MelderSection({
   melderId,
   onMelderIdChange,
   titleOptions,
+  canPickExisting = false,
+  readOnly = false,
 }: MelderSectionProps) {
   const [loaded, setLoaded] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
-  // Edit mode is latched on mount from the initial melderId. Required because
-  // the create-mode path auto-links the current user's profile, which would
-  // silently overwrite the event's original Melder on edit (regression).
-  const [isEditMode] = useState(() => Boolean(melderId))
+
+  const populateFrom = (melder: {
+    firstName?: string | null
+    lastName?: string | null
+    title?: string | null
+    email?: string | null
+    phone?: string | null
+    affiliation?: string | null
+    organisationseinheit?: string | null
+    room?: string | null
+    adresse?: string | null
+  }) => {
+    onChange({
+      firstName: melder.firstName || '',
+      lastName: melder.lastName || '',
+      title: melder.title || '',
+      email: melder.email || '',
+      phone: melder.phone || '',
+      affiliation: melder.affiliation || '',
+      organisationseinheit: melder.organisationseinheit || '',
+      room: melder.room || '',
+      adresse: melder.adresse || '',
+    })
+  }
+
+  // Picking an existing Melder links the record and copies its data in.
+  // Because readOnly is latched (in EventForm) from the mount-time melderId,
+  // this does NOT turn the fields read-only — the editor can still correct
+  // them, and EventForm's upsert-by-email then updates the linked record.
+  const handlePickExisting = (melder: MelderOption) => {
+    onMelderIdChange(melder.id)
+    populateFrom(melder)
+  }
+
+  const handleResetMelder = () => {
+    onMelderIdChange('')
+    onChange({ ...defaultMelderData })
+  }
 
   useEffect(() => {
     if (loaded) return
@@ -89,7 +136,7 @@ export function MelderSection({
       })
     }
 
-    if (isEditMode && melderId) {
+    if (readOnly && melderId) {
       fetch(`/api/melder/${melderId}`, { signal: controller.signal })
         .then(async (res) => {
           if (!res.ok) {
@@ -125,13 +172,9 @@ export function MelderSection({
     }
 
     return () => controller.abort()
-  }, [loaded, isEditMode, melderId, onChange, onMelderIdChange])
+  }, [loaded, readOnly, melderId, onChange, onMelderIdChange])
 
   const updateField = (field: keyof MelderData, val: string) => onChange({ ...value, [field]: val })
-  // In edit mode the section is read-only: the linked Melder belongs to the
-  // event's original submitter and must not be swapped for the editor's
-  // profile. Profile changes go through the separate Melder profile page.
-  const readOnly = isEditMode
 
   return (
     <Card className="border-l-4 border-l-hit-uni-500">
@@ -140,7 +183,7 @@ export function MelderSection({
         <CardDescription className="text-xs">
           {readOnly
             ? 'Ursprüngliche Einreicher-Daten. Nicht änderbar beim Bearbeiten.'
-            : 'Wird automatisch aus Ihrem Profil ausgefüllt. Änderungen gelten nur für diese Veranstaltung.'}
+            : 'Bestehende Melder*in übernehmen oder Daten neu eingeben. Änderungen aktualisieren den Melder-Datensatz.'}
         </CardDescription>
         {loadError && (
           <p className="mt-1 text-xs text-red-600" role="alert">
@@ -149,6 +192,14 @@ export function MelderSection({
         )}
       </CardHeader>
       <CardContent className="space-y-3">
+        {canPickExisting && !readOnly && (
+          <MelderPicker
+            selectedId={melderId}
+            onSelect={handlePickExisting}
+            onReset={handleResetMelder}
+            disabled={readOnly}
+          />
+        )}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2, User, Mail, Phone, Building } from 'lucide-react'
@@ -97,9 +98,17 @@ export function EventForm({
       .catch(console.error)
   }, [])
 
+  const { data: session } = useSession()
+
   // Melder state (not part of form schema, display-only)
   const [melderData, setMelderData] = useState<MelderData>(defaultMelderData)
   const [melderId, setMelderId] = useState<string | null>((initialData?.melderId as string) || null)
+  // Latched on mount, exactly like MelderSection's former isEditMode. Required
+  // because the create-mode path auto-links the current user's profile, which
+  // would silently overwrite the event's original Melder on edit (regression).
+  // MelderSection receives this as `readOnly` so there is a single source of
+  // truth shared with the persist guard below.
+  const [isMelderReadOnly] = useState(() => Boolean(initialData?.melderId))
 
   // Date/time separate state for combining on submit
   const [dateStr, setDateStr] = useState('')
@@ -320,14 +329,20 @@ export function EventForm({
       }
     }
 
-    // If the form has free-form Melder data but no linked Melder id yet,
-    // upsert by email so the new event can link to a persisted Melder.
-    // In edit mode (melderId already present), MelderSection is read-only and
-    // no upsert is needed.
+    // Persist whenever the section was editable. In edit mode MelderSection is
+    // read-only and the event keeps its original Melder untouched; otherwise
+    // upsert-by-email lands on the picked record, so a correction applies to
+    // all of that person's events.
     const trimmedFirst = melderData.firstName.trim()
     const trimmedLast = melderData.lastName.trim()
     const trimmedEmail = melderData.email.trim()
-    if (!melderId && trimmedFirst && trimmedLast && trimmedEmail && melderData.affiliation) {
+    if (
+      !isMelderReadOnly &&
+      trimmedFirst &&
+      trimmedLast &&
+      trimmedEmail &&
+      melderData.affiliation
+    ) {
       const res = await fetch('/api/melder/upsert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -400,6 +415,8 @@ export function EventForm({
             melderId={melderId}
             onMelderIdChange={setMelderId}
             titleOptions={titleOptions}
+            canPickExisting={session?.user?.role === 'ADMIN'}
+            readOnly={isMelderReadOnly}
           />
 
           {/* Section 2: Veranstaltungsinfo */}
