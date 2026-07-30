@@ -20,6 +20,7 @@ import {
   Bus,
   BadgeCheck,
   ClipboardCheck,
+  Type,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -66,6 +67,12 @@ const sidebarItems = [
     title: 'Titel',
     href: '/admin/titles',
     icon: BadgeCheck,
+    adminOnly: true,
+  },
+  {
+    title: 'Texte',
+    href: '/admin/texte',
+    icon: Type,
     adminOnly: true,
   },
   {
