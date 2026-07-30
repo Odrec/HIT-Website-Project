@@ -21,9 +21,13 @@ import { prisma } from '@/lib/db/prisma'
 
 const USE_ANIMATED_BANNER = process.env.NEXT_PUBLIC_ANIMATED_BANNER === 'true'
 
-// The countdown is day-precision; an hour is short enough that it is never
-// visibly stale and long enough to keep the homepage cheap.
-export const revalidate = 3600
+// Reads the active edition, the event count, and the content slots per
+// request, like the other DB-backed public pages (e.g. events/cluster/[id],
+// events/lehramt). A static/ISR prerender would bake this page in at
+// `npm run build` time, when the builder has no DATABASE_URL — that would
+// ship a homepage with no date badge, no countdown, and a '100+' fallback
+// count baked into the image until the cache entry next revalidates.
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   // getActiveEdition() throws when no edition is ACTIVE (e.g. a fresh
