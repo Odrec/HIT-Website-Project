@@ -48,6 +48,12 @@ export interface LecturerRow {
   anzahlVeranstaltungen: number
 }
 
+/** One row per (Studiengang × Veranstaltung) pair, used by the Studiengang export. */
+export interface StudyProgramEventRow extends EventRow {
+  studiengang: string
+  studienfeld: string
+}
+
 export interface InfomarktRow {
   infomarkt: string
   standort: string
@@ -332,6 +338,24 @@ export function groupEventsByProgram<T extends ProgramGroupable>(events: T[]): R
   return sorted
 }
 
+/**
+ * Group flat Studiengang rows by their programme name, keys ordered in German.
+ * Row order inside a group is preserved from the already-sorted input.
+ */
+export function groupFlatRowsByProgram(
+  rows: StudyProgramEventRow[]
+): Record<string, StudyProgramEventRow[]> {
+  const result: Record<string, StudyProgramEventRow[]> = {}
+  for (const r of rows) {
+    ;(result[r.studiengang] ??= []).push(r)
+  }
+  const sorted: Record<string, StudyProgramEventRow[]> = {}
+  for (const key of Object.keys(result).sort(compareDe)) {
+    sorted[key] = result[key]
+  }
+  return sorted
+}
+
 type LecturerRecord = {
   firstName: string
   lastName: string
@@ -469,6 +493,50 @@ export const exportService = {
       out[name] = evs.map(eventToRow)
     }
     return out
+  },
+
+  /**
+   * Flat Studiengang view: one row per (Studiengang × Veranstaltung) pair,
+   * carrying the programme's Studienfeld(er). An event linked to N programmes
+   * yields N rows; events without a programme land under "Ohne Studiengang".
+   *
+   * Feeds both the "Gesamtliste" sheet and the per-programme sheets, so the two
+   * can never disagree.
+   */
+  async eventsByStudyProgramFlat(): Promise<StudyProgramEventRow[]> {
+    const events = await fetchAllEvents()
+    const rows: StudyProgramEventRow[] = []
+
+    for (const event of events) {
+      const base = eventToRow(event)
+
+      if (event.studyPrograms.length === 0) {
+        rows.push({ ...base, studiengang: 'Ohne Studiengang', studienfeld: '' })
+        continue
+      }
+
+      for (const esp of event.studyPrograms) {
+        rows.push({
+          ...base,
+          studiengang: esp.studyProgram.name,
+          studienfeld: esp.studyProgram.clusters
+            .map((c) => c.name)
+            .sort(compareDe)
+            .join(', '),
+        })
+      }
+    }
+
+    rows.sort(
+      (a, b) =>
+        compareDe(a.studiengang, b.studiengang) ||
+        // uhrzeit is "HH:MM – HH:MM"; a plain lexicographic compare is already
+        // chronological. compareDe is deliberately not used here because its
+        // numeric:true option would reorder the digits and break the time sort.
+        a.uhrzeit.localeCompare(b.uhrzeit) ||
+        compareDe(a.titel, b.titel)
+    )
+    return rows
   },
 
   /**

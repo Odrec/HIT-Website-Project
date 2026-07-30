@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import { auth } from '@/auth'
-import { exportService } from '@/services/export-service'
-import type { EventRow, MelderRow, LecturerRow, InfomarktRow } from '@/services/export-service'
+import { exportService, groupFlatRowsByProgram } from '@/services/export-service'
+import type {
+  EventRow,
+  MelderRow,
+  LecturerRow,
+  InfomarktRow,
+  StudyProgramEventRow,
+} from '@/services/export-service'
 import { uniqueSheetName } from '@/lib/excel-sheet-names'
 
 // ---------------------------------------------------------------------------
@@ -87,6 +93,19 @@ const INFOMARKT_COLUMNS: Partial<ExcelJS.Column>[] = [
   { header: 'Dozierende', key: 'dozent', width: 30 },
 ]
 
+/** Gesamtliste in the Studiengang workbook: Studiengang and Studienfeld lead. */
+const STUDIENGANG_OVERVIEW_COLUMNS: Partial<ExcelJS.Column>[] = [
+  { header: 'Studiengang', key: 'studiengang', width: 35 },
+  { header: 'Studienfeld', key: 'studienfeld', width: 30 },
+  ...EVENT_COLUMNS,
+]
+
+/** Per-programme sheets: the Studiengang is constant, so only Studienfeld leads. */
+const STUDIENGANG_SHEET_COLUMNS: Partial<ExcelJS.Column>[] = [
+  { header: 'Studienfeld', key: 'studienfeld', width: 30 },
+  ...EVENT_COLUMNS,
+]
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -123,7 +142,7 @@ function addTitleAndHeaders(
 /** Add data rows to a worksheet starting after the header (row 3+). */
 function addDataRows(
   sheet: ExcelJS.Worksheet,
-  rows: (EventRow | MelderRow | LecturerRow | InfomarktRow)[]
+  rows: (EventRow | MelderRow | LecturerRow | InfomarktRow | StudyProgramEventRow)[]
 ) {
   for (const row of rows) {
     sheet.addRow(row)
@@ -174,7 +193,7 @@ export async function GET(request: NextRequest) {
           name: string,
           title: string,
           columns: Partial<ExcelJS.Column>[],
-          rows: (EventRow | MelderRow | LecturerRow | InfomarktRow)[]
+          rows: (EventRow | MelderRow | LecturerRow | InfomarktRow | StudyProgramEventRow)[]
         ) => {
           const sheet = workbook.addWorksheet(name)
           addTitleAndHeaders(sheet, title, columns)
@@ -228,11 +247,23 @@ export async function GET(request: NextRequest) {
       }
 
       case 'events-studiengang': {
-        const grouped = await exportService.eventsByStudyProgram()
-        for (const [program, rows] of Object.entries(grouped)) {
+        const rows = await exportService.eventsByStudyProgramFlat()
+
+        // Sheet 1: the complete list, so the workbook is usable without
+        // clicking through every programme tab.
+        const overview = workbook.addWorksheet(uniqueSheetName(takenSheetNames, 'Gesamtliste'))
+        addTitleAndHeaders(
+          overview,
+          'HIT – Veranstaltungen nach Studiengang (Gesamtliste)',
+          STUDIENGANG_OVERVIEW_COLUMNS
+        )
+        addDataRows(overview, rows)
+
+        // Then one sheet per programme that actually has events.
+        for (const [program, programRows] of Object.entries(groupFlatRowsByProgram(rows))) {
           const sheet = workbook.addWorksheet(uniqueSheetName(takenSheetNames, program))
-          addTitleAndHeaders(sheet, `HIT – ${program}`, EVENT_COLUMNS)
-          addDataRows(sheet, rows)
+          addTitleAndHeaders(sheet, `HIT – ${program}`, STUDIENGANG_SHEET_COLUMNS)
+          addDataRows(sheet, programRows)
         }
         break
       }
