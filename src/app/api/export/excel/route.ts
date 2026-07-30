@@ -3,6 +3,7 @@ import ExcelJS from 'exceljs'
 import { auth } from '@/auth'
 import { exportService } from '@/services/export-service'
 import type { EventRow, MelderRow, LecturerRow, InfomarktRow } from '@/services/export-service'
+import { uniqueSheetName } from '@/lib/excel-sheet-names'
 
 // ---------------------------------------------------------------------------
 // Valid views and filename mapping
@@ -90,11 +91,6 @@ const INFOMARKT_COLUMNS: Partial<ExcelJS.Column>[] = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Sanitise a string for use as an Excel sheet name (max 31 chars, no special chars). */
-function sanitizeSheetName(name: string): string {
-  return name.replace(/[*?:/\\[\]]/g, '-').slice(0, 31)
-}
-
 /** Add a title row (row 1) and a styled header row (row 2) to a worksheet. */
 function addTitleAndHeaders(
   sheet: ExcelJS.Worksheet,
@@ -159,6 +155,9 @@ export async function GET(request: NextRequest) {
 
     const workbook = new ExcelJS.Workbook()
 
+    // Tracks worksheet names already used, so grouped views cannot collide.
+    const takenSheetNames = new Set<string>()
+
     switch (view) {
       case 'all-combined': {
         const [gesamt, az, time, room, melderRows, lecturerRows, infomarkt] = await Promise.all([
@@ -211,7 +210,7 @@ export async function GET(request: NextRequest) {
       case 'events-cluster': {
         const grouped = await exportService.eventsByCluster()
         for (const [cluster, rows] of Object.entries(grouped)) {
-          const sheet = workbook.addWorksheet(sanitizeSheetName(cluster))
+          const sheet = workbook.addWorksheet(uniqueSheetName(takenSheetNames, cluster))
           addTitleAndHeaders(sheet, `HIT – ${cluster}`, EVENT_COLUMNS)
           addDataRows(sheet, rows)
         }
@@ -221,7 +220,7 @@ export async function GET(request: NextRequest) {
       case 'events-building': {
         const grouped = await exportService.eventsByBuilding()
         for (const [building, rows] of Object.entries(grouped)) {
-          const sheet = workbook.addWorksheet(sanitizeSheetName(building))
+          const sheet = workbook.addWorksheet(uniqueSheetName(takenSheetNames, building))
           addTitleAndHeaders(sheet, `HIT – ${building}`, EVENT_COLUMNS)
           addDataRows(sheet, rows)
         }
@@ -231,7 +230,7 @@ export async function GET(request: NextRequest) {
       case 'events-studiengang': {
         const grouped = await exportService.eventsByStudyProgram()
         for (const [program, rows] of Object.entries(grouped)) {
-          const sheet = workbook.addWorksheet(sanitizeSheetName(program))
+          const sheet = workbook.addWorksheet(uniqueSheetName(takenSheetNames, program))
           addTitleAndHeaders(sheet, `HIT – ${program}`, EVENT_COLUMNS)
           addDataRows(sheet, rows)
         }
