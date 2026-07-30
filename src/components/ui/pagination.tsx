@@ -79,6 +79,12 @@ interface PaginationProps {
   /** Suppress the summary line when a parent already shows the count. */
   hideSummary?: boolean
   onPageChange: (page: number) => void
+  /**
+   * Applied to the component's own root, not a wrapper the caller renders —
+   * since the component returns null for a single page, spacing passed here
+   * never leaves a stray gap the way a caller-side wrapper div would.
+   */
+  className?: string
 }
 
 export function Pagination({
@@ -88,6 +94,7 @@ export function Pagination({
   itemLabel = 'Veranstaltungen',
   hideSummary = false,
   onPageChange,
+  className,
 }: PaginationProps) {
   if (totalPages <= 1) return null
 
@@ -95,7 +102,7 @@ export function Pagination({
 
   return (
     <nav
-      className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between"
+      className={cn('flex flex-col items-center gap-3 sm:flex-row sm:justify-between', className)}
       aria-label="Blätterung"
     >
       {!hideSummary && (

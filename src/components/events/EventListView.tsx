@@ -306,14 +306,13 @@ export function EventListView({
               <EventCard key={e.id} event={e} viewMode={viewMode} />
             ))}
           </div>
-          <div className="mt-8">
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              totalItems={totalEvents}
-              onPageChange={setPage}
-            />
-          </div>
+          <Pagination
+            className="mt-8"
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalEvents}
+            onPageChange={setPage}
+          />
         </>
       )}
     </>
