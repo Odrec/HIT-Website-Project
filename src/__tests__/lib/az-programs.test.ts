@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { filterProgramsByInstitution, groupProgramsByLetter } from '@/lib/az-programs'
+import {
+  filterProgramsByInstitution,
+  groupProgramsByLetter,
+  type AZProgram,
+} from '@/lib/az-programs'
 
 const programs = [
   { id: '1', name: 'Anglistik', institution: 'UNI' as const },
@@ -26,5 +30,24 @@ describe('groupProgramsByLetter', () => {
     const groups = groupProgramsByLetter(programs)
     expect(groups.map((g) => g.letter)).toEqual(['A', 'B'])
     expect(groups[0].programs.map((p) => p.name)).toEqual(['Anglistik', 'Architektur'])
+  })
+})
+
+describe('groupProgramsByLetter — German collation', () => {
+  const p = (id: string, name: string): AZProgram => ({ id, name, institution: 'UNI' })
+
+  it('files Ökotrophologie under O, not in its own section', () => {
+    const groups = groupProgramsByLetter([p('1', 'Ökotrophologie'), p('2', 'Osteologie')])
+    expect(groups.map((g) => g.letter)).toEqual(['O'])
+    expect(groups[0].programs.map((x) => x.name)).toEqual(['Ökotrophologie', 'Osteologie'])
+  })
+
+  it('does not place umlaut sections after Z', () => {
+    const groups = groupProgramsByLetter([
+      p('1', 'Zahnmedizin'),
+      p('2', 'Ästhetik'),
+      p('3', 'Übersetzen'),
+    ])
+    expect(groups.map((g) => g.letter)).toEqual(['A', 'U', 'Z'])
   })
 })

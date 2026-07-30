@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/db/prisma'
 import type { Institution } from '@/types/events'
+import { compareDe, compareDeBy } from '@/lib/sort-de'
 
 /**
  * Study Program service for queries
@@ -11,7 +12,7 @@ export const studyProgramService = {
    * List all study programs
    */
   async list(filters?: { institution?: Institution }) {
-    return prisma.studyProgram.findMany({
+    const programs = await prisma.studyProgram.findMany({
       where: filters?.institution ? { institution: filters.institution } : undefined,
       include: {
         clusters: true,
@@ -19,6 +20,11 @@ export const studyProgramService = {
       },
       orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
+    // Postgres runs a C collation (alpine/musl), so re-sort in German order.
+    // Institution stays the primary key of the ordering.
+    return programs.sort(
+      (a, b) => a.institution.localeCompare(b.institution) || compareDe(a.name, b.name)
+    )
   },
 
   /**
@@ -43,12 +49,18 @@ export const studyProgramService = {
    * List all clusters with their programs
    */
   async listClusters() {
-    return prisma.studyProgramCluster.findMany({
+    const clusters = await prisma.studyProgramCluster.findMany({
       include: {
         programs: true,
       },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     })
+    // Postgres runs a C collation (alpine/musl), so re-sort in German order.
+    // sortOrder stays the primary key; name is only the tie-break.
+    for (const cluster of clusters) {
+      cluster.programs.sort(compareDeBy((p) => p.name))
+    }
+    return clusters.sort((a, b) => a.sortOrder - b.sortOrder || compareDe(a.name, b.name))
   },
 
   /**
@@ -75,6 +87,14 @@ export const studyProgramService = {
       include: { links: { orderBy: { sortOrder: 'asc' } } },
       orderBy: { name: 'asc' },
     })
+
+    // Postgres runs a C collation (alpine/musl), so re-sort in German order.
+    // sortOrder stays the primary key for clusters; name is only the tie-break.
+    for (const cluster of clusters) {
+      cluster.programs.sort(compareDeBy((p) => p.name))
+    }
+    clusters.sort((a, b) => a.sortOrder - b.sortOrder || compareDe(a.name, b.name))
+    unclustered.sort(compareDeBy((p) => p.name))
 
     return {
       clusters,

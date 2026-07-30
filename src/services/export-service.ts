@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/prisma'
 import type { EventType, Institution, Affiliation } from '@/generated/prisma/client/enums'
 import { formatEventTime } from '@/lib/event-time'
 import { getActiveEditionId } from '@/lib/active-edition'
+import { compareDe } from '@/lib/sort-de'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -91,7 +92,7 @@ const eventInclude = {
 function formatStudyPrograms(event: EventWithRelations): string {
   return event.studyPrograms
     .map((esp) => esp.studyProgram.name)
-    .sort()
+    .sort(compareDe)
     .join(', ')
 }
 
@@ -174,15 +175,13 @@ function timeValue(t: Date | string | null): number {
 export function firstClusterName(e: SortableEvent): string {
   const names = e.studyPrograms
     .flatMap((sp) => sp.studyProgram.clusters.map((c) => c.name))
-    .sort((a, b) => a.localeCompare(b, 'de'))
+    .sort(compareDe)
   return names[0] ?? ''
 }
 
 /** Alphabetically-first Studiengang (program) name for the event. */
 export function firstProgramName(e: SortableEvent): string {
-  const names = e.studyPrograms
-    .map((sp) => sp.studyProgram.name)
-    .sort((a, b) => a.localeCompare(b, 'de'))
+  const names = e.studyPrograms.map((sp) => sp.studyProgram.name).sort(compareDe)
   return names[0] ?? ''
 }
 
@@ -193,8 +192,8 @@ export function compareByTimeClusterProgram(a: SortableEvent, b: SortableEvent):
   if (ta !== tb) return ta - tb
   const ca = firstClusterName(a)
   const cb = firstClusterName(b)
-  if (ca !== cb) return ca.localeCompare(cb, 'de')
-  return firstProgramName(a).localeCompare(firstProgramName(b), 'de')
+  if (ca !== cb) return compareDe(ca, cb)
+  return compareDe(firstProgramName(a), firstProgramName(b))
 }
 
 type RoomSortableEvent = SortableEvent & {
@@ -210,10 +209,10 @@ export function eventBuildingName(e: RoomSortableEvent): string {
 export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableEvent): number {
   const ba = eventBuildingName(a)
   const bb = eventBuildingName(b)
-  if (ba !== bb) return ba.localeCompare(bb, 'de')
+  if (ba !== bb) return compareDe(ba, bb)
   const ra = a.room?.name ?? ''
   const rb = b.room?.name ?? ''
-  if (ra !== rb) return ra.localeCompare(rb, 'de')
+  if (ra !== rb) return compareDe(ra, rb)
   return compareByTimeClusterProgram(a, b)
 }
 
@@ -302,7 +301,7 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
     const rb = BOOKLET_INSTITUTION_RANK[b.institution] ?? 9
     if (ra !== rb) return ra - rb
     if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
-    return a.name.localeCompare(b.name, 'de')
+    return compareDe(a.name, b.name)
   })
 
   return { crossProgram, clusterGroups }
@@ -327,7 +326,7 @@ export function groupEventsByProgram<T extends ProgramGroupable>(events: T[]): R
     result[key].sort(compareByTimeClusterProgram)
   }
   const sorted: Record<string, T[]> = {}
-  for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+  for (const key of Object.keys(result).sort(compareDe)) {
     sorted[key] = result[key]
   }
   return sorted
@@ -396,10 +395,7 @@ export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
     }
   }
 
-  const join = (s: Set<string>) =>
-    Array.from(s)
-      .sort((a, b) => a.localeCompare(b, 'de'))
-      .join(', ')
+  const join = (s: Set<string>) => Array.from(s).sort(compareDe).join(', ')
 
   return Array.from(byPerson.values())
     .map((acc) => ({
@@ -413,7 +409,7 @@ export function aggregateLecturers(records: LecturerRecord[]): LecturerRow[] {
       raum: join(acc.rooms),
       anzahlVeranstaltungen: acc.eventIds.size,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
+    .sort((a, b) => compareDe(a.name, b.name))
 }
 
 // ---------------------------------------------------------------------------
@@ -505,12 +501,12 @@ export const exportService = {
 
     // Sort within each cluster
     for (const key of Object.keys(result)) {
-      result[key].sort((a, b) => a.titel.localeCompare(b.titel, 'de'))
+      result[key].sort((a, b) => compareDe(a.titel, b.titel))
     }
 
     // Return sorted by key
     const sorted: Record<string, EventRow[]> = {}
-    for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+    for (const key of Object.keys(result).sort(compareDe)) {
       sorted[key] = result[key]
     }
     return sorted
@@ -531,11 +527,11 @@ export const exportService = {
     }
 
     for (const key of Object.keys(result)) {
-      result[key].sort((a, b) => a.titel.localeCompare(b.titel, 'de'))
+      result[key].sort((a, b) => compareDe(a.titel, b.titel))
     }
 
     const sorted: Record<string, EventRow[]> = {}
-    for (const key of Object.keys(result).sort((a, b) => a.localeCompare(b, 'de'))) {
+    for (const key of Object.keys(result).sort(compareDe)) {
       sorted[key] = result[key]
     }
     return sorted
@@ -619,7 +615,7 @@ export const exportService = {
       institution: formatInstitution(r.event.institution),
       studiengaenge: r.event.studyPrograms
         .map((esp) => esp.studyProgram.name)
-        .sort()
+        .sort(compareDe)
         .join(', '),
       dozent: r.event.lecturers
         .map((l) => [l.title, l.firstName, l.lastName].filter(Boolean).join(' '))
