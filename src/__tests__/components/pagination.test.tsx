@@ -24,6 +24,75 @@ describe('pageWindow', () => {
     expect(w).toContain(10)
     expect(w).toContain(11)
   })
+
+  // Invariant tests to catch budget and elision bugs
+  it('never exceeds maxSlots across diverse inputs', () => {
+    const inputs = [
+      [10, 20],
+      [50, 100],
+      [4, 8],
+      [5, 8],
+      [1, 8],
+      [8, 8],
+    ]
+    inputs.forEach(([page, total]) => {
+      const result = pageWindow(page, total)
+      expect(result.length).toBeLessThanOrEqual(7)
+    })
+  })
+
+  it('never emits a gap that hides exactly one page', () => {
+    const inputs = [
+      [10, 20],
+      [50, 100],
+      [4, 8],
+      [5, 8],
+      [1, 8],
+    ]
+    inputs.forEach(([page, total]) => {
+      const result = pageWindow(page, total)
+      for (let i = 0; i < result.length; i++) {
+        if (result[i] === 'gap') {
+          const beforeVal = result[i - 1]
+          const afterVal = result[i + 1]
+          const before = typeof beforeVal === 'number' ? beforeVal : 0
+          const after = typeof afterVal === 'number' ? afterVal : 0
+          // Gap should never hide exactly one page
+          expect(after - before).toBeGreaterThan(2)
+        }
+      }
+    })
+  })
+
+  it('contains no duplicate page numbers', () => {
+    const inputs = [
+      [10, 20],
+      [50, 100],
+      [4, 8],
+      [5, 8],
+    ]
+    inputs.forEach(([page, total]) => {
+      const result = pageWindow(page, total)
+      const numbers = result.filter((x) => typeof x === 'number')
+      const unique = new Set(numbers)
+      expect(unique.size).toBe(numbers.length)
+    })
+  })
+
+  it('always includes page 1 and the last page', () => {
+    const inputs = [
+      [10, 20],
+      [50, 100],
+      [4, 8],
+      [5, 8],
+      [1, 8],
+    ]
+    inputs.forEach(([page, total]) => {
+      const result = pageWindow(page, total)
+      expect(result).toContain(1)
+      expect(result).toContain(total)
+    })
+  })
 })
 
 describe('Pagination', () => {

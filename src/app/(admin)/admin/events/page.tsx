@@ -13,8 +13,6 @@ import {
   Pencil,
   Copy,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
   Calendar,
   MapPin,
   GraduationCap,
@@ -330,34 +328,20 @@ function EventsListContent() {
           full list and the follow-up pages are reachable without scrolling past
           every card. */}
       {!loading && total > 0 && (
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500">
+        <>
+          <p className="text-sm text-gray-500 mb-4">
             {total} {total === 1 ? 'Veranstaltung' : 'Veranstaltungen'}
-            {totalPages > 1 && ` · Seite ${page} von ${totalPages}`}
           </p>
           {totalPages > 1 && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Zurück
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                Weiter
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={total}
+              hideSummary
+              onPageChange={setPage}
+            />
           )}
-        </div>
+        </>
       )}
 
       {/* Events List */}
@@ -488,13 +472,7 @@ function EventsListContent() {
       </Card>
 
       {/* Pagination */}
-      <Pagination
-        page={page}
-        totalPages={totalPages}
-        totalItems={total}
-        itemLabel="Veranstaltungen"
-        onPageChange={setPage}
-      />
+      <Pagination page={page} totalPages={totalPages} totalItems={total} onPageChange={setPage} />
 
       {/* Delete Dialog */}
       <Dialog
