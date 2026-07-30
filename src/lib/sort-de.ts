@@ -28,12 +28,6 @@ export function compareDeBy<T>(selector: (item: T) => string): (a: T, b: T) => n
 export function azLetter(name: string): string {
   const raw = name.trim().charAt(0)
   if (!raw) return '#'
-  const folded =
-    raw === 'ß'
-      ? 'S'
-      : raw
-          .normalize('NFD')
-          .replace(/[̀-ͯ]/g, '')
-          .toUpperCase()
+  const folded = raw === 'ß' ? 'S' : raw.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
   return /^[A-Z]$/.test(folded) ? folded : '#'
 }

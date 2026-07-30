@@ -4,6 +4,11 @@ import { prisma } from '@/lib/db/prisma'
 import type { Institution } from '@/types/events'
 import { compareDe, compareDeBy } from '@/lib/sort-de'
 
+// Postgres sorts enum columns by declaration order (see `enum Institution` in
+// prisma/schema.prisma: UNI, HOCHSCHULE, BOTH), not alphabetically. This rank
+// map reproduces that declaration order in application code.
+const INSTITUTION_RANK: Record<string, number> = { UNI: 0, HOCHSCHULE: 1, BOTH: 2 }
+
 /**
  * Study Program service for queries
  */
@@ -21,9 +26,12 @@ export const studyProgramService = {
       orderBy: [{ institution: 'asc' }, { name: 'asc' }],
     })
     // Postgres runs a C collation (alpine/musl), so re-sort in German order.
-    // Institution stays the primary key of the ordering.
+    // Institution stays the primary key of the ordering (via the rank map above,
+    // reproducing the enum's declaration order — a plain string compare would not).
     return programs.sort(
-      (a, b) => a.institution.localeCompare(b.institution) || compareDe(a.name, b.name)
+      (a, b) =>
+        (INSTITUTION_RANK[a.institution] ?? 9) - (INSTITUTION_RANK[b.institution] ?? 9) ||
+        compareDe(a.name, b.name)
     )
   },
 
