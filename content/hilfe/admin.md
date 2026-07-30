@@ -12,6 +12,10 @@ Unter **Veranstaltungen** sehen und verwalten Sie alle gemeldeten Events. Sie k�
 
 Im Veranstaltungsformular wählen Sie u. a. den **Veranstaltungstyp** (Vortrag, Laborführung, Rundgang, Workshop, Online, Video, Infostand, Schnupperveranstaltung, Interaktion, Sonstiges) und die **Institution** (muss aktiv gewählt werden). Das **Datum** wird zentral über die aktive Edition vorgegeben (siehe „Editionen & Rollover") und lässt sich nicht pro Veranstaltung ändern. Wählen Sie als Institution **Hochschulübergreifend**, gilt die Veranstaltung automatisch als externes Angebot der Kategorie **Rund ums Studium** und erscheint nicht in den Uni-/Hochschul-Listen. Für Infostände sind 08:30–14:00 Uhr voreingetragen (änderbar).
 
+Im Melder-Bereich des Formulars können Sie über **„Bestehende Melder*in übernehmen"** nach einer bereits angelegten Person suchen (Name, E-Mail oder Einrichtung) und deren Profil per Klick übernehmen — alle Melder-Felder werden automatisch befüllt. **„Neue Melder*in anlegen"** setzt die Auswahl wieder zurück, damit Sie die Daten neu eingeben. Dieser Picker steht nur Admins zur Verfügung; einmal übernommen, bleiben die Felder beim späteren Bearbeiten der Veranstaltung schreibgeschützt und zeigen die ursprünglichen Einreicher-Daten.
+
+Zum Löschen einer Veranstaltung stehen zwei Wege zur Verfügung: das **„…"-Menü** am Ende der jeweiligen Zeile in der Liste sowie die Schaltfläche **Löschen** unten auf der Bearbeiten-Seite der Veranstaltung. Beide fragen vor dem endgültigen Löschen eine Bestätigung ab. Als Admin können Sie jede Veranstaltung löschen; schlägt ein Löschversuch fehl, zeigt die Oberfläche die Fehlermeldung des Servers an, statt den Versuch stillschweigend zu ignorieren.
+
 ## Gebäude & Räume
 
 Unter **Gebäude** verwalten Sie alle Campus-Gebäude mit Räumen, Adressen und Koordinaten. Diese Daten werden im Routenplaner, in der Kartenansicht und bei der Raumzuordnung verwendet. Jedes Gebäude kann Kurzname, Campus-Zuordnung, GPS-Koordinaten und Barrierefreiheit-Infos enthalten.
@@ -43,6 +47,10 @@ Die Studienfelder sind in zwei Gruppen aufgeteilt: **Universität** (6 Cluster, 
 ## Benutzer & Rollen
 
 Unter **Benutzer** verwalten Sie die Zugänge. Es gibt drei Rollen: **Admin** (Vollzugriff), **Veranstalter** (eigene Events) und **Öffentlich** (nur Lesen). Legen Sie neue Benutzer an oder ändern Sie bestehende Rollen.
+
+## Texte
+
+Unter **Texte** (`/admin/texte`) bearbeiten Sie ausgewählte Textbausteine der öffentlichen Startseite, gruppiert nach Bereich: Überschrift und Einleitungstext im Hero-Bereich, die Beschriftungen und Werte der vier Statistik-Kacheln sowie Überschrift, Untertitel und die drei Aufzählungspunkte je Hochschul-Karte. Jeder Textbaustein hat eine eigene **Speichern**- und **Auf Standard zurücksetzen**-Schaltfläche. Änderungen sind sofort auf der öffentlichen Startseite sichtbar — es ist kein Neustart oder Deployment nötig. **Auf Standard zurücksetzen** entfernt nur Ihre Überschreibung und stellt den mitgelieferten Standardtext wieder her; die Schaltfläche ist deaktiviert, solange bereits der Standardtext angezeigt wird.
 
 ## Import / Export
 

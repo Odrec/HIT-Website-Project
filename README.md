@@ -31,7 +31,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |
 | **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page (with a timed "Pause bis …" status), visitors see live markers and official Zeichen 224 bus stop icons on the campus map |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
-| **Admin Interface** | Manage events, programs, locations, users, room assignments, and site settings (HIT date, submission deadline) |
+| **Admin Interface** | Manage events, programs, locations, users, room assignments, site settings (HIT date, submission deadline), and editable homepage texts (`/admin/texte`, backed by the `content_texts` table — overrides only, defaults ship with the code) |
 | **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
 | **Data Export** | Excel exports (per-view sheets — A-Z, time, room, Studiengang, Melder, Dozierende, Infomärkte — plus a combined workbook with an overview sheet first), CSV import/export, PDF program booklet with table of contents, HTML backup, iCal export |
 | **Email Notifications** | Automatic email to HIT team on event create/edit with change detection |
