@@ -3,21 +3,9 @@
 import { cn } from '@/lib/utils'
 import type { NavigatorMessage as NavigatorMessageType } from '@/types/navigator'
 import { Bot, User } from 'lucide-react'
-import { useMemo } from 'react'
 
 interface NavigatorMessageProps {
   message: NavigatorMessageType
-}
-
-/**
- * Clean message content by removing JSON control fields that may leak through
- */
-function cleanContent(content: string): string {
-  // Remove shouldEndSession patterns at the end
-  let cleaned = content.replace(/\n*shouldEndSession:\s*(true|false)\s*$/gi, '')
-  // Remove JSON-like control fields
-  cleaned = cleaned.replace(/\n*\{?\s*"?shouldEndSession"?\s*:\s*(true|false)\s*}?\s*$/gi, '')
-  return cleaned.trim()
 }
 
 /**
@@ -38,6 +26,24 @@ function renderMarkdown(content: string): React.ReactNode {
     while (remaining.length > 0) {
       // Check for bold
       const boldMatch = remaining.match(/\*\*(.+?)\*\*|__(.+?)__/)
+
+      // Check for links: [text](url)
+      const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)\s]+)\)/)
+      if (
+        linkMatch &&
+        linkMatch.index !== undefined &&
+        (!boldMatch || boldMatch.index === undefined || linkMatch.index < boldMatch.index)
+      ) {
+        if (linkMatch.index > 0) parts.push(remaining.substring(0, linkMatch.index))
+        parts.push(
+          <a key={key++} href={linkMatch[2]} className="underline">
+            {linkMatch[1]}
+          </a>
+        )
+        remaining = remaining.substring(linkMatch.index + linkMatch[0].length)
+        continue
+      }
+
       if (boldMatch && boldMatch.index !== undefined) {
         if (boldMatch.index > 0) {
           parts.push(remaining.substring(0, boldMatch.index))
@@ -161,10 +167,8 @@ export function NavigatorMessage({ message }: NavigatorMessageProps) {
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
 
-  const cleanedContent = useMemo(() => cleanContent(message.content), [message.content])
-
   if (isSystem) {
-    return <div className="text-center text-sm text-muted-foreground py-2">{cleanedContent}</div>
+    return <div className="text-center text-sm text-muted-foreground py-2">{message.content}</div>
   }
 
   return (
@@ -182,10 +186,10 @@ export function NavigatorMessage({ message }: NavigatorMessageProps) {
         )}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap">{cleanedContent}</p>
+          <p className="whitespace-pre-wrap">{message.content}</p>
         ) : (
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            {renderMarkdown(cleanedContent)}
+            {renderMarkdown(message.content)}
           </div>
         )}
 
