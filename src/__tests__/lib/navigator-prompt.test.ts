@@ -141,6 +141,12 @@ describe('buildNavigatorSystemPrompt', () => {
     const p = buildNavigatorSystemPrompt(c, { answeredQuestions: 1, phase: 'guided' })
     expect(p).toContain('zuerst den Lehramtsstudiengang')
   })
+
+  it('forbids catalogue IDs in the visible text and caps revised lists at five', () => {
+    const p = buildNavigatorSystemPrompt(c, { answeredQuestions: 1, phase: 'guided' })
+    expect(p).toContain('niemals im sichtbaren Text')
+    expect(p).toContain('auch bei Änderungen höchstens 5')
+  })
 })
 
 describe('fixed first question', () => {

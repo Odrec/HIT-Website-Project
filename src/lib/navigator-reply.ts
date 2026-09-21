@@ -62,6 +62,15 @@ function parseRecommendation(raw: unknown): ParsedRecommendation | undefined {
   }
 }
 
+// Catalogue short IDs (P12) belong in the trailer only. Models occasionally
+// echo them into prose as "(P12)" or "(ID: P12)"; strip those so visitors
+// never see internal identifiers.
+const LEAKED_ID_RE = /\s*\((?:ID:\s*)?P\d+\)/gi
+
+function stripLeakedIds(text: string): string {
+  return text.replace(LEAKED_ID_RE, '')
+}
+
 export function parseNavigatorReply(content: string): ParsedNavigatorReply {
   const lines = stripFences(content.replace(/\r\n/g, '\n').split('\n'))
   // find last non-empty line
@@ -70,11 +79,11 @@ export function parseNavigatorReply(content: string): ParsedNavigatorReply {
   if (idx < 0) return { text: '' }
 
   const match = lines[idx].match(TRAILER_RE)
-  if (!match) return { text: lines.join('\n').trim() }
+  if (!match) return { text: stripLeakedIds(lines.join('\n')).trim() }
 
   const keyword = match[1].toUpperCase()
   const payload = match[2].trim()
-  const text = lines.slice(0, idx).join('\n').trim()
+  const text = stripLeakedIds(lines.slice(0, idx).join('\n')).trim()
 
   let parsed: unknown
   try {
