@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.17.1] - 2026-09-21
+
+### Fixed
+
+- Studiennavigator: internal catalogue IDs such as "(P76)" no longer appear in the chat text; they
+  are stripped server-side and the model is told to keep them out of the visible reply.
+- Studiennavigator: a revised recommendation after a follow-up question stays at five entries at
+  most.
+
 ## [0.17.0] - 2026-09-21
 
 Studiennavigator rework: the recommendations are now produced by the language model itself,
@@ -97,5 +106,6 @@ texts, and a few housekeeping fixes.
 - Removed the "Entwickler-Hinweis" box on the login page, which printed the admin login
   credentials on screen.
 
+[0.17.1]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.1
 [0.17.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.0
 [0.16.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.16.0
