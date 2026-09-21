@@ -1,34 +1,37 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import type { NavigatorOption } from '@/types/navigator'
 
 interface NavigatorSuggestionsProps {
-  suggestions: string[]
-  onSelect: (suggestion: string) => void
+  options: NavigatorOption[]
+  onSelect: (label: string) => void
   disabled?: boolean
 }
 
 export function NavigatorSuggestions({
-  suggestions,
+  options,
   onSelect,
   disabled = false,
 }: NavigatorSuggestionsProps) {
-  if (!suggestions || suggestions.length === 0) {
-    return null
-  }
+  if (!options || options.length === 0) return null
 
   return (
     <div className="flex flex-wrap gap-2 py-3">
-      {suggestions.map((suggestion, index) => (
+      {options.map((opt, index) => (
         <Button
-          key={index}
+          key={`${index}-${opt.label}`}
           variant="outline"
           size="sm"
-          onClick={() => onSelect(suggestion)}
+          onClick={() => onSelect(opt.label)}
           disabled={disabled}
-          className="text-sm"
+          className="h-auto min-h-9 flex-col items-start gap-0 whitespace-normal py-1.5 text-left text-sm"
+          title={opt.description}
         >
-          {suggestion}
+          <span>{opt.label}</span>
+          {opt.description && (
+            <span className="text-xs font-normal text-muted-foreground">{opt.description}</span>
+          )}
         </Button>
       ))}
     </div>

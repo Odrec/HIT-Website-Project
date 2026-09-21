@@ -38,7 +38,7 @@ Auf der Stundenplan-Seite werden automatisch Hinweise angezeigt:
 
 ## Studiengangs-Navigator
 
-Der KI-gestützte **Studiennavigator** hilft Ihnen, passende Studiengänge zu finden. Beschreiben Sie Ihre Interessen und Ziele im Chat, und der Navigator schlägt Ihnen passende Programme vor. Klicken Sie auf einen Vorschlag, um die zugehörigen Veranstaltungen zu sehen.
+Der **Studiennavigator** stellt Ihnen vier bis fünf kurze Fragen zu Ihren Interessen – Sie können die vorgeschlagenen Antworten antippen oder frei schreiben. Danach schlägt er drei bis fünf Studiengänge der Universität und der Hochschule Osnabrück vor, jeweils mit einer kurzen Begründung und den passenden Veranstaltungen am HIT. Anschließend können Sie im Chat Rückfragen stellen, zum Beispiel zum Unterschied zwischen zwei Studiengängen. Bei Lehramtsinteresse fragt der Navigator nach der Schulform; die Kombinationsregeln finden Sie auf der Lehramt-Seite.
 
 ## Routenplaner
 

@@ -5,6 +5,49 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.17.0] - 2026-09-21
+
+Studiennavigator rework: the recommendations are now produced by the language model itself,
+based on the programme catalogue from the database, instead of a keyword matcher. This is the
+answer to the ZSB feedback that the old suggestions did not hold up against the university's
+Studiengangsplaner.
+
+### Changed
+
+- **Studiennavigator recommendations come from the model.** The full list of Studiengänge
+  (name, Universität/Hochschule, Studienfeld, Lehramt tags) is read from the database and handed
+  to the model with every message, so changes made in the admin area show up in the navigator
+  within ten minutes without a redeploy. The model asks four to five guided questions with
+  tap-able answer options (a fixed first question on preferred kinds of activities, one on
+  Lehramt with a Schulform follow-up), then names three to five Studiengänge with a one-sentence
+  reason each and the matching HIT events. Afterwards the chat stays open for follow-up
+  questions, and the model may revise its list.
+- The recommendation cards show the model's reason instead of a percentage score; a summary
+  sentence sits above the list. Programmes recommended as Lehramtsstudiengang or berufliche
+  Fachrichtung add a pointer to the Kombinationsregeln on the Lehramt page.
+- Answer options render as chips with a short description; free text is always possible.
+- Navigator sessions are stored in Redis (two-hour lifetime) with an in-memory fallback, so a
+  container restart no longer drops running conversations. Sessions are processed one message at
+  a time, and a failed message leaves no trace in the conversation.
+- `/api/navigator` is rate-limited per IP (20 messages and 10 new sessions per minute) and
+  validates client-supplied session IDs.
+
+### Removed
+
+- The keyword-based programme scorer and the offline fallback question script. When the language
+  model gateway is unreachable, the chat now shows "Der Studiennavigator ist gerade nicht
+  erreichbar" with a link to the Studienfelder instead of made-up results.
+- Google Gemini support (`GOOGLE_AI_API_KEY`, `GOOGLE_AI_MODEL`). Only OpenAI-compatible
+  endpoints (`OPENAI_API_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`) remain, which is what the
+  LiteLLM setup uses.
+
+### Fixed
+
+- Nature-related conversations no longer surface Soziale Arbeit or Fahrzeugtechnik because of
+  substring matches on "arbeiten" or "Ökosysteme".
+- Links in chat replies are limited to internal paths and http(s) URLs; anything else renders as
+  plain text.
+
 ## [0.16.0] - 2026-07-30
 
 Feedback round following the data-entry ("Datenerfassung") test phase: a repaired export, a real
@@ -54,4 +97,5 @@ texts, and a few housekeeping fixes.
 - Removed the "Entwickler-Hinweis" box on the login page, which printed the admin login
   credentials on screen.
 
+[0.17.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.0
 [0.16.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.16.0

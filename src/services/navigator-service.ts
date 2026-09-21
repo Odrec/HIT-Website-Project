@@ -1,407 +1,241 @@
-// Navigator Service - AI-powered study program navigation
+// Navigator Service – model-driven Studiengang recommendations.
+//
+// The LLM reads the full HIT programme catalogue in its system prompt and
+// returns programme picks in an EMPFEHLUNG trailer line. This service owns
+// session lifecycle, crisis detection, the single gateway call per turn,
+// short-ID resolution and event attachment. There is no keyword matcher
+// and no fallback question script: if the gateway is unavailable we throw
+// NavigatorUnavailableError and the API returns 503.
 
 import { prisma } from '@/lib/db/prisma'
 import { getActiveEditionId } from '@/lib/active-edition'
-import type {
-  NavigatorSession,
-  NavigatorMessage,
-  ProgramRecommendation,
-  ClusterRecommendation,
-  CrisisDetection,
-  LLMCompletionRequest,
-  LLMCompletionResponse,
-  QuestionType,
-  EndSessionResource,
+import { parseNavigatorReply } from '@/lib/navigator-reply'
+import {
+  buildCatalogue,
+  buildNavigatorSystemPrompt,
+  NAVIGATOR_GREETING,
+  FIRST_QUESTION_OPTIONS,
+  type NavigatorCatalogue,
+  type CatalogueProgramInput,
+} from '@/lib/navigator-prompt'
+import {
+  getNavigatorSession,
+  saveNavigatorSession,
+  deleteNavigatorSession,
+} from '@/lib/navigator-session-store'
+import {
+  CRISIS_KEYWORDS,
+  CRISIS_HIGH_SEVERITY_KEYWORDS,
+  CRISIS_SUPPORT_RESOURCES,
+  type NavigatorSession,
+  type NavigatorMessage,
+  type NavigatorRecommendation,
+  type ProgramRecommendation,
+  type CrisisDetection,
 } from '@/types/navigator'
 import { Institution, EventType, Affiliation } from '@/types/events'
-import type { StudyProgram, StudyProgramCluster, Event, Building, Room } from '@/types/events'
+import type { StudyProgram, Event, Building, Room } from '@/types/events'
 
-// In-memory session store (in production, use Redis)
-// Use globalThis to persist sessions across Next.js hot-reloads in development
-const globalForSessions = globalThis as unknown as {
-  navigatorSessions: Map<string, NavigatorSession> | undefined
+export class NavigatorUnavailableError extends Error {
+  constructor(message = 'Navigator LLM gateway unavailable') {
+    super(message)
+    this.name = 'NavigatorUnavailableError'
+  }
 }
 
-const sessions = globalForSessions.navigatorSessions ?? new Map<string, NavigatorSession>()
+// ---------------------------------------------------------------------------
+// Catalogue cache (10 minutes)
+// ---------------------------------------------------------------------------
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForSessions.navigatorSessions = sessions
+const CATALOGUE_TTL_MS = 10 * 60 * 1000
+let cachedCatalogue: { builtAt: number; catalogue: NavigatorCatalogue } | null = null
+
+/** Test-only escape hatch: forces the next loadCatalogue() to refetch. */
+export function resetNavigatorCatalogueCache(): void {
+  cachedCatalogue = null
 }
 
-/**
- * System prompt for the study program navigator
- */
-const SYSTEM_PROMPT = `Du bist ein freundlicher Studienberater für Uni und Hochschule Osnabrück.
+async function loadCatalogue(): Promise<NavigatorCatalogue> {
+  if (cachedCatalogue && Date.now() - cachedCatalogue.builtAt < CATALOGUE_TTL_MS) {
+    return cachedCatalogue.catalogue
+  }
+  const programs = await prisma.studyProgram.findMany({
+    select: {
+      id: true,
+      name: true,
+      institution: true,
+      lehramtTypen: true,
+      isLehramtStudiengang: true,
+      isBeruflicheFachrichtung: true,
+      clusters: { select: { id: true, name: true, sortOrder: true } },
+    },
+  })
+  const catalogue = buildCatalogue(programs as unknown as CatalogueProgramInput[])
+  cachedCatalogue = { builtAt: Date.now(), catalogue }
+  return catalogue
+}
 
-REGELN:
-1. Maximal 1-2 Fragen pro Nachricht
-2. Beziehe dich auf vorherige Antworten
-3. Nach 4-5 Fragen: Fasse zusammen und beende
+// ---------------------------------------------------------------------------
+// Sessions
+// ---------------------------------------------------------------------------
 
-Antworte auf Deutsch als normaler Text (KEIN JSON). Sei freundlich und kurz.`
+// Single home for the session id format: minted here, validated by every
+// route that accepts a client-supplied sessionId (POST body, GET/DELETE
+// query params) before trusting it.
+export const NAVIGATOR_SESSION_ID_RE = /^nav-\d{13}-[a-z0-9]{1,8}$/
 
-/**
- * Generate a unique session ID
- */
 function generateSessionId(): string {
   return `nav-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
 
-/**
- * Create a new navigator session
- */
-export function createSession(): NavigatorSession {
-  const session: NavigatorSession = {
-    id: generateSessionId(),
-    startedAt: new Date(),
-    messages: [],
-    recommendedPrograms: [],
-    askedQuestions: [],
-    crisisDetected: false,
-    completed: false,
+function greetingMessage(): NavigatorMessage {
+  return {
+    id: `msg-${crypto.randomUUID()}`,
+    role: 'assistant',
+    content: NAVIGATOR_GREETING,
+    timestamp: new Date(),
+    metadata: { options: FIRST_QUESTION_OPTIONS },
   }
-  sessions.set(session.id, session)
+}
+
+function newSession(id = generateSessionId()): NavigatorSession {
+  return {
+    id,
+    startedAt: new Date(),
+    phase: 'guided',
+    messages: [greetingMessage()],
+    recommendation: null,
+    crisisDetected: false,
+  }
+}
+
+export async function startSession(): Promise<NavigatorSession> {
+  const session = newSession()
+  await saveNavigatorSession(session)
   return session
 }
 
-/**
- * Get an existing session
- */
-export function getSession(sessionId: string): NavigatorSession | undefined {
-  return sessions.get(sessionId)
+export async function clearSession(sessionId: string): Promise<void> {
+  await deleteNavigatorSession(sessionId)
 }
 
-/**
- * Check for crisis keywords in user message
- */
+// ---------------------------------------------------------------------------
+// Crisis detection
+// ---------------------------------------------------------------------------
+
 export function detectCrisis(message: string): CrisisDetection {
-  const lowerMessage = message.toLowerCase()
-  const detectedKeywords: string[] = []
-
-  // Import crisis keywords
-  const crisisKeywords = [
-    'selbstmord',
-    'suizid',
-    'umbringen',
-    'sterben wollen',
-    'nicht mehr leben',
-    'keinen sinn',
-    'hoffnungslos',
-    'aufgeben',
-    'depressiv',
-    'depression',
-    'verzweifelt',
-    'einsam',
-    'isoliert',
-    'panik',
-    'angst',
-    'überwältigt',
-    'überfordert',
-    'burnout',
-    'zusammenbruch',
-  ]
-
-  for (const keyword of crisisKeywords) {
-    if (lowerMessage.includes(keyword)) {
-      detectedKeywords.push(keyword)
-    }
-  }
-
-  if (detectedKeywords.length === 0) {
+  const lower = message.toLowerCase()
+  const keywords = CRISIS_KEYWORDS.filter((k) => lower.includes(k))
+  if (keywords.length === 0) {
     return { detected: false, keywords: [], severity: 'low', resources: [] }
   }
-
-  // Determine severity
-  const highSeverityWords = [
-    'selbstmord',
-    'suizid',
-    'umbringen',
-    'sterben wollen',
-    'nicht mehr leben',
-  ]
-  const hasHighSeverity = detectedKeywords.some((k) => highSeverityWords.includes(k))
-
-  const severity = hasHighSeverity ? 'high' : detectedKeywords.length > 2 ? 'medium' : 'low'
-
-  return {
-    detected: true,
-    keywords: detectedKeywords,
-    severity,
-    resources: [
-      {
-        name: 'Telefonseelsorge',
-        description: 'Kostenlose und anonyme Beratung bei Krisen',
-        phone: '0800 111 0 111',
-        available: '24/7',
-      },
-      {
-        name: 'Psychologische Beratung der Universität',
-        description: 'Psychologische Beratungsstelle für Studierende',
-        url: 'https://www.uni-osnabrueck.de/studium/studienberatung/psychologische-beratung/',
-        email: 'psychberatung@uni-osnabrueck.de',
-        available: 'Mo-Fr nach Vereinbarung',
-      },
-    ],
-  }
+  const hasHigh = keywords.some((k) => CRISIS_HIGH_SEVERITY_KEYWORDS.includes(k))
+  const severity = hasHigh ? 'high' : keywords.length > 2 ? 'medium' : 'low'
+  return { detected: true, keywords, severity, resources: CRISIS_SUPPORT_RESOURCES }
 }
 
-/**
- * Call the LLM API - supports Google Gemini and OpenAI
- * Priority: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
- */
-async function callLLM(request: LLMCompletionRequest): Promise<LLMCompletionResponse> {
-  const openaiBaseUrl = process.env.OPENAI_API_BASE_URL
-  const openaiApiKey = process.env.OPENAI_API_KEY
-  const googleApiKey = process.env.GOOGLE_AI_API_KEY
-  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+const CRISIS_REPLY = `Es tut mir leid zu hören, dass du dich so fühlst. Deine Gefühle sind wichtig und es gibt Menschen, die dir helfen können.
 
-  // Try OpenAI-compatible API first (works with OpenAI, vLLM, and other compatible servers)
-  if (openaiBaseUrl || openaiApiKey) {
-    return callOpenAI(request, openaiApiKey || '', openaiModel, openaiBaseUrl)
-  }
+Die Telefonseelsorge ist rund um die Uhr erreichbar unter 0800 111 0 111 (kostenlos und anonym).
 
-  // Fall back to Google Gemini
-  if (googleApiKey) {
-    return callGemini(request, googleApiKey)
-  }
+Wenn du möchtest, können wir auch weiter über Studiengänge sprechen – aber dein Wohlbefinden hat Priorität.`
 
-  console.warn(
-    'No AI API key configured (OPENAI_API_BASE_URL, OPENAI_API_KEY, or GOOGLE_AI_API_KEY), using fallback responses'
-  )
-  return getFallbackResponse(request)
+// ---------------------------------------------------------------------------
+// Gateway
+// ---------------------------------------------------------------------------
+
+function gatewayConfig(): { url: string; apiKey: string; model: string } | null {
+  const baseUrl = process.env.OPENAI_API_BASE_URL
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!baseUrl && !apiKey) return null
+  const url = baseUrl
+    ? `${baseUrl.replace(/\/+$/, '')}/chat/completions`
+    : 'https://api.openai.com/v1/chat/completions'
+  return { url, apiKey: apiKey ?? '', model: process.env.OPENAI_MODEL || 'gpt-4o-mini' }
 }
 
-/**
- * Call OpenAI API
- */
-async function callOpenAI(
-  request: LLMCompletionRequest,
-  apiKey: string,
-  model: string,
-  baseUrl?: string
-): Promise<LLMCompletionResponse> {
+export function getModelDisplayName(): string {
+  const cfg = gatewayConfig()
+  if (!cfg) return 'Nicht konfiguriert'
+  const baseUrl = process.env.OPENAI_API_BASE_URL
+  const provider = baseUrl && !baseUrl.includes('openai.com') ? 'Local' : 'OpenAI'
+  return `${provider} ${cfg.model}`
+}
+
+async function callChatCompletion(
+  messages: { role: 'system' | 'user' | 'assistant'; content: string }[]
+): Promise<string> {
+  const cfg = gatewayConfig()
+  if (!cfg) {
+    console.error('[navigator] no OPENAI_API_BASE_URL / OPENAI_API_KEY configured')
+    throw new NavigatorUnavailableError('not configured')
+  }
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (cfg.apiKey) headers.Authorization = `Bearer ${cfg.apiKey}`
+
+  let response: Response
   try {
-    const url = baseUrl
-      ? `${baseUrl.replace(/\/+$/, '')}/chat/completions`
-      : 'https://api.openai.com/v1/chat/completions'
-
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`
-    }
-
-    const response = await fetch(url, {
+    response = await fetch(cfg.url, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        model,
-        messages: request.messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
-        temperature: request.temperature ?? 0.7,
-        max_tokens: request.maxTokens ?? 1024,
-      }),
+      body: JSON.stringify({ model: cfg.model, messages, temperature: 0.4, max_tokens: 1200 }),
+      signal: AbortSignal.timeout(30_000),
     })
-
-    if (!response.ok) {
-      console.error('OpenAI API error:', await response.text())
-      return getFallbackResponse(request)
-    }
-
-    const data = await response.json()
-    const content = data.choices?.[0]?.message?.content || ''
-
-    return parseAIResponse(content)
   } catch (error) {
-    console.error('OpenAI API call failed:', error)
-    return getFallbackResponse(request)
+    console.error('[navigator] gateway request failed:', error)
+    throw new NavigatorUnavailableError()
   }
+  if (!response.ok) {
+    console.error('[navigator] gateway error', response.status, await response.text())
+    throw new NavigatorUnavailableError(`status ${response.status}`)
+  }
+  const data = await response.json()
+  const content = data?.choices?.[0]?.message?.content
+  if (typeof content !== 'string' || !content.trim()) {
+    console.error('[navigator] empty completion')
+    throw new NavigatorUnavailableError('empty completion')
+  }
+  return content
 }
 
-/**
- * Call Google Gemini API
- */
-async function callGemini(
-  request: LLMCompletionRequest,
-  apiKey: string
-): Promise<LLMCompletionResponse> {
-  const model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
+// ---------------------------------------------------------------------------
+// Turn processing
+// ---------------------------------------------------------------------------
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: request.messages.map((m) => ({
-            role: m.role === 'assistant' ? 'model' : m.role,
-            parts: [{ text: m.content }],
-          })),
-          generationConfig: {
-            temperature: request.temperature ?? 0.7,
-            maxOutputTokens: request.maxTokens ?? 1024,
-          },
-        }),
-      }
-    )
+const FALLBACK_TEXT_WITH_RECOMMENDATION = 'Hier sind meine Vorschläge für dich.'
+const FALLBACK_TEXT_WITHOUT_RECOMMENDATION =
+  'Erzähl mir gern noch etwas mehr über deine Interessen.'
 
-    if (!response.ok) {
-      console.error('Gemini API error:', await response.text())
-      return getFallbackResponse(request)
-    }
-
-    const data = await response.json()
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-
-    return parseAIResponse(content)
-  } catch (error) {
-    console.error('Gemini API call failed:', error)
-    return getFallbackResponse(request)
-  }
-}
-
-/**
- * Parse AI response and extract structured data
- */
-function parseAIResponse(
-  content: string
-): LLMCompletionResponse & { shouldEndSession?: boolean; summary?: string } {
-  try {
-    const jsonMatch = content.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0])
-      return {
-        content: parsed.message || content,
-        suggestedResponses: parsed.suggestedResponses,
-        detectedIntents: parsed.questionType ? [parsed.questionType] : undefined,
-        recommendedPrograms: parsed.recommendedProgramIds,
-        crisisKeywords: undefined,
-        shouldEndSession: parsed.shouldEndSession,
-        summary: parsed.summary,
-      }
-    }
-  } catch {
-    // If JSON parsing fails, return raw content
-  }
-
-  return { content }
-}
-
-/**
- * Fallback response when LLM is not available
- */
-function getFallbackResponse(request: LLMCompletionRequest): LLMCompletionResponse {
-  const messageCount = request.messages.filter((m) => m.role === 'user').length
-
-  const questions = [
-    {
-      message:
-        'Willkommen beim Studiennavigator! Was interessiert dich besonders? Welche Themen oder Fächer faszinieren dich?',
-      suggestions: [
-        'Naturwissenschaften und Technik',
-        'Sprachen und Kultur',
-        'Wirtschaft und Management',
-        'Soziales und Gesundheit',
-      ],
-    },
-    {
-      message:
-        'Das ist interessant! Arbeitest du lieber praktisch mit konkreten Projekten oder beschäftigst du dich gerne mit theoretischen Konzepten?',
-      suggestions: [
-        'Praktisch - ich will direkt anwenden',
-        'Theoretisch - ich will verstehen warum',
-        'Eine Mischung aus beidem',
-      ],
-    },
-    {
-      message:
-        'Gut zu wissen! Hast du schon eine Vorstellung, in welchem Bereich du später arbeiten möchtest?',
-      suggestions: [
-        'In der Forschung',
-        'In einem Unternehmen',
-        'Im öffentlichen Dienst',
-        'Selbstständig',
-        'Noch keine Ahnung',
-      ],
-    },
-    {
-      message:
-        'Möchtest du lieber an einer Universität oder einer Hochschule studieren? Die Uni ist forschungsorientierter, die Hochschule praxisnäher.',
-      suggestions: [
-        'Universität',
-        'Hochschule',
-        'Das ist mir egal',
-        'Erkläre mir den Unterschied genauer',
-      ],
-    },
-    {
-      message:
-        'Basierend auf deinen Antworten kann ich dir einige Studiengänge empfehlen. Schau sie dir an und klicke auf die Veranstaltungen, die dich interessieren!',
-      suggestions: [
-        'Zeige mir die Empfehlungen',
-        'Ich habe noch mehr Fragen',
-        'Starte nochmal von vorne',
-      ],
-    },
-  ]
-
-  const idx = Math.min(messageCount, questions.length - 1)
-  const question = questions[idx]
-
-  return {
-    content: question.message,
-    suggestedResponses: question.suggestions,
-  }
-}
-
-/**
- * Process a user message and generate a response
- */
-export async function processMessage(
+async function doProcessMessage(
   sessionId: string,
   userMessage: string
 ): Promise<{
   session: NavigatorSession
   response: NavigatorMessage
+  recommendation?: NavigatorRecommendation
   crisis?: CrisisDetection
 }> {
-  let session = sessions.get(sessionId)
+  // Work on a private copy so a failure partway through this turn (gateway
+  // error, or a Prisma error while hydrating a recommendation) never leaves
+  // the stored session mutated. structuredClone preserves Date instances.
+  const stored = await getNavigatorSession(sessionId)
+  const session: NavigatorSession = stored ? structuredClone(stored) : newSession(sessionId)
 
-  if (!session) {
-    session = createSession()
-    session.id = sessionId
-    sessions.set(sessionId, session)
-  }
-
-  // Check for crisis keywords
   const crisis = detectCrisis(userMessage)
-  if (crisis.detected) {
-    session.crisisDetected = true
-  }
+  if (crisis.detected) session.crisisDetected = true
 
-  // Add user message to session
   const userMsg: NavigatorMessage = {
-    id: `msg-${Date.now()}`,
+    id: `msg-${crypto.randomUUID()}`,
     role: 'user',
     content: userMessage,
     timestamp: new Date(),
   }
-  session.messages.push(userMsg)
 
-  // If crisis detected, provide support resources
   if (crisis.detected && crisis.severity === 'high') {
-    const supportMessage: NavigatorMessage = {
-      id: `msg-${Date.now() + 1}`,
+    const support: NavigatorMessage = {
+      id: `msg-${crypto.randomUUID()}`,
       role: 'assistant',
-      content: `Es tut mir leid zu hören, dass du dich so fühlst. Deine Gefühle sind wichtig und es gibt Menschen, die dir helfen können.
-
-Die Telefonseelsorge ist rund um die Uhr erreichbar unter 0800 111 0 111 (kostenlos und anonym).
-
-Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber dein Wohlbefinden hat Priorität.`,
+      content: CRISIS_REPLY,
       timestamp: new Date(),
       metadata: {
         resources: crisis.resources.map((r) => ({
@@ -412,368 +246,166 @@ Wenn du möchtest, können wir auch weiter über Studiengänge sprechen - aber d
         })),
       },
     }
-    session.messages.push(supportMessage)
-    sessions.set(sessionId, session)
-
-    return { session, response: supportMessage, crisis }
+    session.messages.push(userMsg, support)
+    await saveNavigatorSession(session)
+    return { session, response: support, crisis }
   }
 
-  // Count exchanges (user messages)
-  const userMessageCount = session.messages.filter((m) => m.role === 'user').length
-
-  // Build conversation history for LLM with context
-  const contextInfo = `
-
-AKTUELLER STATUS:
-- Anzahl bisheriger Austausche: ${userMessageCount}
-- ${userMessageCount >= 4 ? 'WICHTIG: Du hast genug Informationen! Fasse zusammen und beende bald das Gespräch.' : 'Stelle noch Fragen um mehr zu erfahren.'}
-- ${userMessageCount >= 5 ? 'JETZT das Gespräch beenden mit shouldEndSession: true!' : ''}
-
-Bisherige Antworten des Users:
-${session.messages
-  .filter((m) => m.role === 'user')
-  .map((m, i) => `${i + 1}. "${m.content}"`)
-  .join('\n')}
-`
-
-  const llmMessages = [
-    { role: 'system' as const, content: SYSTEM_PROMPT + contextInfo },
-    ...session.messages.map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    })),
-  ]
-
-  // Call LLM
-  const llmResponse = await callLLM({
-    messages: llmMessages,
-    temperature: 0.7,
-    maxTokens: 1024,
+  const catalogue = await loadCatalogue()
+  const history = [...session.messages, userMsg]
+  const answeredQuestions = history.filter((m) => m.role === 'user').length
+  const systemPrompt = buildNavigatorSystemPrompt(catalogue, {
+    answeredQuestions,
+    phase: session.phase,
   })
 
-  // Create assistant message
-  const assistantMsg: NavigatorMessage = {
-    id: `msg-${Date.now() + 1}`,
-    role: 'assistant',
-    content: llmResponse.content,
-    timestamp: new Date(),
-    metadata: {
-      suggestedResponses: llmResponse.suggestedResponses,
-      questionType: llmResponse.detectedIntents?.[0] as QuestionType | undefined,
-    },
-  }
+  // Throws NavigatorUnavailableError; the user message is NOT persisted then,
+  // so the visitor can simply resend it.
+  const raw = await callChatCompletion([
+    { role: 'system', content: systemPrompt },
+    ...history
+      .filter((m) => m.role !== 'system')
+      .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+  ])
 
-  session.messages.push(assistantMsg)
+  const parsed = parseNavigatorReply(raw)
 
-  // Track asked question type
-  if (llmResponse.detectedIntents?.[0]) {
-    session.askedQuestions.push(llmResponse.detectedIntents[0])
-  }
-
-  // Check if session should end - either from LLM or after 5+ user messages
-  const extendedResponse = llmResponse as LLMCompletionResponse & { shouldEndSession?: boolean }
-  if (extendedResponse.shouldEndSession || userMessageCount >= 5 || session.messages.length >= 12) {
-    session.completed = true
-  }
-
-  sessions.set(sessionId, session)
-
-  return { session, response: assistantMsg, crisis: crisis.detected ? crisis : undefined }
-}
-
-/**
- * Get program recommendations based on session
- */
-export async function getRecommendations(
-  sessionId: string,
-  limit: number = 10
-): Promise<{
-  programs: ProgramRecommendation[]
-  clusters: ClusterRecommendation[]
-  endResources: EndSessionResource[]
-}> {
-  const session = sessions.get(sessionId)
-
-  // Extract keywords from conversation
-  const conversationText =
-    session?.messages
-      .filter((m) => m.role === 'user')
-      .map((m) => m.content)
-      .join(' ')
-      .toLowerCase() || ''
-
-  // Get all programs from database
-  const programs = await prisma.studyProgram.findMany({
-    include: {
-      clusters: true,
-      events: {
-        include: {
-          event: {
-            include: {
-              building: true,
-              room: true,
-              lecturers: true,
-            },
-          },
+  let recommendation: NavigatorRecommendation | undefined
+  if (parsed.recommendation) {
+    const resolved = parsed.recommendation.programs
+      .map((p) => ({ row: catalogue.byShortId.get(p.id.toUpperCase()), reason: p.reason }))
+      .filter((x): x is { row: NonNullable<typeof x.row>; reason: string } => Boolean(x.row))
+    // de-duplicate by programme id, keep first reason
+    const seen = new Set<string>()
+    const unique = resolved.filter((x) => (seen.has(x.row.id) ? false : (seen.add(x.row.id), true)))
+    if (unique.length > 0) {
+      // hydrateRecommendation (Prisma) can still throw; only commit the
+      // phase/recommendation change onto `session` once it succeeds, so a
+      // rejection here leaves the copy (and therefore the stored session,
+      // which we haven't saved yet) untouched.
+      const candidate: NavigatorSession = {
+        ...session,
+        recommendation: {
+          programs: unique.map((x) => ({ programId: x.row.id, reason: x.reason })),
+          summary: parsed.recommendation.summary,
         },
-      },
-    },
-  })
-
-  // Score programs based on keyword matching
-  const scoredPrograms = programs.map((program) => {
-    let score = 50 // Base score
-    const reasons: string[] = []
-
-    // Check for keyword matches
-    const programName = program.name.toLowerCase()
-
-    // DIRECT PROGRAM NAME MATCH - highest priority!
-    // Extract core program name (without degree suffix like B.Eng., M.Sc., etc.)
-    const coreNameMatch = programName.match(/^([^(]+)/)
-    const coreName = coreNameMatch ? coreNameMatch[1].trim() : programName
-
-    // Check if user explicitly mentioned this program name
-    if (conversationText.includes(coreName)) {
-      score += 40 // Very high boost for explicit mention
-      reasons.push('Direkt von dir erwähnt')
+        phase: 'followup',
+      }
+      recommendation = (await hydrateRecommendation(candidate, catalogue)) ?? undefined
+      session.recommendation = candidate.recommendation
+      session.phase = candidate.phase
     } else {
-      // Check for partial matches of significant words in program name
-      const programWords = coreName.split(/\s+/).filter((w) => w.length > 4)
-      for (const word of programWords) {
-        if (conversationText.includes(word)) {
-          score += 35 // High boost for mentioning key program words
-          reasons.push('Passt zu deiner Anfrage')
-          break
-        }
-      }
-    }
-
-    // Interest matching
-    if (
-      conversationText.includes('technik') &&
-      (programName.includes('technik') ||
-        programName.includes('ingenieur') ||
-        programName.includes('maschinenbau'))
-    ) {
-      score += 20
-      reasons.push('Passt zu deinem Interesse an Technik')
-    }
-    if (
-      conversationText.includes('naturwissenschaft') &&
-      (programName.includes('physik') ||
-        programName.includes('chemie') ||
-        programName.includes('biologie'))
-    ) {
-      score += 20
-      reasons.push('Naturwissenschaftlicher Studiengang')
-    }
-    if (
-      conversationText.includes('wirtschaft') &&
-      (programName.includes('wirtschaft') ||
-        programName.includes('bwl') ||
-        programName.includes('management'))
-    ) {
-      score += 20
-      reasons.push('Wirtschaftlicher Schwerpunkt')
-    }
-    if (
-      conversationText.includes('sozial') &&
-      (programName.includes('sozial') ||
-        programName.includes('pädagogik') ||
-        programName.includes('psychologie'))
-    ) {
-      score += 20
-      reasons.push('Sozialwissenschaftlicher Fokus')
-    }
-    if (
-      conversationText.includes('sprache') &&
-      (programName.includes('sprach') ||
-        programName.includes('germanistik') ||
-        programName.includes('anglistik'))
-    ) {
-      score += 20
-      reasons.push('Sprachwissenschaftlicher Studiengang')
-    }
-    if (
-      conversationText.includes('informatik') &&
-      (programName.includes('informatik') ||
-        programName.includes('software') ||
-        programName.includes('computer'))
-    ) {
-      score += 25
-      reasons.push('Informatik-Studiengang')
-    }
-    if (conversationText.includes('lehramt') && programName.includes('lehramt')) {
-      score += 30
-      reasons.push('Lehramtsstudiengang')
-    }
-
-    // Institution preference - check for full names and abbreviations
-    const wantsUni =
-      conversationText.includes('universität') ||
-      /\buni\b/.test(conversationText) ||
-      conversationText.includes('uos')
-    const wantsHS =
-      conversationText.includes('hochschule') ||
-      /\bhs\b/.test(conversationText) ||
-      conversationText.includes('osnabrück hochschule')
-
-    if (wantsUni && program.institution === 'UNI') {
-      score += 15
-      reasons.push('An der Universität (deine Präferenz)')
-    }
-    if (wantsHS && program.institution === 'HOCHSCHULE') {
-      score += 15
-      reasons.push('An der Hochschule (deine Präferenz)')
-    }
-    // Slight penalty if user expressed a preference for the other institution
-    if (wantsUni && !wantsHS && program.institution === 'HOCHSCHULE') {
-      score -= 5
-    }
-    if (wantsHS && !wantsUni && program.institution === 'UNI') {
-      score -= 5
-    }
-
-    // Practical vs theoretical preference
-    if (conversationText.includes('praktisch') && program.institution === 'HOCHSCHULE') {
-      score += 10
-      reasons.push('Praxisorientiertes Studium')
-    }
-    if (conversationText.includes('forschung') && program.institution === 'UNI') {
-      score += 10
-      reasons.push('Forschungsorientiertes Studium')
-    }
-
-    // Add some randomness to avoid identical results
-    score += Math.random() * 5
-
-    if (reasons.length === 0) {
-      reasons.push('Könnte zu deinen Interessen passen')
-    }
-
-    // Map events
-    const relatedEvents: Event[] = program.events.map((ep) => ({
-      id: ep.event.id,
-      title: ep.event.title,
-      description: ep.event.description || undefined,
-      eventType: ep.event.eventType as unknown as EventType,
-      timeStart: ep.event.timeStart ? new Date(ep.event.timeStart) : undefined,
-      timeEnd: ep.event.timeEnd ? new Date(ep.event.timeEnd) : undefined,
-      locationDetails: ep.event.locationDetails as Record<string, unknown> | undefined,
-      roomRequest: ep.event.roomRequest || undefined,
-      meetingPoint: ep.event.meetingPoint || undefined,
-      additionalInfo: ep.event.additionalInfo || undefined,
-      photoUrl: ep.event.photoUrl || undefined,
-      institution: ep.event.institution as unknown as Institution,
-      isCrossProgram: ep.event.isCrossProgram ?? false,
-      locationHint: ep.event.locationHint ?? null,
-      building: ep.event.building ?? undefined,
-      room: ep.event.room ?? undefined,
-      melderId: ep.event.melderId ?? null,
-      buildingId: ep.event.buildingId ?? null,
-      roomId: ep.event.roomId ?? null,
-      createdAt: new Date(ep.event.createdAt),
-      updatedAt: new Date(ep.event.updatedAt),
-    }))
-
-    const mappedProgram: StudyProgram = {
-      id: program.id,
-      name: program.name,
-      institution: program.institution as unknown as Institution,
-      clusters: program.clusters.map((c) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description || undefined,
-      })),
-    }
-
-    return {
-      program: mappedProgram,
-      relevanceScore: Math.min(100, score),
-      matchReasons: reasons,
-      relatedEvents,
-    } as ProgramRecommendation
-  })
-
-  // Sort by score and limit - only include programs with 60%+ relevance
-  scoredPrograms.sort((a, b) => b.relevanceScore - a.relevanceScore)
-  const qualifiedPrograms = scoredPrograms.filter((p) => p.relevanceScore >= 60)
-  const topPrograms = qualifiedPrograms.slice(0, limit)
-
-  // Group by cluster — a program assigned to multiple Studienfelder appears
-  // equally in each (stakeholder requirement).
-  const clusterMap: Record<
-    string,
-    { cluster: StudyProgramCluster; progs: ProgramRecommendation[] }
-  > = {}
-  for (const prog of topPrograms) {
-    for (const cluster of prog.program.clusters ?? []) {
-      if (!clusterMap[cluster.id]) {
-        clusterMap[cluster.id] = { cluster, progs: [] }
-      }
-      clusterMap[cluster.id].progs.push(prog)
+      console.warn('[navigator] EMPFEHLUNG contained no known IDs:', parsed.recommendation)
     }
   }
 
-  const clusters: ClusterRecommendation[] = Object.values(clusterMap).map(({ cluster, progs }) => ({
-    cluster,
-    programs: progs,
-    averageScore:
-      progs.reduce((acc: number, p: ProgramRecommendation) => acc + p.relevanceScore, 0) /
-      progs.length,
-  }))
-  clusters.sort((a, b) => b.averageScore - a.averageScore)
+  const fallbackText = recommendation
+    ? FALLBACK_TEXT_WITH_RECOMMENDATION
+    : FALLBACK_TEXT_WITHOUT_RECOMMENDATION
 
-  // End session resources
-  const endResources: EndSessionResource[] = [
-    {
-      type: 'counseling',
-      title: 'Studienberatung',
-      description: 'Persönliche Beratung zu Studienentscheidungen',
-      url: 'https://www.uni-osnabrueck.de/studium/studienberatung/',
-      icon: 'MessageCircle',
-    },
-    {
-      type: 'trial',
-      title: 'Schnupperstudium',
-      description: 'Vorlesungen besuchen und Studienfächer erleben',
-      url: 'https://www.uni-osnabrueck.de/studium/schnupperstudium/',
-      icon: 'GraduationCap',
-    },
-    {
-      type: 'events',
-      title: 'Veranstaltungen',
-      description: 'Kommende Informationsveranstaltungen besuchen',
-      url: '/events',
-      icon: 'Calendar',
-    },
-    {
-      type: 'aptitude_test',
-      title: 'Selbsttests',
-      description: 'Eignungstests und Interessenfragebögen',
-      url: 'https://www.uni-osnabrueck.de/studium/studienberatung/selbsttests/',
-      icon: 'ClipboardCheck',
-    },
-  ]
+  const assistantMsg: NavigatorMessage = {
+    id: `msg-${crypto.randomUUID()}`,
+    role: 'assistant',
+    content: parsed.text || fallbackText,
+    timestamp: new Date(),
+    metadata:
+      parsed.options && session.phase === 'guided' ? { options: parsed.options } : undefined,
+  }
 
-  return { programs: topPrograms, clusters, endResources }
+  session.messages.push(userMsg, assistantMsg)
+  await saveNavigatorSession(session)
+
+  return {
+    session,
+    response: assistantMsg,
+    recommendation,
+    crisis: crisis.detected ? crisis : undefined,
+  }
 }
 
-/**
- * Get events for recommended programs
- */
+// Serialises overlapping processMessage calls for the same session id, so
+// two concurrent turns never both read the same pre-turn history and both
+// save — the second call's history must include the first call's turn.
+// This lock is per-process (in-memory Map), which is sufficient because the
+// navigator runs as a single container — it does not coordinate across
+// multiple instances/replicas.
+const inflightTurns = new Map<string, Promise<unknown>>()
+
+export async function processMessage(
+  sessionId: string,
+  userMessage: string
+): Promise<{
+  session: NavigatorSession
+  response: NavigatorMessage
+  recommendation?: NavigatorRecommendation
+  crisis?: CrisisDetection
+}> {
+  const previous = inflightTurns.get(sessionId) ?? Promise.resolve()
+  const run = previous.catch(() => undefined).then(() => doProcessMessage(sessionId, userMessage))
+  inflightTurns.set(sessionId, run)
+  try {
+    return await run
+  } finally {
+    if (inflightTurns.get(sessionId) === run) {
+      inflightTurns.delete(sessionId)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recommendations
+// ---------------------------------------------------------------------------
+
+function toStudyProgram(row: {
+  id: string
+  name: string
+  institution: string
+  clusters: { id: string; name: string }[]
+}): StudyProgram {
+  return {
+    id: row.id,
+    name: row.name,
+    institution: row.institution as Institution,
+    clusters: row.clusters.map((c) => ({ id: c.id, name: c.name })),
+  }
+}
+
+async function hydrateRecommendation(
+  session: NavigatorSession,
+  catalogue: NavigatorCatalogue
+): Promise<NavigatorRecommendation | null> {
+  if (!session.recommendation) return null
+  const rowsById = new Map(catalogue.rows.map((r) => [r.id, r]))
+  const picks = session.recommendation.programs.filter((p) => rowsById.has(p.programId))
+  if (picks.length === 0) return null
+
+  const events = await getEventsForPrograms(picks.map((p) => p.programId))
+  const programs: ProgramRecommendation[] = picks.map((p) => {
+    const row = rowsById.get(p.programId)!
+    return {
+      program: toStudyProgram(row),
+      reason: p.reason,
+      isLehramt: row.isLehramtStudiengang || row.isBeruflicheFachrichtung,
+      relatedEvents: events.filter((e) => e.studyPrograms?.some((sp) => sp.id === p.programId)),
+    }
+  })
+  return { programs, summary: session.recommendation.summary }
+}
+
+export async function getRecommendation(
+  sessionId: string
+): Promise<NavigatorRecommendation | null> {
+  const session = await getNavigatorSession(sessionId)
+  if (!session?.recommendation) return null
+  return hydrateRecommendation(session, await loadCatalogue())
+}
+
 export async function getEventsForPrograms(programIds: string[]): Promise<Event[]> {
+  if (programIds.length === 0) return []
   const editionId = await getActiveEditionId()
   const events = await prisma.event.findMany({
     where: {
-      studyPrograms: {
-        some: {
-          studyProgramId: {
-            in: programIds,
-          },
-        },
-      },
+      studyPrograms: { some: { studyProgramId: { in: programIds } } },
       editionId,
       reviewStatus: 'PUBLISHED',
     },
@@ -781,15 +413,9 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
       building: true,
       room: true,
       lecturers: true,
-      studyPrograms: {
-        include: {
-          studyProgram: true,
-        },
-      },
+      studyPrograms: { include: { studyProgram: true } },
     },
-    orderBy: {
-      timeStart: 'asc',
-    },
+    orderBy: { timeStart: 'asc' },
   })
 
   return events.map(
@@ -833,21 +459,14 @@ export async function getEventsForPrograms(programIds: string[]): Promise<Event[
   )
 }
 
-/**
- * Clear a session
- */
-export function clearSession(sessionId: string): void {
-  sessions.delete(sessionId)
-}
-
 export const navigatorService = {
-  createSession,
-  getSession,
+  startSession,
   processMessage,
-  getRecommendations,
+  getRecommendation,
   getEventsForPrograms,
-  detectCrisis,
   clearSession,
+  detectCrisis,
+  getModelDisplayName,
 }
 
 export default navigatorService

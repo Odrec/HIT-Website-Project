@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Send, RotateCcw, Compass, MessageSquare } from 'lucide-react'
+import { Loader2, Send, RotateCcw, Compass } from 'lucide-react'
 import { NavigatorMessage } from './NavigatorMessage'
 import { NavigatorSuggestions } from './NavigatorSuggestions'
 import { NavigatorRecommendations } from './NavigatorRecommendations'
@@ -12,10 +12,11 @@ import { CrisisSupportBanner } from './CrisisSupportBanner'
 import { EndSessionResources } from './EndSessionResources'
 import type {
   NavigatorMessage as NavigatorMessageType,
-  ProgramRecommendation,
-  EndSessionResource,
+  NavigatorRecommendation,
+  NavigatorOption,
   CrisisDetection,
 } from '@/types/navigator'
+import { END_SESSION_RESOURCES } from '@/types/navigator'
 import { useToast } from '@/hooks/use-toast'
 
 interface NavigatorChatProps {
@@ -28,12 +29,9 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
   const [messages, setMessages] = useState<NavigatorMessageType[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [recommendations, setRecommendations] = useState<ProgramRecommendation[]>([])
-  const [endResources, setEndResources] = useState<EndSessionResource[]>([])
-  const [showRecommendations, setShowRecommendations] = useState(false)
+  const [options, setOptions] = useState<NavigatorOption[]>([])
+  const [recommendation, setRecommendation] = useState<NavigatorRecommendation | null>(null)
   const [crisisDetected, setCrisisDetected] = useState<CrisisDetection | null>(null)
-  const [, setIsComplete] = useState(false)
   const [modelName, setModelName] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -76,7 +74,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
       }
 
       setMessages([initialMessage])
-      setSuggestions(data.message.metadata?.suggestedResponses || [])
+      setOptions(data.message.metadata?.options || [])
     } catch (error) {
       console.error('Failed to initialize navigator:', error)
       toast({
@@ -108,7 +106,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
 
     setMessages((prev) => [...prev, userMessage])
     setInputValue('')
-    setSuggestions([])
+    setOptions([])
     setIsLoading(true)
 
     try {
@@ -118,34 +116,49 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         body: JSON.stringify({ sessionId, message }),
       })
 
+      if (response.status === 503) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `unavailable-${Date.now()}`,
+            role: 'assistant',
+            content:
+              'Der Studiennavigator ist gerade nicht erreichbar. Versuch es gleich noch einmal oder schau dir in der Zwischenzeit die [Studienfelder](/events) an.',
+            timestamp: new Date(),
+          },
+        ])
+        return
+      }
+      if (response.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `ratelimited-${Date.now()}`,
+            role: 'assistant',
+            content:
+              'Du hast gerade sehr viele Nachrichten geschickt. Warte einen kurzen Moment und versuch es dann noch einmal.',
+            timestamp: new Date(),
+          },
+        ])
+        return
+      }
       if (!response.ok) throw new Error('Failed to send message')
 
       const data = await response.json()
 
-      const assistantMessage: NavigatorMessageType = {
-        id: data.message.id,
-        role: 'assistant',
-        content: data.message.content,
-        timestamp: new Date(data.message.timestamp),
-        metadata: data.message.metadata,
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
-      setSuggestions(data.message.metadata?.suggestedResponses || [])
-
-      if (data.crisis?.detected) {
-        setCrisisDetected(data.crisis)
-      }
-
-      if (data.session?.completed) {
-        setIsComplete(true)
-        await loadRecommendations()
-      }
-
-      // Auto-load OR refresh recommendations after enough messages
-      if (data.session?.messageCount >= 4 || showRecommendations) {
-        await loadRecommendations()
-      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.message.id,
+          role: 'assistant',
+          content: data.message.content,
+          timestamp: new Date(data.message.timestamp),
+          metadata: data.message.metadata,
+        },
+      ])
+      setOptions(data.message.metadata?.options || [])
+      if (data.crisis?.detected) setCrisisDetected(data.crisis)
+      if (data.recommendation) setRecommendation(data.recommendation)
     } catch (error) {
       console.error('Failed to send message:', error)
       toast({
@@ -156,38 +169,6 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     } finally {
       setIsLoading(false)
       inputRef.current?.focus()
-    }
-  }
-
-  // Load recommendations
-  const loadRecommendations = async () => {
-    try {
-      const url = sessionId
-        ? `/api/navigator/recommendations?sessionId=${sessionId}&limit=10`
-        : `/api/navigator/recommendations?limit=10`
-
-      const response = await fetch(url)
-
-      if (!response.ok) {
-        console.error('Recommendations response not ok:', response.status)
-        // Still show the panel even if there's an error
-        setShowRecommendations(true)
-        return
-      }
-
-      const data = await response.json()
-      setRecommendations(data.programs || [])
-      setEndResources(data.endResources || [])
-      setShowRecommendations(true)
-
-      // Update session ID if a new one was created
-      if (data.newSessionId && data.newSessionId !== sessionId) {
-        setSessionId(data.newSessionId)
-      }
-    } catch (error) {
-      console.error('Failed to load recommendations:', error)
-      // Show panel anyway so user can see something
-      setShowRecommendations(true)
     }
   }
 
@@ -221,12 +202,9 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
 
     setSessionId(null)
     setMessages([])
-    setSuggestions([])
-    setRecommendations([])
-    setEndResources([])
-    setShowRecommendations(false)
+    setOptions([])
+    setRecommendation(null)
     setCrisisDetected(null)
-    setIsComplete(false)
   }
 
   // Handle view events for program
@@ -285,10 +263,10 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
             </div>
 
             {/* Suggestions */}
-            {suggestions.length > 0 && !isLoading && (
+            {options.length > 0 && !isLoading && (
               <div className="px-4 py-2 border-t bg-muted/30">
                 <NavigatorSuggestions
-                  suggestions={suggestions}
+                  options={options}
                   onSelect={handleSuggestionClick}
                   disabled={isLoading}
                 />
@@ -301,7 +279,7 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Schreibe eine Nachricht..."
+                placeholder="Antwort oder Frage eingeben..."
                 disabled={isLoading}
                 className="flex-1"
               />
@@ -317,33 +295,14 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         </Card>
       </div>
 
-      {/* Recommendations Column */}
-      {showRecommendations && (
+      {recommendation && (
         <div className="lg:w-[400px] space-y-4">
           <NavigatorRecommendations
-            programs={recommendations}
+            recommendation={recommendation}
             onProgramSelect={onProgramSelect}
             onViewEvents={handleViewEvents}
           />
-
-          {endResources.length > 0 && <EndSessionResources resources={endResources} />}
-        </div>
-      )}
-
-      {/* Show recommendations button if not visible */}
-      {!showRecommendations && messages.length >= 4 && (
-        <div className="lg:w-[300px]">
-          <Card className="bg-primary/5">
-            <CardContent className="py-6 text-center">
-              <MessageSquare className="w-8 h-8 mx-auto text-primary mb-3" />
-              <p className="text-sm text-muted-foreground mb-4">
-                Möchtest du jetzt Studiengänge sehen, die zu deinen Interessen passen?
-              </p>
-              <Button onClick={loadRecommendations} disabled={isLoading}>
-                Empfehlungen anzeigen
-              </Button>
-            </CardContent>
-          </Card>
+          <EndSessionResources resources={END_SESSION_RESOURCES} />
         </div>
       )}
     </div>

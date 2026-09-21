@@ -1,23 +1,40 @@
 'use client'
 
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { NavigatorMessage as NavigatorMessageType } from '@/types/navigator'
 import { Bot, User } from 'lucide-react'
-import { useMemo } from 'react'
 
 interface NavigatorMessageProps {
   message: NavigatorMessageType
 }
 
+/** Internal path (e.g. "/events") — must not be "//" (protocol-relative). */
+const INTERNAL_HREF_RE = /^\/(?!\/)/
+const EXTERNAL_HREF_RE = /^https?:\/\//
+
 /**
- * Clean message content by removing JSON control fields that may leak through
+ * Renders a markdown link node from model output. The href is untrusted, so
+ * only an internal path or an http(s) URL is ever rendered as a real link —
+ * anything else (javascript:, data:, //evil, mailto:, ...) is rendered as
+ * plain text with no anchor.
  */
-function cleanContent(content: string): string {
-  // Remove shouldEndSession patterns at the end
-  let cleaned = content.replace(/\n*shouldEndSession:\s*(true|false)\s*$/gi, '')
-  // Remove JSON-like control fields
-  cleaned = cleaned.replace(/\n*\{?\s*"?shouldEndSession"?\s*:\s*(true|false)\s*}?\s*$/gi, '')
-  return cleaned.trim()
+function renderLink(key: number, text: string, href: string): React.ReactNode {
+  if (INTERNAL_HREF_RE.test(href)) {
+    return (
+      <Link key={key} href={href} className="underline">
+        {text}
+      </Link>
+    )
+  }
+  if (EXTERNAL_HREF_RE.test(href)) {
+    return (
+      <a key={key} href={href} target="_blank" rel="noopener noreferrer" className="underline">
+        {text}
+      </a>
+    )
+  }
+  return text
 }
 
 /**
@@ -38,6 +55,20 @@ function renderMarkdown(content: string): React.ReactNode {
     while (remaining.length > 0) {
       // Check for bold
       const boldMatch = remaining.match(/\*\*(.+?)\*\*|__(.+?)__/)
+
+      // Check for links: [text](url)
+      const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)\s]+)\)/)
+      if (
+        linkMatch &&
+        linkMatch.index !== undefined &&
+        (!boldMatch || boldMatch.index === undefined || linkMatch.index < boldMatch.index)
+      ) {
+        if (linkMatch.index > 0) parts.push(remaining.substring(0, linkMatch.index))
+        parts.push(renderLink(key++, linkMatch[1], linkMatch[2]))
+        remaining = remaining.substring(linkMatch.index + linkMatch[0].length)
+        continue
+      }
+
       if (boldMatch && boldMatch.index !== undefined) {
         if (boldMatch.index > 0) {
           parts.push(remaining.substring(0, boldMatch.index))
@@ -161,10 +192,8 @@ export function NavigatorMessage({ message }: NavigatorMessageProps) {
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
 
-  const cleanedContent = useMemo(() => cleanContent(message.content), [message.content])
-
   if (isSystem) {
-    return <div className="text-center text-sm text-muted-foreground py-2">{cleanedContent}</div>
+    return <div className="text-center text-sm text-muted-foreground py-2">{message.content}</div>
   }
 
   return (
@@ -182,10 +211,10 @@ export function NavigatorMessage({ message }: NavigatorMessageProps) {
         )}
       >
         {isUser ? (
-          <p className="whitespace-pre-wrap">{cleanedContent}</p>
+          <p className="whitespace-pre-wrap">{message.content}</p>
         ) : (
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            {renderMarkdown(cleanedContent)}
+            {renderMarkdown(message.content)}
           </div>
         )}
 
