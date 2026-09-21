@@ -40,7 +40,7 @@ const programs = [
     id: 'cuid-land',
     name: 'Landschaftsentwicklung (B.Eng.)',
     institution: 'HOCHSCHULE',
-    lehramtTypen: [],
+    lehramtTypen: ['GYMNASIUM'],
     isLehramtStudiengang: false,
     isBeruflicheFachrichtung: false,
     clusters: [{ id: 'c2', name: 'Agrar', sortOrder: 1 }],
@@ -154,6 +154,8 @@ describe('processMessage', () => {
     expect(r.recommendation?.summary).toBe('Du magst Natur.')
     expect(r.recommendation?.programs.map((p) => p.program.id)).toEqual(['cuid-bio', 'cuid-land'])
     expect(r.recommendation?.programs[0].reason).toBe('Natur')
+    expect(r.recommendation?.programs[0].isLehramt).toBe(false)
+    expect(r.recommendation?.programs[1].isLehramt).toBe(true)
     expect(r.recommendation?.programs[0].relatedEvents?.[0].id).toBe('ev1')
     expect(r.recommendation?.programs[1].relatedEvents).toEqual([])
     expect(mockEventFindMany).toHaveBeenCalledWith(

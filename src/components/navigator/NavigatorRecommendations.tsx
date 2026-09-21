@@ -31,10 +31,6 @@ const INSTITUTION_LABEL: Record<string, string> = {
   BOTH: 'Hochschulübergreifend',
 }
 
-function isLehramtName(name: string): boolean {
-  return /lehramt/i.test(name)
-}
-
 export function NavigatorRecommendations({
   recommendation,
   onProgramSelect,
@@ -63,7 +59,7 @@ export function NavigatorRecommendations({
     )
   }
 
-  const hasLehramt = programs.some((p) => isLehramtName(p.program.name)) || /lehramt/i.test(summary)
+  const hasLehramt = programs.some((p) => p.isLehramt)
 
   return (
     <div className="space-y-4">

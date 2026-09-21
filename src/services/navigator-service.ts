@@ -377,6 +377,8 @@ async function hydrateRecommendation(
     return {
       program: toStudyProgram(row),
       reason: p.reason,
+      isLehramt:
+        row.lehramtTypen.length > 0 || row.isLehramtStudiengang || row.isBeruflicheFachrichtung,
       relatedEvents: events.filter((e) => e.studyPrograms?.some((sp) => sp.id === p.programId)),
     }
   })

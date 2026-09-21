@@ -38,6 +38,7 @@ export interface MessageMetadata {
 export interface ProgramRecommendation {
   program: StudyProgram
   reason: string
+  isLehramt?: boolean
   relatedEvents?: Event[]
 }
 

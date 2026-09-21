@@ -1,11 +1,40 @@
 'use client'
 
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { NavigatorMessage as NavigatorMessageType } from '@/types/navigator'
 import { Bot, User } from 'lucide-react'
 
 interface NavigatorMessageProps {
   message: NavigatorMessageType
+}
+
+/** Internal path (e.g. "/events") — must not be "//" (protocol-relative). */
+const INTERNAL_HREF_RE = /^\/(?!\/)/
+const EXTERNAL_HREF_RE = /^https?:\/\//
+
+/**
+ * Renders a markdown link node from model output. The href is untrusted, so
+ * only an internal path or an http(s) URL is ever rendered as a real link —
+ * anything else (javascript:, data:, //evil, mailto:, ...) is rendered as
+ * plain text with no anchor.
+ */
+function renderLink(key: number, text: string, href: string): React.ReactNode {
+  if (INTERNAL_HREF_RE.test(href)) {
+    return (
+      <Link key={key} href={href} className="underline">
+        {text}
+      </Link>
+    )
+  }
+  if (EXTERNAL_HREF_RE.test(href)) {
+    return (
+      <a key={key} href={href} target="_blank" rel="noopener noreferrer" className="underline">
+        {text}
+      </a>
+    )
+  }
+  return text
 }
 
 /**
@@ -35,11 +64,7 @@ function renderMarkdown(content: string): React.ReactNode {
         (!boldMatch || boldMatch.index === undefined || linkMatch.index < boldMatch.index)
       ) {
         if (linkMatch.index > 0) parts.push(remaining.substring(0, linkMatch.index))
-        parts.push(
-          <a key={key++} href={linkMatch[2]} className="underline">
-            {linkMatch[1]}
-          </a>
-        )
+        parts.push(renderLink(key++, linkMatch[1], linkMatch[2]))
         remaining = remaining.substring(linkMatch.index + linkMatch[0].length)
         continue
       }
