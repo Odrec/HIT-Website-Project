@@ -50,6 +50,11 @@ export class NavigatorUnavailableError extends Error {
 const CATALOGUE_TTL_MS = 10 * 60 * 1000
 let cachedCatalogue: { builtAt: number; catalogue: NavigatorCatalogue } | null = null
 
+/** Test-only escape hatch: forces the next loadCatalogue() to refetch. */
+export function resetNavigatorCatalogueCache(): void {
+  cachedCatalogue = null
+}
+
 async function loadCatalogue(): Promise<NavigatorCatalogue> {
   if (cachedCatalogue && Date.now() - cachedCatalogue.builtAt < CATALOGUE_TTL_MS) {
     return cachedCatalogue.catalogue
@@ -80,7 +85,7 @@ function generateSessionId(): string {
 
 function greetingMessage(): NavigatorMessage {
   return {
-    id: `msg-init-${Date.now()}`,
+    id: `msg-${crypto.randomUUID()}`,
     role: 'assistant',
     content: NAVIGATOR_GREETING,
     timestamp: new Date(),
@@ -192,7 +197,11 @@ async function callChatCompletion(
 // Turn processing
 // ---------------------------------------------------------------------------
 
-export async function processMessage(
+const FALLBACK_TEXT_WITH_RECOMMENDATION = 'Hier sind meine Vorschläge für dich.'
+const FALLBACK_TEXT_WITHOUT_RECOMMENDATION =
+  'Erzähl mir gern noch etwas mehr über deine Interessen.'
+
+async function doProcessMessage(
   sessionId: string,
   userMessage: string
 ): Promise<{
@@ -201,13 +210,17 @@ export async function processMessage(
   recommendation?: NavigatorRecommendation
   crisis?: CrisisDetection
 }> {
-  const session = (await getNavigatorSession(sessionId)) ?? newSession(sessionId)
+  // Work on a private copy so a failure partway through this turn (gateway
+  // error, or a Prisma error while hydrating a recommendation) never leaves
+  // the stored session mutated. structuredClone preserves Date instances.
+  const stored = await getNavigatorSession(sessionId)
+  const session: NavigatorSession = stored ? structuredClone(stored) : newSession(sessionId)
 
   const crisis = detectCrisis(userMessage)
   if (crisis.detected) session.crisisDetected = true
 
   const userMsg: NavigatorMessage = {
-    id: `msg-${Date.now()}`,
+    id: `msg-${crypto.randomUUID()}`,
     role: 'user',
     content: userMessage,
     timestamp: new Date(),
@@ -215,7 +228,7 @@ export async function processMessage(
 
   if (crisis.detected && crisis.severity === 'high') {
     const support: NavigatorMessage = {
-      id: `msg-${Date.now() + 1}`,
+      id: `msg-${crypto.randomUUID()}`,
       role: 'assistant',
       content: CRISIS_REPLY,
       timestamp: new Date(),
@@ -261,21 +274,34 @@ export async function processMessage(
     const seen = new Set<string>()
     const unique = resolved.filter((x) => (seen.has(x.row.id) ? false : (seen.add(x.row.id), true)))
     if (unique.length > 0) {
-      session.recommendation = {
-        programs: unique.map((x) => ({ programId: x.row.id, reason: x.reason })),
-        summary: parsed.recommendation.summary,
+      // hydrateRecommendation (Prisma) can still throw; only commit the
+      // phase/recommendation change onto `session` once it succeeds, so a
+      // rejection here leaves the copy (and therefore the stored session,
+      // which we haven't saved yet) untouched.
+      const candidate: NavigatorSession = {
+        ...session,
+        recommendation: {
+          programs: unique.map((x) => ({ programId: x.row.id, reason: x.reason })),
+          summary: parsed.recommendation.summary,
+        },
+        phase: 'followup',
       }
-      session.phase = 'followup'
-      recommendation = (await hydrateRecommendation(session, catalogue)) ?? undefined
+      recommendation = (await hydrateRecommendation(candidate, catalogue)) ?? undefined
+      session.recommendation = candidate.recommendation
+      session.phase = candidate.phase
     } else {
       console.warn('[navigator] EMPFEHLUNG contained no known IDs:', parsed.recommendation)
     }
   }
 
+  const fallbackText = recommendation
+    ? FALLBACK_TEXT_WITH_RECOMMENDATION
+    : FALLBACK_TEXT_WITHOUT_RECOMMENDATION
+
   const assistantMsg: NavigatorMessage = {
-    id: `msg-${Date.now() + 1}`,
+    id: `msg-${crypto.randomUUID()}`,
     role: 'assistant',
-    content: parsed.text || raw.trim(),
+    content: parsed.text || fallbackText,
     timestamp: new Date(),
     metadata:
       parsed.options && session.phase === 'guided' ? { options: parsed.options } : undefined,
@@ -289,6 +315,32 @@ export async function processMessage(
     response: assistantMsg,
     recommendation,
     crisis: crisis.detected ? crisis : undefined,
+  }
+}
+
+// Serialises overlapping processMessage calls for the same session id, so
+// two concurrent turns never both read the same pre-turn history and both
+// save — the second call's history must include the first call's turn.
+const inflightTurns = new Map<string, Promise<unknown>>()
+
+export async function processMessage(
+  sessionId: string,
+  userMessage: string
+): Promise<{
+  session: NavigatorSession
+  response: NavigatorMessage
+  recommendation?: NavigatorRecommendation
+  crisis?: CrisisDetection
+}> {
+  const previous = inflightTurns.get(sessionId) ?? Promise.resolve()
+  const run = previous.catch(() => undefined).then(() => doProcessMessage(sessionId, userMessage))
+  inflightTurns.set(sessionId, run)
+  try {
+    return await run
+  } finally {
+    if (inflightTurns.get(sessionId) === run) {
+      inflightTurns.delete(sessionId)
+    }
   }
 }
 
