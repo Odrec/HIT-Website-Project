@@ -74,4 +74,17 @@ describe('parseNavigatorReply', () => {
     expect(r.options).toBeUndefined()
     expect(r.recommendation).toBeUndefined()
   })
+
+  it('strips leaked catalogue IDs like "(P76)" from the visible text', () => {
+    const r = parseNavigatorReply(
+      '**Hebammenwissenschaft (B.Sc.), dual** (P76) passt gut.\n**Pflege** (ID: P12) auch.\nEMPFEHLUNG: {"programs":[{"id":"P76","reason":"x"}],"summary":"s"}'
+    )
+    expect(r.text).toBe('**Hebammenwissenschaft (B.Sc.), dual** passt gut.\n**Pflege** auch.')
+    expect(r.recommendation?.programs[0].id).toBe('P76')
+  })
+
+  it('strips leaked IDs even when there is no trailer', () => {
+    const r = parseNavigatorReply('Schau dir Biologie (P1) an.')
+    expect(r.text).toBe('Schau dir Biologie an.')
+  })
 })
