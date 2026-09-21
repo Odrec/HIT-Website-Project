@@ -1,104 +1,16 @@
-// Navigator API - Session and message handling
+// Navigator API – session and message handling
 import { NextRequest, NextResponse } from 'next/server'
-import { navigatorService } from '@/services/navigator-service'
+import { navigatorService, NavigatorUnavailableError } from '@/services/navigator-service'
 
-/**
- * Get the AI model name for display
- * Priority matches navigator-service.ts: OPENAI_API_KEY > GOOGLE_AI_API_KEY > fallback
- */
-function getModelDisplayName(): string {
-  const openaiBaseUrl = process.env.OPENAI_API_BASE_URL
-  const openaiApiKey = process.env.OPENAI_API_KEY
-  const googleApiKey = process.env.GOOGLE_AI_API_KEY
-
-  let model: string
-  let provider: string
-
-  if (openaiBaseUrl || openaiApiKey) {
-    model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-    // Detect local/self-hosted setups (vLLM, Ollama, etc.)
-    provider = openaiBaseUrl && !openaiBaseUrl.includes('openai.com') ? 'Local' : 'OpenAI'
-  } else if (googleApiKey) {
-    model = process.env.GOOGLE_AI_MODEL || 'gemini-1.5-flash'
-    provider = 'Google'
-  } else {
-    return 'Fallback Mode (No AI configured)'
-  }
-
-  // Format model name for display: "gpt-4o-mini" -> "GPT 4o Mini"
-  const formattedModel = model.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-
-  return `${provider} ${formattedModel}`
-}
-
-/**
- * POST /api/navigator
- * Send a message to the navigator and get a response
- */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { sessionId, message } = body
-
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
-    }
-
-    // Create new session if not provided
-    const session = sessionId
-      ? navigatorService.getSession(sessionId) || navigatorService.createSession()
-      : navigatorService.createSession()
-
-    // Process the message
-    const result = await navigatorService.processMessage(session.id, message)
-
-    return NextResponse.json({
-      sessionId: result.session.id,
-      message: result.response,
-      session: {
-        id: result.session.id,
-        messageCount: result.session.messages.length,
-        crisisDetected: result.session.crisisDetected,
-        completed: result.session.completed,
-      },
-      crisis: result.crisis,
-      model: getModelDisplayName(),
-    })
-  } catch (error) {
-    console.error('Navigator error:', error)
-    return NextResponse.json({ error: 'Failed to process message' }, { status: 500 })
-  }
-}
-
-/**
- * GET /api/navigator
- * Create a new session and get initial message
- */
+/** GET /api/navigator – create a session and return greeting + first question */
 export async function GET() {
   try {
-    const session = navigatorService.createSession()
-
-    // Generate initial greeting
-    await navigatorService.processMessage(session.id, '__INIT__')
-
+    const session = await navigatorService.startSession()
     return NextResponse.json({
       sessionId: session.id,
-      message: {
-        id: `msg-init-${Date.now()}`,
-        role: 'assistant',
-        content:
-          'Willkommen beim Studiennavigator! Ich helfe dir dabei, den passenden Studiengang zu finden. Was interessiert dich besonders? Welche Themen oder Fächer faszinieren dich?',
-        timestamp: new Date(),
-        metadata: {
-          suggestedResponses: [
-            'Naturwissenschaften und Technik',
-            'Sprachen und Kultur',
-            'Wirtschaft und Management',
-            'Soziales und Gesundheit',
-          ],
-        },
-      },
-      model: getModelDisplayName(),
+      message: session.messages[0],
+      phase: session.phase,
+      model: navigatorService.getModelDisplayName(),
     })
   } catch (error) {
     console.error('Navigator init error:', error)
@@ -106,21 +18,51 @@ export async function GET() {
   }
 }
 
-/**
- * DELETE /api/navigator
- * Clear a session
- */
+/** POST /api/navigator – send a message, get the model's reply */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { sessionId, message } = body as { sessionId?: unknown; message?: unknown }
+
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+    }
+    if (message.length > 2000) {
+      return NextResponse.json({ error: 'Message too long' }, { status: 400 })
+    }
+
+    const id =
+      typeof sessionId === 'string' && sessionId
+        ? sessionId
+        : (await navigatorService.startSession()).id
+
+    const result = await navigatorService.processMessage(id, message.trim())
+
+    return NextResponse.json({
+      sessionId: result.session.id,
+      message: result.response,
+      phase: result.session.phase,
+      recommendation: result.recommendation,
+      crisis: result.crisis,
+      model: navigatorService.getModelDisplayName(),
+    })
+  } catch (error) {
+    if (error instanceof NavigatorUnavailableError) {
+      return NextResponse.json({ error: 'unavailable' }, { status: 503 })
+    }
+    console.error('Navigator error:', error)
+    return NextResponse.json({ error: 'Failed to process message' }, { status: 500 })
+  }
+}
+
+/** DELETE /api/navigator?sessionId= – clear a session */
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get('sessionId')
-
+    const sessionId = new URL(request.url).searchParams.get('sessionId')
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 })
     }
-
-    navigatorService.clearSession(sessionId)
-
+    await navigatorService.clearSession(sessionId)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Navigator delete error:', error)
