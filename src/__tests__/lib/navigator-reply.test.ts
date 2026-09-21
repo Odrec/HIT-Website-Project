@@ -67,4 +67,11 @@ describe('parseNavigatorReply', () => {
     expect(r.text).toBe('OPTIONS: sind Auswahlmöglichkeiten.\nWas magst du?')
     expect(r.options).toBeUndefined()
   })
+
+  it('does not treat a prose line merely starting with the keyword as a trailer', () => {
+    const r = parseNavigatorReply('Optionsvielfalt: gibt es viele.')
+    expect(r.text).toBe('Optionsvielfalt: gibt es viele.')
+    expect(r.options).toBeUndefined()
+    expect(r.recommendation).toBeUndefined()
+  })
 })

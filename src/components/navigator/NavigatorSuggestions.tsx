@@ -18,9 +18,9 @@ export function NavigatorSuggestions({
 
   return (
     <div className="flex flex-wrap gap-2 py-3">
-      {options.map((opt) => (
+      {options.map((opt, index) => (
         <Button
-          key={opt.label}
+          key={`${index}-${opt.label}`}
           variant="outline"
           size="sm"
           onClick={() => onSelect(opt.label)}

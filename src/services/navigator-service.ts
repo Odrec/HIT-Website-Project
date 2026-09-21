@@ -79,6 +79,11 @@ async function loadCatalogue(): Promise<NavigatorCatalogue> {
 // Sessions
 // ---------------------------------------------------------------------------
 
+// Single home for the session id format: minted here, validated by every
+// route that accepts a client-supplied sessionId (POST body, GET/DELETE
+// query params) before trusting it.
+export const NAVIGATOR_SESSION_ID_RE = /^nav-\d{13}-[a-z0-9]{1,8}$/
+
 function generateSessionId(): string {
   return `nav-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
@@ -321,6 +326,9 @@ async function doProcessMessage(
 // Serialises overlapping processMessage calls for the same session id, so
 // two concurrent turns never both read the same pre-turn history and both
 // save — the second call's history must include the first call's turn.
+// This lock is per-process (in-memory Map), which is sufficient because the
+// navigator runs as a single container — it does not coordinate across
+// multiple instances/replicas.
 const inflightTurns = new Map<string, Promise<unknown>>()
 
 export async function processMessage(
@@ -377,8 +385,7 @@ async function hydrateRecommendation(
     return {
       program: toStudyProgram(row),
       reason: p.reason,
-      isLehramt:
-        row.lehramtTypen.length > 0 || row.isLehramtStudiengang || row.isBeruflicheFachrichtung,
+      isLehramt: row.isLehramtStudiengang || row.isBeruflicheFachrichtung,
       relatedEvents: events.filter((e) => e.studyPrograms?.some((sp) => sp.id === p.programId)),
     }
   })

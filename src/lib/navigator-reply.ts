@@ -19,7 +19,7 @@ export interface ParsedNavigatorReply {
   recommendation?: ParsedRecommendation
 }
 
-const TRAILER_RE = /^\s*\**\s*(OPTIONS|EMPFEHLUNG)\s*:?\**\s*:?\s*(.*)$/i
+const TRAILER_RE = /^\s*\**\s*(OPTIONS|EMPFEHLUNG)\b\s*\**\s*:\s*\**\s*(.*)$/i
 
 function stripFences(lines: string[]): string[] {
   return lines.filter((l) => !/^\s*```/.test(l))

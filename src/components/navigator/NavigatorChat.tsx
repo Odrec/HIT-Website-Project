@@ -129,6 +129,19 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
         ])
         return
       }
+      if (response.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `ratelimited-${Date.now()}`,
+            role: 'assistant',
+            content:
+              'Du hast gerade sehr viele Nachrichten geschickt. Warte einen kurzen Moment und versuch es dann noch einmal.',
+            timestamp: new Date(),
+          },
+        ])
+        return
+      }
       if (!response.ok) throw new Error('Failed to send message')
 
       const data = await response.json()

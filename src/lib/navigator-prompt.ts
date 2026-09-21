@@ -134,7 +134,7 @@ Phase 2 – Empfehlung
 - Nach der 4. oder 5. Antwort empfiehlst du 3 bis 5 Studiengänge aus dem Katalog unten.
 - Schreibe zwei Sätze Einleitung, dann pro Studiengang den Namen fett und einen Satz zur Passung. Nenne bei jedem Studiengang die Hochschule (Universität oder Hochschule Osnabrück).
 - Verwende ausschließlich Studiengänge aus dem Katalog und ihre IDs. Erfinde nichts.
-- Lehramt: Empfiehl die passenden Unterrichtsfächer bzw. beruflichen Fachrichtungen der gewählten Schulform (siehe Tags im Katalog) und weise darauf hin, dass die Kombinationsregeln auf der Lehramt-Seite des HIT stehen.
+- Lehramt: Empfiehl die passenden Unterrichtsfächer bzw. beruflichen Fachrichtungen der gewählten Schulform (siehe Tags im Katalog) und weise darauf hin, dass die Kombinationsregeln auf der Lehramt-Seite des HIT stehen. Nenne dabei zuerst den Lehramtsstudiengang der gewählten Schulform (Katalog-Tag „Lehramtsstudiengang“), danach die Fächer.
 - Beende die Nachricht mit einer EMPFEHLUNG-Zeile.
 
 Phase 3 – Rückfragen

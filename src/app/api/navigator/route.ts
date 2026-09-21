@@ -1,9 +1,20 @@
 // Navigator API – session and message handling
 import { NextRequest, NextResponse } from 'next/server'
-import { navigatorService, NavigatorUnavailableError } from '@/services/navigator-service'
+import {
+  navigatorService,
+  NavigatorUnavailableError,
+  NAVIGATOR_SESSION_ID_RE,
+} from '@/services/navigator-service'
+import { withRateLimit } from '@/lib/rate-limit'
+
+const NAVIGATOR_POST_LIMIT = { maxRequests: 20, windowSeconds: 60, keyPrefix: 'rl:navigator:post' }
+const NAVIGATOR_GET_LIMIT = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'rl:navigator:get' }
 
 /** GET /api/navigator – create a session and return greeting + first question */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = await withRateLimit(request, NAVIGATOR_GET_LIMIT)
+  if (limited) return limited
+
   try {
     const session = await navigatorService.startSession()
     return NextResponse.json({
@@ -20,6 +31,9 @@ export async function GET() {
 
 /** POST /api/navigator – send a message, get the model's reply */
 export async function POST(request: NextRequest) {
+  const limited = await withRateLimit(request, NAVIGATOR_POST_LIMIT)
+  if (limited) return limited
+
   try {
     const body = await request.json()
     const { sessionId, message } = body as { sessionId?: unknown; message?: unknown }
@@ -32,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const id =
-      typeof sessionId === 'string' && sessionId
+      typeof sessionId === 'string' && NAVIGATOR_SESSION_ID_RE.test(sessionId)
         ? sessionId
         : (await navigatorService.startSession()).id
 
@@ -61,6 +75,9 @@ export async function DELETE(request: NextRequest) {
     const sessionId = new URL(request.url).searchParams.get('sessionId')
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 })
+    }
+    if (!NAVIGATOR_SESSION_ID_RE.test(sessionId)) {
+      return NextResponse.json({ error: 'Invalid session ID' }, { status: 400 })
     }
     await navigatorService.clearSession(sessionId)
     return NextResponse.json({ success: true })

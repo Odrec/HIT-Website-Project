@@ -274,7 +274,7 @@ After running the seed script:
 | `/api/routes/analyze` | POST | Travel-time analysis between consecutive routable schedule events | No |
 | `/api/settings/deadline` | GET | Public deadline info (date, passed, days remaining) | No |
 | `/api/recommendations` | POST | Get event recommendations | No |
-| `/api/navigator` | POST | AI navigator chat (503 when the gateway is down) | No |
+| `/api/navigator` | POST | AI navigator chat (503 when the gateway is down; 429 when rate-limited) | No |
 | `/api/navigator/recommendations` | GET | Stored recommendation for a session | No |
 | `/api/schedule/share` | POST | Create short link for schedule sharing | No |
 | `/api/schedule/share/[code]` | GET | Look up shared schedule by code | No |

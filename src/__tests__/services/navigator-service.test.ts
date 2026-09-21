@@ -23,6 +23,7 @@ vi.mock('@/lib/cache/redis', () => ({
 import {
   navigatorService,
   NavigatorUnavailableError,
+  NAVIGATOR_SESSION_ID_RE,
   resetNavigatorCatalogueCache,
 } from '@/services/navigator-service'
 
@@ -40,13 +41,25 @@ const programs = [
     id: 'cuid-land',
     name: 'Landschaftsentwicklung (B.Eng.)',
     institution: 'HOCHSCHULE',
+    // Non-empty lehramtTypen alone (a Fach tagged for a Schulform) must NOT
+    // trigger isLehramt — only isLehramtStudiengang / isBeruflicheFachrichtung do.
     lehramtTypen: ['GYMNASIUM'],
     isLehramtStudiengang: false,
     isBeruflicheFachrichtung: false,
     clusters: [{ id: 'c2', name: 'Agrar', sortOrder: 1 }],
   },
+  {
+    id: 'cuid-lag',
+    name: 'Zusatz Lehramt Gymnasium',
+    institution: 'UNI',
+    lehramtTypen: ['GYMNASIUM'],
+    isLehramtStudiengang: true,
+    isBeruflicheFachrichtung: false,
+    clusters: [{ id: 'c1', name: 'MINT', sortOrder: 1 }],
+  },
 ]
-// buildCatalogue order: UNI first → P1 = Biologie, P2 = Landschaftsentwicklung
+// buildCatalogue order: UNI first, German-collated by name →
+// P1 = Biologie, P2 = Zusatz Lehramt Gymnasium (both UNI), P3 = Landschaftsentwicklung (HOCHSCHULE)
 
 function llmReply(content: string, status = 200) {
   return {
@@ -82,6 +95,11 @@ describe('startSession', () => {
     expect(s.messages[0].role).toBe('assistant')
     expect(s.messages[0].metadata?.options).toHaveLength(6)
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('mints a session id matching NAVIGATOR_SESSION_ID_RE', async () => {
+    const s = await navigatorService.startSession()
+    expect(s.id).toMatch(NAVIGATOR_SESSION_ID_RE)
   })
 })
 
@@ -145,17 +163,26 @@ describe('processMessage', () => {
     ])
     fetchMock.mockResolvedValue(
       llmReply(
-        'Meine Vorschläge.\nEMPFEHLUNG: {"programs":[{"id":"P1","reason":"Natur"},{"id":"P99","reason":"x"},{"id":"p2","reason":"Draußen"}],"summary":"Du magst Natur."}'
+        'Meine Vorschläge.\nEMPFEHLUNG: {"programs":[{"id":"P1","reason":"Natur"},{"id":"P99","reason":"x"},{"id":"p3","reason":"Draußen"},{"id":"P2","reason":"Unterricht"}],"summary":"Du magst Natur."}'
       )
     )
     const r = await navigatorService.processMessage(s.id, 'Natur und draußen')
 
     expect(r.session.phase).toBe('followup')
     expect(r.recommendation?.summary).toBe('Du magst Natur.')
-    expect(r.recommendation?.programs.map((p) => p.program.id)).toEqual(['cuid-bio', 'cuid-land'])
+    expect(r.recommendation?.programs.map((p) => p.program.id)).toEqual([
+      'cuid-bio',
+      'cuid-land',
+      'cuid-lag',
+    ])
     expect(r.recommendation?.programs[0].reason).toBe('Natur')
+    // Biologie: no Lehramt flags at all → false.
     expect(r.recommendation?.programs[0].isLehramt).toBe(false)
-    expect(r.recommendation?.programs[1].isLehramt).toBe(true)
+    // Landschaftsentwicklung: non-empty lehramtTypen but neither flag set → false
+    // (this is the bug fix under test: lehramtTypen alone must not trigger the hint).
+    expect(r.recommendation?.programs[1].isLehramt).toBe(false)
+    // Zusatz Lehramt Gymnasium: isLehramtStudiengang=true → true.
+    expect(r.recommendation?.programs[2].isLehramt).toBe(true)
     expect(r.recommendation?.programs[0].relatedEvents?.[0].id).toBe('ev1')
     expect(r.recommendation?.programs[1].relatedEvents).toEqual([])
     expect(mockEventFindMany).toHaveBeenCalledWith(
@@ -168,6 +195,7 @@ describe('processMessage', () => {
     expect(stored?.programs.map((p) => p.program.name)).toEqual([
       'Biologie',
       'Landschaftsentwicklung (B.Eng.)',
+      'Zusatz Lehramt Gymnasium',
     ])
   })
 

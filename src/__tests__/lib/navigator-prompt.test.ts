@@ -136,6 +136,11 @@ describe('buildNavigatorSystemPrompt', () => {
     const p = buildNavigatorSystemPrompt(c, { answeredQuestions: 5, phase: 'followup' })
     expect(p).toContain('Phase 3 ist aktiv')
   })
+
+  it('instructs the model to name the Lehramtsstudiengang before the Fächer', () => {
+    const p = buildNavigatorSystemPrompt(c, { answeredQuestions: 1, phase: 'guided' })
+    expect(p).toContain('zuerst den Lehramtsstudiengang')
+  })
 })
 
 describe('fixed first question', () => {
