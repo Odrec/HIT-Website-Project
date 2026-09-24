@@ -93,6 +93,9 @@ export interface NavigatorMessageResponse {
   model: string
 }
 
+// External links below were verified on 2026-09-24. The ZSB (Zentrale
+// Studienberatung) serves both Universität and Hochschule Osnabrück, so its
+// pages are the right landing spots for visitors of either institution.
 export const CRISIS_SUPPORT_RESOURCES: SupportResource[] = [
   {
     name: 'Telefonseelsorge',
@@ -101,17 +104,12 @@ export const CRISIS_SUPPORT_RESOURCES: SupportResource[] = [
     available: '24/7',
   },
   {
-    name: 'Psychologische Beratung der Universität',
-    description: 'Psychologische Beratungsstelle für Studierende',
-    url: 'https://www.uni-osnabrueck.de/studium/studienberatung/psychologische-beratung/',
-    email: 'psychberatung@uni-osnabrueck.de',
-    available: 'Mo-Fr nach Vereinbarung',
-  },
-  {
-    name: 'Studierendenwerk Psychosoziale Beratung',
-    description: 'Unterstützung bei persönlichen Schwierigkeiten',
-    url: 'https://www.studentenwerk-osnabrueck.de/de/beratung/psychosoziale-beratung.html',
-    available: 'Mo-Fr 9-16 Uhr',
+    name: 'Psychologische Beratung des Studentenwerks Osnabrück',
+    description:
+      'Kostenlose psychosoziale Beratung für Studierende und Studieninteressierte von Universität und Hochschule',
+    url: 'https://www.studentenwerk-osnabrueck.de/de/beratung/psychologische-beratung.html',
+    phone: '0541 969-2580',
+    available: 'Mo-Do 9-12 und 13-16 Uhr, Fr 9-13 Uhr',
   },
 ]
 
@@ -119,15 +117,15 @@ export const END_SESSION_RESOURCES: EndSessionResource[] = [
   {
     type: 'counseling',
     title: 'Studienberatung',
-    description: 'Persönliche Beratung zu Studienentscheidungen',
-    url: 'https://www.uni-osnabrueck.de/studium/studienberatung/',
+    description: 'Persönliche Beratung der Zentralen Studienberatung Osnabrück (ZSB)',
+    url: 'https://www.zsb-os.de/beratung/beratung-und-information',
     icon: 'MessageCircle',
   },
   {
     type: 'trial',
-    title: 'Schnupperstudium',
-    description: 'Vorlesungen besuchen und Studienfächer erleben',
-    url: 'https://www.uni-osnabrueck.de/studium/schnupperstudium/',
+    title: 'Studieren probieren',
+    description: 'Schnupperstudium und "Studi für einen Tag" an Universität und Hochschule',
+    url: 'https://www.zsb-os.de/studienorientierung/orientieren-und-informieren#c1825',
     icon: 'GraduationCap',
   },
   {
@@ -139,9 +137,9 @@ export const END_SESSION_RESOURCES: EndSessionResource[] = [
   },
   {
     type: 'aptitude_test',
-    title: 'Selbsttests',
-    description: 'Eignungstests und Interessenfragebögen',
-    url: 'https://www.uni-osnabrueck.de/studium/studienberatung/selbsttests/',
+    title: 'Tests zur Studienorientierung',
+    description: 'Selbsttests und Interessenfragebögen, empfohlen von der ZSB',
+    url: 'https://www.zsb-os.de/studienorientierung/orientieren-und-informieren',
     icon: 'ClipboardCheck',
   },
 ]
