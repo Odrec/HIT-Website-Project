@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.17.2] - 2026-09-24
+
+### Fixed
+
+- Studiennavigator: the "Nächste Schritte" links under the recommendations (Studienberatung,
+  Studieren probieren, Tests zur Studienorientierung) and the psychological-counselling link in the
+  crisis banner pointed to pages that do not exist. They now go to the verified ZSB and
+  Studentenwerk pages, which cover both Universität and Hochschule.
+
 ## [0.17.1] - 2026-09-21
 
 ### Fixed
@@ -106,6 +115,7 @@ texts, and a few housekeeping fixes.
 - Removed the "Entwickler-Hinweis" box on the login page, which printed the admin login
   credentials on screen.
 
+[0.17.2]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.2
 [0.17.1]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.1
 [0.17.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.0
 [0.16.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.16.0
