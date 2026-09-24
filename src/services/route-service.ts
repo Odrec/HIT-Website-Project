@@ -14,6 +14,7 @@ import type {
   RouteGeometry,
 } from '@/types/routes'
 import { prisma } from '@/lib/db/prisma'
+import { normalizeCampus } from '@/lib/campus'
 import { fetchWalkingDirections } from '@/services/google-directions'
 import { getActiveEditionId } from '@/lib/active-edition'
 
@@ -39,12 +40,12 @@ function toBuildingInfo(
     id: b.slug,
     name: b.name,
     shortName: b.shortName ?? undefined,
-    coordinates: {
-      latitude: b.latitude ?? 0,
-      longitude: b.longitude ?? 0,
-    },
+    coordinates:
+      b.latitude != null && b.longitude != null
+        ? { latitude: b.latitude, longitude: b.longitude }
+        : null,
     address: b.address ?? '',
-    campus: (b.campus as BuildingInfo['campus']) ?? 'other',
+    campus: normalizeCampus(b.campus),
     hasAccessibility: b.hasAccessibility,
     accessibilityNotes: b.accessibilityNotes ?? undefined,
     eventCount,

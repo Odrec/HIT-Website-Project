@@ -283,20 +283,23 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
       continue
     }
 
+    // Key by institution + name: "Zentrale Angebote" exists for both the
+    // Universität and the Hochschule and must stay two separate sections.
     const seen = new Set<string>()
     for (const info of infos) {
-      if (seen.has(info.name)) continue
-      seen.add(info.name)
+      const key = `${info.institution}::${info.name}`
+      if (seen.has(key)) continue
+      seen.add(key)
       const g =
-        groups.get(info.name) ??
+        groups.get(key) ??
         (groups
-          .set(info.name, {
+          .set(key, {
             name: info.name,
             institution: info.institution,
             sortOrder: info.sortOrder,
             events: [],
           })
-          .get(info.name) as BookletClusterGroup<T>)
+          .get(key) as BookletClusterGroup<T>)
       g.events.push(event)
     }
   }

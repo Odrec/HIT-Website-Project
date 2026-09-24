@@ -36,6 +36,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: `Building not found: ${to}` }, { status: 404 })
     }
 
+    if (!fromBuilding.coordinates || !toBuilding.coordinates) {
+      return NextResponse.json(
+        { error: 'Für mindestens ein Gebäude sind keine Koordinaten hinterlegt' },
+        { status: 422 }
+      )
+    }
+
     const waypoints: RouteWaypoint[] = [
       {
         id: fromBuilding.id,
