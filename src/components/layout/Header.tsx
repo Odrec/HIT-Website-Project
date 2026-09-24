@@ -258,6 +258,13 @@ export function Header() {
             )}
           </Link>
           <Link
+            href="/route-planner"
+            className="py-2 text-sm font-medium text-hit-gray-600"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Routenplanung
+          </Link>
+          <Link
             href="/navigator"
             className="py-2 text-sm font-medium text-hit-gray-600"
             onClick={() => setMobileMenuOpen(false)}

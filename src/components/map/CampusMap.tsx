@@ -6,6 +6,9 @@ import type { BuildingInfo, Route, Coordinates, TravelTimeAnalysis } from '@/typ
 import type { BusPositionResponse, ShuttleStop } from '@/types/shuttle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatEventTimeRange } from '@/lib/event-time'
+import { CAMPUS_LABELS, getCampusColor } from '@/lib/campus'
+import { computeMapCenter, buildingsWithCoordinates, DEFAULT_MAP_CENTER } from '@/lib/map-center'
+import { MapViewportSync } from './MapViewportSync'
 
 // Dynamic import for Leaflet (no SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
@@ -38,24 +41,15 @@ interface CampusMapProps {
   selectedLegIndex?: number | null
   highlightBuildingIds?: string[]
   dimUnselected?: boolean
+  /**
+   * Changes to this value re-fit the viewport to the currently passed
+   * buildings (used when the campus filter changes). The initial mount never
+   * animates.
+   */
+  viewportKey?: string
 }
 
-// Default center (Osnabrück)
-const DEFAULT_CENTER: [number, number] = [52.2799, 8.0472]
 const DEFAULT_ZOOM = 14
-
-// Corporate colors: Uni = burgundy, FH/HS = cyan blue
-function getBuildingColor(campus: string | null | undefined): string {
-  switch (campus) {
-    case 'schloss':
-    case 'westerberg':
-      return '#AC0634' // Uni burgundy
-    case 'caprivi':
-      return '#009EE3' // FH blue
-    default:
-      return '#6B7280' // Neutral gray for other/unknown
-  }
-}
 
 export default function CampusMap({
   buildings = [],
@@ -74,6 +68,7 @@ export default function CampusMap({
   selectedLegIndex = null,
   highlightBuildingIds,
   dimUnselected = false,
+  viewportKey,
 }: CampusMapProps) {
   const [isClient, setIsClient] = useState(false)
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
@@ -103,20 +98,13 @@ export default function CampusMap({
     )
   }
 
-  // Calculate center based on buildings or route
-  let center = DEFAULT_CENTER
-  if (route && route.waypoints.length > 0) {
-    const avgLat =
-      route.waypoints.reduce((sum, wp) => sum + wp.coordinates.latitude, 0) / route.waypoints.length
-    const avgLng =
-      route.waypoints.reduce((sum, wp) => sum + wp.coordinates.longitude, 0) /
-      route.waypoints.length
-    center = [avgLat, avgLng]
-  } else if (buildings.length > 0) {
-    const avgLat = buildings.reduce((sum, b) => sum + b.coordinates.latitude, 0) / buildings.length
-    const avgLng = buildings.reduce((sum, b) => sum + b.coordinates.longitude, 0) / buildings.length
-    center = [avgLat, avgLng]
-  }
+  // Centre on the route if there is one, else on the buildings that actually
+  // have coordinates, else on the Schloss. Never average missing positions.
+  const locatedBuildings = buildingsWithCoordinates(buildings)
+  const center = computeMapCenter(
+    buildings,
+    route && route.waypoints.length > 0 ? route.waypoints.map((wp) => wp.coordinates) : undefined
+  )
 
   // Create custom icons
   const eventIcon = leaflet.divIcon({
@@ -156,6 +144,13 @@ export default function CampusMap({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
+          <MapViewportSync
+            viewportKey={viewportKey}
+            points={locatedBuildings.map((b) => b.coordinates)}
+            fallbackCenter={DEFAULT_MAP_CENTER}
+            fallbackZoom={DEFAULT_ZOOM}
+          />
+
           {/* Current location marker */}
           {currentLocation && (
             <Marker
@@ -172,10 +167,10 @@ export default function CampusMap({
 
           {/* Building markers */}
           {showAllBuildings &&
-            buildings.map((building) => {
+            locatedBuildings.map((building) => {
               const isDimmed =
                 dimUnselected && highlightBuildingIds && !highlightBuildingIds.includes(building.id)
-              const color = isDimmed ? '#D1D5DB' : getBuildingColor(building.campus)
+              const color = isDimmed ? '#D1D5DB' : getCampusColor(building.campus)
               const opacity = isDimmed ? 'opacity:0.6;' : ''
               const icon = leaflet.divIcon({
                 className: 'custom-marker',
@@ -204,17 +199,11 @@ export default function CampusMap({
                         <span
                           className="px-2 py-1 text-xs rounded"
                           style={{
-                            backgroundColor: getBuildingColor(building.campus),
+                            backgroundColor: getCampusColor(building.campus),
                             color: 'white',
                           }}
                         >
-                          {building.campus === 'schloss'
-                            ? 'Schloss (Universität)'
-                            : building.campus === 'westerberg'
-                              ? 'Westerberg (Universität)'
-                              : building.campus === 'caprivi'
-                                ? 'Caprivi (Hochschule)'
-                                : 'Sonstige'}
+                          {CAMPUS_LABELS[building.campus]}
                         </span>
                         {building.hasAccessibility && (
                           <span className="text-green-600" title="Barrierefrei">
@@ -363,7 +352,9 @@ export default function CampusMap({
                 className: 'custom-marker',
                 html: `<img src="/zeichen-224.svg" alt="Bushaltestelle" style="width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />`,
                 iconSize: [36, 36],
-                iconAnchor: [18, 36],
+                // Zeichen 224 is a round sign without a pole: anchor at its centre
+                iconAnchor: [18, 18],
+                popupAnchor: [0, -18],
               })
 
               return (

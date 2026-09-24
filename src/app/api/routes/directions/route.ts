@@ -34,6 +34,13 @@ export async function GET(request: Request) {
     })
   }
 
+  if (!fromBuilding.coordinates || !toBuilding.coordinates) {
+    return NextResponse.json(
+      { error: 'Für mindestens ein Gebäude sind keine Koordinaten hinterlegt' },
+      { status: 422 }
+    )
+  }
+
   // Fallback: call Google Directions API and cache
   try {
     const result = await fetchWalkingDirections(

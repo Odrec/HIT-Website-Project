@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.17.3] - 2026-09-24
+
+Navigation and map fixes reported by the ZSB test round.
+
+### Fixed
+
+- The mobile menu was missing the **Routenplanung** entry.
+- The Lageplan opened somewhere in the Alps when the Stundenplan was empty: buildings without
+  stored coordinates were averaged in as 0°/0°. Buildings without a position are now excluded from
+  the map centre and from the markers, and the routing APIs answer 422 instead of routing to 0/0.
+- The campus dropdown above the map (Schloss, Westerberg, Caprivi) did not change the visible map
+  section and, because the database spells campuses as "Innenstadt", "Westerberg", "Caprivi", it
+  matched no building at all and every popup said "Sonstige". Campus values are now normalised once
+  on the server (`src/lib/campus.ts`), and choosing a campus flies the map to its buildings.
+- Shuttle-bus stop signs were drawn half a sign too high: the round Zeichen 224 icon was anchored at
+  its bottom edge instead of its centre.
+- PDF booklet: the Hochschule's "Zentrale Angebote" were merged into the Universität's section
+  of the same name. Sections are now keyed by institution and name.
+
 ## [0.17.2] - 2026-09-24
 
 ### Fixed
@@ -115,6 +134,7 @@ texts, and a few housekeeping fixes.
 - Removed the "Entwickler-Hinweis" box on the login page, which printed the admin login
   credentials on screen.
 
+[0.17.3]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.3
 [0.17.2]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.2
 [0.17.1]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.1
 [0.17.0]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.0

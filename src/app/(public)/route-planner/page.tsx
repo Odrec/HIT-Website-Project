@@ -1,5 +1,7 @@
 'use client'
 
+import { CAMPUS_KEYS, CAMPUS_LABELS } from '@/lib/campus'
+
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -47,9 +49,7 @@ const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
 // Campus areas for filtering
 const CAMPUS_AREAS: { id: string; name: string }[] = [
   { id: 'all', name: 'Alle Standorte' },
-  { id: 'schloss', name: 'Schloss Campus' },
-  { id: 'westerberg', name: 'Westerberg Campus' },
-  { id: 'caprivi', name: 'Caprivi (Hochschule)' },
+  ...CAMPUS_KEYS.map((key) => ({ id: key, name: CAMPUS_LABELS[key] })),
 ]
 
 export default function RoutePlannerPage() {
@@ -603,6 +603,7 @@ export default function RoutePlannerPage() {
                     selectedLegIndex={selectedLegIndex}
                     highlightBuildingIds={scheduledBuildingSlugs}
                     dimUnselected={mapLocationFilter === 'mine'}
+                    viewportKey={selectedCampus}
                   />
                 )}
 

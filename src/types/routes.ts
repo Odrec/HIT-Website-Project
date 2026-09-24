@@ -1,3 +1,5 @@
+import type { CampusKey } from '@/lib/campus'
+
 // Route Planning Types
 
 /**
@@ -105,9 +107,10 @@ export interface BuildingInfo {
   id: string
   name: string
   shortName?: string
-  coordinates: Coordinates
+  /** null when the building has no position yet (never 0/0). */
+  coordinates: Coordinates | null
   address: string
-  campus: 'schloss' | 'westerberg' | 'caprivi' | 'other'
+  campus: CampusKey
   hasAccessibility: boolean
   accessibilityNotes?: string
   eventCount?: number

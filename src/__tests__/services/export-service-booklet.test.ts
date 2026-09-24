@@ -63,6 +63,18 @@ describe('groupEventsForBooklet', () => {
     expect(res.clusterGroups.map((g) => g.name).sort()).toEqual(['A', 'B'])
   })
 
+  it('keeps same-named clusters of different institutions apart (Zentrale Angebote)', () => {
+    const u = ev('u', { clusters: [uni('Zentrale Angebote', 1)] })
+    const h = ev('h', { clusters: [hs('Zentrale Angebote', 1)] })
+    const res = groupEventsForBooklet([u, h])
+    expect(
+      res.clusterGroups.map((g) => [g.institution, g.name, g.events.map((e) => e.id)])
+    ).toEqual([
+      ['HOCHSCHULE', 'Zentrale Angebote', ['h']],
+      ['UNI', 'Zentrale Angebote', ['u']],
+    ])
+  })
+
   it('buckets a non-cross event without clusters under "Ohne Studienfeld", ranked last', () => {
     const withField = ev('w', { clusters: [uni('Feld', 0)] })
     const without = ev('x', {})
