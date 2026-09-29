@@ -181,6 +181,7 @@ The model receives the full programme catalogue (name, institution, Studienfeld,
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `CONTACT_EMAIL` | Address rendered as the public contact link in the site footer. Server-only — read at request time, so a deploy-time change to `.env` (followed by a container restart) takes effect without rebuilding the image. | `hit@zsb-os.de` |
+| `START_URL` | Target of the "Start" entry in the header menu. The HIT site is embedded in the ZSB website, so "Start" leads back there. Server-only, read at request time like `CONTACT_EMAIL`. | `https://www.zsb-os.de/hit` |
 
 ### Matomo Analytics
 

@@ -28,7 +28,12 @@ function getInitials(nameOrEmail: string): string {
 /**
  * Main header component with navigation and user menu
  */
-export function Header() {
+interface HeaderProps {
+  /** Target of the "Start" menu entry; defaults to the internal homepage. */
+  startHref?: string
+}
+
+export function Header({ startHref = '/' }: HeaderProps = {}) {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { state, getConflicts, getWatchlistCount } = useSchedule()
@@ -65,12 +70,12 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link
-            href="/"
+          <a
+            href={startHref}
             className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
           >
             Start
-          </Link>
+          </a>
           <Link
             href="/events"
             className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
@@ -212,13 +217,13 @@ export function Header() {
         )}
       >
         <nav className="container mx-auto flex flex-col gap-2 px-4 py-4">
-          <Link
-            href="/"
+          <a
+            href={startHref}
             className="py-2 text-sm font-medium text-hit-gray-600"
             onClick={() => setMobileMenuOpen(false)}
           >
             Start
-          </Link>
+          </a>
           <Link
             href="/events"
             className="py-2 text-sm font-medium text-hit-gray-600"
