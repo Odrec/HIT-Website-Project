@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.17.4] - 2026-09-29
+
+### Changed
+
+- The **Start** entry in the header menu (desktop and mobile) now leads to the ZSB's HIT page
+  (`https://www.zsb-os.de/hit`), because the programme site is embedded there. The target is
+  configurable at runtime via `START_URL`; the internal homepage `/` remains reachable.
+
 ## [0.17.3] - 2026-09-24
 
 Navigation and map fixes reported by the ZSB test round.
@@ -134,6 +142,7 @@ texts, and a few housekeeping fixes.
 - Removed the "Entwickler-Hinweis" box on the login page, which printed the admin login
   credentials on screen.
 
+[0.17.4]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.4
 [0.17.3]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.3
 [0.17.2]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.2
 [0.17.1]: https://github.com/Odrec/HIT-Website-Project/releases/tag/v0.17.1
