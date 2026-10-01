@@ -1,9 +1,13 @@
 // Navigator Recommendations API – return the recommendation stored on a session
 import { NextRequest, NextResponse } from 'next/server'
+import { navigatorDisabledResponse } from '@/lib/navigator-disabled'
 import { navigatorService, NAVIGATOR_SESSION_ID_RE } from '@/services/navigator-service'
 
 /** GET /api/navigator/recommendations?sessionId= */
 export async function GET(request: NextRequest) {
+  const disabled = navigatorDisabledResponse()
+  if (disabled) return disabled
+
   try {
     const sessionId = new URL(request.url).searchParams.get('sessionId')
     if (!sessionId) {

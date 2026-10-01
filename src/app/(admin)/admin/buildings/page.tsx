@@ -32,6 +32,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { CoordinateInputs } from '@/components/admin/CoordinateInputs'
+import { validateCoordinatePair } from '@/lib/coordinates'
 
 interface Room {
   id: string
@@ -177,6 +179,12 @@ export default function BuildingsPage() {
   const handleSaveBuilding = async () => {
     if (!buildingForm.name.trim()) return
 
+    const coordinates = validateCoordinatePair(buildingForm.latitude, buildingForm.longitude)
+    if ('error' in coordinates) {
+      alert(coordinates.error)
+      return
+    }
+
     setSavingBuilding(true)
     try {
       const body = {
@@ -186,8 +194,8 @@ export default function BuildingsPage() {
         address: buildingForm.address.trim() || null,
         campus: buildingForm.campus.trim() || null,
         institution: buildingForm.institution,
-        latitude: buildingForm.latitude ? parseFloat(buildingForm.latitude) : null,
-        longitude: buildingForm.longitude ? parseFloat(buildingForm.longitude) : null,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
         hasAccessibility: buildingForm.hasAccessibility,
         accessibilityNotes: buildingForm.accessibilityNotes.trim() || null,
       }
@@ -206,7 +214,7 @@ export default function BuildingsPage() {
         fetchBuildings()
       } else {
         const error = await response.json()
-        alert(error.message || 'Fehler beim Speichern')
+        alert(error.error || error.message || 'Fehler beim Speichern')
       }
     } catch (error) {
       console.error('Failed to save building:', error)
@@ -741,30 +749,11 @@ export default function BuildingsPage() {
                 placeholder="z.B. Albrechtstraße 28, 49076 Osnabrück"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="building-latitude">Breitengrad</Label>
-                <Input
-                  id="building-latitude"
-                  type="number"
-                  step="any"
-                  value={buildingForm.latitude}
-                  onChange={(e) => setBuildingForm({ ...buildingForm, latitude: e.target.value })}
-                  placeholder="52.2815"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="building-longitude">Längengrad</Label>
-                <Input
-                  id="building-longitude"
-                  type="number"
-                  step="any"
-                  value={buildingForm.longitude}
-                  onChange={(e) => setBuildingForm({ ...buildingForm, longitude: e.target.value })}
-                  placeholder="8.0231"
-                />
-              </div>
-            </div>
+            <CoordinateInputs
+              idPrefix="building"
+              value={{ latitude: buildingForm.latitude, longitude: buildingForm.longitude }}
+              onChange={(coords) => setBuildingForm({ ...buildingForm, ...coords })}
+            />
             <div className="flex items-center gap-2">
               <Checkbox
                 id="building-accessibility"

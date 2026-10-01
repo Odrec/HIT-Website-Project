@@ -4,14 +4,14 @@ import {
   updateBusPosition,
   getAllBusPositions,
 } from '@/services/shuttle-service'
-import { SHUTTLE_STOPS } from '@/types/shuttle'
+import { getShuttleStops } from '@/services/shuttle-stop-service'
 
 export async function GET(_request: NextRequest) {
   try {
-    const buses = await getAllBusPositions()
+    const [buses, stops] = await Promise.all([getAllBusPositions(), getShuttleStops()])
 
     return NextResponse.json(
-      { buses, stops: SHUTTLE_STOPS },
+      { buses, stops },
       {
         headers: {
           'Cache-Control': 'public, max-age=5',

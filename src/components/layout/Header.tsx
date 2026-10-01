@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, LogOut, Settings, AlertTriangle, HelpCircle } from 'lucide-react'
+import { Menu, X, LogOut, Settings, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { useSchedule } from '@/contexts/schedule-context'
+import { NAVIGATOR_ENABLED } from '@/lib/features'
 
 function getInitials(nameOrEmail: string): string {
   const cleaned = nameOrEmail.split('@')[0]
@@ -125,23 +126,18 @@ export function Header({ startHref = '/' }: HeaderProps = {}) {
           >
             Routenplanung
           </Link>
-          <Link
-            href="/navigator"
-            className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
-          >
-            Studiennavigator
-          </Link>
+          {NAVIGATOR_ENABLED && (
+            <Link
+              href="/navigator"
+              className="text-sm font-medium text-hit-gray-600 transition-colors hover:text-hit-uni-500"
+            >
+              Studiennavigator
+            </Link>
+          )}
         </nav>
 
         {/* User Menu */}
         <div className="flex items-center gap-4">
-          <Link
-            href="/hilfe"
-            className="hidden md:flex items-center justify-center h-8 w-8 rounded-full text-hit-gray-400 transition-colors hover:bg-hit-gray-100 hover:text-hit-uni-500"
-            aria-label="Hilfe"
-          >
-            <HelpCircle className="h-5 w-5" />
-          </Link>
           {status === 'loading' ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-hit-gray-200" />
           ) : session ? (
@@ -269,20 +265,15 @@ export function Header({ startHref = '/' }: HeaderProps = {}) {
           >
             Routenplanung
           </Link>
-          <Link
-            href="/navigator"
-            className="py-2 text-sm font-medium text-hit-gray-600"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Studiennavigator
-          </Link>
-          <Link
-            href="/hilfe"
-            className="py-2 text-sm font-medium text-hit-gray-600"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Hilfe
-          </Link>
+          {NAVIGATOR_ENABLED && (
+            <Link
+              href="/navigator"
+              className="py-2 text-sm font-medium text-hit-gray-600"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Studiennavigator
+            </Link>
+          )}
           {session && isAdmin && (
             <Link
               href="/admin"

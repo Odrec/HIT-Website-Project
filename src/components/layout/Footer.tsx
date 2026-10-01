@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { NAVIGATOR_ENABLED } from '@/lib/features'
 
 /**
  * Footer component with institutional links and information
@@ -32,19 +33,16 @@ export function Footer() {
                   Stundenplan erstellen
                 </Link>
               </li>
-              <li>
-                <Link href="/navigator" className="text-hit-gray-600 hover:text-hit-uni-500">
-                  Studiennavigator
-                </Link>
-              </li>
+              {NAVIGATOR_ENABLED && (
+                <li>
+                  <Link href="/navigator" className="text-hit-gray-600 hover:text-hit-uni-500">
+                    Studiennavigator
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/route-planner" className="text-hit-gray-600 hover:text-hit-uni-500">
                   Lageplan
-                </Link>
-              </li>
-              <li>
-                <Link href="/hilfe" className="text-hit-gray-600 hover:text-hit-uni-500">
-                  Hilfe & Anleitung
                 </Link>
               </li>
             </ul>

@@ -27,7 +27,6 @@ import { ScheduleEventCard } from '@/components/schedule/ScheduleEventCard'
 import { RecommendationList, ScheduleAnalysis } from '@/components/recommendations'
 import { TravelWarnings, RouteInfo } from '@/components/map'
 import type { Route, TravelTimeAnalysis, BuildingInfo } from '@/types/routes'
-import { HelpLink } from '@/components/help/HelpLink'
 import {
   Calendar,
   List,
@@ -456,7 +455,6 @@ function SchedulePageContent() {
               <Calendar className="h-8 w-8 text-primary" />
               Mein Stundenplan
             </h1>
-            <HelpLink href="/hilfe/besucher#stundenplan" />
           </div>
           <p className="text-muted-foreground mt-1">
             {state.items.length > 0

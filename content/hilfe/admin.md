@@ -22,6 +22,8 @@ Unter **Gebäude** verwalten Sie alle Campus-Gebäude mit Räumen, Adressen und 
 
 **Wichtig:** GPS-Koordinaten (Breitengrad und Längengrad) sind **erforderlich**, damit Veranstaltungen in diesem Gebäude im Routenplaner und auf dem Lageplan angezeigt werden. Fehlen die Koordinaten, werden die zugehörigen Veranstaltungen stillschweigend aus der Routenberechnung entfernt — sie bleiben im persönlichen Stundenplan der Besucher sichtbar, erscheinen aber nicht in der Routenplaner-Liste. Prüfen Sie die Koordinaten nach dem Anlegen eines neuen Gebäudes.
 
+**Koordinaten eingeben:** Breiten- und Längengrad werden in Dezimalgrad mit bis zu 6 Nachkommastellen eingetragen (z. B. 52.271234 und 8.045678); Komma oder Punkt als Dezimaltrennzeichen sind beide möglich. Am einfachsten klicken Sie in Google Maps mit der rechten Maustaste auf den Ort, klicken die angezeigten Koordinaten an (damit werden sie kopiert) und fügen sie in das Feld **Breitengrad** ein – das Paar wird automatisch auf beide Felder verteilt. Ist ein Feld leer, zeigt es nur ein graues Beispiel („z.B. …“), keinen gespeicherten Wert. Liegen die Koordinaten nicht in Osnabrück (z. B. weil Breiten- und Längengrad vertauscht sind), erscheint ein Hinweis unter den Feldern.
+
 ## Raumzuordnungen
 
 Unter **Raumzuordnung** weisen Sie Veranstaltungen bestimmten Räumen und Zeitslots zu. Das System warnt bei Doppelbelegungen.
@@ -59,6 +61,8 @@ Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei import
 ## Shuttle-Busse
 
 Unter **Shuttle-Busse** verwalten Sie die GPS-verfolgten Shuttle-Busse für den HIT-Tag. Sie können Busse hinzufügen, aktivieren oder deaktivieren und löschen. Für jeden Bus wird ein **QR-Code** generiert, den die Busbegleiter (Guides) mit ihrem Smartphone scannen. Die Guides öffnen damit eine Webseite, die ihren Standort automatisch an die HIT-Website sendet. Besucher sehen die Live-Positionen auf dem Lageplan im Routenplaner. Pausiert ein Bus, zeigt die Admin-Liste **„Pausiert bis HH:MM"** und der Bus erscheint auf der Karte gedämpft; über **„Pause aufheben"** beenden Sie eine Pause vorzeitig. Bei Sicherheitsbedenken können Sie den Token eines Busses jederzeit über **„Token erneuern"** neu generieren.
+
+**Haltestellen:** Unterhalb der Busse pflegen Sie die Haltestellen, die mit dem Bus-Symbol auf dem Lageplan erscheinen. Jede Haltestelle hat einen Namen, Koordinaten (wie bei den Gebäuden mit bis zu 6 Nachkommastellen, damit das Symbol auf der richtigen Straßenseite steht) und einen optionalen Hinweis, wie Besucher*innen sie finden (z. B. „Zwei Haltestellen (eine pro Fahrtrichtung)"). Über **„Haltestelle hinzufügen"** legen Sie weitere an.
 
 Hinweise zur Bus-Begleitung: Die Hilfskraft im Bus muss nach dem Scannen des QR-Codes einmalig den **Standortzugriff** im Browser erlauben. Der Tab muss während der gesamten Schicht geöffnet bleiben — bei iOS Safari pausiert die Standortübertragung, sobald das Display gesperrt wird; bei Android Chrome läuft sie meist weiter, sobald die Berechtigung einmal erteilt wurde. Bei längeren Pausen empfiehlt sich ein erneutes Öffnen des Links. Für geplante Pausen kann die Hilfskraft auf der Tracking-Seite **„Pause bis …"** wählen (z. B. +15/+30/+45 Minuten oder offen) — das Tracking ruht dann sichtbar, **„Weiter"** nimmt es wieder auf. Zuverlässiges Tracking im Hintergrund (gesperrtes Display, andere App im Vordergrund) ist im Browser technisch nicht garantiert.
 

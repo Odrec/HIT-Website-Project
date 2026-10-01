@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateBuildingCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { validateCoordinatePair } from '@/lib/coordinates'
 import { compareDe } from '@/lib/sort-de'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
@@ -85,6 +86,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name ist erforderlich' }, { status: 400 })
     }
 
+    const coordinates = validateCoordinatePair(latitude, longitude)
+    if ('error' in coordinates) {
+      return NextResponse.json({ error: coordinates.error }, { status: 400 })
+    }
+
     const validInstitutions = ['UNI', 'HOCHSCHULE', 'BOTH'] as const
     type Inst = (typeof validInstitutions)[number]
     const resolvedInstitution: Inst = validInstitutions.includes(institution) ? institution : 'BOTH'
@@ -110,8 +116,8 @@ export async function POST(request: NextRequest) {
         address: address?.trim() || null,
         campus: campus?.trim() || null,
         institution: resolvedInstitution,
-        latitude: latitude != null ? parseFloat(latitude) : null,
-        longitude: longitude != null ? parseFloat(longitude) : null,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
         hasAccessibility: hasAccessibility ?? false,
         accessibilityNotes: accessibilityNotes?.trim() || null,
       },

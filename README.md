@@ -27,9 +27,9 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 |---------|-------------|
 | **Event Browsing** | Entry-point landing on `/events` with search bar, separate Studienfeld tiles for Universität and Hochschule, and dedicated links for Lehramt, Studiengänge A-Z, Infomärkte, Rund ums Studium, and the Multiplikator\*innen-Café event. Studienfeld tiles open an intermediate programs list at `/events/cluster/[id]` (mirroring the old zsb-os.de pattern); the "Alle Veranstaltungen dieses Studienfelds anzeigen" CTA from there links to `/events/cluster/[id]/all`. The two Lehramt Studienfeld tiles instead route to the dedicated Lehramt page (the HS one to its `#berufsbildend` section). The Lehramt page mirrors the old zsb-os.de structure: an intro text, then per Schulform (Grund-, Haupt- und Realschulen / Gymnasien / berufsbildende Schulen) the events of that Schulform's dedicated Lehramt-Studiengang first, followed by its Unterrichtsfächer as a clickable list (each links to the subject's events). A subject (`StudyProgram.lehramtTypen[]`) is tagged with several Schulformen at once. The Berufsschule section additionally splits berufliche Fachrichtungen from allgemeinbildende Unterrichtsfächer with a combination warning. Other entries open their own sub-route with full filtering (event type, institution, time, sort, list/grid/calendar views). Study programs link to external Uni/HS pages |
 | **Merkliste & Schedule Builder** | Loose **Merkliste** (watchlist) to collect events before committing, then a personal **Stundenplan** with conflict detection, travel-time + spatial-proximity warnings, 3-level priority labels (Hoch/Mittel/Niedrig), QR code/short link sharing, Google Calendar integration |
-| **Studiennavigator** | LLM-guided Studiengang recommendations: 4–5 questions, then 3–5 programmes picked by the model from the DB catalogue, linked to HIT events |
+| **Studiennavigator** | LLM-guided Studiengang recommendations: 4–5 questions, then 3–5 programmes picked by the model from the DB catalogue, linked to HIT events. **Switched off for HIT 2026** (`NAVIGATOR_ENABLED` in `src/lib/features.ts`): no entry points, `/navigator` and `/api/navigator*` answer 404 |
 | **Route Planner** | Navigate between campus locations with Google Directions API walking routes, cached for performance. Click schedule events to filter individual route legs on the map, or hand the whole plan off to Google Maps for turn-by-turn navigation |
-| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page (with a timed "Pause bis …" status), visitors see live markers and official Zeichen 224 bus stop icons on the campus map |
+| **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page (with a timed "Pause bis …" status), visitors see live markers and official Zeichen 224 bus stop icons on the campus map. Stops are admin-editable (Shuttle-Busse page, 6-decimal coordinates) |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
 | **Admin Interface** | Manage events, programs, locations, users, room assignments, site settings (HIT date, submission deadline), and editable homepage texts (`/admin/texte`, backed by the `content_texts` table — overrides only, defaults ship with the code) |
 | **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
@@ -151,7 +151,7 @@ Copy `.env.example` to `.env.local` and configure:
 
 ### AI Configuration (Study Navigator)
 
-The Studiennavigator supports any OpenAI-compatible chat-completions endpoint (LiteLLM, vLLM, Ollama, OpenAI):
+The Studiennavigator supports any OpenAI-compatible chat-completions endpoint (LiteLLM, vLLM, Ollama, OpenAI). It is currently switched off in code (`NAVIGATOR_ENABLED = false` in `src/lib/features.ts`); these variables only matter once it is switched back on.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -301,6 +301,8 @@ After running the seed script:
 | `/api/admin/shuttle-buses` | GET, POST | Manage shuttle buses |
 | `/api/admin/shuttle-buses/[id]` | PUT, DELETE | Update/delete shuttle bus |
 | `/api/admin/shuttle-buses/[id]/regenerate-token` | POST | Regenerate guide token |
+| `/api/admin/shuttle-stops` | GET, POST | List/create shuttle stops shown on the Lageplan |
+| `/api/admin/shuttle-stops/[id]` | PUT, DELETE | Update/delete a shuttle stop |
 
 ---
 
@@ -425,6 +427,7 @@ npx prisma migrate dev
 ```
 
 #### AI Navigator not responding
+- `/navigator` and `/api/navigator` answer 404 while `NAVIGATOR_ENABLED` is `false` in `src/lib/features.ts` (the state for HIT 2026) — that is intentional
 - Check `OPENAI_API_BASE_URL` reachability from the container; a 503 from `/api/navigator` means the gateway call failed (see container logs for `[navigator]`)
 - For local LLMs (vLLM): ensure the server is running and reachable at the configured URL
 - Check API key has sufficient credits/quota (cloud providers)

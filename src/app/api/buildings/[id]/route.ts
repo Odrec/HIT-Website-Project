@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { cacheGet, cacheSet, invalidateBuildingCaches } from '@/lib/cache/cache-utils'
 import { CacheKeys, CacheTTL } from '@/lib/cache/cache-keys'
 import { isRedisConnected } from '@/lib/cache/redis'
+import { validateCoordinatePair } from '@/lib/coordinates'
 
 const PUBLIC_CACHE_HEADER = 'public, s-maxage=300, stale-while-revalidate=600'
 
@@ -88,6 +89,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Name ist erforderlich' }, { status: 400 })
     }
 
+    const coordinates = validateCoordinatePair(latitude, longitude)
+    if ('error' in coordinates) {
+      return NextResponse.json({ error: coordinates.error }, { status: 400 })
+    }
+
     const existing = await prisma.building.findUnique({ where: { id } })
     if (!existing) {
       return NextResponse.json({ error: 'Gebäude nicht gefunden' }, { status: 404 })
@@ -108,8 +114,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         address: address?.trim() || null,
         campus: campus?.trim() || null,
         ...(resolvedInstitution !== undefined && { institution: resolvedInstitution }),
-        latitude: latitude != null ? parseFloat(latitude) : null,
-        longitude: longitude != null ? parseFloat(longitude) : null,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
         hasAccessibility: hasAccessibility ?? existing.hasAccessibility,
         accessibilityNotes: accessibilityNotes?.trim() || null,
       },

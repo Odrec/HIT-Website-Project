@@ -5,6 +5,38 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.18.0] - 2026-10-01
+
+Feedback from the ZSB's October test round.
+
+**Deploy note:** runs the migration `shuttle_stops` (new table, pre-filled with the three existing
+stops). Building **04** currently has the coordinates -1 / 1 on the test instance (an artefact of
+the bug fixed below) and should be corrected in the admin area after the deploy.
+
+### Changed
+
+- The **Studiennavigator** is switched off for HIT 2026: it no longer appears in the header, the
+  mobile menu, the footer or on the homepage, `/navigator` answers 404 and the navigator APIs
+  answer 404 without contacting the language model. The code stays in place; the switch is
+  `NAVIGATOR_ENABLED` in `src/lib/features.ts`.
+- Visitors are no longer pointed to the help manual: the footer's **Hilfe & Anleitung**, the "?"
+  icon in the header, the **Hilfe** entry in the mobile menu and the "?" icons next to the page
+  titles of Veranstaltungen, Stundenplan and Routenplanung are gone, since the ZSB's FAQs cover
+  these questions. The admin area keeps its **Hilfe** entry.
+- **Shuttle-bus stops** are now maintained in the admin area (Shuttle-Busse → Haltestellen) with
+  6-decimal coordinates, instead of being fixed in the code with 3–4 decimals, which placed the
+  Schloss stop inside the OsnabrückHalle.
+
+### Fixed
+
+- The coordinates of buildings without a stored position (02, 04, FB, Mensa Schlossgarten) could
+  not be entered: the empty number field showed its example value like a real value that could
+  not be selected, and the arrow keys turned it into -1 / 1. Coordinate fields are now text
+  fields with a clearly marked example, accept the German decimal comma, split a pair copied from
+  Google Maps across both fields, explain invalid input and warn when a point is not in
+  Osnabrück. The server rejects invalid or half-filled coordinates with a German message instead
+  of failing or storing them, and the building dialog now shows that message.
+
 ## [0.17.4] - 2026-09-29
 
 ### Changed

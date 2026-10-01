@@ -503,6 +503,22 @@ model BusPosition {
   updatedAt DateTime   @updatedAt
 }
 
+/// Shuttle-bus stop shown on the Lageplan. Admin-editable (Shuttle-Busse page)
+/// so the ZSB can place stops with 6-decimal precision; replaces the former
+/// hardcoded SHUTTLE_STOPS list.
+model ShuttleStop {
+  id             String   @id @default(cuid())
+  name           String   @db.VarChar(200)
+  latitude       Float
+  longitude      Float
+  directionsNote String?  @db.Text
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("shuttle_stops")
+}
+
 /// Admin-editable text overrides for fixed slots on public pages.
 /// Only overrides live here — the shipped defaults are in
 /// src/lib/content-slots.ts, so an empty table renders the site correctly.

@@ -1,5 +1,6 @@
 // Navigator API – session and message handling
 import { NextRequest, NextResponse } from 'next/server'
+import { navigatorDisabledResponse } from '@/lib/navigator-disabled'
 import {
   navigatorService,
   NavigatorUnavailableError,
@@ -12,6 +13,9 @@ const NAVIGATOR_GET_LIMIT = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'rl
 
 /** GET /api/navigator – create a session and return greeting + first question */
 export async function GET(request: NextRequest) {
+  const disabled = navigatorDisabledResponse()
+  if (disabled) return disabled
+
   const limited = await withRateLimit(request, NAVIGATOR_GET_LIMIT)
   if (limited) return limited
 
@@ -31,6 +35,9 @@ export async function GET(request: NextRequest) {
 
 /** POST /api/navigator – send a message, get the model's reply */
 export async function POST(request: NextRequest) {
+  const disabled = navigatorDisabledResponse()
+  if (disabled) return disabled
+
   const limited = await withRateLimit(request, NAVIGATOR_POST_LIMIT)
   if (limited) return limited
 
@@ -71,6 +78,9 @@ export async function POST(request: NextRequest) {
 
 /** DELETE /api/navigator?sessionId= – clear a session */
 export async function DELETE(request: NextRequest) {
+  const disabled = navigatorDisabledResponse()
+  if (disabled) return disabled
+
   try {
     const sessionId = new URL(request.url).searchParams.get('sessionId')
     if (!sessionId) {
