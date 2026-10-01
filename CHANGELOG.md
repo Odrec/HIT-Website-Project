@@ -36,6 +36,11 @@ the bug fixed below) and should be corrected in the admin area after the deploy.
   Google Maps across both fields, explain invalid input and warn when a point is not in
   Osnabrück. The server rejects invalid or half-filled coordinates with a German message instead
   of failing or storing them, and the building dialog now shows that message.
+- `START_URL` and `CONTACT_EMAIL` were only read at request time on the homepage. Every other
+  public page (Veranstaltungen, Stundenplan, Routenplanung, Hilfe, Impressum, …) was prerendered
+  when the image was built, so the header's Start link and the footer's contact address there kept
+  the build-time values after a `.env` change. Public pages are now rendered per request, so a
+  change plus container restart takes effect everywhere.
 
 ## [0.17.4] - 2026-09-29
 
