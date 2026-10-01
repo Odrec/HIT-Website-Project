@@ -1,9 +1,8 @@
 /**
  * Site-wide feature switches.
  *
- * A code constant, not an env var: most public pages are prerendered at build
- * time, so a runtime env read in Header/Footer would only take effect on the
- * dynamic pages and the navigation would differ from page to page.
+ * Code constants rather than env vars on purpose: turning a feature back on
+ * should go through a review and a release, not a quiet `.env` edit.
  */
 
 /**
