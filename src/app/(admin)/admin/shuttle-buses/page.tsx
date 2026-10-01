@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Bus, Plus, RefreshCw, Trash2, QrCode, Power, PowerOff } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import { ShuttleStopsCard } from '@/components/admin/ShuttleStopsCard'
 
 interface ShuttleBus {
   id: string
@@ -259,6 +260,8 @@ export default function ShuttleBusesPage() {
           </CardContent>
         </Card>
       )}
+
+      <ShuttleStopsCard />
     </div>
   )
 }

@@ -6,6 +6,7 @@ vi.mock('@/services/shuttle-service', () => ({
   updateBusPosition: vi.fn(),
   getAllBusPositions: vi.fn(),
 }))
+vi.mock('@/services/shuttle-stop-service', () => ({ getShuttleStops: vi.fn() }))
 
 import { GET, POST } from '@/app/api/bus-positions/route'
 import {
@@ -13,10 +14,12 @@ import {
   updateBusPosition,
   getAllBusPositions,
 } from '@/services/shuttle-service'
+import { getShuttleStops } from '@/services/shuttle-stop-service'
 
 const mockValidateGuideToken = vi.mocked(validateGuideToken)
 const mockUpdateBusPosition = vi.mocked(updateBusPosition)
 const mockGetAllBusPositions = vi.mocked(getAllBusPositions)
+const mockGetShuttleStops = vi.mocked(getShuttleStops)
 
 describe('Bus Positions API', () => {
   beforeEach(() => {
@@ -24,7 +27,16 @@ describe('Bus Positions API', () => {
   })
 
   describe('GET /api/bus-positions', () => {
-    it('returns bus positions and stops', async () => {
+    it('returns bus positions and the admin-maintained stops', async () => {
+      const stops = [
+        {
+          id: 'osnabrueckhalle',
+          name: 'OsnabrückHalle / Schloss',
+          coordinates: { latitude: 52.272345, longitude: 8.044123 },
+          directionsNote: null,
+        },
+      ]
+      mockGetShuttleStops.mockResolvedValue(stops)
       mockGetAllBusPositions.mockResolvedValue([
         {
           id: 'bus1',
@@ -47,7 +59,7 @@ describe('Bus Positions API', () => {
 
       expect(response.status).toBe(200)
       expect(data.buses).toHaveLength(1)
-      expect(data.stops).toHaveLength(3)
+      expect(data.stops).toEqual(stops)
       expect(response.headers.get('Cache-Control')).toBe('public, max-age=5')
     })
   })

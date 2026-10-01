@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { HelpLink } from '@/components/help/HelpLink'
 import { shouldShowMultiplikatorCafeLink } from '@/lib/multiplikator-cafe'
 
 interface Cluster {
@@ -65,10 +64,7 @@ function EventsLandingContent() {
   return (
     <>
       <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
-          <HelpLink href="/hilfe/besucher#veranstaltungen" />
-        </div>
+        <h1 className="text-3xl font-bold text-hit-gray-900">Veranstaltungen</h1>
         <p className="mt-2 text-hit-gray-600">
           Entdecken Sie alle Veranstaltungen des Hochschulinfotags 2026
         </p>

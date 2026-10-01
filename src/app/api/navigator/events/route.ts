@@ -1,5 +1,6 @@
 // Navigator Events API - Get events for recommended programs
 import { NextRequest, NextResponse } from 'next/server'
+import { navigatorDisabledResponse } from '@/lib/navigator-disabled'
 import { navigatorService } from '@/services/navigator-service'
 
 /**
@@ -7,6 +8,9 @@ import { navigatorService } from '@/services/navigator-service'
  * Get events for specified program IDs
  */
 export async function GET(request: NextRequest) {
+  const disabled = navigatorDisabledResponse()
+  if (disabled) return disabled
+
   try {
     const { searchParams } = new URL(request.url)
     const programIds = searchParams.get('programIds')

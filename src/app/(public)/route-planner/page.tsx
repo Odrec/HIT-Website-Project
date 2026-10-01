@@ -37,7 +37,6 @@ import {
   ExternalLink,
   X,
 } from 'lucide-react'
-import { HelpLink } from '@/components/help/HelpLink'
 import { formatEventTimeRange } from '@/lib/event-time'
 
 // Dynamic import for map component (no SSR)
@@ -304,7 +303,6 @@ export default function RoutePlannerPage() {
               <Navigation className="h-8 w-8 text-primary" />
               Routenplanung
             </h1>
-            <HelpLink href="/hilfe/besucher#routenplaner" />
           </div>
           <p className="text-muted-foreground mt-1">
             Planen Sie Ihren Weg zwischen den Veranstaltungen

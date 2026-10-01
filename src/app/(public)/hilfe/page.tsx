@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { GraduationCap, ClipboardList, Settings } from 'lucide-react'
+import { NAVIGATOR_ENABLED } from '@/lib/features'
 
 const roles = [
   {
     slug: 'besucher',
     title: 'Für Besucher',
-    description: 'Veranstaltungen finden, Stundenplan erstellen, Navigator nutzen',
+    description: NAVIGATOR_ENABLED
+      ? 'Veranstaltungen finden, Stundenplan erstellen, Navigator nutzen'
+      : 'Veranstaltungen finden, Stundenplan erstellen, Lageplan nutzen',
     icon: GraduationCap,
     color: 'bg-hit-uni-500',
     hoverColor: 'hover:border-hit-uni-300',

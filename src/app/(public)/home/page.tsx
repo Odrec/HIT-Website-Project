@@ -17,6 +17,7 @@ import { HitCountdown } from '@/components/home/HitCountdown'
 import { formatEventDateLong } from '@/lib/event-time'
 import { getActiveEdition } from '@/lib/active-edition'
 import { getContentTexts } from '@/lib/content-texts'
+import { NAVIGATOR_ENABLED } from '@/lib/features'
 import { prisma } from '@/lib/db/prisma'
 
 const USE_ANIMATED_BANNER = process.env.NEXT_PUBLIC_ANIMATED_BANNER === 'true'
@@ -102,16 +103,18 @@ export default async function HomePage() {
                   Alle Veranstaltungen
                 </Button>
               </Link>
-              <Link href="/navigator">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white bg-transparent hover:bg-white/10"
-                >
-                  <Compass className="mr-2 h-5 w-5" />
-                  Studiennavigator
-                </Button>
-              </Link>
+              {NAVIGATOR_ENABLED && (
+                <Link href="/navigator">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white text-white bg-transparent hover:bg-white/10"
+                  >
+                    <Compass className="mr-2 h-5 w-5" />
+                    Studiennavigator
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 

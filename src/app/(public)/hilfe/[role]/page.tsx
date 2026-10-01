@@ -5,6 +5,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { HelpLayout } from '@/components/help/HelpLayout'
 import type { TocEntry } from '@/components/help/TableOfContents'
+import { NAVIGATOR_ENABLED } from '@/lib/features'
+import { removeMarkdownSection } from '@/lib/help-content'
 
 const VALID_ROLES = ['besucher', 'veranstalter', 'admin'] as const
 type Role = (typeof VALID_ROLES)[number]
@@ -54,6 +56,10 @@ export default async function HelpRolePage({ params }: HelpRolePageProps) {
     markdown = fs.readFileSync(filePath, 'utf-8')
   } catch {
     notFound()
+  }
+
+  if (!NAVIGATOR_ENABLED) {
+    markdown = removeMarkdownSection(markdown, 'Studiengangs-Navigator')
   }
 
   const tocEntries = extractToc(markdown)

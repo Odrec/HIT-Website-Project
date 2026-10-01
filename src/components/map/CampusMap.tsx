@@ -366,7 +366,9 @@ export default function CampusMap({
                   <Popup>
                     <div className="min-w-[200px]">
                       <h3 className="font-bold">{stop.name}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{stop.directionsNote}</p>
+                      {stop.directionsNote && (
+                        <p className="text-sm text-gray-500 mt-1">{stop.directionsNote}</p>
+                      )}
                     </div>
                   </Popup>
                 </Marker>
