@@ -15,7 +15,7 @@ import type {
 } from '@/types/routes'
 import { prisma } from '@/lib/db/prisma'
 import { normalizeCampus } from '@/lib/campus'
-import { fetchWalkingDirections } from '@/services/google-directions'
+import { getWalkingRoute } from '@/services/route-cache'
 import { getActiveEditionId } from '@/lib/active-edition'
 
 /**
@@ -53,8 +53,10 @@ function toBuildingInfo(
 }
 
 /**
- * Get walking directions between two buildings from cache.
- * Returns null if no cached route exists.
+ * Walking directions between two buildings (cached, see route-cache.ts).
+ * Callers pass the coordinates they already resolved from the building rows;
+ * without them the buildings are looked up. Returns null when a position is
+ * missing or Google fails — callers fall back to a straight-line estimate.
  */
 export async function getDirections(
   fromBuildingSlug: string,
@@ -70,60 +72,16 @@ export async function getDirections(
     return { distanceMeters: 0, durationSeconds: 0, waypoints: [] }
   }
 
-  const cached = await prisma.cachedRoute.findUnique({
-    where: {
-      fromBuildingSlug_toBuildingSlug: { fromBuildingSlug, toBuildingSlug },
-    },
-  })
-
-  if (cached) {
-    return {
-      distanceMeters: cached.distanceMeters,
-      durationSeconds: cached.durationSeconds,
-      waypoints: (cached.waypoints as [number, number][]) ?? [],
-    }
-  }
-
-  // No cache — resolve coordinates from buildings or use provided coords
-  const fromBuilding = await findBuilding(fromBuildingSlug)
-  const toBuilding = await findBuilding(toBuildingSlug)
-  const from = fromBuilding?.coordinates ?? fromCoords
-  const to = toBuilding?.coordinates ?? toCoords
+  const from = fromCoords ?? (await findBuilding(fromBuildingSlug))?.coordinates
+  const to = toCoords ?? (await findBuilding(toBuildingSlug))?.coordinates
   if (!from || !to) return null
 
   try {
-    const result = await fetchWalkingDirections(
-      from.latitude,
-      from.longitude,
-      to.latitude,
-      to.longitude
+    const { route } = await getWalkingRoute(
+      { slug: fromBuildingSlug, coordinates: from },
+      { slug: toBuildingSlug, coordinates: to }
     )
-
-    await prisma.cachedRoute.upsert({
-      where: {
-        fromBuildingSlug_toBuildingSlug: { fromBuildingSlug, toBuildingSlug },
-      },
-      create: {
-        fromBuildingSlug,
-        toBuildingSlug,
-        distanceMeters: result.distanceMeters,
-        durationSeconds: result.durationSeconds,
-        polyline: result.polyline,
-        waypoints: result.waypoints,
-      },
-      update: {
-        distanceMeters: result.distanceMeters,
-        durationSeconds: result.durationSeconds,
-        polyline: result.polyline,
-        waypoints: result.waypoints,
-      },
-    })
-
-    return {
-      distanceMeters: result.distanceMeters,
-      durationSeconds: result.durationSeconds,
-      waypoints: result.waypoints,
-    }
+    return route
   } catch (error) {
     console.error('Google Directions API error, falling back to straight line:', error)
     return null
