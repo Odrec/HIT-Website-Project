@@ -128,21 +128,23 @@ function haversineDistance(from: Coordinates, to: Coordinates): number {
  * Find a building by slug or name (queries the database)
  */
 export async function findBuilding(slugOrName: string): Promise<BuildingInfo | undefined> {
-  const lowerQuery = slugOrName.toLowerCase()
-
-  // Try exact slug match first
-  const bySlug = await prisma.building.findUnique({
-    where: { slug: lowerQuery },
+  // Exact slug first: admins choose slugs freely ("CN", "Fachbereich Biologie"),
+  // so lowercasing before this lookup missed them.
+  const exact = await prisma.building.findUnique({
+    where: { slug: slugOrName },
   })
-  if (bySlug) return toBuildingInfo(bySlug)
+  if (exact) return toBuildingInfo(exact)
 
-  // Fallback: search by name
+  // Fallback: slug in other case, then name / short name
+  const lowerQuery = slugOrName.toLowerCase()
   const all = await prisma.building.findMany()
-  const match = all.find(
-    (b) =>
-      b.name.toLowerCase().includes(lowerQuery) ||
-      (b.shortName && b.shortName.toLowerCase() === lowerQuery)
-  )
+  const match =
+    all.find((b) => b.slug.toLowerCase() === lowerQuery) ??
+    all.find(
+      (b) =>
+        b.name.toLowerCase().includes(lowerQuery) ||
+        (b.shortName && b.shortName.toLowerCase() === lowerQuery)
+    )
   return match ? toBuildingInfo(match) : undefined
 }
 
