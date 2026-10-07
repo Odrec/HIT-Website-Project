@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.19.1] - 2026-10-07
+
+Route planner fixes from the ZSB's report.
+
+**Deploy note:** runs migration `cached_route_coordinates` (four nullable columns on
+`cached_routes`). All existing cached routes are recomputed the first time they are used, which
+costs one Google Directions request each (71 routes on the test instance).
+
+### Fixed
+
+- **The route planner led from CN to building 69 instead of the Schloss (building 11).** In early
+  September building 11 briefly had coordinates at Westerberg next to building 69. Routes computed
+  at that time (CN ↔ 11, 11 → SL, Physik → 11) stayed in the route cache after the coordinates were
+  corrected, because cached routes were never checked against the buildings' current positions.
+  Each cached route now records the positions it was computed from and is recomputed automatically
+  as soon as either building has moved.
+- **No route to or from building 35 ("Fachbereich Biologie").** The building lookup lowercased
+  the identifier before searching, so buildings whose identifier contains capitals were found only
+  by a name match, or not at all. It now looks for the exact identifier first.
+
 ## [0.19.0] - 2026-10-07
 
 Photos and videos on events, reported by the ZSB's correction round.
