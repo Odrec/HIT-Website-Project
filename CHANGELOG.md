@@ -5,6 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.19.0] - 2026-10-07
+
+Photos and videos on events, reported by the ZSB's correction round.
+
+**Deploy note:** runs migration `event_media` (new table `uploaded_images`, new column
+`events.videoUrl`, and clears photo references to the old `/uploads/…` files, which no longer
+exist). The Datenschutz page gains a section on embedded videos; the ZSB should confirm its wording.
+
+### Added
+
+- **Video field** on events for YouTube and Vimeo links. On the event page the video is loaded
+  only after visitors click "Video abspielen" (with a short privacy notice); before that nothing is
+  sent to YouTube or Vimeo. A link "Auf YouTube/Vimeo ansehen" is always offered. The CSV export
+  has a new "Video-URL" column.
+
+### Fixed
+
+- **Uploaded photos never appeared.** The upload succeeded, but the file was written into the
+  app's `public/` folder, which the production server does not serve for files added after the
+  build, and every redeploy deleted it. Photos are now stored in the database and served from
+  `/api/images/…`. Only real JPEG, PNG and WebP files are accepted, judged by their content.
+- **Photo links that are not images** (a web page, a YouTube link) were accepted and showed as a
+  broken image. The form now checks that the address really is an image, points video links to the
+  video field, accepts images dragged in from another browser tab, and shows when a stored photo
+  cannot be displayed. The server rejects such values with a German message, and visitors never
+  see a broken image frame.
+- On phones, event pages with long German compound words in the title (e.g.
+  "Wirtschaftsingenieurwesen") could be scrolled sideways. Long words are now hyphenated on small
+  screens.
+
 ## [0.18.0] - 2026-10-01
 
 Feedback from the ZSB's October test round.

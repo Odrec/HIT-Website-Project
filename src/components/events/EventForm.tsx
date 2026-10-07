@@ -33,6 +33,8 @@ import {
 import { TimeGridPicker } from '@/components/events/TimeGridPicker'
 import { BuildingRoomSelect } from '@/components/events/BuildingRoomSelect'
 import { ImageUpload } from '@/components/events/ImageUpload'
+import { VideoLinkInput } from '@/components/events/VideoLinkInput'
+import { parseVideoUrl } from '@/lib/video-embed'
 import { Affiliation } from '@/types/events'
 
 interface BuildingOption {
@@ -307,6 +309,15 @@ export function EventForm({
     setDateError(null)
 
     const formData = form.getValues()
+
+    // The video field explains an unusable link inline; don't submit past it.
+    const videoUrl = formData.videoUrl?.trim()
+    if (videoUrl && !parseVideoUrl(videoUrl)) {
+      const input = document.getElementById('videoUrl')
+      input?.scrollIntoView({ block: 'center' })
+      input?.focus()
+      return
+    }
 
     // Combine date + time into Dates whose UTC components carry the Berlin
     // wall-clock value. Appending "Z" makes the parser treat the typed time
@@ -871,13 +882,18 @@ export function EventForm({
         {/* Row 4: Foto & Zusätzliches (full width) */}
         <Card className="border-l-4 border-l-[#f59e0b]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Foto & Zusätzliches</CardTitle>
+            <CardTitle className="text-base">Foto, Video & Zusätzliches</CardTitle>
             <CardDescription className="text-xs">Weitere Details und Medien</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ImageUpload
               value={watch('photoUrl') || ''}
               onChange={(url) => setValue('photoUrl', url)}
+            />
+
+            <VideoLinkInput
+              value={watch('videoUrl') || ''}
+              onChange={(url) => setValue('videoUrl', url)}
             />
 
             <div className="space-y-1.5">

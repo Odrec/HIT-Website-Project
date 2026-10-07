@@ -161,6 +161,52 @@ export default function DatenschutzPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Eingebettete Videos (YouTube und Vimeo)</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm max-w-none">
+            <p>
+              Auf einzelnen Veranstaltungsseiten können Videos eingebunden sein, die bei YouTube
+              (Google Ireland Limited, Irland) oder Vimeo (Vimeo.com, Inc., USA) gespeichert sind.
+            </p>
+            <h4 className="font-semibold">Laden erst nach Ihrem Klick</h4>
+            <p>
+              Beim Aufruf einer Veranstaltungsseite wird keine Verbindung zu YouTube oder Vimeo
+              hergestellt. Erst wenn Sie auf „Video abspielen“ klicken, wird der Player des
+              jeweiligen Anbieters geladen. Dabei werden Daten wie Ihre IP-Adresse, Angaben zu
+              Browser und Gerät sowie die aufgerufene Seite an den Anbieter übermittelt; bei Vimeo
+              kann eine Übermittlung in die USA erfolgen. Wir nutzen die datenschutzfreundlicheren
+              Varianten der Player (YouTube im erweiterten Datenschutzmodus über
+              youtube-nocookie.com, Vimeo mit aktivierter „Do Not Track“-Einstellung). Auf die
+              weitere Datenverarbeitung durch die Anbieter haben wir keinen Einfluss.
+            </p>
+            <h4 className="font-semibold">Rechtsgrundlage</h4>
+            <p>
+              Die Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO,
+              § 25 Abs. 1 TDDDG), die Sie mit dem Klick auf „Video abspielen“ erteilen. Ohne diesen
+              Klick werden keine Daten an die Anbieter übertragen. Alternativ können Sie jedes Video
+              über den Link „Auf YouTube ansehen“ bzw. „Auf Vimeo ansehen“ direkt beim Anbieter
+              aufrufen.
+            </p>
+            <p>
+              Weitere Informationen finden Sie in den Datenschutzerklärungen von{' '}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google
+              </a>{' '}
+              und{' '}
+              <a href="https://vimeo.com/privacy" target="_blank" rel="noopener noreferrer">
+                Vimeo
+              </a>
+              .
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Ihre Rechte</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-sm max-w-none">

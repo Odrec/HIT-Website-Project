@@ -107,6 +107,7 @@ describe('rollover — event cloning', () => {
     meetingPoint: null,
     additionalInfo: null,
     photoUrl: 'https://example.com/pic.jpg',
+    videoUrl: 'https://vimeo.com/76979871',
     institution: 'UNI',
     isCrossProgram: false,
     locationHint: null,
@@ -218,6 +219,15 @@ describe('rollover — event cloning', () => {
     expect(createCall.data.room).toEqual({ connect: { id: 'room-1' } })
     expect(createCall.data.photoUrl).toBe('https://example.com/pic.jpg')
     expect(createCall.data.institution).toBe('UNI')
+  })
+
+  it('copies the video link', async () => {
+    mockEventFindMany.mockResolvedValue([sourceEvent])
+    mockMelderFindUnique.mockResolvedValue({ id: 'melder-1' })
+    mockMelderFindMany.mockResolvedValue([{ id: 'melder-1' }])
+    await rollover(baseInput)
+    const createCall = mockEventCreate.mock.calls[0][0] as { data: { videoUrl?: string } }
+    expect(createCall.data.videoUrl).toBe('https://vimeo.com/76979871')
   })
 
   it('does not clone events when cloneEvents is false', async () => {

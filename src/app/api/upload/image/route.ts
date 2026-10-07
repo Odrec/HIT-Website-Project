@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
+import { prisma } from '@/lib/db/prisma'
+import { detectImageType } from '@/lib/event-media'
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
+/**
+ * POST /api/upload/image — store an event photo in the database and return
+ * its public address (/api/images/<id>). See src/lib/event-media.ts for why
+ * the bytes live in the database rather than in public/.
+ */
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) {
@@ -13,29 +17,29 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData()
-  const file = formData.get('file') as File | null
+  const file = formData.get('file')
 
-  if (!file) {
+  if (!(file instanceof File)) {
     return NextResponse.json({ error: 'Keine Datei hochgeladen' }, { status: 400 })
   }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: 'Die Datei ist zu groß (max. 5 MB).' }, { status: 400 })
+  }
+
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const mimeType = detectImageType(bytes)
+  if (!mimeType) {
     return NextResponse.json(
-      { error: 'Nur JPEG, PNG und WebP Dateien sind erlaubt' },
+      { error: 'Nur JPEG-, PNG- und WebP-Bilder sind erlaubt.' },
       { status: 400 }
     )
   }
 
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Datei ist zu groß (max. 5MB)' }, { status: 400 })
-  }
+  const image = await prisma.uploadedImage.create({
+    data: { mimeType, data: bytes },
+    select: { id: true },
+  })
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const filename = `${crypto.randomUUID()}.${ext}`
-  const bytes = new Uint8Array(await file.arrayBuffer())
-  const uploadPath = join(process.cwd(), 'public', 'uploads', 'events', filename)
-
-  await writeFile(uploadPath, bytes)
-
-  return NextResponse.json({ url: `/uploads/events/${filename}` })
+  return NextResponse.json({ url: `/api/images/${image.id}` })
 }

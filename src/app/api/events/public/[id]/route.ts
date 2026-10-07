@@ -216,6 +216,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       meetingPoint: e.meetingPoint,
       additionalInfo: e.additionalInfo,
       photoUrl: e.photoUrl,
+      videoUrl: e.videoUrl,
       institution: mapInstitutionToFrontend(e.institution),
       building: e.building || null,
       room: e.room || null,

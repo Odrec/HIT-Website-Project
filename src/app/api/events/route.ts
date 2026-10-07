@@ -6,6 +6,7 @@ import { auth } from '@/auth'
 import { EventType, Institution } from '@/types/events'
 import { sendEventCreatedEmail } from '@/lib/email'
 import { prisma } from '@/lib/db/prisma'
+import { validateEventMedia } from '@/lib/event-media'
 
 /**
  * GET /api/events - List events with filtering, sorting, and pagination
@@ -133,9 +134,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const media = validateEventMedia(body)
+    if ('error' in media) {
+      return NextResponse.json({ error: media.error }, { status: 400 })
+    }
+
     // Parse dates if provided
     const eventData = {
       ...body,
+      ...media.data,
       isCrossProgram: body.isCrossProgram ?? false,
       locationHint: body.locationHint || null,
       melderId:

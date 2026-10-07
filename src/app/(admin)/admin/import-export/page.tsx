@@ -116,6 +116,7 @@ export default function ImportExportPage() {
         'Treffpunkt',
         'Zusätzliche Info',
         'Foto-URL',
+        'Video-URL',
         'Studiengänge',
         'Dozierende',
         'Studiengangsübergreifend',
@@ -137,6 +138,7 @@ export default function ImportExportPage() {
           meetingPoint: string | null
           additionalInfo: string | null
           photoUrl: string | null
+          videoUrl?: string | null
           studyPrograms: { studyProgram: { name: string } }[]
           lecturers: { firstName: string; lastName: string; title: string | null }[]
           isCrossProgram?: boolean
@@ -155,6 +157,7 @@ export default function ImportExportPage() {
           event.meetingPoint || '',
           event.additionalInfo || '',
           event.photoUrl || '',
+          event.videoUrl || '',
           event.studyPrograms
             ?.map((sp: { studyProgram: { name: string } }) => sp.studyProgram.name)
             .join('; ') || '',

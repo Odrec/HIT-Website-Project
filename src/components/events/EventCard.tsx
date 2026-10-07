@@ -2,7 +2,7 @@
 
 import { trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
-import Image from 'next/image'
+import { EventPhoto } from '@/components/events/EventPhoto'
 import { Clock, MapPin, User, GraduationCap, Info } from 'lucide-react'
 import { formatEventTime } from '@/lib/event-time'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -178,15 +178,12 @@ export function EventCard({ event, viewMode }: EventCardProps) {
           </div>
           {/* Optional photo */}
           {event.photoUrl && (
-            <div className="relative h-40 overflow-hidden rounded-t-lg">
-              <Image
-                src={event.photoUrl}
-                alt={event.title}
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              />
-            </div>
+            <EventPhoto
+              src={event.photoUrl}
+              alt={event.title}
+              className="h-40 rounded-t-lg"
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            />
           )}
 
           <CardHeader className="pb-2">

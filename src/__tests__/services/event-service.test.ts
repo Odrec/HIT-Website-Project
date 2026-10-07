@@ -163,6 +163,26 @@ describe('eventService.duplicate edition stamping', () => {
     expect(createCall.data.edition).toEqual({ connect: { id: 'active-edition-id' } })
     expect(createCall.data.editionId).toBeUndefined()
   })
+
+  it('keeps photo and video on the copy', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'original',
+      title: 'Imagefilm',
+      photoUrl: '/api/images/cmuimg123',
+      videoUrl: 'https://www.youtube.com/watch?v=bsA6AfLREkI',
+      lecturers: [],
+      organizers: [],
+      studyPrograms: [],
+      infoMarkets: [],
+    })
+    mockCreate.mockResolvedValue({ id: 'duplicate' })
+    await eventService.duplicate('original')
+    const createCall = mockCreate.mock.calls[0][0] as {
+      data: { photoUrl?: string; videoUrl?: string }
+    }
+    expect(createCall.data.photoUrl).toBe('/api/images/cmuimg123')
+    expect(createCall.data.videoUrl).toBe('https://www.youtube.com/watch?v=bsA6AfLREkI')
+  })
 })
 
 describe('eventService primary-key only operations (intentionally unscoped)', () => {

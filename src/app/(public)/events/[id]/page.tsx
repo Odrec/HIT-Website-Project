@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { EventPhoto } from '@/components/events/EventPhoto'
+import { EventVideo } from '@/components/events/EventVideo'
 import {
   Calendar,
   Clock,
@@ -51,6 +52,7 @@ interface Event {
   meetingPoint: string | null
   additionalInfo: string | null
   photoUrl: string | null
+  videoUrl: string | null
   institution: string
   building: {
     id: string
@@ -260,8 +262,10 @@ export default function EventDetailPage() {
 
   const formatTime = (dateString: string) => formatEventTime(dateString)
 
+  // German compound words ("Wirtschaftsingenieurwesen") are wider than a phone at
+  // heading size: hyphenate on small screens and break as a last resort.
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto break-words px-4 py-8 max-md:hyphens-auto">
       {/* Back Button */}
       <Link
         href="/events"
@@ -284,21 +288,21 @@ export default function EventDetailPage() {
         <h1 className="text-3xl font-bold text-hit-gray-900 lg:text-4xl">{event.title}</h1>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Photo */}
           {event.photoUrl && (
-            <div className="relative h-64 overflow-hidden rounded-lg lg:h-80">
-              <Image
-                src={event.photoUrl}
-                alt={event.title}
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 66vw, 100vw"
-              />
-            </div>
+            <EventPhoto
+              src={event.photoUrl}
+              alt={event.title}
+              className="h-64 rounded-lg lg:h-80"
+              sizes="(min-width: 1024px) 66vw, 100vw"
+            />
           )}
+
+          {/* Video — loads from YouTube/Vimeo only after a click */}
+          {event.videoUrl && <EventVideo url={event.videoUrl} title={event.title} />}
 
           {/* Description — only rendered when the event actually has one */}
           {event.description && (

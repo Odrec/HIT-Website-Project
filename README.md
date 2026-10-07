@@ -32,6 +32,7 @@ The HIT-Website provides a comprehensive platform for organizing and attending u
 | **Shuttle Bus Tracking** | Real-time GPS tracking of shuttle buses between campuses — guides share location via web page (with a timed "Pause bis …" status), visitors see live markers and official Zeichen 224 bus stop icons on the campus map. Stops are admin-editable (Shuttle-Busse page, 6-decimal coordinates) |
 | **Event Recommendations** | Smart suggestions based on interests and schedule, with transparent scoring documentation |
 | **Admin Interface** | Manage events, programs, locations, users, room assignments, site settings (HIT date, submission deadline), and editable homepage texts (`/admin/texte`, backed by the `content_texts` table — overrides only, defaults ship with the code) |
+| **Event Photos & Videos** | Photos are uploaded through the event form (JPEG/PNG/WebP up to 5 MB, type checked from the file content), stored in the `uploaded_images` table and served by `/api/images/[id]`; external image addresses are checked in the browser before they are accepted. YouTube/Vimeo links go into a separate video field and are embedded click-to-load (youtube-nocookie / Vimeo `dnt`), so nothing is sent to the provider before the visitor presses play |
 | **Rights Management** | Event ownership enforcement, admin-configurable submission deadline with hard lock for organizers |
 | **Data Export** | Excel exports (per-view sheets — A-Z, time, room, Studiengang, Melder, Dozierende, Infomärkte — plus a combined workbook with an overview sheet first), CSV import/export, PDF program booklet with table of contents, HTML backup, iCal export |
 | **Email Notifications** | Automatic email to HIT team on event create/edit with change detection |
@@ -280,6 +281,7 @@ After running the seed script:
 | `/api/schedule/share` | POST | Create short link for schedule sharing | No |
 | `/api/schedule/share/[code]` | GET | Look up shared schedule by code | No |
 | `/api/bus-positions` | GET | Get live shuttle bus positions and stops | 5s |
+| `/api/images/[id]` | GET | Uploaded event photo | 1 year (immutable) |
 | `/api/bus-positions` | POST | Update bus position (guide token auth) | No |
 
 ### Admin Endpoints (Authentication Required)
@@ -287,6 +289,7 @@ After running the seed script:
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/events` | GET, POST | List/create events |
+| `/api/upload/image` | POST | Upload an event photo (logged-in users; stored in the database, returns `/api/images/<id>`) |
 | `/api/events/[id]` | GET, PUT, DELETE | Manage single event |
 | `/api/users` | GET, POST | Manage users |
 | `/api/buildings` | POST | Create building |
