@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
 import { findBuilding } from '@/services/route-service'
-import { fetchWalkingDirections } from '@/services/google-directions'
+import { getWalkingRoute } from '@/services/route-cache'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -19,21 +18,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Building not found' }, { status: 404 })
   }
 
-  // Check cache first
-  const cached = await prisma.cachedRoute.findUnique({
-    where: {
-      fromBuildingSlug_toBuildingSlug: { fromBuildingSlug: from, toBuildingSlug: to },
-    },
-  })
-
-  if (cached) {
-    return NextResponse.json({
-      distanceMeters: cached.distanceMeters,
-      durationSeconds: cached.durationSeconds,
-      waypoints: cached.waypoints,
-    })
-  }
-
   if (!fromBuilding.coordinates || !toBuilding.coordinates) {
     return NextResponse.json(
       { error: 'Für mindestens ein Gebäude sind keine Koordinaten hinterlegt' },
@@ -41,40 +25,12 @@ export async function GET(request: Request) {
     )
   }
 
-  // Fallback: call Google Directions API and cache
   try {
-    const result = await fetchWalkingDirections(
-      fromBuilding.coordinates.latitude,
-      fromBuilding.coordinates.longitude,
-      toBuilding.coordinates.latitude,
-      toBuilding.coordinates.longitude
+    const { route } = await getWalkingRoute(
+      { slug: from, coordinates: fromBuilding.coordinates },
+      { slug: to, coordinates: toBuilding.coordinates }
     )
-
-    await prisma.cachedRoute.upsert({
-      where: {
-        fromBuildingSlug_toBuildingSlug: { fromBuildingSlug: from, toBuildingSlug: to },
-      },
-      create: {
-        fromBuildingSlug: from,
-        toBuildingSlug: to,
-        distanceMeters: result.distanceMeters,
-        durationSeconds: result.durationSeconds,
-        polyline: result.polyline,
-        waypoints: result.waypoints,
-      },
-      update: {
-        distanceMeters: result.distanceMeters,
-        durationSeconds: result.durationSeconds,
-        polyline: result.polyline,
-        waypoints: result.waypoints,
-      },
-    })
-
-    return NextResponse.json({
-      distanceMeters: result.distanceMeters,
-      durationSeconds: result.durationSeconds,
-      waypoints: result.waypoints,
-    })
+    return NextResponse.json(route)
   } catch (error) {
     console.error('Google Directions API error:', error)
     return NextResponse.json({ error: 'Failed to fetch directions' }, { status: 502 })

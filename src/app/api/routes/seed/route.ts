@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/db/prisma'
-import { fetchWalkingDirections } from '@/services/google-directions'
+import { getWalkingRoute } from '@/services/route-cache'
 
 export async function POST(_request: Request) {
   const session = await auth()
@@ -43,41 +43,28 @@ export async function POST(_request: Request) {
 
       for (const fromBuilding of campuses[campusNames[i]]) {
         for (const toBuilding of campuses[campusNames[j]]) {
-          // Check if already cached
-          const existing = await prisma.cachedRoute.findUnique({
-            where: {
-              fromBuildingSlug_toBuildingSlug: {
-                fromBuildingSlug: fromBuilding.slug,
-                toBuildingSlug: toBuilding.slug,
-              },
-            },
-          })
-
-          if (existing) {
-            skipped++
-            results.push({ from: fromBuilding.slug, to: toBuilding.slug, status: 'skipped' })
-            continue
-          }
-
+          // Routes still valid for the current positions are skipped; stale or
+          // missing ones are (re)computed by the shared cache.
           try {
-            const directions = await fetchWalkingDirections(
-              fromBuilding.latitude!,
-              fromBuilding.longitude!,
-              toBuilding.latitude!,
-              toBuilding.longitude!
+            const { source } = await getWalkingRoute(
+              {
+                slug: fromBuilding.slug,
+                coordinates: {
+                  latitude: fromBuilding.latitude!,
+                  longitude: fromBuilding.longitude!,
+                },
+              },
+              {
+                slug: toBuilding.slug,
+                coordinates: { latitude: toBuilding.latitude!, longitude: toBuilding.longitude! },
+              }
             )
 
-            await prisma.cachedRoute.create({
-              data: {
-                fromBuildingSlug: fromBuilding.slug,
-                toBuildingSlug: toBuilding.slug,
-                distanceMeters: directions.distanceMeters,
-                durationSeconds: directions.durationSeconds,
-                polyline: directions.polyline,
-                waypoints: directions.waypoints,
-              },
-            })
-
+            if (source === 'cache') {
+              skipped++
+              results.push({ from: fromBuilding.slug, to: toBuilding.slug, status: 'skipped' })
+              continue
+            }
             seeded++
             results.push({ from: fromBuilding.slug, to: toBuilding.slug, status: 'seeded' })
           } catch (error) {

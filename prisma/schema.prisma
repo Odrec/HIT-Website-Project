@@ -459,7 +459,10 @@ model ExportSchedule {
 }
 
 /// Cached walking route between two buildings from Google Directions API
-/// fromBuildingSlug/toBuildingSlug reference Building.slug for stable cache keys
+/// fromBuildingSlug/toBuildingSlug reference Building.slug for stable cache keys.
+/// The from/to coordinates record the positions the route was computed from; a
+/// row whose positions no longer match the buildings is stale and recomputed
+/// (src/services/route-cache.ts). Null = computed before positions were recorded.
 model CachedRoute {
   id               String   @id @default(cuid())
   fromBuildingSlug String   @db.VarChar(50)
@@ -468,6 +471,10 @@ model CachedRoute {
   durationSeconds  Int
   polyline         String   @db.Text
   waypoints        Json?    @db.JsonB
+  fromLatitude     Float?
+  fromLongitude    Float?
+  toLatitude       Float?
+  toLongitude      Float?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
