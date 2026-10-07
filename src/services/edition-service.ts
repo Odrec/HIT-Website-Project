@@ -175,6 +175,7 @@ export async function rollover(input: RolloverInput) {
             meetingPoint: src.meetingPoint,
             additionalInfo: src.additionalInfo,
             photoUrl: src.photoUrl,
+            videoUrl: src.videoUrl,
             institution: src.institution,
             isCrossProgram: src.isCrossProgram,
             locationHint: src.locationHint,

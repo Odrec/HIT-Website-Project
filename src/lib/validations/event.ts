@@ -62,7 +62,9 @@ export const eventFormSchema = z
       .max(2000, 'Additional info must be less than 2000 characters')
       .optional()
       .default(''),
-    photoUrl: z.url('Invalid URL').optional().or(z.literal('')).default(''),
+    // Checked by the API (validateEventMedia): an upload path or https URL / a video link
+    photoUrl: z.string().max(500).optional().default(''),
+    videoUrl: z.string().max(500).optional().default(''),
     institution: z.enum(['UNI', 'HOCHSCHULE', 'BOTH'], {
       message: 'Bitte Institution auswählen',
     }),

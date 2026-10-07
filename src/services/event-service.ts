@@ -550,6 +550,7 @@ export const eventService = {
         meetingPoint: original.meetingPoint,
         additionalInfo: original.additionalInfo,
         photoUrl: original.photoUrl,
+        videoUrl: original.videoUrl,
         institution: original.institution,
         isCrossProgram: original.isCrossProgram,
         locationHint: original.locationHint,

@@ -112,6 +112,7 @@ export interface Event {
   meetingPoint?: string
   additionalInfo?: string
   photoUrl?: string
+  videoUrl?: string
   institution: Institution
   isCrossProgram?: boolean
   locationHint?: string | null
@@ -148,7 +149,10 @@ export interface CreateEventInput {
   roomRequest?: string
   meetingPoint?: string
   additionalInfo?: string
-  photoUrl?: string
+  /** `null` clears it (see validateEventMedia). */
+  photoUrl?: string | null
+  /** `null` clears it (see validateEventMedia). */
+  videoUrl?: string | null
   institution: Institution
   isCrossProgram?: boolean
   locationHint?: string

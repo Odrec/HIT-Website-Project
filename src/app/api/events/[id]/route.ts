@@ -5,6 +5,7 @@ import { eventService } from '@/services'
 import { auth } from '@/auth'
 import { EventType, Institution } from '@/types/events'
 import { sendEventUpdatedEmail } from '@/lib/email'
+import { validateEventMedia } from '@/lib/event-media'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -91,10 +92,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    const media = validateEventMedia(body)
+    if ('error' in media) {
+      return NextResponse.json({ error: media.error }, { status: 400 })
+    }
+
     // Parse dates if provided
     const updateData: Record<string, unknown> & { id: string } = {
       id,
       ...body,
+      ...media.data,
       isCrossProgram: body.isCrossProgram ?? false,
       locationHint: body.locationHint || null,
       melderId:

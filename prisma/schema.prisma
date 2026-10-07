@@ -208,6 +208,8 @@ model Event {
   meetingPoint     String?                  @db.VarChar(500)
   additionalInfo   String?                  @db.Text
   photoUrl         String?                  @db.VarChar(500)
+  /// YouTube/Vimeo link, stored in canonical form (src/lib/video-embed.ts)
+  videoUrl         String?                  @db.VarChar(500)
   institution      Institution
   isCrossProgram   Boolean                  @default(false)
   editionId        String
@@ -501,6 +503,18 @@ model BusPosition {
   heading   Float?
   speed     Float?
   updatedAt DateTime   @updatedAt
+}
+
+/// Photo uploaded through the event form, served by /api/images/<id>.
+/// Kept in the database rather than on disk: the app container has no volume,
+/// and the production server never serves files added to public/ at runtime.
+model UploadedImage {
+  id        String   @id @default(cuid())
+  mimeType  String   @db.VarChar(50)
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@map("uploaded_images")
 }
 
 /// Shuttle-bus stop shown on the Lageplan. Admin-editable (Shuttle-Busse page)
