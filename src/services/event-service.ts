@@ -339,7 +339,7 @@ export const eventService = {
             lastName: lecturer.lastName,
             title: lecturer.title,
             email: lecturer.email,
-            affiliation: lecturer.affiliation,
+            affiliation: lecturer.affiliation || null,
           })),
         },
         organizers: {
@@ -421,7 +421,8 @@ export const eventService = {
       ...(locationWishArea !== undefined && { locationWishArea: locationWishArea || null }),
     }
 
-    // Handle lecturers update (delete and recreate)
+    // Handle lecturers update (delete and recreate). The edit form sends '' for
+    // "no affiliation", which the Affiliation enum rejects — store NULL instead.
     if (lecturers !== undefined) {
       updateData.lecturers = {
         deleteMany: {},
@@ -430,7 +431,7 @@ export const eventService = {
           lastName: lecturer.lastName,
           title: lecturer.title,
           email: lecturer.email,
-          affiliation: lecturer.affiliation,
+          affiliation: lecturer.affiliation || null,
         })),
       }
     }
@@ -564,7 +565,7 @@ export const eventService = {
             lastName: lecturer.lastName,
             title: lecturer.title,
             email: lecturer.email,
-            affiliation: lecturer.affiliation,
+            affiliation: lecturer.affiliation || null,
           })),
         },
         organizers: {

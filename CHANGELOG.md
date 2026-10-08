@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.19.2] - 2026-10-08
+
+### Fixed
+
+- **"Fehler beim Speichern / Failed to update event" when saving certain events.** Events with a
+  lecturer entry that has no affiliation (e.g. "Mitarbeitende", "N.N.", "Fachschaft") could not be
+  saved from the edit page at all, whatever was changed: the form sends an empty affiliation, which
+  the database rejects. An empty affiliation is now stored as "none". 22 events on the test
+  instance were affected; the report concerned the photo of "Gewinne einen Einblick in das
+  Musikstudium am IfM", but the photo itself was not the cause.
+
 ## [0.19.1] - 2026-10-07
 
 Route planner fixes from the ZSB's report.

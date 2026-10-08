@@ -24,6 +24,7 @@ vi.mock('@/lib/db/prisma', () => ({
   },
 }))
 
+vi.mock('@/lib/cache/cache-utils', () => ({ invalidateEventCaches: vi.fn() }))
 vi.mock('@/lib/active-edition', () => ({
   getActiveEditionId: vi.fn().mockResolvedValue('active-edition-id'),
   getActiveEdition: vi.fn(),
@@ -209,5 +210,53 @@ describe('eventService primary-key only operations (intentionally unscoped)', ()
     mockDeleteMany.mockResolvedValue({ count: 2 })
     await eventService.deleteMany(['e1', 'e2'])
     expect(mockDeleteMany).toHaveBeenCalledWith({ where: { id: { in: ['e1', 'e2'] } } })
+  })
+})
+
+describe('lecturers without an affiliation', () => {
+  // The edit page turns a missing affiliation into '' for its select; Prisma's
+  // Affiliation enum rejects '', which made 22 events on the test instance
+  // unsaveable ("Failed to update event").
+  const lecturer = {
+    firstName: '',
+    lastName: 'Mitarbeitende',
+    title: '',
+    email: '',
+    affiliation: '',
+  }
+
+  it('saves an event whose lecturer has no affiliation', async () => {
+    mockUpdate.mockResolvedValue({ id: 'event-1' })
+    await eventService.update({ id: 'event-1', lecturers: [lecturer] } as never)
+    const call = mockUpdate.mock.calls[0][0] as {
+      data: { lecturers: { create: { affiliation: unknown }[] } }
+    }
+    expect(call.data.lecturers.create[0].affiliation).toBeNull()
+  })
+
+  it('creates an event whose lecturer has no affiliation', async () => {
+    mockCreate.mockResolvedValue({ id: 'event-2' })
+    await eventService.create({
+      title: 'X',
+      eventType: 'VORTRAG',
+      institution: 'UNI',
+      lecturers: [lecturer],
+    } as never)
+    const call = mockCreate.mock.calls[0][0] as {
+      data: { lecturers: { create: { affiliation: unknown }[] } }
+    }
+    expect(call.data.lecturers.create[0].affiliation).toBeNull()
+  })
+
+  it('keeps a real affiliation', async () => {
+    mockUpdate.mockResolvedValue({ id: 'event-1' })
+    await eventService.update({
+      id: 'event-1',
+      lecturers: [{ ...lecturer, affiliation: 'HOCHSCHULE' }],
+    } as never)
+    const call = mockUpdate.mock.calls[0][0] as {
+      data: { lecturers: { create: { affiliation: unknown }[] } }
+    }
+    expect(call.data.lecturers.create[0].affiliation).toBe('HOCHSCHULE')
   })
 })
