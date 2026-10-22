@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +28,8 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [messages, setMessages] = useState<NavigatorMessageType[]>([])
   const [inputValue, setInputValue] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  // Starts out true: the init effect below begins loading right away.
+  const [isLoading, setIsLoading] = useState(true)
   const [options, setOptions] = useState<NavigatorOption[]>([])
   const [recommendation, setRecommendation] = useState<NavigatorRecommendation | null>(null)
   const [crisisDetected, setCrisisDetected] = useState<CrisisDetection | null>(null)
@@ -44,54 +45,54 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Initialize session (with ref guard to prevent duplicate calls in StrictMode).
-  // The ref must be reset in the finally block so a Neu-starten click can
-  // initialize a fresh session — otherwise the second call early-returns and
-  // the user is left with an empty chat focused on the input field.
-  const initializeSession = useCallback(async () => {
+  // Initialize a session on mount, and again after Neu starten: handleRestart
+  // clears sessionId, which re-runs this effect. The ref guard prevents a
+  // duplicate call in StrictMode; it must be reset in the finally block so a
+  // Neu-starten click can initialize a fresh session — otherwise the second
+  // run early-returns and the user is left with an empty chat focused on the
+  // input field.
+  useEffect(() => {
     if (initializingRef.current || sessionId) return
     initializingRef.current = true
 
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/navigator')
-      if (!response.ok) throw new Error('Failed to initialize')
+    const initializeSession = async () => {
+      try {
+        const response = await fetch('/api/navigator')
+        if (!response.ok) throw new Error('Failed to initialize')
 
-      const data = await response.json()
-      setSessionId(data.sessionId)
+        const data = await response.json()
+        setSessionId(data.sessionId)
 
-      // Set the model name if provided
-      if (data.model) {
-        setModelName(data.model)
+        // Set the model name if provided
+        if (data.model) {
+          setModelName(data.model)
+        }
+
+        const initialMessage: NavigatorMessageType = {
+          id: data.message.id,
+          role: 'assistant',
+          content: data.message.content,
+          timestamp: new Date(data.message.timestamp),
+          metadata: data.message.metadata,
+        }
+
+        setMessages([initialMessage])
+        setOptions(data.message.metadata?.options || [])
+      } catch (error) {
+        console.error('Failed to initialize navigator:', error)
+        toast({
+          title: 'Fehler',
+          description: 'Navigator konnte nicht initialisiert werden.',
+          variant: 'destructive',
+        })
+      } finally {
+        setIsLoading(false)
+        initializingRef.current = false
       }
-
-      const initialMessage: NavigatorMessageType = {
-        id: data.message.id,
-        role: 'assistant',
-        content: data.message.content,
-        timestamp: new Date(data.message.timestamp),
-        metadata: data.message.metadata,
-      }
-
-      setMessages([initialMessage])
-      setOptions(data.message.metadata?.options || [])
-    } catch (error) {
-      console.error('Failed to initialize navigator:', error)
-      toast({
-        title: 'Fehler',
-        description: 'Navigator konnte nicht initialisiert werden.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
-      initializingRef.current = false
     }
-  }, [sessionId, toast])
 
-  // Initialize on mount
-  useEffect(() => {
     initializeSession()
-  }, [initializeSession])
+  }, [sessionId, toast])
 
   // Send message
   const sendMessage = async (message: string) => {
@@ -183,14 +184,13 @@ export function NavigatorChat({ onProgramSelect, className }: NavigatorChatProps
     sendMessage(suggestion)
   }
 
-  // Handle restart. We deliberately don't call initializeSession() here:
-  // setSessionId(null) re-creates the initializeSession callback with a
-  // fresh closure (sessionId === null), and the mount-effect re-runs
-  // because the callback identity changed, which kicks off a new session.
-  // Calling it inline would use the stale closure (sessionId still
-  // truthy) and early-return — leaving the chat empty.
+  // Handle restart. We deliberately don't start the session here:
+  // setSessionId(null) re-runs the init effect, which kicks off a new
+  // session. isLoading is set here so the spinner shows right away — only
+  // when there is a session, since otherwise the effect does not re-run.
   const handleRestart = async () => {
     if (sessionId) {
+      setIsLoading(true)
       try {
         await fetch(`/api/navigator?sessionId=${sessionId}`, {
           method: 'DELETE',

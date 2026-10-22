@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar, Grid3X3, List, Search, Filter, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -101,42 +101,41 @@ export function EventListView({
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Stable serialization so callers can pass inline `staticFilters={{...}}`
-  // without causing fetchEvents to be recreated every render.
-  const staticFiltersKey = JSON.stringify(staticFilters)
+  // The query string is a primitive, so callers can pass inline
+  // `staticFilters={{...}}` without re-triggering the fetch every render.
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('pageSize', String(pageSize))
+  if (debouncedSearch) params.set('search', debouncedSearch)
+  if (filters.eventType) params.set('eventType', filters.eventType)
+  if (filters.institution) params.set('institution', filters.institution)
+  if (filters.studyProgramId) params.set('studyProgramId', filters.studyProgramId)
+  if (filters.timeFrom) params.set('timeFrom', filters.timeFrom)
+  if (filters.timeTo) params.set('timeTo', filters.timeTo)
+  params.set('sortBy', sortBy)
+  params.set('sortOrder', sortOrder)
+  for (const [k, v] of Object.entries(staticFilters)) params.set(k, v)
+  const query = params.toString()
 
-  const fetchEvents = useCallback(async () => {
+  // Show the spinner as soon as the filters change. Adjusting state during
+  // render keeps the effect below from setting state synchronously.
+  const [requestedQuery, setRequestedQuery] = useState(query)
+  if (query !== requestedQuery) {
+    setRequestedQuery(query)
     setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      params.set('page', String(page))
-      params.set('pageSize', String(pageSize))
-      if (debouncedSearch) params.set('search', debouncedSearch)
-      if (filters.eventType) params.set('eventType', filters.eventType)
-      if (filters.institution) params.set('institution', filters.institution)
-      if (filters.studyProgramId) params.set('studyProgramId', filters.studyProgramId)
-      if (filters.timeFrom) params.set('timeFrom', filters.timeFrom)
-      if (filters.timeTo) params.set('timeTo', filters.timeTo)
-      params.set('sortBy', sortBy)
-      params.set('sortOrder', sortOrder)
-      const parsedStatic: Record<string, string> = JSON.parse(staticFiltersKey)
-      for (const [k, v] of Object.entries(parsedStatic)) params.set(k, v)
-
-      const response = await fetch(`/api/events/public?${params.toString()}`)
-      if (!response.ok) throw new Error('Failed to fetch events')
-      const data = await response.json()
-      setEvents(data.events)
-      setTotalEvents(data.total)
-    } catch (e) {
-      console.error('Error fetching events:', e)
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, debouncedSearch, filters, sortBy, sortOrder, staticFiltersKey])
+  }
 
   useEffect(() => {
-    fetchEvents()
-  }, [fetchEvents])
+    fetch(`/api/events/public?${query}`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Failed to fetch events')
+        const data = await response.json()
+        setEvents(data.events)
+        setTotalEvents(data.total)
+      })
+      .catch((e) => console.error('Error fetching events:', e))
+      .finally(() => setLoading(false))
+  }, [query])
 
   const clearFilters = () => {
     setFilters({ eventType: '', institution: '', studyProgramId: '', timeFrom: '', timeTo: '' })

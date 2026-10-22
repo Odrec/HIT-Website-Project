@@ -102,24 +102,28 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchUsers = useCallback(async () => {
+  // State is only set in promise callbacks, so the mount effect never sets
+  // state synchronously; `loading` starts out true for the first load.
+  const loadUsers = useCallback(
+    () =>
+      fetch('/api/users')
+        .then(async (response) => {
+          if (response.ok) setUsers(await response.json())
+        })
+        .catch((error) => console.error('Failed to fetch users:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchUsers = () => {
     setLoading(true)
-    try {
-      const response = await fetch('/api/users')
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    return loadUsers()
+  }
 
   useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
+    loadUsers()
+  }, [loadUsers])
 
   const filteredUsers = users.filter((user) => {
     if (roleFilter && user.role !== roleFilter) return false

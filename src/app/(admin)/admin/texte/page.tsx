@@ -17,23 +17,16 @@ export default function AdminTextePage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/content-texts')
-      if (!res.ok) throw new Error('load failed')
-      const body = await res.json()
-      setSlots(body.slots)
-      setValues(body.values)
-    } catch {
-      setError('Textbausteine konnten nicht geladen werden.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    load()
+    fetch('/api/admin/content-texts')
+      .then(async (res) => {
+        if (!res.ok) throw new Error('load failed')
+        const body = await res.json()
+        setSlots(body.slots)
+        setValues(body.values)
+      })
+      .catch(() => setError('Textbausteine konnten nicht geladen werden.'))
+      .finally(() => setLoading(false))
   }, [])
 
   const grouped = useMemo(() => {

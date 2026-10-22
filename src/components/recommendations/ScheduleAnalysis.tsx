@@ -46,6 +46,15 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
   const scheduledEventIds = useMemo(() => state.items.map((item) => item.eventId), [state.items])
   const scheduledEventIdsKey = scheduledEventIds.join(',')
 
+  // Drop the analysis once the schedule is emptied, so it can't flash up again
+  // when events are added later (adjusting state during render, not in the
+  // effect). `loading` needs no reset: an aborted request clears it itself.
+  const [prevEventIdsKey, setPrevEventIdsKey] = useState(scheduledEventIdsKey)
+  if (scheduledEventIdsKey !== prevEventIdsKey) {
+    setPrevEventIdsKey(scheduledEventIdsKey)
+    if (scheduledEventIds.length === 0) setAnalysis(null)
+  }
+
   useEffect(() => {
     // Cancel any pending request
     if (abortControllerRef.current) {
@@ -53,11 +62,7 @@ export function ScheduleAnalysis({ onOptimizationSelect }: ScheduleAnalysisProps
     }
     abortControllerRef.current = new AbortController()
 
-    if (scheduledEventIds.length === 0) {
-      setAnalysis(null)
-      setLoading(false)
-      return
-    }
+    if (scheduledEventIds.length === 0) return
 
     const analyzeSchedule = async () => {
       setLoading(true)

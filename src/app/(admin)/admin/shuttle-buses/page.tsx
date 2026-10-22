@@ -30,20 +30,23 @@ export default function ShuttleBusesPage() {
   const [showQr, setShowQr] = useState<string | null>(null)
   const [newBusName, setNewBusName] = useState('')
   const [newBusNumber, setNewBusNumber] = useState('')
+  // Reference time for the pause/"Veraltet" checks, advanced on every poll —
+  // reading the clock during render would make the output impure.
+  const [now, setNow] = useState(() => Date.now())
 
-  const fetchBuses = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/shuttle-buses')
-      if (res.ok) {
-        const data = await res.json()
-        setBuses(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch buses:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const fetchBuses = useCallback(
+    () =>
+      fetch('/api/admin/shuttle-buses')
+        .then(async (res) => {
+          if (res.ok) setBuses(await res.json())
+        })
+        .catch((error) => console.error('Failed to fetch buses:', error))
+        .finally(() => {
+          setNow(Date.now())
+          setLoading(false)
+        }),
+    []
+  )
 
   useEffect(() => {
     fetchBuses()
@@ -103,7 +106,7 @@ export default function ShuttleBusesPage() {
 
   const getTrackingStatus = (bus: ShuttleBus) => {
     if (bus.pausedIndefinitely) return { label: 'Pausiert', color: 'bg-amber-100 text-amber-800' }
-    if (bus.pausedUntil && new Date(bus.pausedUntil).getTime() > Date.now()) {
+    if (bus.pausedUntil && new Date(bus.pausedUntil).getTime() > now) {
       const hm = new Date(bus.pausedUntil).toLocaleTimeString('de-DE', {
         hour: '2-digit',
         minute: '2-digit',
@@ -112,7 +115,7 @@ export default function ShuttleBusesPage() {
     }
     if (!bus.active) return { label: 'Deaktiviert', color: 'bg-gray-100 text-gray-800' }
     if (!bus.position) return { label: 'Kein Signal', color: 'bg-yellow-100 text-yellow-800' }
-    const age = Date.now() - new Date(bus.position.updatedAt).getTime()
+    const age = now - new Date(bus.position.updatedAt).getTime()
     if (age > 60_000) return { label: 'Veraltet', color: 'bg-red-100 text-red-800' }
     return { label: 'Aktiv', color: 'bg-green-100 text-green-800' }
   }
@@ -230,7 +233,7 @@ export default function ShuttleBusesPage() {
                 </Button>
 
                 {(bus.pausedIndefinitely ||
-                  (bus.pausedUntil && new Date(bus.pausedUntil).getTime() > Date.now())) && (
+                  (bus.pausedUntil && new Date(bus.pausedUntil).getTime() > now)) && (
                   <Button variant="outline" size="sm" onClick={() => resumePause(bus.id)}>
                     Pause aufheben
                   </Button>

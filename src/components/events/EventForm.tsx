@@ -855,6 +855,8 @@ export function EventForm({
                       <div className="space-y-1.5">
                         <Label>Zugehörigkeit</Label>
                         <Select
+                          // React Compiler is not enabled, and watch() works fine without it.
+                          // eslint-disable-next-line react-hooks/incompatible-library
                           value={watch(`lecturers.${index}.affiliation`) || ''}
                           onValueChange={(value) =>
                             setValue(`lecturers.${index}.affiliation`, value as Affiliation)

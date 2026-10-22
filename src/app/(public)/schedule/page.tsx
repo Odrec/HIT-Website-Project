@@ -93,7 +93,11 @@ function SchedulePageContent() {
   }, [])
   const [shareData, setShareData] = useState<{ code: string; url: string } | null>(null)
   const [shareLoading, setShareLoading] = useState(false)
-  const [isLoadingShared, setIsLoadingShared] = useState(false)
+  const shareParam = searchParams.get('share')
+  // Share code whose import has finished (or failed). Until then the
+  // empty-schedule hint stays hidden.
+  const [importedShareCode, setImportedShareCode] = useState<string | null>(null)
+  const isLoadingShared = Boolean(shareParam) && importedShareCode !== shareParam
   const [showRecommendations, setShowRecommendations] = useState(true)
   const [showAnalysis, setShowAnalysis] = useState(false)
   const [showRouteMap, setShowRouteMap] = useState(false)
@@ -120,12 +124,20 @@ function SchedulePageContent() {
     }
   }, [])
 
+  const fetchSharedEvents = async (eventIds: string[], editionId: string) => {
+    for (const id of eventIds) {
+      const response = await fetch(`/api/events/public/${id}?edition=${editionId}`)
+      if (response.ok) {
+        const data = await response.json()
+        addEvent(data.event)
+      }
+    }
+  }
+
   // Check for shared schedule in URL (value is a short code, NOT base64 anymore)
   useEffect(() => {
-    const shareParam = searchParams.get('share')
     if (!shareParam || !state.isLoaded || state.items.length > 0) return
 
-    setIsLoadingShared(true)
     fetch(`/api/schedule/share/${shareParam}`)
       .then(async (r) => {
         if (!r.ok) throw new Error('share lookup failed')
@@ -160,22 +172,12 @@ function SchedulePageContent() {
         })
       })
       .finally(() => {
-        setIsLoadingShared(false)
+        setImportedShareCode(shareParam)
       })
     // fetchSharedEvents is defined in component scope; exclude from deps to
     // avoid re-triggering the share import on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, state.isLoaded, state.items.length, toast, activeEditionId])
-
-  const fetchSharedEvents = async (eventIds: string[], editionId: string) => {
-    for (const id of eventIds) {
-      const response = await fetch(`/api/events/public/${id}?edition=${editionId}`)
-      if (response.ok) {
-        const data = await response.json()
-        addEvent(data.event)
-      }
-    }
-  }
+  }, [shareParam, state.isLoaded, state.items.length, toast, activeEditionId])
 
   // Fetch route and travel analysis when schedule changes
   useEffect(() => {
@@ -268,12 +270,14 @@ function SchedulePageContent() {
       })
   }, [state.items])
 
-  // Auto-select the first date that has events
-  useEffect(() => {
-    if (scheduleDates.length > 0) {
-      setSelectedDate(scheduleDates[0])
-    }
-  }, [scheduleDates])
+  // Auto-select the first date that has events whenever the schedule's dates
+  // change (adjusting state during render rather than in an effect). Starts
+  // at null so a schedule that is already loaded on mount is handled too.
+  const [prevScheduleDates, setPrevScheduleDates] = useState<Date[] | null>(null)
+  if (scheduleDates !== prevScheduleDates) {
+    setPrevScheduleDates(scheduleDates)
+    if (scheduleDates.length > 0) setSelectedDate(scheduleDates[0])
+  }
 
   // Events for selected date
   const eventsForDate = useMemo(() => {

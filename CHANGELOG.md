@@ -5,6 +5,34 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.19.3] - 2026-10-22
+
+Security update.
+
+**Deploy note:** the image now runs on Node.js 24 (was 20). No migration.
+
+### Security
+
+- **Next.js 16.2.2 → 16.4.2, with sharp 0.35.5.** Closes the critical remote-code-execution flaw in
+  the image optimizer (AVIF images, GHSA-2xp9-vwfh-vxw4), the optimizer's server-side request
+  forgery (GHSA-cjq9-62q9-8jv4) and the image-library flaws fixed in sharp 0.35.x. Because photo
+  addresses may point to any HTTPS host, `/_next/image` fetches and decodes images for anyone who
+  asks, without logging in, so these were reachable on the public site. Also includes the other
+  Next.js fixes published since 16.2.2 (Server Components denial of service, middleware bypasses,
+  cache poisoning).
+- **Node.js 20 → 24 (LTS)** in the Docker image and CI. Node 20 reached end of life in April 2026
+  and no longer receives security fixes.
+- **The image optimizer's disk cache is capped at 500 MB.** By default it may grow to half the
+  free disk at startup; the server has 10 GB, so requests for many different images could have
+  filled it.
+
+### Changed
+
+- **Code adjusted to the stricter React rules that come with Next.js 16.4.** The admin lists, the
+  event lists, the Stundenplan, the Lageplan and the Studiennavigator now set their loading state
+  in promise callbacks or during render instead of directly inside effects. No visible change is
+  intended; filtered lists now show their spinner one render earlier.
+
 ## [0.19.2] - 2026-10-08
 
 ### Fixed

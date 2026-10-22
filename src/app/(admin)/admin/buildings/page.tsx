@@ -109,24 +109,28 @@ export default function BuildingsPage() {
   const [roomToDelete, setRoomToDelete] = useState<Room | null>(null)
   const [deletingRoom, setDeletingRoom] = useState(false)
 
-  const fetchBuildings = useCallback(async () => {
+  // State is only set in promise callbacks, so the mount effect never sets
+  // state synchronously; `loading` starts out true for the first load.
+  const loadBuildings = useCallback(
+    () =>
+      fetch('/api/buildings')
+        .then(async (response) => {
+          if (response.ok) setBuildings(await response.json())
+        })
+        .catch((error) => console.error('Failed to fetch buildings:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchBuildings = () => {
     setLoading(true)
-    try {
-      const response = await fetch('/api/buildings')
-      if (response.ok) {
-        const data = await response.json()
-        setBuildings(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch buildings:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    return loadBuildings()
+  }
 
   useEffect(() => {
-    fetchBuildings()
-  }, [fetchBuildings])
+    loadBuildings()
+  }, [loadBuildings])
 
   const toggleExpanded = (buildingId: string) => {
     setExpandedBuildings((prev) => {

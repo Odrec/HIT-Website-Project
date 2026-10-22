@@ -29,16 +29,18 @@ export function ShuttleStopsCard() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
 
-  const fetchStops = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/shuttle-stops')
-      if (res.ok) setStops(await res.json())
-    } catch (error) {
-      console.error('Failed to fetch shuttle stops:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  // State is only set in promise callbacks, so the mount effect below never
+  // sets state synchronously.
+  const fetchStops = useCallback(
+    () =>
+      fetch('/api/admin/shuttle-stops')
+        .then(async (res) => {
+          if (res.ok) setStops(await res.json())
+        })
+        .catch((error) => console.error('Failed to fetch shuttle stops:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
 
   useEffect(() => {
     fetchStops()

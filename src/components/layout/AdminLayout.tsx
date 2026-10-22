@@ -184,6 +184,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             className="mt-3 w-full justify-start"
             onClick={async () => {
               await signOut({ redirect: false })
+              // A full reload on purpose: it drops all client state of the signed-in session.
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
               window.location.href = '/'
             }}
           >

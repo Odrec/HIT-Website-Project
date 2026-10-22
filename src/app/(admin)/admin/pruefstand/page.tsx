@@ -68,26 +68,40 @@ export default function PruefstandPage() {
     }
   }
 
-  const fetchEvents = useCallback(async () => {
+  const params = new URLSearchParams()
+  if (filter !== 'ALL') params.set('reviewStatus', filter)
+  if (search) params.set('search', search)
+  const query = params.toString()
+
+  // Show the spinner as soon as the filters change. Adjusting state during
+  // render keeps the effect below from setting state synchronously.
+  const [requestedQuery, setRequestedQuery] = useState(query)
+  if (query !== requestedQuery) {
+    setRequestedQuery(query)
     setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (filter !== 'ALL') params.set('reviewStatus', filter)
-      if (search) params.set('search', search)
-      const res = await fetch(`/api/events/pruefstand?${params.toString()}`)
-      if (!res.ok) throw new Error('failed')
-      const data = await res.json()
-      setEvents(data)
-    } catch {
-      toast({ variant: 'destructive', title: 'Fehler beim Laden des Prüfstands' })
-    } finally {
-      setLoading(false)
-    }
-  }, [filter, search, toast])
+  }
+
+  const loadEvents = useCallback(
+    () =>
+      fetch(`/api/events/pruefstand?${query}`)
+        .then(async (res) => {
+          if (!res.ok) throw new Error('failed')
+          setEvents(await res.json())
+        })
+        .catch(() => toast({ variant: 'destructive', title: 'Fehler beim Laden des Prüfstands' }))
+        .finally(() => setLoading(false)),
+    [query, toast]
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchEvents = () => {
+    setLoading(true)
+    return loadEvents()
+  }
 
   useEffect(() => {
-    fetchEvents()
-  }, [fetchEvents])
+    loadEvents()
+  }, [loadEvents])
 
   const handlePublish = async (id: string) => {
     try {

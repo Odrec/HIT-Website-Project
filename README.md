@@ -68,7 +68,7 @@ This installation serves multiple HIT editions over time. Each `HitEdition` (one
 
 ## 📋 Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - Docker & Docker Compose (for local database) — or external PostgreSQL/Redis
 - Git
 
