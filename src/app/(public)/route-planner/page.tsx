@@ -341,8 +341,10 @@ export default function RoutePlannerPage() {
         </div>
       </div>
 
-      {/* Main content grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Main content grid. grid-cols-1 is needed on phones: without explicit
+          columns the single track sizes to its content, and a long event
+          title (one line, truncated) made the page several screens wide. */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left sidebar - Schedule route */}
         <div className="lg:col-span-1 space-y-6">
           {/* Schedule route card */}
