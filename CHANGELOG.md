@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.19.4] - 2026-10-22
+
+Fix from the testers' feedback.
+
+### Fixed
+
+- **The route planner looked like the desktop site on phones** ("Detaillierte Routenplanung" from
+  the Stundenplan), and the buttons "In Google Maps öffnen" and "Stundenplan bearbeiten" could not
+  be seen. A long event title in "Mein Stundenplan" stretched the page to several screen widths
+  instead of being shortened with "…", so the browser zoomed out and the centred button labels
+  ended up off screen. The page now keeps to the screen width.
+- **The Stundenplan page was a little too wide on phones**: the "Aktualisieren" button beside
+  "Empfohlene Veranstaltungen" now moves below the heading when there is no room for it.
+
 ## [0.19.3] - 2026-10-22
 
 Security update.

@@ -541,7 +541,7 @@ function SchedulePageContent() {
 
       {/* Schedule content */}
       {state.items.length > 0 && (
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Date selector (sidebar on desktop) — only when there's a real choice */}
           <div className="lg:col-span-1 print:hidden">
             {scheduleDates.length > 1 && (
@@ -759,7 +759,7 @@ function SchedulePageContent() {
                 {isLoadingRoute ? (
                   <Skeleton className="h-[400px] w-full rounded-lg" />
                 ) : (
-                  <div className="grid lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Map */}
                     <div>
                       {/* Location filter toggle */}
