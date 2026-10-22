@@ -12,11 +12,15 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    // Admins paste photo URLs from arbitrary external sources when
-    // creating events, so we allowlist any HTTPS host. This makes the
-    // built-in image optimizer behave like an open proxy for HTTPS —
-    // acceptable here because only authenticated admins can set photoUrl.
+    // Event photo URLs are pasted from arbitrary external sources, so we
+    // allowlist any HTTPS host. This makes /_next/image a public proxy:
+    // anyone, without logging in, can make the server fetch and decode an
+    // image from any HTTPS address (only who can set photoUrl is restricted).
+    // Keep Next.js and sharp patched — the 2026 optimizer RCEs were reachable
+    // this way. Private addresses stay blocked (dangerouslyAllowLocalIP off).
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    // The default cache may grow to half the free disk; the server has 10 GB.
+    maximumDiskCacheSize: 500_000_000,
   },
   async redirects() {
     return [
