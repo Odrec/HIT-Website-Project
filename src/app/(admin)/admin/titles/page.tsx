@@ -54,23 +54,28 @@ export default function TitlesPage() {
   const [toDelete, setToDelete] = useState<Title | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchTitles = useCallback(async () => {
+  // State is only set in promise callbacks, so the mount effect never sets
+  // state synchronously; `loading` starts out true for the first load.
+  const loadTitles = useCallback(
+    () =>
+      fetch('/api/titles')
+        .then(async (res) => {
+          if (res.ok) setTitles(await res.json())
+        })
+        .catch((error) => console.error('Failed to fetch titles:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchTitles = () => {
     setLoading(true)
-    try {
-      const res = await fetch('/api/titles')
-      if (res.ok) {
-        setTitles(await res.json())
-      }
-    } catch (error) {
-      console.error('Failed to fetch titles:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    return loadTitles()
+  }
 
   useEffect(() => {
-    fetchTitles()
-  }, [fetchTitles])
+    loadTitles()
+  }, [loadTitles])
 
   const openCreate = () => {
     setEditingTitle(null)

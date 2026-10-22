@@ -124,33 +124,29 @@ export default function StudyProgramsPage() {
   } | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchData = useCallback(async () => {
+  // State is only set in promise callbacks, so the mount effect never sets
+  // state synchronously; `loading` starts out true for the first load.
+  const loadData = useCallback(
+    () =>
+      Promise.all([fetch('/api/study-programs'), fetch('/api/study-programs/clusters')])
+        .then(async ([programsRes, clustersRes]) => {
+          if (programsRes.ok) setStudyPrograms(await programsRes.json())
+          if (clustersRes.ok) setClusters(await clustersRes.json())
+        })
+        .catch((error) => console.error('Failed to fetch data:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchData = () => {
     setLoading(true)
-    try {
-      const [programsRes, clustersRes] = await Promise.all([
-        fetch('/api/study-programs'),
-        fetch('/api/study-programs/clusters'),
-      ])
-
-      if (programsRes.ok) {
-        const data = await programsRes.json()
-        setStudyPrograms(data)
-      }
-
-      if (clustersRes.ok) {
-        const data = await clustersRes.json()
-        setClusters(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    return loadData()
+  }
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    loadData()
+  }, [loadData])
 
   const filteredPrograms = studyPrograms.filter((prog) => {
     if (institutionFilter && prog.institution !== institutionFilter) return false

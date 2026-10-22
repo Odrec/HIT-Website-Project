@@ -70,11 +70,11 @@ export default function CampusMap({
   dimUnselected = false,
   viewportKey,
 }: CampusMapProps) {
-  const [isClient, setIsClient] = useState(false)
+  // Set only on the client, after the dynamic import — doubles as the
+  // "rendering on the client" check.
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null)
 
   useEffect(() => {
-    setIsClient(true)
     // Import Leaflet CSS and library on client side
     import('leaflet').then((L) => {
       setLeaflet(L)
@@ -90,7 +90,7 @@ export default function CampusMap({
     })
   }, [])
 
-  if (!isClient || !leaflet) {
+  if (!leaflet) {
     return (
       <div className={className} style={{ height }}>
         <Skeleton className="w-full h-full" />

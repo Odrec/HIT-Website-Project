@@ -42,34 +42,23 @@ export default function RoomAssignmentsPage() {
   const [loading, setLoading] = useState(true)
   const [saveStatuses, setSaveStatuses] = useState<Record<string, SaveStatus>>({})
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const [uniRes, hsRes, buildingsRes] = await Promise.all([
-        fetch('/api/events?pageSize=1000&institution=UNI'),
-        fetch('/api/events?pageSize=1000&institution=HOCHSCHULE'),
-        fetch('/api/buildings'),
-      ])
-      const [uniData, hsData, buildingsData] = await Promise.all([
-        uniRes.json(),
-        hsRes.json(),
-        buildingsRes.json(),
-      ])
-      setEvents({
-        uni: uniData.data || [],
-        hs: hsData.data || [],
-      })
-      setBuildings(buildingsData || [])
-    } catch (error) {
-      console.error('Failed to fetch data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    Promise.all([
+      fetch('/api/events?pageSize=1000&institution=UNI'),
+      fetch('/api/events?pageSize=1000&institution=HOCHSCHULE'),
+      fetch('/api/buildings'),
+    ])
+      .then((responses) => Promise.all(responses.map((res) => res.json())))
+      .then(([uniData, hsData, buildingsData]) => {
+        setEvents({
+          uni: uniData.data || [],
+          hs: hsData.data || [],
+        })
+        setBuildings(buildingsData || [])
+      })
+      .catch((error) => console.error('Failed to fetch data:', error))
+      .finally(() => setLoading(false))
+  }, [])
 
   const saveAssignment = useCallback(
     async (eventId: string, buildingId: string | null, roomId: string | null) => {

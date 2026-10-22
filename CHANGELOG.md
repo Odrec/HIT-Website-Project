@@ -26,6 +26,13 @@ Security update.
   free disk at startup; the server has 10 GB, so requests for many different images could have
   filled it.
 
+### Changed
+
+- **Code adjusted to the stricter React rules that come with Next.js 16.4.** The admin lists, the
+  event lists, the Stundenplan, the Lageplan and the Studiennavigator now set their loading state
+  in promise callbacks or during render instead of directly inside effects. No visible change is
+  intended; filtered lists now show their spinner one render earlier.
+
 ## [0.19.2] - 2026-10-08
 
 ### Fixed

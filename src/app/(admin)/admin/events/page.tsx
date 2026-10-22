@@ -109,33 +109,44 @@ function EventsListContent() {
       .catch(() => {})
   }, [isOrganizer])
 
-  const fetchEvents = useCallback(async () => {
+  const params = new URLSearchParams({ page: page.toString(), pageSize: '50' })
+  if (search) params.set('search', search)
+  if (eventType) params.set('eventType', eventType)
+  if (institution) params.set('institution', institution)
+  if (includeReview) params.set('includeReview', '1')
+  const query = params.toString()
+
+  // Show the spinner as soon as the filters change. Adjusting state during
+  // render keeps the effect below from setting state synchronously.
+  const [requestedQuery, setRequestedQuery] = useState(query)
+  if (query !== requestedQuery) {
+    setRequestedQuery(query)
     setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      params.set('page', page.toString())
-      params.set('pageSize', '50')
-      if (search) params.set('search', search)
-      if (eventType) params.set('eventType', eventType)
-      if (institution) params.set('institution', institution)
-      if (includeReview) params.set('includeReview', '1')
+  }
 
-      const res = await fetch(`/api/events?${params.toString()}`)
-      const data: EventsResponse = await res.json()
+  const loadEvents = useCallback(
+    () =>
+      fetch(`/api/events?${query}`)
+        .then(async (res) => {
+          const data: EventsResponse = await res.json()
+          setEvents(data.data)
+          setTotal(data.total)
+          setTotalPages(data.totalPages)
+        })
+        .catch((error) => console.error('Error fetching events:', error))
+        .finally(() => setLoading(false)),
+    [query]
+  )
 
-      setEvents(data.data)
-      setTotal(data.total)
-      setTotalPages(data.totalPages)
-    } catch (error) {
-      console.error('Error fetching events:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [page, search, eventType, institution, includeReview])
+  // Reload after a change, with the same spinner as the first load.
+  const fetchEvents = () => {
+    setLoading(true)
+    return loadEvents()
+  }
 
   useEffect(() => {
-    fetchEvents()
-  }, [fetchEvents])
+    loadEvents()
+  }, [loadEvents])
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()

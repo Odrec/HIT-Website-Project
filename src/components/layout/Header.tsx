@@ -177,6 +177,8 @@ export function Header({ startHref = '/' }: HeaderProps = {}) {
                 <DropdownMenuItem
                   onSelect={async () => {
                     await signOut({ redirect: false })
+                    // A full reload on purpose: it drops all client state of the signed-in session.
+                    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                     window.location.href = '/'
                   }}
                   className="cursor-pointer"
@@ -296,6 +298,8 @@ export function Header({ startHref = '/' }: HeaderProps = {}) {
                   onClick={async () => {
                     setMobileMenuOpen(false)
                     await signOut({ redirect: false })
+                    // A full reload on purpose: it drops all client state of the signed-in session.
+                    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                     window.location.href = '/'
                   }}
                 >

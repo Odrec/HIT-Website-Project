@@ -101,24 +101,28 @@ export default function MeldersPage() {
   const [melderToDelete, setMelderToDelete] = useState<Melder | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchMelders = useCallback(async () => {
+  // State is only set in promise callbacks, so the mount effect never sets
+  // state synchronously; `loading` starts out true for the first load.
+  const loadMelders = useCallback(
+    () =>
+      fetch('/api/melder/all')
+        .then(async (response) => {
+          if (response.ok) setMelders(await response.json())
+        })
+        .catch((error) => console.error('Failed to fetch melders:', error))
+        .finally(() => setLoading(false)),
+    []
+  )
+
+  // Reload after a change, with the same spinner as the first load.
+  const fetchMelders = () => {
     setLoading(true)
-    try {
-      const response = await fetch('/api/melder/all')
-      if (response.ok) {
-        const data = await response.json()
-        setMelders(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch melders:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    return loadMelders()
+  }
 
   useEffect(() => {
-    fetchMelders()
-  }, [fetchMelders])
+    loadMelders()
+  }, [loadMelders])
 
   const openCreateDialog = () => {
     setEditingMelder(null)
