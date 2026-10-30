@@ -4,7 +4,7 @@ import ReactPDF, { type TextProps } from '@react-pdf/renderer'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { auth } from '@/auth'
-import { exportService } from '@/services/export-service'
+import { exportService, formatEventType } from '@/services/export-service'
 import { formatEventTime } from '@/lib/event-time'
 import { compareDe } from '@/lib/sort-de'
 
@@ -176,17 +176,35 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 16,
   },
-  infoMarketEntry: {
+  // Headings inside a section (Schulform, Infomarkt) and below them (Fachrichtung)
+  subsectionHeader: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER_COLOR,
+    paddingBottom: 2,
+    marginTop: 10,
     marginBottom: 6,
   },
-  infoMarketName: {
+  programHeader: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 10,
+    backgroundColor: CLUSTER_BG,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    marginTop: 6,
+    marginBottom: 6,
   },
   infoMarketLocation: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 9,
     color: GRAY,
+    marginBottom: 6,
+  },
+  emptyHint: {
+    fontSize: 9,
+    color: GRAY,
+    marginBottom: 8,
   },
   linkText: {
     fontSize: 10,
@@ -258,19 +276,6 @@ function formatInstitutionLabel(institution: string): string {
     default:
       return String(institution)
   }
-}
-
-function formatEventType(type: string): string {
-  const map: Record<string, string> = {
-    VORTRAG: 'Vortrag',
-    LABORFUEHRUNG: 'Laborf\u00FChrung',
-    RUNDGANG: 'Rundgang',
-    WORKSHOP: 'Workshop',
-    ONLINE: 'Online',
-    VIDEO: 'Video',
-    INFOSTAND: 'Infostand',
-  }
-  return map[type] ?? String(type)
 }
 
 function getInstitutionBadgeStyle(institution: string) {
@@ -357,6 +362,14 @@ function renderTwoColumnEvents(events: any[]) {
   )
 }
 
+/**
+ * Keeps a heading (and its TOC marker) on the page where the content after it
+ * starts, instead of leaving it alone at the bottom of the previous page.
+ */
+function keepWithNext(key: string, ...children: React.ReactElement[]) {
+  return h(View, { key, wrap: false, minPresenceAhead: 60 }, ...children)
+}
+
 function pageFooter() {
   return h(Text, {
     style: styles.pageFooter,
@@ -404,13 +417,13 @@ function tocRow(
 // ---------------------------------------------------------------------------
 
 function buildDoc(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: { clusterGroups: any[]; crossProgram: any[]; infoMarkets: any[] },
+  data: Awaited<ReturnType<typeof exportService.eventsForBooklet>>,
   logos: { uos: string; hs: string },
   tocPages: Record<string, number> | null,
   collect?: (key: string, page: number) => void
 ): React.ReactElement {
-  const { clusterGroups, crossProgram, infoMarkets } = data
+  const { clusterGroups, crossProgram, lehramt, infoMarkets } = data
+  const hasLehramt = lehramt.schulformen.length > 0 || lehramt.fachrichtungen.length > 0
 
   // Group cluster groups into institution sections, preserving order.
   const sections: { label: string; groups: typeof clusterGroups }[] = []
@@ -445,8 +458,24 @@ function buildDoc(
       )
     }
   }
+  if (hasLehramt) {
+    tocChildren.push(h(Text, { style: styles.tocSectionLabel, key: 'toc-sec-lehramt' }, 'Lehramt'))
+    for (const g of lehramt.schulformen) {
+      tocChildren.push(tocRow(`lehramt-${g.title}`, g.title, styles.tocItem, tocPages))
+    }
+    if (lehramt.fachrichtungen.length > 0) {
+      tocChildren.push(
+        tocRow('lehramt-fachrichtungen', 'Berufliche Fachrichtungen', styles.tocItem, tocPages)
+      )
+    }
+  }
   if (infoMarkets.length > 0) {
-    tocChildren.push(tocRow('infomaerkte', 'Infomärkte', styles.tocSectionLabel, tocPages))
+    tocChildren.push(
+      h(Text, { style: styles.tocSectionLabel, key: 'toc-sec-infomaerkte' }, 'Infomärkte')
+    )
+    for (const m of infoMarkets) {
+      tocChildren.push(tocRow(`infomarkt-${m.id}`, m.name, styles.tocItem, tocPages))
+    }
   }
   tocChildren.push(tocRow('links', 'Nützliche Links', styles.tocSectionLabel, tocPages))
 
@@ -495,20 +524,74 @@ function buildDoc(
     }
   }
 
-  // --- Info markets ---
+  // --- Lehramt: replaces the two Lehramt Studienfelder. First the events per
+  // Schulform (as on /events/lehramt), then per berufliche Fachrichtung. ---
+  if (hasLehramt) {
+    const fachrichtungen =
+      lehramt.fachrichtungen.length > 0
+        ? [
+            keepWithNext(
+              'lehramt-fachrichtungen',
+              pageMarker('lehramt-fachrichtungen', collect),
+              h(Text, { style: styles.subsectionHeader }, 'Berufliche Fachrichtungen')
+            ),
+            ...lehramt.fachrichtungen.map((g) =>
+              h(
+                View,
+                { key: `fachrichtung-${g.title}` },
+                keepWithNext('heading', h(Text, { style: styles.programHeader }, g.title)),
+                renderTwoColumnEvents(g.events)
+              )
+            ),
+          ]
+        : []
+    contentPages.push(
+      h(
+        Page,
+        { size: 'A4', style: styles.page, key: 'lehramt', bookmark: 'Lehramt' },
+        h(Text, { style: styles.sectionHeader }, 'Lehramt'),
+        ...lehramt.schulformen.map((g) =>
+          h(
+            View,
+            { key: `schulform-${g.title}` },
+            keepWithNext(
+              'heading',
+              pageMarker(`lehramt-${g.title}`, collect),
+              h(Text, { style: styles.subsectionHeader }, g.title)
+            ),
+            renderTwoColumnEvents(g.events)
+          )
+        ),
+        ...fachrichtungen,
+        pageFooter()
+      )
+    )
+  }
+
+  // --- Info markets, each with its stands ---
   if (infoMarkets.length > 0) {
     contentPages.push(
       h(
         Page,
         { size: 'A4', style: styles.page, key: 'info-markets', bookmark: 'Infomärkte' },
-        pageMarker('infomaerkte', collect),
         h(Text, { style: styles.sectionHeader }, 'Infomärkte'),
         ...infoMarkets.map((market) =>
           h(
             View,
-            { style: styles.infoMarketEntry, key: market.id },
-            h(Text, { style: styles.infoMarketName }, market.name),
-            h(Text, { style: styles.infoMarketLocation }, market.location)
+            { key: market.id },
+            keepWithNext(
+              'heading',
+              pageMarker(`infomarkt-${market.id}`, collect),
+              h(Text, { style: styles.subsectionHeader }, market.name),
+              h(Text, { style: styles.infoMarketLocation }, market.location)
+            ),
+            market.events.length > 0
+              ? renderTwoColumnEvents(market.events)
+              : h(
+                  Text,
+                  { style: styles.emptyHint },
+                  'Noch keine Infomarkt-Veranstaltungen an diesem Standort.'
+                )
           )
         ),
         pageFooter()
@@ -580,11 +663,14 @@ export async function GET() {
     const data = await exportService.eventsForBooklet()
     const logos = { uos: uosLogoBase64, hs: hsLogoBase64 }
 
-    // Pass 1: discover which page each section starts on. First write wins
-    // in case react-pdf evaluates a render callback more than once.
+    // Pass 1: discover which page each section starts on. Last write wins:
+    // while it splits a Page, react-pdf calls the render callbacks of all
+    // content not yet placed with the number of the page being split, so a
+    // marker further down first reports too early a page. Only the final
+    // call, made after pagination, has the page the marker landed on.
     const sectionPages: Record<string, number> = {}
     const collect = (key: string, page: number) => {
-      if (!(key in sectionPages)) sectionPages[key] = page
+      sectionPages[key] = page
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const passOneStream = await ReactPDF.renderToStream(buildDoc(data, logos, null, collect) as any)

@@ -5,6 +5,15 @@ import type { EventType, Institution, Affiliation } from '@/generated/prisma/cli
 import { formatEventTime } from '@/lib/event-time'
 import { getActiveEditionId } from '@/lib/active-edition'
 import { compareDe } from '@/lib/sort-de'
+import { compareInfoMarkets } from '@/lib/info-markets'
+import {
+  isLehramtCluster,
+  LEHRAMT_TYP_LABELS,
+  type GroupedLehramtPrograms,
+  type LehramtProgramLike,
+  type LehramtTypValue,
+} from '@/lib/lehramt'
+import { getLehramtPageData } from '@/services/lehramt-service'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,7 +141,7 @@ function formatInstitution(institution: Institution | Affiliation): string {
   }
 }
 
-function formatEventType(type: EventType): string {
+export function formatEventType(type: EventType): string {
   const map: Record<EventType, string> = {
     VORTRAG: 'Vortrag',
     LABORFUEHRUNG: 'Laborführung',
@@ -225,6 +234,7 @@ export function compareByBuildingRoomTime(a: RoomSortableEvent, b: RoomSortableE
 type BookletClusterInfo = { name: string; institution: Institution; sortOrder: number }
 
 type BookletEventShape = {
+  id: string
   isCrossProgram: boolean
   timeStart: Date | string | null
   studyPrograms: { studyProgram: { clusters: BookletClusterInfo[] } }[]
@@ -242,20 +252,29 @@ export interface BookletClusterGroup<T> {
 // Postgres enum declaration order). Do not "harmonise" the two.
 const BOOKLET_INSTITUTION_RANK: Record<string, number> = { HOCHSCHULE: 0, UNI: 1, BOTH: 2 }
 
+/** Earlier start first, events without a start time last. */
+function compareByStart(
+  a: { timeStart: Date | string | null },
+  b: { timeStart: Date | string | null }
+): number {
+  return timeValue(a.timeStart) - timeValue(b.timeStart)
+}
+
 /**
  * Split events for the booklet into crossProgram (Rund ums Studium) and cluster
  * groups. Cluster groups are ordered by institution (Hochschule → Universität →
  * BOTH), then cluster.sortOrder, then name. Events within each group are
  * time-sorted (earlier first, no-time last). An event in multiple clusters
- * appears in each group; a non-cross event with no cluster goes to "Ohne
- * Studienfeld" (ranked last).
+ * appears in each group. The two Lehramt Studienfelder get no group: the
+ * booklet's Lehramt block (groupLehramtEventsForBooklet) replaces them. A
+ * non-cross event left without a cluster goes to "Ohne Studienfeld" (ranked
+ * last), unless `inLehramtBlock` holds its id.
  */
 export function groupEventsForBooklet<T extends BookletEventShape>(
-  events: T[]
+  events: T[],
+  inLehramtBlock: ReadonlySet<string> = new Set()
 ): { crossProgram: T[]; clusterGroups: BookletClusterGroup<T>[] } {
-  const byTime = (a: T, b: T) => timeValue(a.timeStart) - timeValue(b.timeStart)
-
-  const crossProgram = events.filter((e) => e.isCrossProgram).sort(byTime)
+  const crossProgram = events.filter((e) => e.isCrossProgram).sort(compareByStart)
 
   const groups = new Map<string, BookletClusterGroup<T>>()
   const NO_FIELD = 'Ohne Studienfeld'
@@ -265,10 +284,13 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
 
     const infos: BookletClusterInfo[] = []
     for (const sp of event.studyPrograms) {
-      for (const c of sp.studyProgram.clusters) infos.push(c)
+      for (const c of sp.studyProgram.clusters) {
+        if (!isLehramtCluster(c.name)) infos.push(c)
+      }
     }
 
     if (infos.length === 0) {
+      if (inLehramtBlock.has(event.id)) continue
       const g =
         groups.get(NO_FIELD) ??
         (groups
@@ -305,7 +327,7 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
   }
 
   const clusterGroups = Array.from(groups.values())
-  for (const g of clusterGroups) g.events.sort(byTime)
+  for (const g of clusterGroups) g.events.sort(compareByStart)
   clusterGroups.sort((a, b) => {
     const ra = BOOKLET_INSTITUTION_RANK[a.institution] ?? 9
     const rb = BOOKLET_INSTITUTION_RANK[b.institution] ?? 9
@@ -315,6 +337,72 @@ export function groupEventsForBooklet<T extends BookletEventShape>(
   })
 
   return { crossProgram, clusterGroups }
+}
+
+type BookletLehramtEventShape = {
+  timeStart: Date | string | null
+  studyPrograms: { studyProgram: { id: string } }[]
+}
+
+export interface BookletLehramtGroup<T> {
+  title: string
+  events: T[]
+}
+
+/**
+ * The booklet's Lehramt block, mirroring /events/lehramt: per Schulform the
+ * events of its Lehramt-Studiengang (Rund ums Studium events included, as on
+ * the page), then each berufliche Fachrichtung with its events. Groups without
+ * events are left out; Unterrichtsfächer stay in their Studienfelder.
+ */
+export function groupLehramtEventsForBooklet<T extends BookletLehramtEventShape>(
+  events: T[],
+  programs: GroupedLehramtPrograms<LehramtProgramLike>
+): { schulformen: BookletLehramtGroup<T>[]; fachrichtungen: BookletLehramtGroup<T>[] } {
+  const eventsOf = (programId: string) =>
+    events
+      .filter((e) => e.studyPrograms.some((sp) => sp.studyProgram.id === programId))
+      .sort(compareByStart)
+
+  const studiengaenge: [LehramtTypValue, LehramtProgramLike | null][] = [
+    ['GRUND_HAUPT_REAL', programs.ghr.lehramtStudiengang],
+    ['GYMNASIUM', programs.gymnasium.lehramtStudiengang],
+    ['BERUFSBILDEND', programs.berufsbildend.lehramtStudiengang],
+  ]
+  const schulformen = studiengaenge
+    .map(([typ, program]) => ({
+      title: LEHRAMT_TYP_LABELS[typ],
+      events: program ? eventsOf(program.id) : [],
+    }))
+    .filter((g) => g.events.length > 0)
+
+  const fachrichtungen = programs.berufsbildend.fachrichtungen
+    .map((p) => ({ title: p.name, events: eventsOf(p.id) }))
+    .filter((g) => g.events.length > 0)
+
+  return { schulformen, fachrichtungen }
+}
+
+/**
+ * Infomärkte in the order of the /events/infomaerkte page, each with its
+ * stands by start time. Most stands open at the same time, so ties are broken
+ * by title in German order.
+ */
+export function groupInfoMarketsForBooklet<
+  T extends { title: string; timeStart: Date | string | null },
+>(
+  markets: { id: string; name: string; location: string; events: { event: T }[] }[]
+): { id: string; name: string; location: string; events: T[] }[] {
+  return markets
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      location: m.location,
+      events: m.events
+        .map((em) => em.event)
+        .sort((a, b) => compareByStart(a, b) || compareDe(a.title, b.title)),
+    }))
+    .sort(compareInfoMarkets)
 }
 
 /**
@@ -658,28 +746,39 @@ export const exportService = {
   },
 
   /**
-   * Full event objects for booklet PDF generation.
-   * Cross-program events separated out. Info markets included.
+   * Full event objects for booklet PDF generation: Rund ums Studium, the
+   * Studienfelder, the Lehramt block and the Infomärkte with their stands.
    */
   async eventsForBooklet() {
     const editionId = await getActiveEditionId()
-    const [events, infoMarkets] = await Promise.all([
+    const [events, markets, lehramtPrograms] = await Promise.all([
       prisma.event.findMany({
         where: { editionId, reviewStatus: 'PUBLISHED' },
         include: eventInclude,
         orderBy: { title: 'asc' },
       }),
       prisma.informationMarket.findMany({
-        include: { events: { include: { event: true } } },
-        orderBy: { name: 'asc' },
+        include: {
+          events: {
+            where: { event: { editionId, reviewStatus: 'PUBLISHED' } },
+            include: { event: { include: eventInclude } },
+          },
+        },
       }),
+      getLehramtPageData(),
     ])
 
-    // Postgres runs a C collation, so order in German here.
-    infoMarkets.sort((a, b) => compareDe(a.name, b.name))
-
-    const { crossProgram, clusterGroups } = groupEventsForBooklet(events)
-    return { crossProgram, clusterGroups, infoMarkets }
+    const lehramt = groupLehramtEventsForBooklet(events, lehramtPrograms)
+    const inLehramtBlock = new Set(
+      [...lehramt.schulformen, ...lehramt.fachrichtungen].flatMap((g) => g.events.map((e) => e.id))
+    )
+    const { crossProgram, clusterGroups } = groupEventsForBooklet(events, inLehramtBlock)
+    return {
+      crossProgram,
+      clusterGroups,
+      lehramt,
+      infoMarkets: groupInfoMarketsForBooklet(markets),
+    }
   },
 
   /**

@@ -5,6 +5,30 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.20.0] - 2026-10-30
+
+Changes to the PDF program booklet from the ZSB's feedback. The booklet is the fallback in case
+the website goes down under load on the day.
+
+### Changed
+
+- **The booklet has a Lehramt section of its own.** The overarching Lehramt talks ("Lehrer\*in
+  werden in Osnabrück: …" for each Schulform) are marked "Rund ums Studium", so the booklet listed
+  them only there, and its two Lehramt Studienfelder (Universität "Lehramt", Hochschule "Lehramt an
+  berufsbildenden Schulen") held only the events of the berufliche Fachrichtungen. Both Studienfelder
+  are replaced by one Lehramt section after the Universität: first the events for each Schulform, as
+  on the website's Lehramt page, then the events of each berufliche Fachrichtung. The overarching
+  talks stay under "Rund ums Studium" as well, as on the website. The table of contents lists each
+  Schulform and the Fachrichtungen with their pages.
+- **The Infomärkte list their stands.** Under each Infomarkt the booklet now lists the stands there,
+  as on the Infomärkte page and in the same order of markets (Schloss, SL, Caprivi). Each Infomarkt
+  has its own line in the table of contents.
+
+### Fixed
+
+- **The booklet printed some event types in capitals** ("SCHNUPPER", "INTERAKTION", "SONSTIGES"
+  instead of "Schnupperveranstaltung", "Interaktion", "Sonstiges").
+
 ## [0.19.4] - 2026-10-22
 
 Fix from the testers' feedback.
