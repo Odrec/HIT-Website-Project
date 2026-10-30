@@ -13,6 +13,15 @@ export const LEHRAMT_TYP_LABELS: Record<LehramtTypValue, string> = {
   BERUFSBILDEND: 'Lehramt an berufsbildenden Schulen',
 }
 
+// The two Studienfelder that stand for Lehramt as a whole (Universität and
+// Hochschule). /events routes their tiles to the Lehramt page by these names;
+// the PDF booklet replaces them with its own Lehramt block.
+const LEHRAMT_CLUSTER_NAMES = ['Lehramt', 'Lehramt an berufsbildenden Schulen']
+
+export function isLehramtCluster(name: string): boolean {
+  return LEHRAMT_CLUSTER_NAMES.includes(name)
+}
+
 export interface NormalizedLehramtInput {
   lehramtTypen: LehramtTypValue[]
   isLehramtStudiengang: boolean

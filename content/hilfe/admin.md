@@ -60,7 +60,7 @@ Unter **Texte** (`/admin/texte`) bearbeiten Sie ausgewählte Textbausteine der �
 
 ## Import / Export
 
-Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei importieren oder exportieren. Verfügbar sind mehrere Excel-Ansichten (A-Z, nach Zeit, nach Raum, nach Studiengang, Melder, Dozierende, Infomärkte) sowie eine **Gesamtmappe** mit einer Gesamtübersicht als erstem Blatt; außerdem die PDF-Programmbroschüre (mit Inhaltsverzeichnis) und ein HTML-Backup.
+Unter **Import / Export** können Sie Veranstaltungsdaten als Excel-Datei importieren oder exportieren. Verfügbar sind mehrere Excel-Ansichten (A-Z, nach Zeit, nach Raum, nach Studiengang, Melder, Dozierende, Infomärkte) sowie eine **Gesamtmappe** mit einer Gesamtübersicht als erstem Blatt; außerdem die PDF-Programmbroschüre (mit Inhaltsverzeichnis, einem eigenen Lehramt-Teil nach Schulformen und beruflichen Fachrichtungen und den Ständen jedes Infomarkts) und ein HTML-Backup.
 
 ## Shuttle-Busse
 

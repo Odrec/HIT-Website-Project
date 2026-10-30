@@ -3,20 +3,9 @@ import { ArrowLeft, MapPin } from 'lucide-react'
 import { prisma } from '@/lib/db/prisma'
 import { EventCard } from '@/components/events/EventCard'
 import { getActiveEdition } from '@/lib/active-edition'
+import { compareInfoMarkets } from '@/lib/info-markets'
 
 export const dynamic = 'force-dynamic'
-
-// Display order for the three known markets. Anything not in this list is
-// appended after, alphabetically. Match is case-insensitive substring on
-// the market name to tolerate small wording changes ("Infomarkt Schloss"
-// vs "Schloss Infomarkt").
-const MARKET_ORDER = ['schloss', 'sl', 'caprivi'] as const
-
-function marketSortKey(name: string): number {
-  const lower = name.toLowerCase()
-  const idx = MARKET_ORDER.findIndex((token) => lower.includes(token))
-  return idx === -1 ? MARKET_ORDER.length : idx
-}
 
 function anchorId(marketId: string): string {
   return `markt-${marketId}`
@@ -68,7 +57,7 @@ export default async function InfomaerktePage() {
         .filter((e) => e.timeStart !== null)
         .sort((a, b) => (a.timeStart?.getTime() ?? 0) - (b.timeStart?.getTime() ?? 0)),
     }))
-    .sort((a, b) => marketSortKey(a.name) - marketSortKey(b.name))
+    .sort(compareInfoMarkets)
 
   const reshape = (e: (typeof sortedMarkets)[number]['events'][number]) => ({
     id: e.id,
