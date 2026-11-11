@@ -7,7 +7,12 @@ import type { BusPositionResponse, ShuttleStop } from '@/types/shuttle'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatEventTimeRange } from '@/lib/event-time'
 import { CAMPUS_LABELS, getCampusColor } from '@/lib/campus'
-import { computeMapCenter, buildingsWithCoordinates, DEFAULT_MAP_CENTER } from '@/lib/map-center'
+import {
+  buildingsWithCoordinates,
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_ZOOM,
+  initialMapView,
+} from '@/lib/map-center'
 import { MapViewportSync } from './MapViewportSync'
 
 // Dynamic import for Leaflet (no SSR)
@@ -28,6 +33,11 @@ interface CampusMapProps {
   buildings?: BuildingInfo[]
   route?: Route
   travelAnalyses?: TravelTimeAnalysis[]
+  /**
+   * Id (slug) of the selected building: its marker is highlighted, and if it
+   * is selected when the map mounts, the map opens centred on it with its
+   * popup open (e.g. from an event's "Auf dem Lageplan anzeigen").
+   */
   selectedBuilding?: string
   currentLocation?: Coordinates
   onBuildingClick?: (building: BuildingInfo) => void
@@ -49,13 +59,11 @@ interface CampusMapProps {
   viewportKey?: string
 }
 
-const DEFAULT_ZOOM = 14
-
 export default function CampusMap({
   buildings = [],
   route,
   travelAnalyses = [],
-  selectedBuilding: _selectedBuilding,
+  selectedBuilding,
   currentLocation,
   onBuildingClick,
   className = '',
@@ -98,12 +106,14 @@ export default function CampusMap({
     )
   }
 
-  // Centre on the route if there is one, else on the buildings that actually
-  // have coordinates, else on the Schloss. Never average missing positions.
+  // Centre on the selected building if there is one, else on the route, else
+  // on the buildings that actually have coordinates, else on the Schloss.
+  // Never average missing positions. MapContainer reads this on mount only.
   const locatedBuildings = buildingsWithCoordinates(buildings)
-  const center = computeMapCenter(
+  const initialView = initialMapView(
     buildings,
-    route && route.waypoints.length > 0 ? route.waypoints.map((wp) => wp.coordinates) : undefined
+    route && route.waypoints.length > 0 ? route.waypoints.map((wp) => wp.coordinates) : undefined,
+    selectedBuilding
   )
 
   // Create custom icons
@@ -134,8 +144,8 @@ export default function CampusMap({
       />
       <div className={className} style={{ height }}>
         <MapContainer
-          center={center}
-          zoom={DEFAULT_ZOOM}
+          center={initialView.center}
+          zoom={initialView.zoom}
           style={{ height: '100%', width: '100%' }}
           className="rounded-lg"
         >
@@ -148,7 +158,7 @@ export default function CampusMap({
             viewportKey={viewportKey}
             points={locatedBuildings.map((b) => b.coordinates)}
             fallbackCenter={DEFAULT_MAP_CENTER}
-            fallbackZoom={DEFAULT_ZOOM}
+            fallbackZoom={DEFAULT_MAP_ZOOM}
           />
 
           {/* Current location marker */}
@@ -170,13 +180,22 @@ export default function CampusMap({
             locatedBuildings.map((building) => {
               const isDimmed =
                 dimUnselected && highlightBuildingIds && !highlightBuildingIds.includes(building.id)
+              const isSelected = building.id === selectedBuilding
               const color = isDimmed ? '#D1D5DB' : getCampusColor(building.campus)
               const opacity = isDimmed ? 'opacity:0.6;' : ''
+              // The selected building is larger and ringed in its campus colour
+              // so it stands out among its neighbours.
+              const size = isSelected ? 44 : 32
+              const shadow = isSelected
+                ? `0 0 0 4px ${getCampusColor(building.campus)},0 4px 12px rgba(0,0,0,0.45)`
+                : '0 2px 8px rgba(0,0,0,0.3)'
               const icon = leaflet.divIcon({
                 className: 'custom-marker',
-                html: `<div style="width:32px;height:32px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;${opacity}">🏛️</div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
+                html: `<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:${isSelected ? 20 : 14}px;font-weight:bold;box-shadow:${shadow};border:2px solid white;${opacity}">🏛️</div>`,
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size],
+                // Open popups above the marker instead of covering it.
+                popupAnchor: [0, -size],
               })
 
               return (
@@ -184,8 +203,12 @@ export default function CampusMap({
                   key={building.id}
                   position={[building.coordinates.latitude, building.coordinates.longitude]}
                   icon={icon}
+                  zIndexOffset={isSelected ? 1000 : 0}
                   eventHandlers={{
                     click: () => onBuildingClick?.(building),
+                    // A building that is already selected when its marker is
+                    // added (map opened for it) shows its popup straight away.
+                    ...(isSelected && { add: (e) => e.target.openPopup() }),
                   }}
                 >
                   <Popup>

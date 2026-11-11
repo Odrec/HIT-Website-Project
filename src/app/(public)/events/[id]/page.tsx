@@ -19,9 +19,11 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Map as MapIcon,
   Info,
 } from 'lucide-react'
 import { formatEventDateLong, formatEventTime } from '@/lib/event-time'
+import { lageplanHref } from '@/lib/map-links'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -578,22 +580,15 @@ export default function EventDetailPage() {
                 <p className="text-hit-gray-500 italic">Ort wird noch bekannt gegeben</p>
               )}
 
-              {/* Open location in Google Maps — pass the building name/address so
-                  the pin is labelled instead of showing raw coordinates. */}
+              {/* Our own Lageplan, centred on the building. It used to open
+                  Google Maps with the building name, which Google misread
+                  ("11" landed near the Neumarkt instead of at the Schloss). */}
               {event.building?.latitude != null && event.building?.longitude != null && (
                 <Button asChild variant="outline" size="sm" className="w-full">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      [event.building.name, event.building.address, 'Osnabrück']
-                        .filter(Boolean)
-                        .join(', ')
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
+                  <Link href={lageplanHref(event.building.slug)}>
+                    <MapIcon className="mr-2 h-4 w-4" />
                     Auf dem Lageplan anzeigen
-                  </a>
+                  </Link>
                 </Button>
               )}
             </CardContent>

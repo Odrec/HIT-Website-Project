@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { computeMapCenter, DEFAULT_MAP_CENTER, buildingsWithCoordinates } from '@/lib/map-center'
+import {
+  computeMapCenter,
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_ZOOM,
+  FOCUS_MAP_ZOOM,
+  buildingsWithCoordinates,
+  initialMapView,
+} from '@/lib/map-center'
 import type { BuildingInfo } from '@/types/routes'
 
 const b = (id: string, coords: { latitude: number; longitude: number } | null): BuildingInfo => ({
@@ -42,5 +49,36 @@ describe('buildingsWithCoordinates', () => {
   it('drops buildings whose coordinates are null', () => {
     const list = [b('a', { latitude: 1, longitude: 2 }), b('n', null)]
     expect(buildingsWithCoordinates(list).map((x) => x.id)).toEqual(['a'])
+  })
+})
+
+describe('initialMapView', () => {
+  const schloss = b('11-aula', { latitude: 52.2715, longitude: 8.044231 })
+  const fc = b('FC', { latitude: 52.27656, longitude: 8.02186 })
+  const route = [
+    { latitude: 52.3, longitude: 8.1 },
+    { latitude: 52.2, longitude: 8.0 },
+  ]
+
+  it('centres on the focused building, zoomed in, ahead of the route', () => {
+    expect(initialMapView([schloss, fc], route, 'FC')).toEqual({
+      center: [52.27656, 8.02186],
+      zoom: FOCUS_MAP_ZOOM,
+    })
+  })
+  it('keeps the overview when nothing is focused', () => {
+    const view = initialMapView([schloss, fc], undefined, undefined)
+    expect(view.zoom).toBe(DEFAULT_MAP_ZOOM)
+    expect(view.center).toEqual(computeMapCenter([schloss, fc]))
+  })
+  it('keeps the overview when the focused building is unknown or has no position', () => {
+    expect(initialMapView([schloss, fc], route, 'gibt-es-nicht')).toEqual({
+      center: computeMapCenter([schloss, fc], route),
+      zoom: DEFAULT_MAP_ZOOM,
+    })
+    expect(initialMapView([schloss, b('neu', null)], undefined, 'neu')).toEqual({
+      center: computeMapCenter([schloss]),
+      zoom: DEFAULT_MAP_ZOOM,
+    })
   })
 })

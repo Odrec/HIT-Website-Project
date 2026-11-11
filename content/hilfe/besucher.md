@@ -15,7 +15,7 @@ Auf der Seite **Veranstaltungen** finden Sie die Einstiege in alle Angebote des 
 
 In den Unterseiten können Sie weiter filtern (Veranstaltungsart, Institution, Zeit), nach Titel/Zeit sortieren und zwischen Listen-, Kachel- und Kalenderansicht wechseln.
 
-Auf der Detailseite einer Veranstaltung finden Sie im Abschnitt **„Ort"** die Schaltfläche **„Auf dem Lageplan anzeigen"**, sofern der Veranstaltungsort bekannte Koordinaten hat. Damit öffnen Sie den Standort — mit Gebäudenamen statt nur Koordinaten — direkt in Google Maps; auf dem Smartphone startet in der Regel die installierte Karten-App.
+Auf der Detailseite einer Veranstaltung finden Sie im Abschnitt **„Ort"** die Schaltfläche **„Auf dem Lageplan anzeigen"**, sofern der Veranstaltungsort bekannte Koordinaten hat. Damit öffnen Sie den Lageplan der Routenplanung: Die Karte ist auf das Gebäude herangezoomt, das Gebäude ist hervorgehoben und seine Infos sind aufgeklappt. Unter der Karte finden Sie die Schaltfläche **„In Google Maps öffnen"**, mit der Sie sich vom eigenen Standort zum Gebäude navigieren lassen können; auf dem Smartphone startet in der Regel die installierte Karten-App.
 
 ## Merkliste & Stundenplan
 
@@ -47,6 +47,8 @@ Mit dem **Routenplaner** sehen Sie Ihre geplanten Veranstaltungen auf dem Lagepl
 **Einzelne Strecken anzeigen:** Klicken Sie auf eine Veranstaltung in der Liste links, um nur die Strecke von dieser zur nächsten Veranstaltung auf der Karte hervorzuheben. Ein Hinweis zeigt an, welche Strecke gefiltert wird. Klicken Sie erneut oder auf das **✕**, um alle Strecken wieder anzuzeigen.
 
 **Infostände im Routenplaner:** Infostände erscheinen nicht in der Routenplaner-Liste — sie sind den ganzen Tag geöffnet und haben keinen festen Platz in Ihrem Laufweg. Bleiben Veranstaltungen Ihres Stundenplans im Routenplaner unsichtbar, sehen Sie unterhalb der Liste einen Hinweis „N Veranstaltungen ohne Standort ausgeblendet".
+
+**Gebäude auf dem Lageplan:** Tippen Sie auf ein Gebäude, um seine Adresse, die Barrierefreiheit und die Zahl der Veranstaltungen dort zu sehen. Mit **„In Google Maps öffnen"** unter der Karte öffnen Sie genau dieses Gebäude in Google Maps.
 
 **In Google Maps öffnen:** Unterhalb des Stundenplans finden Sie die Schaltfläche **„In Google Maps öffnen"**. Damit wechseln Sie zu Google Maps und erhalten Ihre komplette Route mit Abbiegehinweisen — ideal unterwegs auf dem Smartphone. Google Maps unterstützt maximal 11 Stationen pro Link; bei längeren Zeitplänen werden nur die ersten 11 übernommen, darauf weist ein Hinweis unter der Schaltfläche hin.
 
