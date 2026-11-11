@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.20.1] - 2026-11-11
+
+Fix from the ZSB's feedback.
+
+### Fixed
+
+- **"Auf dem Lageplan anzeigen" on an event led to the wrong place in Google Maps.** Since June the
+  button sent Google the building's name together with its address ("11, Neuer Graben 29, …",
+  "FC, Caprivistraße 3, …"), and Google read the building number as part of the address: the
+  Schloss ended up near the Neumarkt and the FC building on the Caprivi campus. The button now
+  opens the site's own Lageplan, zoomed in on the building, with the building highlighted and its
+  details open; on phones the map comes first. The building's details below the map have an
+  "In Google Maps öffnen" button that passes the building's coordinates, which Google cannot
+  misread (as the route planner's "In Google Maps öffnen" for the whole Stundenplan already did).
+
 ## [0.20.0] - 2026-10-30
 
 Changes to the PDF program booklet from the ZSB's feedback. The booklet is the fallback in case

@@ -2,8 +2,8 @@
 
 import { CAMPUS_KEYS, CAMPUS_LABELS } from '@/lib/campus'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState, useEffect, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSchedule } from '@/contexts/schedule-context'
@@ -38,6 +38,7 @@ import {
   X,
 } from 'lucide-react'
 import { formatEventTimeRange } from '@/lib/event-time'
+import { googleMapsLocationUrl, LAGEPLAN_BUILDING_PARAM } from '@/lib/map-links'
 
 // Dynamic import for map component (no SSR)
 const CampusMap = dynamic(() => import('@/components/map/CampusMap'), {
@@ -52,8 +53,26 @@ const CAMPUS_AREAS: { id: string; name: string }[] = [
 ]
 
 export default function RoutePlannerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-64 mb-8" />
+          <Skeleton className="h-[500px] w-full rounded-lg" />
+        </div>
+      }
+    >
+      <RoutePlannerContent />
+    </Suspense>
+  )
+}
+
+function RoutePlannerContent() {
   const router = useRouter()
   const { state } = useSchedule()
+  // Slug of the building to show, set by an event's "Auf dem Lageplan
+  // anzeigen" (see lageplanHref).
+  const focusBuildingSlug = useSearchParams().get(LAGEPLAN_BUILDING_PARAM)
 
   const [view, setView] = useState<'map' | 'list'>('map')
   const [selectedCampus, setSelectedCampus] = useState('all')
@@ -78,7 +97,12 @@ export default function RoutePlannerPage() {
         const response = await fetch(`/api/routes/buildings?withEvents=false`)
         if (response.ok) {
           const data = await response.json()
-          setBuildings(data.buildings || [])
+          const list: BuildingInfo[] = data.buildings || []
+          setBuildings(list)
+          // Select it in the same render that shows the map, so the map
+          // mounts centred on it.
+          const focus = focusBuildingSlug ? list.find((b) => b.id === focusBuildingSlug) : undefined
+          if (focus) setSelectedBuilding(focus)
         }
       } catch (error) {
         console.error('Failed to fetch buildings:', error)
@@ -87,7 +111,7 @@ export default function RoutePlannerPage() {
       }
     }
     fetchBuildings()
-  }, [])
+  }, [focusBuildingSlug])
 
   // All scheduled events with a time, sorted chronologically. These are sent
   // to /api/routes; the server decides which can actually be routed.
@@ -532,8 +556,13 @@ export default function RoutePlannerPage() {
           )}
         </div>
 
-        {/* Main content area - Map or List */}
-        <div className="lg:col-span-2">
+        {/* Main content area - Map or List. Opened for one building, the map
+            comes first on phones instead of below "Mein Stundenplan". */}
+        <div
+          className={
+            focusBuildingSlug ? 'order-first lg:order-none lg:col-span-2' : 'lg:col-span-2'
+          }
+        >
           {view === 'map' ? (
             <Card className="h-full">
               <CardHeader className="pb-2">
@@ -646,6 +675,18 @@ export default function RoutePlannerPage() {
                             <p className="text-sm text-orange-600 mt-2">
                               ⚠️ {selectedBuilding.accessibilityNotes}
                             </p>
+                          )}
+                          {selectedBuilding.coordinates && (
+                            <Button asChild variant="outline" size="sm" className="mt-3">
+                              <a
+                                href={googleMapsLocationUrl(selectedBuilding.coordinates)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                In Google Maps öffnen
+                              </a>
+                            </Button>
                           )}
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => setSelectedBuilding(null)}>
