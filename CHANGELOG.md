@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [0.20.2] - 2026-11-18
+
+Fix found while checking the live site the day before the HIT.
+
+### Fixed
+
+- **The event search failed when the search term contained German quotation marks, a dash or an
+  emoji.** Phone keyboards turn typed quotes into „…“, and a search like „Lehramt“ answered with an
+  error instead of results (umlauts were not affected). The public events API copied the search
+  term into a diagnostic response header (`X-Cache-Key`), and HTTP headers cannot carry characters
+  beyond Latin-1. The header is gone from that API and from `/api/study-programs`, which had the
+  same problem with its `institution` parameter; the `X-Cache: HIT/MISS` header stays.
+
 ## [0.20.1] - 2026-11-11
 
 Fix from the ZSB's feedback.
