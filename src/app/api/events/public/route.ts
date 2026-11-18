@@ -52,7 +52,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(cached, {
           headers: {
             'X-Cache': 'HIT',
-            'X-Cache-Key': cacheKey,
             'Cache-Control': PUBLIC_CACHE_HEADER,
           },
         })
@@ -367,7 +366,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData, {
       headers: {
         'X-Cache': 'MISS',
-        'X-Cache-Key': cacheKey,
         'Cache-Control': PUBLIC_CACHE_HEADER,
       },
     })
